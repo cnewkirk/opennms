@@ -124,6 +124,16 @@
       <jsp:param name="asset" value="font-awesome" />
       <jsp:param name="asset-type" value="css" />
     </jsp:include>
+    <jsp:include page="/assets/load-assets.jsp" flush="false">
+      <jsp:param name="asset" value="modern-ui" />
+      <jsp:param name="asset-media" value="screen" />
+      <jsp:param name="asset-type" value="css" />
+    </jsp:include>
+    <jsp:include page="/assets/load-assets.jsp" flush="false">
+      <jsp:param name="asset" value="dark-mode" />
+      <jsp:param name="asset-media" value="screen" />
+      <jsp:param name="asset-type" value="css" />
+    </jsp:include>
     <!-- we used to include the "print.css" here but it turns out it looks like crap -->
   </c:if>
   <link rel="shortcut icon" href="<%= __baseHref %>favicon.ico" />
@@ -201,6 +211,16 @@
 
   <%-- Vue side menu --%>
   <link rel="stylesheet" href="<%= __baseHref %>ui-components/assets/index.css" media="screen" />
+
+  <%-- Apply saved theme to <html> immediately to prevent flash of unstyled content --%>
+  <script type="text/javascript">
+    (function() {
+      var saved = localStorage.getItem('theme');
+      if (saved === 'open-dark' || saved === 'open-light') {
+        document.documentElement.className = saved;
+      }
+    }());
+  </script>
 </head>
 
 <%-- The <body> tag is unmatched in this file (its matching tag is in the
@@ -224,6 +244,69 @@
   class="fixed-nav"
 </c:if>
 <%= ">" %>
+
+<%-- Propagate the active theme class into Vaadin iframes.
+     Vaadin pages run in a separate document so body-scoped CSS from the parent
+     page does not reach them.  This script watches for iframes being added to
+     the DOM and, once they finish loading, copies the active theme class onto
+     their <html> element so that dark-mode.scss (which uses the html.open-dark
+     selector) applies inside the iframe as well. --%>
+<script type="text/javascript">
+  (function() {
+    function applyThemeToFrame(frame) {
+      var applyNow = function() {
+        try {
+          var doc = frame.contentDocument || frame.contentWindow.document;
+          var theme = document.documentElement.className;
+          if (theme === 'open-dark' || theme === 'open-light') {
+            doc.documentElement.classList.remove('open-dark', 'open-light');
+            doc.documentElement.classList.add(theme);
+          }
+        } catch(e) { /* cross-origin frame, ignore */ }
+      };
+      if (frame.contentDocument && frame.contentDocument.readyState === 'complete') {
+        applyNow();
+      } else {
+        frame.addEventListener('load', applyNow);
+      }
+    }
+
+    // Watch for iframes added after page load (Vaadin embeds them dynamically)
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        m.addedNodes.forEach(function(node) {
+          if (node.nodeName === 'IFRAME') {
+            applyThemeToFrame(node);
+          }
+          if (node.querySelectorAll) {
+            node.querySelectorAll('iframe').forEach(applyThemeToFrame);
+          }
+        });
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Also handle any iframes already in the DOM at script-run time
+    document.querySelectorAll('iframe').forEach(applyThemeToFrame);
+
+    // Re-apply when the Vue menu changes the theme on the body
+    var bodyObserver = new MutationObserver(function() {
+      var theme = document.documentElement.className;
+      document.querySelectorAll('iframe').forEach(function(frame) {
+        try {
+          var doc = frame.contentDocument || frame.contentWindow.document;
+          if (theme === 'open-dark' || theme === 'open-light') {
+            doc.documentElement.classList.remove('open-dark', 'open-light');
+            doc.documentElement.classList.add(theme);
+          } else {
+            doc.documentElement.classList.remove('open-dark', 'open-light');
+          }
+        } catch(e) { /* cross-origin frame, ignore */ }
+      });
+    });
+    bodyObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  }());
+</script>
 
 <!-- Bootstrap header -->
 <c:choose>
