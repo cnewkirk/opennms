@@ -41,7 +41,7 @@
     </div>
 
     <div class="form-field">
-      <FeatherCheckbox v-model="config.authenticate" label="Requires Authentication" />
+      <FeatherCheckbox v-model="config.authenticate">Requires Authentication</FeatherCheckbox>
     </div>
 
     <template v-if="config.authenticate">
@@ -63,8 +63,8 @@
     </template>
 
     <div class="form-field options-row">
-      <FeatherCheckbox v-model="config.skipDefaultVM" label="Skip Default JVM MBeans" />
-      <FeatherCheckbox v-model="config.skipNonNumber" label="Skip Non-numeric Attributes" />
+      <FeatherCheckbox v-model="config.skipDefaultVM">Skip Default JVM MBeans</FeatherCheckbox>
+      <FeatherCheckbox v-model="config.skipNonNumber">Skip Non-numeric Attributes</FeatherCheckbox>
     </div>
 
     <div class="form-actions">

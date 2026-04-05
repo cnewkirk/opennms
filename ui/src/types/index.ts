@@ -257,6 +257,8 @@ export interface Outage {
   hostname: string
   serviceName: string
   outageId: number
+  ifLostService?: number        // ms timestamp — present in v2 API responses
+  ifRegainedService?: number | null  // null means still active
 }
 
 export interface IfService {

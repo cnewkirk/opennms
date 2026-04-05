@@ -84,6 +84,7 @@ const getRowClass = (data: Event) => data.severity.toLowerCase()
 >
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
+@import "@featherds/styles/themes/variables";
 .card {
   @include elevation(2);
   padding: 15px;

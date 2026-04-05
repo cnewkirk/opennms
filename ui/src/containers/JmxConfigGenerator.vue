@@ -139,9 +139,10 @@ const onMBeansSelected = (mbeans: MBeanDto[]) => {
   color: var($secondary-text-on-surface);
 
   &.active {
-    background: var($clickable-normal);
-    color: white;
-    border-color: var($clickable-normal);
+    background: var($primary);
+    color: var($primary-text-on-color);
+    border-color: var($primary);
+    font-weight: 600;
   }
 
   &.done {

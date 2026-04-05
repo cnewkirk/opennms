@@ -312,6 +312,22 @@ const router = createRouter({
       }
     },
     {
+      path: '/mib-compiler',
+      name: 'SNMP MIB Compiler',
+      component: () => import('@/containers/MibCompiler.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access SNMP MIB Compiler.' })
+            router.push(from.path)
+          }
+        }
+
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }

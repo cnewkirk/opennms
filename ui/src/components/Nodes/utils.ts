@@ -27,7 +27,19 @@ import {
 import { isNumber } from '@/lib/utils'
 
 /**
- * Construct an array of Feather Table CSS classes for the given configured node table columns. 
+ * Returns a node criteria string for use in Vue Router links.
+ * Prefers foreignSource:foreignId (human-readable) when both are present;
+ * falls back to the numeric node ID for backward compatibility.
+ */
+export const getNodeCriteria = (node: Node): string => {
+  if (node.foreignSource && node.foreignId) {
+    return `${node.foreignSource}:${node.foreignId}`
+  }
+  return node.id
+}
+
+/**
+ * Construct an array of Feather Table CSS classes for the given configured node table columns.
  * These start with 't', then ('l', 'r', 'c') for (left, right, center), then the 1 based column index.
  * e.g. 'tl1': left-align 1st column
  * 'tr7': right-align 7th colunn

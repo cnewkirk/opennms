@@ -148,6 +148,7 @@ onMounted(() => {
 <style scoped lang="scss">
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/typography";
+@import "@featherds/styles/themes/variables";
 
 table {
   margin-top: 0px !important;

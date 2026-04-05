@@ -30,16 +30,18 @@ defineProps({
   width: 100%;
   display: flex;
   margin-bottom: 15px;
-  background: #e9ecef;
+  background: var($background);
+  border: 1px solid var($border-light-on-surface);
+  border-radius: 4px;
 
   .link {
-    color: #265A87;
+    color: var($clickable-normal);
     a {
       font-weight:400;
-      color: #265A87;
+      color: var($clickable-normal);
     }
     a:visited {
-      color: #265A87;
+      color: var($clickable-normal);
     }
 
     padding:8px 0;
@@ -59,7 +61,7 @@ defineProps({
   }
 
   .slash {
-    color: #6c757d;
+    color: var($secondary-text-on-surface);
     padding: 0 8px;
     font-weight:400;
   }

@@ -22,7 +22,7 @@
 
 import { describe, expect, test } from 'vitest'
 import { mock } from 'vitest-mock-extended'
-import { getTableCssClasses, hasEgressFlow, hasIngressFlow } from '@/components/Nodes/utils'
+import { getTableCssClasses, hasEgressFlow, hasIngressFlow, getNodeCriteria } from '@/components/Nodes/utils'
 import { Node, NodeColumnSelectionItem } from '@/types'
 
 describe('Nodes utils test', () => {
@@ -80,5 +80,54 @@ describe('Nodes utils test', () => {
 
     expect(hasEgressFlow(neither)).toBeFalsy()
     expect(hasIngressFlow(neither)).toBeFalsy()
+  })
+})
+
+describe('getNodeCriteria', () => {
+  const baseNode: Node = {
+    id: '42',
+    label: 'myserver',
+    location: 'Default',
+    type: 'A',
+    createTime: 0,
+    primaryInterface: 0,
+    categories: [],
+    assetRecord: {
+      longitude: '',
+      latitude: '',
+      category: '',
+      description: '',
+      maintcontract: ''
+    },
+    foreignId: '',
+    foreignSource: '',
+    lastEgressFlow: 0,
+    lastIngressFlow: 0,
+    labelSource: '',
+    lastCapabilitiesScan: '',
+    sysObjectId: '',
+    sysDescription: '',
+    sysName: '',
+    sysContact: '',
+    sysLocation: ''
+  }
+
+  test('returns foreignSource:foreignId when both are present', () => {
+    const node = { ...baseNode, foreignSource: 'selfmonitor', foreignId: 'localhost' }
+    expect(getNodeCriteria(node)).toBe('selfmonitor:localhost')
+  })
+
+  test('falls back to numeric id when foreignSource is missing', () => {
+    const node = { ...baseNode, foreignSource: '', foreignId: 'localhost' }
+    expect(getNodeCriteria(node)).toBe('42')
+  })
+
+  test('falls back to numeric id when foreignId is missing', () => {
+    const node = { ...baseNode, foreignSource: 'selfmonitor', foreignId: '' }
+    expect(getNodeCriteria(node)).toBe('42')
+  })
+
+  test('falls back to numeric id when both are missing', () => {
+    expect(getNodeCriteria(baseNode)).toBe('42')
   })
 })

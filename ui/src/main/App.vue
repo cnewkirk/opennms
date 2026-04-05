@@ -68,6 +68,12 @@ onMounted(() => {
 html {
   overflow-x: hidden;
 }
+
+// Soften the light theme — pure white is too harsh
+html:not(.open-dark) {
+  --feather-surface: #f8f9fa;
+  --feather-background: #eef1f6;
+}
 .main-content {
   table {
     width: 100%;
