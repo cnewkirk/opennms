@@ -458,3 +458,43 @@ router isis FABRIC
 FRR
 
 echo "    FRR configs staged for all 5 nodes."
+
+# ---------------------------------------------------------------------------
+# Phase 4: Start containers
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [4/7] Starting topology nodes..."
+
+# Each entry in NODES: "name mgmt-ip role net1:iface1:ip1 ..."
+for node_def in "${NODES[@]}"; do
+  read -ra parts <<< "$node_def"
+  name="${parts[0]}"
+  mgmt_ip="${parts[1]}"
+  role="${parts[2]}"
+  # Derive the short hostname (strip "topo-" prefix)
+  hostname="${name#topo-}"
+  # Derive frr config dir from hostname
+  frr_dir="${CONFIGS}/${hostname}"
+
+  # Build --network args as array: management first (eth0), then P2P links
+  net_args=(
+    "--network" "${MGMT_NET}:interface_name=eth0,ip=${mgmt_ip}"
+  )
+  for net_entry in "${parts[@]:3}"; do
+    net="${net_entry%%:*}"
+    rest="${net_entry#*:}"
+    iface="${rest%%:*}"
+    ip="${rest##*:}"
+    net_args+=("--network" "${net}:interface_name=${iface},ip=${ip}")
+  done
+
+  podman run -d --privileged \
+    --name "${name}" \
+    --hostname "${hostname}" \
+    -e "ROLE=${role}" \
+    -v "${frr_dir}:/etc/frr:ro" \
+    "${net_args[@]}" \
+    "${TOPO_IMAGE}"
+
+  echo "    started: ${name} (mgmt: ${mgmt_ip}, role: ${role})"
+done
