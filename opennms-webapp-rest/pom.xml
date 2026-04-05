@@ -292,6 +292,30 @@
     </dependency>
 
     <dependency>
+      <groupId>org.opennms.features</groupId>
+      <artifactId>jmxconfiggenerator</artifactId>
+      <version>${project.version}</version>
+      <scope>${onmsLibScope}</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.core.jmx</groupId>
+      <artifactId>org.opennms.core.jmx.impl</artifactId>
+      <version>${project.version}</version>
+      <scope>${onmsLibScope}</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.core.jmx</groupId>
+      <artifactId>org.opennms.core.jmx.api</artifactId>
+      <version>${project.version}</version>
+      <scope>${onmsLibScope}</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms</groupId>
+      <artifactId>opennms-config-jaxb</artifactId>
+      <scope>${onmsLibScope}</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.opennms.features.timeformat</groupId>
       <artifactId>org.opennms.features.timeformat.impl</artifactId>
       <version>${project.version}</version>
