@@ -84,6 +84,10 @@ public class DashboardRestServiceIT extends AbstractSpringJerseyRestTestCase {
         // Extract the dashboard ID from the Location header
         final String id = location.substring(location.lastIndexOf('/') + 1);
 
+        // Verify response body from POST contains the created ID
+        final String postResponseBody = postResponse.getContentAsString();
+        assertThat(postResponseBody, containsString(id));
+
         // GET by ID — full payload including spec
         final String json = sendRequest(GET, "/dashboards/" + id, 200);
         assertThat(json, containsString("My Dashboard"));
@@ -112,6 +116,7 @@ public class DashboardRestServiceIT extends AbstractSpringJerseyRestTestCase {
         // Verify the update
         final String json = sendRequest(GET, "/dashboards/" + id, 200);
         assertThat(json, containsString("Updated"));
+        assertThat(json, not(containsString("ToUpdate")));
 
         // DELETE
         sendRequest(DELETE, "/dashboards/" + id, 204);
@@ -129,6 +134,10 @@ public class DashboardRestServiceIT extends AbstractSpringJerseyRestTestCase {
         // Missing name — should return 400
         final String noName = "{\"spec\":\"{}\"}";
         sendData(POST, MediaType.APPLICATION_JSON, "/dashboards", noName, 400);
+
+        // Blank name (covers isBlank() validation branch)
+        final String blankName = "{\"name\":\"\",\"spec\":\"{}\"}";
+        sendData(POST, MediaType.APPLICATION_JSON, "/dashboards", blankName, 400);
     }
 
     @Test
