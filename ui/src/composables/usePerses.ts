@@ -18,8 +18,12 @@ export function usePerses(
 ): void {
   let root: Root | null = null
 
-  watch([containerRef, specRef], ([el, spec]) => {
+  watch([containerRef, specRef], ([el, spec], [prevEl]) => {
     if (!el) return
+    if (root && el !== prevEl) {
+      root.unmount()
+      root = null
+    }
     if (!root) {
       root = createRoot(el)
     }

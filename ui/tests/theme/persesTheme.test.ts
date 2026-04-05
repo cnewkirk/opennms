@@ -31,4 +31,13 @@ describe('buildPersesTheme', () => {
     const theme = buildPersesTheme()
     expect(theme.palette.mode).toBe('dark')
   })
+
+  test('uses fallback values when CSS vars are absent', () => {
+    vi.stubGlobal('getComputedStyle', () => ({
+      getPropertyValue: () => ''
+    }))
+    const theme = buildPersesTheme()
+    expect(theme.palette.primary?.main).toBe('#1976d2')
+    expect(theme.palette.background?.default).toBe('#ffffff')
+  })
 })

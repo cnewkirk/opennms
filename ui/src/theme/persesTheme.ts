@@ -7,6 +7,9 @@ import { createTheme, type Theme } from '@mui/material/styles'
  * Call this at React subtree mount time (and re-call when dark mode changes).
  */
 export function buildPersesTheme(): Theme {
+  if (typeof document === 'undefined') {
+    return createTheme()
+  }
   const style = getComputedStyle(document.body)
   const get = (prop: string) => style.getPropertyValue(prop).trim()
 
