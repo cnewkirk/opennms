@@ -296,6 +296,11 @@ const router = createRouter({
       component: () => import('@/containers/EventConfigEventCreate.vue')
     },
     {
+      path: '/topology',
+      name: 'Network Topology',
+      component: () => import('@/containers/Topology.vue')
+    },
+    {
       path: '/jmx-config-generator',
       name: 'JMX Config Generator',
       component: () => import('@/containers/JmxConfigGenerator.vue'),
