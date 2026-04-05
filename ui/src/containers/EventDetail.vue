@@ -108,8 +108,7 @@
             <template v-if="event.alarmId">
               <dt>Alarm</dt>
               <dd>
-                <!-- TODO: link to Vue alarm detail once available -->
-                <a :href="`/opennms/alarm/detail.htm?id=${event.alarmId}`">{{ event.alarmId }}</a>
+                <router-link :to="`/alarm/${event.alarmId}`">{{ event.alarmId }}</router-link>
               </dd>
             </template>
           </dl>
