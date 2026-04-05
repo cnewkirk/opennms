@@ -72,7 +72,6 @@
     </div>
 
     <div class="alarms-list__filter-group alarms-list__col-menu-wrap">
-      <span class="alarms-list__filter-label caption">&nbsp;</span>
       <button class="alarms-list__col-btn" @click.stop="showColumnMenu = !showColumnMenu">
         Columns ▾
       </button>
@@ -457,6 +456,7 @@ onMounted(() => {
     padding: 16px;
     border-bottom: 1px solid var($border-light-on-surface);
     align-items: flex-end;
+    overflow: visible;
   }
 
   &__filter-group {
@@ -611,6 +611,7 @@ onMounted(() => {
 
   &__col-menu-wrap {
     position: relative;
+    margin-left: auto;
   }
 
   &__col-btn {
@@ -629,7 +630,7 @@ onMounted(() => {
     position: absolute;
     top: calc(100% + 4px);
     right: 0;
-    z-index: 100;
+    z-index: 1000;
     background: var($surface);
     border: 1px solid var($border-light-on-surface);
     border-radius: 4px;
