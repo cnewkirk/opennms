@@ -23,11 +23,14 @@
     <import resource="classpath:/META-INF/cxf/cxf-servlet.xml" />
 
     <!--
-      This ResourceContextProvider will manually tell CXF to use the Spring context to 
+      This ResourceContextProvider will manually tell CXF to use the Spring context to
       fetch subresource instances. I'm not sure exactly WHY this is necessary but I can't
       get the subresources to load the autowired Spring beans without it. :)
     -->
     <bean id="springResourceContextProvider" class="org.opennms.web.rest.support.SpringResourceContextProvider"/>
+
+    <!-- JMX Config Generator support beans (explicit declaration as fallback if component-scan misses them) -->
+    <bean id="jmxDetectJobManager" class="org.opennms.web.rest.support.jmxconfig.JmxDetectJobManager"/>
 
     <!-- Used by MenuRestService -->
     <bean id="menuTemplatePath" class="java.lang.String">
