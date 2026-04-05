@@ -84,16 +84,22 @@ public class JmxDetectJob implements Runnable {
 
     private List<MBeanDto> convertToDto(JmxDatacollectionConfig config) {
         List<MBeanDto> dtos = new ArrayList<>();
-        if (config.getJmxCollectionList().isEmpty()) {
+        if (config == null || config.getJmxCollectionList() == null || config.getJmxCollectionList().isEmpty()) {
             return dtos;
         }
-        for (Mbean mbean : config.getJmxCollectionList().get(0).getMbeans()) {
+        final var collection = config.getJmxCollectionList().get(0);
+        if (collection == null || collection.getMbeans() == null) {
+            return dtos;
+        }
+        for (Mbean mbean : collection.getMbeans()) {
             MBeanDto dto = new MBeanDto(mbean.getObjectname(), mbean.getName());
-            for (Attrib attrib : mbean.getAttribList()) {
-                String typeStr = attrib.getType() != null ? attrib.getType().getName() : "gauge";
-                dto.getAttributes().add(new MBeanAttributeDto(attrib.getName(), attrib.getAlias(), typeStr));
+            if (mbean.getAttribList() != null) {
+                for (Attrib attrib : mbean.getAttribList()) {
+                    String typeStr = attrib.getType() != null ? attrib.getType().getName() : "gauge";
+                    dto.getAttributes().add(new MBeanAttributeDto(attrib.getName(), attrib.getAlias(), typeStr));
+                }
             }
-            // CompAttrib (composite) not included in Phase 2a
+            // Phase 2a: only handles simple Attrib; CompAttrib (composite) deferred to Phase 2b
             dtos.add(dto);
         }
         return dtos;
