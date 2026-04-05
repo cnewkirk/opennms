@@ -27,7 +27,7 @@
                 <router-link :to="`/event/${event.id}`">{{ event.id }}</router-link>
               </td>
               <td v-date>{{ event.createTime }}</td>
-              <td>{{ event.severity }}</td>
+              <td><SeverityBadge :severity="event.severity" /></td>
               <td>
                 <span
                   v-html="event.logMessage"
@@ -53,6 +53,7 @@
   lang="ts"
 >
 import Pagination from '../Common/Pagination.vue'
+import SeverityBadge from '../Common/SeverityBadge.vue'
 import { useEventStore } from '@/stores/eventStore'
 import useQueryParameters from '@/composables/useQueryParams'
 import { Event, QueryParameters } from '@/types'

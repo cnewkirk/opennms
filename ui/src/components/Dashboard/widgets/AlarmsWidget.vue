@@ -51,9 +51,7 @@
           :class="`row--${alarm.severity.toLowerCase()}`"
         >
           <td>
-            <span :class="`severity-badge severity-${alarm.severity.toLowerCase()}`">
-              {{ alarm.severity }}
-            </span>
+            <SeverityBadge :severity="alarm.severity" />
           </td>
           <td>
             <router-link :to="`/node/${alarm.nodeId}`">{{ alarm.nodeLabel }}</router-link>
@@ -75,6 +73,7 @@
 <script setup lang="ts">
 import { FeatherIcon } from '@featherds/icon'
 import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
+import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import API from '@/services'
 import { type WidgetConfig } from '@/services/dashboardConfigService'
 import { type Alarm, type QueryParameters } from '@/types'
@@ -195,26 +194,6 @@ defineExpose({ refresh: load })
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-
-.severity-badge {
-  @include body-small;
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-// Severity colors — using OpenNMS-standard palette
-.severity-critical   { background: #cc0000; color: #fff; }
-.severity-major      { background: #ff3300; color: #fff; }
-.severity-minor      { background: #ff9900; color: #000; }
-.severity-warning    { background: #ffcc00; color: #000; }
-.severity-normal     { background: #336600; color: #fff; }
-.severity-indeterminate { background: #999; color: #fff; }
-.severity-cleared    { background: #d0d0d0; color: #333; }
 
 .more-hint {
   @include body-small;

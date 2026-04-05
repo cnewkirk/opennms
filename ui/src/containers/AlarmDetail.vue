@@ -58,7 +58,7 @@
           <div class="headline4 card__section-title">Details</div>
           <dl class="alarm-detail__grid">
             <dt>Severity</dt>
-            <dd>{{ alarm.severity }}</dd>
+            <dd><SeverityBadge :severity="alarm.severity" /></dd>
 
             <dt>Node</dt>
             <dd>
@@ -225,7 +225,7 @@
                 :class="`row--${sit.severity.toLowerCase()}`"
               >
                 <td><router-link :to="`/alarm/${sit.id}`">{{ sit.id }}</router-link></td>
-                <td>{{ sit.severity }}</td>
+                <td><SeverityBadge :severity="sit.severity" /></td>
                 <td>
                   <router-link v-if="sit.nodeId" :to="`/node/${sit.nodeId}`">{{ sit.nodeLabel }}</router-link>
                   <span v-else>&mdash;</span>
@@ -260,7 +260,7 @@
               >
                 <td><router-link :to="`/alarm/${rel.id}`">{{ rel.id }}</router-link></td>
                 <td>{{ rel.isSituation ? '✓' : '' }}</td>
-                <td>{{ rel.severity }}</td>
+                <td><SeverityBadge :severity="rel.severity" /></td>
                 <td>
                   <router-link v-if="rel.nodeId" :to="`/node/${rel.nodeId}`">{{ rel.nodeLabel }}</router-link>
                   <span v-else>&mdash;</span>
@@ -292,7 +292,7 @@
                 :class="`row--${ev.severity.toLowerCase()}`"
               >
                 <td><router-link :to="`/event/${ev.id}`">{{ ev.id }}</router-link></td>
-                <td>{{ ev.severity }}</td>
+                <td><SeverityBadge :severity="ev.severity" /></td>
                 <td v-date>{{ ev.time }}</td>
                 <td class="alarm-detail__uei">{{ ev.uei }}</td>
                 <td class="alarm-detail__log-msg">{{ ev.logMessage }}</td>
@@ -390,6 +390,7 @@
 <script setup lang="ts">
 import { FeatherButton } from '@featherds/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
+import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import useAlarmDetail from '@/composables/useAlarmDetail'
 import useRole from '@/composables/useRole'
 import useSnackbar from '@/composables/useSnackbar'
