@@ -90,9 +90,15 @@ public class DashboardRestService {
     public Response create(@Context final UriInfo uriInfo,
                            @Context final SecurityContext securityContext,
                            final OnmsDashboard dashboard) {
+        if (dashboard == null || dashboard.getName() == null || dashboard.getName().isBlank()
+                || dashboard.getSpec() == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Dashboard name and spec are required").build();
+        }
         dashboard.setId(UUID.randomUUID().toString());
         dashboard.setCreatedBy(securityContext.getUserPrincipal() != null
                 ? securityContext.getUserPrincipal().getName() : "anonymous");
+        LOG.debug("Creating dashboard '{}' for user '{}'", dashboard.getName(), dashboard.getCreatedBy());
         dashboard.setCreatedAt(new Date());
         dashboard.setUpdatedAt(new Date());
         dashboardDao.save(dashboard);
@@ -148,8 +154,8 @@ public class DashboardRestService {
             s.name = d.getName();
             s.description = d.getDescription();
             s.createdBy = d.getCreatedBy();
-            s.createdAt = d.getCreatedAt();
-            s.updatedAt = d.getUpdatedAt();
+            s.createdAt = d.getCreatedAt() == null ? null : new Date(d.getCreatedAt().getTime());
+            s.updatedAt = d.getUpdatedAt() == null ? null : new Date(d.getUpdatedAt().getTime());
             return s;
         }
     }
