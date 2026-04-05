@@ -195,6 +195,8 @@ isisd=yes
 bgpd=no
 ripd=no
 ospf6d=no
+watchfrr_enable=yes
+vtysh_enable=yes
 DAEMONS
 cat > "${CONFIGS}/spine-01/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/spine-01/frr.conf" <<'FRR'
@@ -205,6 +207,8 @@ agentx
 !
 interface lo
  ip address 10.255.0.11/32
+ isis passive
+ ip router isis FABRIC
 !
 interface eth1
  description link-to-leaf-01
@@ -250,6 +254,8 @@ isisd=yes
 bgpd=no
 ripd=no
 ospf6d=no
+watchfrr_enable=yes
+vtysh_enable=yes
 DAEMONS
 cat > "${CONFIGS}/spine-02/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/spine-02/frr.conf" <<'FRR'
@@ -260,6 +266,8 @@ agentx
 !
 interface lo
  ip address 10.255.0.12/32
+ isis passive
+ ip router isis FABRIC
 !
 interface eth1
  description link-to-leaf-01
@@ -305,6 +313,8 @@ isisd=yes
 bgpd=no
 ripd=no
 ospf6d=no
+watchfrr_enable=yes
+vtysh_enable=yes
 DAEMONS
 cat > "${CONFIGS}/leaf-01/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/leaf-01/frr.conf" <<'FRR'
@@ -315,6 +325,8 @@ agentx
 !
 interface lo
  ip address 10.255.0.21/32
+ isis passive
+ ip router isis FABRIC
 !
 interface eth1
  description uplink-to-spine-01
@@ -352,6 +364,8 @@ isisd=yes
 bgpd=no
 ripd=no
 ospf6d=no
+watchfrr_enable=yes
+vtysh_enable=yes
 DAEMONS
 cat > "${CONFIGS}/leaf-02/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/leaf-02/frr.conf" <<'FRR'
@@ -362,6 +376,8 @@ agentx
 !
 interface lo
  ip address 10.255.0.22/32
+ isis passive
+ ip router isis FABRIC
 !
 interface eth1
  description uplink-to-spine-01
@@ -399,6 +415,8 @@ isisd=yes
 bgpd=no
 ripd=no
 ospf6d=no
+watchfrr_enable=yes
+vtysh_enable=yes
 DAEMONS
 cat > "${CONFIGS}/leaf-03/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/leaf-03/frr.conf" <<'FRR'
@@ -409,6 +427,8 @@ agentx
 !
 interface lo
  ip address 10.255.0.23/32
+ isis passive
+ ip router isis FABRIC
 !
 interface eth1
  description uplink-to-spine-01
