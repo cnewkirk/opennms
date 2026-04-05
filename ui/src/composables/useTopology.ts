@@ -41,13 +41,20 @@ const SEVERITY_CSS_VARS: Record<string, string> = {
   INDETERMINATE: '--feather-indeterminate'
 }
 
+// Cytoscape selector that matches spine/core/distribution tier nodes by label prefix.
+// Used to choose roots for the breadthfirst hierarchical layout.
+const SPINE_TIER_SELECTOR =
+  '[label ^= "spine-"],[label ^= "spine_"],[label ^= "core-"],[label ^= "core_"],' +
+  '[label ^= "distribution-"],[label ^= "dist-"],[label ^= "agg-"],[label ^= "aggregate-"]'
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const buildStylesheet = (): any[] => {
-  const defaultNodeColor  = cssVar('--feather-primary')
-  const selectedColor     = cssVar('--feather-primary-dark')
-  const textColor         = cssVar('--feather-primary-text-on-color')
-  const edgeColor         = cssVar('--feather-border-on-surface')
-  const labelOutlineColor = cssVar('--feather-surface')
+  const defaultNodeColor = cssVar('--feather-primary')
+  const selectedColor    = cssVar('--feather-primary-dark')
+  const edgeColor        = cssVar('--feather-border-on-surface')
+  // Label uses a solid semi-transparent backdrop instead of text-outline so it
+  // remains readable on any canvas background (light, dark, or busy edges).
+  const labelBg          = cssVar('--feather-surface') || '#0d1117'
 
   return [
     {
@@ -55,17 +62,21 @@ const buildStylesheet = (): any[] => {
       css: {
         'background-color': defaultNodeColor || '#1f78c1',
         'label': 'data(label)',
-        'color': textColor || '#ffffff',
+        'color': '#ffffff',
         'font-size': 11,
+        'font-weight': 600,
         'text-valign': 'bottom',
         'text-halign': 'center',
-        'text-margin-y': 4,
-        'text-outline-width': 2,
-        'text-outline-color': labelOutlineColor || '#ffffff',
+        'text-margin-y': 6,
+        'text-outline-width': 0,
+        'text-background-color': labelBg || '#0d1117',
+        'text-background-opacity': 0.75,
+        'text-background-padding': '3px',
+        'text-background-shape': 'roundrectangle',
         'width': 36,
         'height': 36,
         'border-width': 2,
-        'border-color': labelOutlineColor || '#ffffff'
+        'border-color': 'rgba(255,255,255,0.25)'
       }
     },
     {
@@ -84,20 +95,18 @@ const buildStylesheet = (): any[] => {
       selector: 'edge',
       css: {
         'width': 2,
-        'line-color': edgeColor || '#888888',
+        'line-color': edgeColor || '#4a5568',
         'target-arrow-shape': 'none',
         'curve-style': 'bezier',
-        'font-size': 9,
-        'color': edgeColor || '#555555',
-        'text-outline-width': 1,
-        'text-outline-color': labelOutlineColor || '#ffffff'
+        'opacity': 0.7
       }
     },
     {
       selector: 'edge:selected',
       css: {
         'line-color': selectedColor || '#005eb8',
-        'width': 3
+        'width': 3,
+        'opacity': 1
       }
     }
   ]
@@ -106,6 +115,89 @@ const buildStylesheet = (): any[] => {
 const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   const store = useTopologyStore()
   let cy: Core | null = null
+
+  // --- Layout persistence (localStorage) ---
+
+  const layoutKey = (): string => {
+    const l = store.activeLayer
+    return l ? `opennms-topo-layout-${l.containerId}-${l.namespace}` : ''
+  }
+
+  const savedPositions = (): Record<string, { x: number; y: number }> | null => {
+    const key = layoutKey()
+    if (!key) return null
+    const raw = localStorage.getItem(key)
+    if (!raw) return null
+    try { return JSON.parse(raw) } catch { return null }
+  }
+
+  const saveLayout = () => {
+    if (!cy) return
+    const key = layoutKey()
+    if (!key) return
+    const positions: Record<string, { x: number; y: number }> = {}
+    cy.nodes().forEach(n => { positions[n.id()] = { ...n.position() } })
+    localStorage.setItem(key, JSON.stringify(positions))
+  }
+
+  const resetLayout = () => {
+    const key = layoutKey()
+    if (key) localStorage.removeItem(key)
+    runLayout(true)
+  }
+
+  // --- Layout selection ---
+
+  // Run the best layout for the current graph:
+  //   1. Saved positions from localStorage → preset
+  //   2. Spine/leaf naming detected        → breadthfirst (hierarchical)
+  //   3. Fallback                          → cose (force-directed)
+  const runLayout = (forceAuto = false) => {
+    if (!cy || cy.nodes().length === 0) return
+
+    if (!forceAuto) {
+      const saved = savedPositions()
+      if (saved) {
+        cy.layout({
+          name: 'preset',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          positions: (node: any) => saved[node.id()] ?? node.position(),
+          animate: false,
+          padding: 30
+        }).run()
+        return
+      }
+    }
+
+    const spineNodes = cy.nodes(SPINE_TIER_SELECTOR)
+    if (spineNodes.length > 0) {
+      cy.layout({
+        name: 'breadthfirst',
+        directed: false,
+        roots: spineNodes,
+        animate: false,
+        padding: 40,
+        spacingFactor: 1.75,
+        avoidOverlap: true,
+        nodeDimensionsIncludeLabels: false
+      } as cytoscape.LayoutOptions).run()
+      return
+    }
+
+    cy.layout({
+      name: 'cose',
+      animate: false,
+      randomize: true,
+      nodeRepulsion: () => 400000,
+      idealEdgeLength: () => 100,
+      edgeElasticity: () => 100,
+      numIter: 1000,
+      gravity: 80,
+      padding: 30
+    } as cytoscape.LayoutOptions).run()
+  }
+
+  // --- Cytoscape setup ---
 
   const initCytoscape = () => {
     if (!containerRef.value) return
@@ -137,6 +229,9 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy.on('tap', (evt) => {
       if (evt.target === cy) store.selectElement(null)
     })
+
+    // Auto-save whenever the user finishes dragging a node
+    cy.on('dragfree', 'node', saveLayout)
   }
 
   const rebuildStylesheet = () => {
@@ -184,21 +279,6 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     })
   }
 
-  const runLayout = () => {
-    if (!cy || cy.nodes().length === 0) return
-    cy.layout({
-      name: 'cose',
-      animate: false,
-      randomize: true,
-      nodeRepulsion: () => 400000,
-      idealEdgeLength: () => 100,
-      edgeElasticity: () => 100,
-      numIter: 1000,
-      gravity: 80,
-      padding: 30
-    } as cytoscape.LayoutOptions).run()
-  }
-
   watch(() => [store.vertices, store.edges], syncElements, { deep: true })
 
   watch(() => store.alarmSeverity, applySeverityClasses, { deep: true })
@@ -236,7 +316,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy = null
   })
 
-  return { getCy: () => cy }
+  return { getCy: () => cy, saveLayout, resetLayout }
 }
 
 export default useTopology

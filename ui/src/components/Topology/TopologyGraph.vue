@@ -22,7 +22,9 @@ import { useTopologyStore } from '@/stores/topologyStore'
 const store = useTopologyStore()
 const graphContainer = ref<HTMLElement | null>(null)
 
-useTopology(graphContainer)
+const { saveLayout, resetLayout } = useTopology(graphContainer)
+
+defineExpose({ saveLayout, resetLayout })
 </script>
 
 <style lang="scss" scoped>

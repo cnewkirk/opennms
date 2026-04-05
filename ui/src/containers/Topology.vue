@@ -6,8 +6,11 @@
   </div>
 
   <div class="topology-page">
-    <TopologyToolbar />
-    <TopologyGraph />
+    <TopologyToolbar
+      @save-layout="graphRef?.saveLayout()"
+      @reset-layout="graphRef?.resetLayout()"
+    />
+    <TopologyGraph ref="graphRef" />
     <TopologyDetailPanel />
   </div>
 </template>
@@ -23,6 +26,8 @@ import { BreadCrumb } from '@/types'
 
 const store = useTopologyStore()
 const menuStore = useMenuStore()
+
+const graphRef = ref<InstanceType<typeof TopologyGraph> | null>(null)
 
 const homeUrl = computed<string>(() => menuStore.mainMenu?.homeUrl ?? '/opennms')
 const breadcrumbs = computed<BreadCrumb[]>(() => [

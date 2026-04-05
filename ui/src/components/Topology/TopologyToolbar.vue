@@ -14,15 +14,37 @@
       class="topology-toolbar__search"
       @update:modelValue="onSearch"
     />
+    <div class="topology-toolbar__layout-actions">
+      <FeatherButton
+        text
+        @click="emit('save-layout')"
+        title="Save current node positions to this browser"
+      >
+        Save Layout
+      </FeatherButton>
+      <FeatherButton
+        text
+        @click="emit('reset-layout')"
+        title="Clear saved positions and re-run auto-layout"
+      >
+        Reset Layout
+      </FeatherButton>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { FeatherSelect } from '@featherds/select'
 import { FeatherInput } from '@featherds/input'
+import { FeatherButton } from '@featherds/button'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyLayer } from '@/types/topology'
 import { useDebounceFn } from '@vueuse/core'
+
+const emit = defineEmits<{
+  'save-layout': []
+  'reset-layout': []
+}>()
 
 const store = useTopologyStore()
 
@@ -76,6 +98,14 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
 
   &__search {
     width: 280px;
+  }
+
+  &__layout-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    padding-top: 8px;
   }
 }
 </style>
