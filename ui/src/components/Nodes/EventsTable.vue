@@ -101,7 +101,7 @@ table {
   }
 }
 // border-left on <tr> is ignored in border-separate mode; target first td instead
-$row-opacity: 0.06;
+$row-opacity: 0.15;
 .row {
   &--critical      { background: utils.alpha(fvars.$error,         $row-opacity); td:first-child { border-left: 3px solid var(--feather-error); } }
   &--major         { background: utils.alpha(fvars.$major,         $row-opacity); td:first-child { border-left: 3px solid var(--feather-major); } }
