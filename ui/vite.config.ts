@@ -94,6 +94,9 @@ export default defineConfig({
     outDir: './dist',
     target: 'esnext',
     copyPublicDir: false,
+    // lightningcss incorrectly strips var() from CSS custom property name strings
+    // (e.g. var(--feather-surface) → --feather-surface). Use esbuild instead.
+    cssMinify: 'esbuild',
     rollupOptions: {
       output: {
         entryFileNames: 'assets/[name].js',
