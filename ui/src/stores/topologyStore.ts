@@ -31,17 +31,75 @@ const ENLINKD_CONTAINER_ID = 'enlinkd'
 
 export const useTopologyStore = defineStore('topologyStore', () => {
   const availableLayers = ref<TopologyLayer[]>([])
-  const activeLayer = ref<TopologyLayer | null>(null)
-  const vertices = ref<TopologyVertex[]>([])
-  const edges = ref<TopologyEdge[]>([])
+  // Per-layer graph cache; keyed by namespace
+  const layerCache = ref<Record<string, { vertices: TopologyVertex[], edges: TopologyEdge[] }>>({})
+  // Active protocol layer namespaces (user-selected multi-select)
+  const activeLayers = ref<string[]>([])
+
   const alarmSeverity = ref<Record<number, AlarmSeverity>>({})
-  const edgeProtocols = ref<Record<string, string[]>>({})
   const nodeAlarmDetails = ref<Record<number, Alarm[]>>({})
   const selectedElement = ref<TopologyElement | null>(null)
   const focusTarget = ref<string | null>(null)
   const searchQuery = ref('')
   const loading = ref(false)
   const error = ref<string | null>(null)
+
+  // Protocol layers are everything except the server-side "All" rollup (namespace 'nodes')
+  const protocolLayers = computed<TopologyLayer[]>(() =>
+    availableLayers.value.filter(l => l.namespace !== 'nodes')
+  )
+
+  // Merged, deduplicated vertices from all active layers
+  const vertices = computed<TopologyVertex[]>(() => {
+    const seen = new Set<string>()
+    const result: TopologyVertex[] = []
+    for (const ns of activeLayers.value) {
+      const g = layerCache.value[ns]
+      if (!g) continue
+      for (const v of g.vertices) {
+        if (!seen.has(v.id)) { seen.add(v.id); result.push(v) }
+      }
+    }
+    return result
+  })
+
+  // Merged, deduplicated edges — one per physical pair, with protocols[] attached
+  const edges = computed<TopologyEdge[]>(() => {
+    const map = new Map<string, TopologyEdge & { protocols: string[] }>()
+    for (const ns of activeLayers.value) {
+      const g = layerCache.value[ns]
+      if (!g) continue
+      const label = availableLayers.value.find(l => l.namespace === ns)?.label ?? ns
+      for (const e of g.edges) {
+        const key = `${Math.min(e.source.id, e.target.id)}-${Math.max(e.source.id, e.target.id)}`
+        const existing = map.get(key)
+        if (!existing) {
+          map.set(key, { source: e.source, target: e.target, protocols: [label] })
+        } else if (!existing.protocols.includes(label)) {
+          existing.protocols.push(label)
+        }
+      }
+    }
+    return Array.from(map.values())
+  })
+
+  // localStorage key for layout persistence — stable across layer toggles when same set
+  const layoutKey = computed<string>(() => {
+    const sorted = [...activeLayers.value].sort()
+    return sorted.length > 0 ? `enlinkd-${sorted.join('+')}` : ''
+  })
+
+  const ensureLayerLoaded = async (layer: TopologyLayer) => {
+    if (layerCache.value[layer.namespace]) return
+    const graph = await getGraph(layer.containerId, layer.namespace)
+    layerCache.value = {
+      ...layerCache.value,
+      [layer.namespace]: {
+        vertices: graph?.vertices ?? [],
+        edges: graph?.edges ?? []
+      }
+    }
+  }
 
   const loadContainers = async () => {
     const containers = await getContainers()
@@ -54,31 +112,48 @@ export const useTopologyStore = defineStore('topologyStore', () => {
       label: g.label ?? g.namespace
     }))
 
-    if (availableLayers.value.length > 0 && !activeLayer.value) {
-      const defaultLayer = availableLayers.value.find(l => l.namespace === 'nodes') ?? availableLayers.value[0]
-      await loadGraph(defaultLayer)
-    }
+    // Default to all protocol layers; fall back to 'nodes' if none exist
+    const defaults = availableLayers.value.filter(l => l.namespace !== 'nodes')
+    const toLaod = defaults.length > 0 ? defaults : availableLayers.value.slice(0, 1)
 
-    // Build protocol map in the background; don't block initial render
-    buildEdgeProtocolMap()
-  }
-
-  const loadGraph = async (layer: TopologyLayer) => {
     loading.value = true
     error.value = null
-    activeLayer.value = layer
-    selectedElement.value = null
-
-    const graph = await getGraph(layer.containerId, layer.namespace)
-    if (graph) {
-      vertices.value = graph.vertices ?? []
-      edges.value = graph.edges ?? []
-    } else {
-      error.value = `Failed to load ${layer.label} topology`
-      vertices.value = []
-      edges.value = []
-    }
+    await Promise.all(toLaod.map(ensureLayerLoaded))
+    activeLayers.value = toLaod.map(l => l.namespace)
     loading.value = false
+  }
+
+  const toggleLayer = async (layer: TopologyLayer) => {
+    const ns = layer.namespace
+    const isActive = activeLayers.value.includes(ns)
+
+    if (isActive) {
+      // Don't allow removing the last active layer
+      if (activeLayers.value.length <= 1) return
+      activeLayers.value = activeLayers.value.filter(n => n !== ns)
+    } else {
+      if (!layerCache.value[ns]) {
+        loading.value = true
+        await ensureLayerLoaded(layer)
+        loading.value = false
+      }
+      activeLayers.value = [...activeLayers.value, ns]
+    }
+    selectedElement.value = null
+  }
+
+  const setAllLayers = async (active: boolean) => {
+    const targets = protocolLayers.value.length > 0 ? protocolLayers.value : availableLayers.value
+    if (active) {
+      loading.value = true
+      await Promise.all(targets.filter(l => !layerCache.value[l.namespace]).map(ensureLayerLoaded))
+      activeLayers.value = targets.map(l => l.namespace)
+      loading.value = false
+    } else {
+      // Keep only the first layer active
+      activeLayers.value = activeLayers.value.slice(0, 1)
+    }
+    selectedElement.value = null
   }
 
   const loadAlarmSeverities = async () => {
@@ -96,28 +171,8 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     alarmSeverity.value = severityMap
   }
 
-  const buildEdgeProtocolMap = async () => {
-    const protocolLayers = availableLayers.value.filter(l => l.namespace !== 'nodes')
-    if (protocolLayers.length === 0) return
-
-    const results = await Promise.all(
-      protocolLayers.map(async l => ({ label: l.label, graph: await getGraph(l.containerId, l.namespace) }))
-    )
-
-    const map: Record<string, string[]> = {}
-    for (const { label, graph } of results) {
-      if (!graph) continue
-      for (const e of graph.edges) {
-        const key = `${Math.min(e.source.id, e.target.id)}-${Math.max(e.source.id, e.target.id)}`
-        if (!map[key]) map[key] = []
-        if (!map[key].includes(label)) map[key].push(label)
-      }
-    }
-    edgeProtocols.value = map
-  }
-
   const loadNodeAlarmDetails = async (nodeId: number) => {
-    if (nodeAlarmDetails.value[nodeId]) return  // already loaded
+    if (nodeAlarmDetails.value[nodeId]) return
     const alarms = await getNodeAlarms(nodeId, 10)
     const sorted = alarms.sort((a, b) => {
       const sevA = numericSeverityLevel(a.severity.toUpperCase() as AlarmSeverity)
@@ -151,11 +206,12 @@ export const useTopologyStore = defineStore('topologyStore', () => {
 
   return {
     availableLayers,
-    activeLayer,
+    protocolLayers,
+    activeLayers,
     vertices,
     edges,
+    layoutKey,
     alarmSeverity,
-    edgeProtocols,
     nodeAlarmDetails,
     selectedElement,
     focusTarget,
@@ -163,9 +219,9 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     loading,
     error,
     loadContainers,
-    loadGraph,
+    toggleLayer,
+    setAllLayers,
     loadAlarmSeverities,
-    buildEdgeProtocolMap,
     loadNodeAlarmDetails,
     selectElement,
     focusNode,

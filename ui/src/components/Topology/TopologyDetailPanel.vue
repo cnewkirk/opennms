@@ -62,7 +62,7 @@
           <div v-if="edgeProtocols.length" class="detail-panel__chips">
             <span v-for="p in edgeProtocols" :key="p" class="detail-panel__chip">{{ p }}</span>
           </div>
-          <span v-else class="detail-panel__val">{{ store.activeLayer?.label ?? 'Unknown' }}</span>
+          <span v-else class="detail-panel__val">Unknown</span>
         </div>
       </template>
     </div>
@@ -122,13 +122,7 @@ watch(nodeId, (id) => {
   }
 }, { immediate: true })
 
-const edgeProtocols = computed(() => {
-  if (!edge.value) return []
-  const src = edge.value.source.id
-  const tgt = edge.value.target.id
-  const key = `${Math.min(src, tgt)}-${Math.max(src, tgt)}`
-  return store.edgeProtocols[key] ?? []
-})
+const edgeProtocols = computed(() => edge.value?.protocols ?? [])
 
 const sourceLabel = computed(() => {
   if (!edge.value) return ''

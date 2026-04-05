@@ -1,32 +1,36 @@
 <template>
   <div class="topology-toolbar">
-    <FeatherSelect
-      v-model="selectedLayerItem"
-      :options="(layerOptions as any)"
-      text-prop="label"
-      label="Layer"
-      class="topology-toolbar__layer-select"
-      @update:modelValue="onLayerChange"
-    />
+    <div class="topology-toolbar__layers">
+      <button
+        type="button"
+        class="topology-toolbar__chip"
+        :class="{ active: allActive }"
+        :disabled="store.loading"
+        @click="toggleAll"
+      >All</button>
+      <button
+        v-for="layer in store.protocolLayers"
+        :key="layer.namespace"
+        type="button"
+        class="topology-toolbar__chip"
+        :class="{ active: store.activeLayers.includes(layer.namespace) }"
+        :disabled="store.loading || (store.activeLayers.includes(layer.namespace) && store.activeLayers.length === 1)"
+        @click="store.toggleLayer(layer)"
+      >{{ layer.label }}</button>
+    </div>
+
     <FeatherInput
       v-model="searchText"
       label="Search nodes"
       class="topology-toolbar__search"
       @update:modelValue="onSearch"
     />
+
     <div class="topology-toolbar__layout-actions">
-      <FeatherButton
-        text
-        @click="emit('save-layout')"
-        title="Save current node positions to this browser"
-      >
+      <FeatherButton text @click="emit('save-layout')" title="Save current node positions to this browser">
         Save Layout
       </FeatherButton>
-      <FeatherButton
-        text
-        @click="emit('reset-layout')"
-        title="Clear saved positions and re-run auto-layout"
-      >
+      <FeatherButton text @click="emit('reset-layout')" title="Clear saved positions and re-run auto-layout">
         Reset Layout
       </FeatherButton>
     </div>
@@ -34,11 +38,9 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherSelect } from '@featherds/select'
 import { FeatherInput } from '@featherds/input'
 import { FeatherButton } from '@featherds/button'
 import { useTopologyStore } from '@/stores/topologyStore'
-import { TopologyLayer } from '@/types/topology'
 import { useDebounceFn } from '@vueuse/core'
 
 const emit = defineEmits<{
@@ -48,34 +50,12 @@ const emit = defineEmits<{
 
 const store = useTopologyStore()
 
-interface LayerOption {
-  id: string
-  label: string
-  layer: TopologyLayer
-}
-
-const layerOptions = computed<LayerOption[]>(() =>
-  store.availableLayers.map(l => ({ id: `${l.containerId}/${l.namespace}`, label: l.label, layer: l }))
+const allActive = computed(() =>
+  store.protocolLayers.length > 0 &&
+  store.protocolLayers.every(l => store.activeLayers.includes(l.namespace))
 )
 
-const selectedLayerItem = ref<LayerOption | undefined>(undefined)
-
-watch(() => store.activeLayer, (layer) => {
-  if (layer) {
-    selectedLayerItem.value = layerOptions.value.find(o => o.id === `${layer.containerId}/${layer.namespace}`)
-  }
-})
-
-watch(layerOptions, (opts) => {
-  if (!selectedLayerItem.value && opts.length > 0) {
-    selectedLayerItem.value = opts.find(o => o.id === 'nodes/nodes') ?? opts[0]
-  }
-})
-
-const onLayerChange = (item: unknown) => {
-  const opt = item as LayerOption | undefined
-  if (opt?.layer) store.loadGraph(opt.layer)
-}
+const toggleAll = () => store.setAllLayers(!allActive.value)
 
 const searchText = ref('')
 
@@ -85,6 +65,8 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
 </script>
 
 <style lang="scss" scoped>
+@import "@featherds/styles/themes/variables";
+
 .topology-toolbar {
   display: flex;
   align-items: flex-start;
@@ -92,12 +74,43 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
   padding: 8px 16px;
   flex-shrink: 0;
 
-  &__layer-select {
-    width: 220px;
+  &__layers {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 6px;
+  }
+
+  &__chip {
+    padding: 4px 14px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid var($primary);
+    background: transparent;
+    color: var($primary);
+    transition: background 0.15s, color 0.15s;
+    line-height: 1.4;
+
+    &.active {
+      background: var($primary);
+      color: #fff;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    &:not(:disabled):hover {
+      opacity: 0.8;
+    }
   }
 
   &__search {
-    width: 280px;
+    width: 260px;
   }
 
   &__layout-actions {

@@ -23,7 +23,6 @@
 import cytoscape, { Core } from 'cytoscape'
 import { Ref } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
-import { isVertex } from '@/types/topology'
 
 // Read a Feather DS CSS custom property value from the document at runtime.
 // Cytoscape renders to canvas so CSS variables don't apply directly —
@@ -52,8 +51,7 @@ const buildStylesheet = (): any[] => {
   const defaultNodeColor = cssVar('--feather-primary')
   const selectedColor    = cssVar('--feather-primary-dark')
   const edgeColor        = cssVar('--feather-border-on-surface')
-  // Label uses a solid semi-transparent backdrop instead of text-outline so it
-  // remains readable on any canvas background (light, dark, or busy edges).
+  const multiEdgeColor   = cssVar('--feather-primary')
   const labelBg          = cssVar('--feather-surface') || '#0d1117'
 
   return [
@@ -98,14 +96,23 @@ const buildStylesheet = (): any[] => {
         'line-color': edgeColor || '#4a5568',
         'target-arrow-shape': 'none',
         'curve-style': 'bezier',
-        'opacity': 0.7
+        'opacity': 0.65
+      }
+    },
+    // Multi-protocol edges — thicker, colored to signal convergence of multiple layers
+    {
+      selector: 'edge.multi-protocol',
+      css: {
+        'width': 4,
+        'line-color': multiEdgeColor || '#1f78c1',
+        'opacity': 0.85
       }
     },
     {
       selector: 'edge:selected',
       css: {
         'line-color': selectedColor || '#005eb8',
-        'width': 3,
+        'width': 4,
         'opacity': 1
       }
     }
@@ -118,13 +125,13 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
   // --- Layout persistence (localStorage) ---
 
-  const layoutKey = (): string => {
-    const l = store.activeLayer
-    return l ? `opennms-topo-layout-${l.containerId}-${l.namespace}` : ''
+  const localStorageKey = (): string => {
+    const k = store.layoutKey
+    return k ? `opennms-topo-layout-${k}` : ''
   }
 
   const savedPositions = (): Record<string, { x: number; y: number }> | null => {
-    const key = layoutKey()
+    const key = localStorageKey()
     if (!key) return null
     const raw = localStorage.getItem(key)
     if (!raw) return null
@@ -133,7 +140,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
   const saveLayout = () => {
     if (!cy) return
-    const key = layoutKey()
+    const key = localStorageKey()
     if (!key) return
     const positions: Record<string, { x: number; y: number }> = {}
     cy.nodes().forEach(n => { positions[n.id()] = { ...n.position() } })
@@ -141,7 +148,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   }
 
   const resetLayout = () => {
-    const key = layoutKey()
+    const key = localStorageKey()
     if (key) localStorage.removeItem(key)
     runLayout(true)
   }
@@ -220,6 +227,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
     cy.on('tap', 'edge', (evt) => {
       const { edgeKey } = evt.target.data()
+      // store.edges are already deduplicated with protocols[] attached
       const edge = store.edges.find(e => {
         const s = e.source.id; const t = e.target.id
         return `${Math.min(s, t)}-${Math.max(s, t)}` === edgeKey
@@ -254,22 +262,29 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       }
     }))
 
-    // Deduplicate edges — the "All" layer returns one edge per protocol per pair.
-    // Collapse them to a single Cytoscape edge, keyed by the canonical (min-max) node pair.
-    const seen = new Set<string>()
-    const edgeElements: { data: Record<string, string> }[] = []
-    for (const e of store.edges) {
+    // store.edges are already deduplicated (one per physical pair) with protocols[] attached
+    const edgeElements = store.edges.map(e => {
       const src = e.source.id
       const tgt = e.target.id
       const key = `${Math.min(src, tgt)}-${Math.max(src, tgt)}`
-      if (!seen.has(key)) {
-        seen.add(key)
-        edgeElements.push({ data: { id: `edge-${key}`, source: String(src), target: String(tgt), edgeKey: key } })
+      return {
+        data: {
+          id: `edge-${key}`,
+          source: String(src),
+          target: String(tgt),
+          edgeKey: key,
+          protocolCount: e.protocols?.length ?? 1
+        }
       }
-    }
+    })
 
     cy.add(nodeElements)
     cy.add(edgeElements)
+
+    // Apply multi-protocol class for visual distinction
+    cy.edges().forEach(edge => {
+      if ((edge.data('protocolCount') ?? 1) > 1) edge.addClass('multi-protocol')
+    })
 
     applySeverityClasses()
     runLayout()
