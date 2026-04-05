@@ -30,7 +30,7 @@
         </div>
         <div v-if="vertex.tooltipText" class="detail-panel__row">
           <span class="detail-panel__key">Info</span>
-          <span class="detail-panel__val">{{ vertex.tooltipText }}</span>
+          <span class="detail-panel__val detail-panel__val--html" v-html="vertex.tooltipText" />
         </div>
         <div v-if="vertex.id" class="detail-panel__actions">
           <FeatherButton text @click="goToNodeDetail">View Node Detail</FeatherButton>
@@ -134,6 +134,12 @@ const goToNodeDetail = () => {
   &__val {
     font-size: 0.9rem;
     word-break: break-all;
+
+    &--html :deep(p) {
+      margin: 0 0 4px;
+
+      &:last-child { margin-bottom: 0; }
+    }
   }
 
   &__badge {
