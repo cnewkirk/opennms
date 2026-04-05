@@ -21,7 +21,7 @@
 ///
 
 import { v2, rest } from './axiosInstances'
-import { QueryParameters, AlarmQueryParameters, AlarmApiResponse } from '@/types'
+import { QueryParameters, AlarmQueryParameters, AlarmApiResponse, Alarm, AlarmAcknowledgment } from '@/types'
 import { queryParametersHandler } from './serviceHelpers'
 
 const endpoint = '/alarms'
@@ -62,4 +62,71 @@ const modifyAlarm = async (alarmId: string, alarmQueryParameters: AlarmQueryPara
   }
 }
 
-export { getAlarms, modifyAlarm }
+const getAlarmById = async (id: string | number): Promise<Alarm | false> => {
+  try {
+    const resp = await v2.get(`${endpoint}/${id}`)
+    return resp.data
+  } catch (err) {
+    return false
+  }
+}
+
+const getAlarmAcknowledgments = async (id: string | number): Promise<AlarmAcknowledgment[]> => {
+  try {
+    const resp = await rest.get(`/acks?alarmId=${id}`)
+    return resp.data?.ack ?? []
+  } catch (err) {
+    return []
+  }
+}
+
+const saveStickyMemo = async (id: string | number, body: string): Promise<boolean> => {
+  try {
+    await v2.put(`${endpoint}/${id}/memo`, body, {
+      headers: { 'Content-Type': 'text/plain' }
+    })
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
+const deleteStickyMemo = async (id: string | number): Promise<boolean> => {
+  try {
+    await v2.delete(`${endpoint}/${id}/memo`)
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
+const saveJournalMemo = async (id: string | number, body: string): Promise<boolean> => {
+  try {
+    await v2.put(`${endpoint}/${id}/journal`, body, {
+      headers: { 'Content-Type': 'text/plain' }
+    })
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
+const deleteJournalMemo = async (id: string | number): Promise<boolean> => {
+  try {
+    await v2.delete(`${endpoint}/${id}/journal`)
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
+export {
+  getAlarms,
+  modifyAlarm,
+  getAlarmById,
+  getAlarmAcknowledgments,
+  saveStickyMemo,
+  deleteStickyMemo,
+  saveJournalMemo,
+  deleteJournalMemo
+}
