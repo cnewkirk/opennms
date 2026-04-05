@@ -46,6 +46,12 @@ const pluginLoader = dynamicImportPluginLoader([
 interface Props {
   dashboardResource: DashboardResource
   isEditMode?: boolean
+  /**
+   * Called when the user saves the dashboard.
+   * NOTE: DashboardProvider (0.50.x) does not accept an onSave callback directly —
+   * it manages saves internally. This prop is reserved for P3-T3 (DashboardViewer)
+   * which will wire save via the REST API after Perses emits a save event.
+   */
   onSave?: (resource: DashboardResource) => Promise<void>
 }
 
