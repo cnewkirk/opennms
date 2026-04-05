@@ -516,7 +516,19 @@ const isisLinks = computed(() => {
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 0.78rem;
-    font-weight: bold;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+
+    &.critical      { color: var(--feather-error);         border: 1.5px solid var(--feather-error);         background: rgba(var(--feather-error-r),         var(--feather-error-g),         var(--feather-error-b),         0.12); }
+    &.major         { color: var(--feather-major);         border: 1.5px solid var(--feather-major);         background: rgba(var(--feather-major-r),         var(--feather-major-g),         var(--feather-major-b),         0.12); }
+    &.minor         { color: var(--feather-minor);         border: 1.5px solid var(--feather-minor);         background: rgba(var(--feather-minor-r),         var(--feather-minor-g),         var(--feather-minor-b),         0.12); }
+    &.warning       { color: var(--feather-warning);       border: 1.5px solid var(--feather-warning);       background: rgba(var(--feather-warning-r),       var(--feather-warning-g),       var(--feather-warning-b),       0.12); }
+    &.normal        { color: var(--feather-success);       border: 1.5px solid var(--feather-success);       background: rgba(var(--feather-success-r),       var(--feather-success-g),       var(--feather-success-b),       0.12); }
+    &.cleared,
+    &.unacknowledged { color: var(--feather-cleared);      border: 1.5px solid var(--feather-cleared);       background: rgba(var(--feather-cleared-r),       var(--feather-cleared-g),       var(--feather-cleared-b),       0.12); }
+    &.indeterminate { color: var(--feather-indeterminate); border: 1.5px solid var(--feather-indeterminate); background: rgba(var(--feather-indeterminate-r), var(--feather-indeterminate-g), var(--feather-indeterminate-b), 0.12); }
   }
 
   &__alarm {

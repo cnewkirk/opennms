@@ -264,18 +264,29 @@ table {
 
 .log-message :deep(p) { margin: 0; }
 
+// Outlined severity badge: colored border + text, subtle tinted background.
+// Avoids the contrast problem of solid badges (where background and text can
+// be the same token) while remaining readable in both light and dark themes.
+$badge-bg-opacity: 0.12;
 .severity-badge {
   display: inline-block;
   padding: 1px 7px;
   border-radius: 3px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
+  white-space: nowrap;
 
-// Severity colors from shared token layer
-@import "@/styles/severities";
+  &.critical      { color: var(--feather-error);         border: 1.5px solid var(--feather-error);         background: utils.alpha(fvars.$error,         $badge-bg-opacity); }
+  &.major         { color: var(--feather-major);         border: 1.5px solid var(--feather-major);         background: utils.alpha(fvars.$major,         $badge-bg-opacity); }
+  &.minor         { color: var(--feather-minor);         border: 1.5px solid var(--feather-minor);         background: utils.alpha(fvars.$minor,         $badge-bg-opacity); }
+  &.warning       { color: var(--feather-warning);       border: 1.5px solid var(--feather-warning);       background: utils.alpha(fvars.$warning,       $badge-bg-opacity); }
+  &.normal        { color: var(--feather-success);       border: 1.5px solid var(--feather-success);       background: utils.alpha(fvars.$success,       $badge-bg-opacity); }
+  &.cleared,
+  &.unacknowledged { color: var(--feather-cleared);      border: 1.5px solid var(--feather-cleared);       background: utils.alpha(fvars.$cleared,       $badge-bg-opacity); }
+  &.indeterminate { color: var(--feather-indeterminate); border: 1.5px solid var(--feather-indeterminate); background: utils.alpha(fvars.$indeterminate, $badge-bg-opacity); }
+}
 
 $row-opacity: 0.15;
 .row {
