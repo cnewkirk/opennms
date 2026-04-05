@@ -22,9 +22,10 @@
 
 import { defineStore } from 'pinia'
 import { getContainers, getGraph } from '@/services/topologyService'
-import { getAlarms } from '@/services/alarmService'
+import { getAlarms, getNodeAlarms } from '@/services/alarmService'
 import { TopologyVertex, TopologyEdge, TopologyLayer, TopologyElement, AlarmSeverity } from '@/types/topology'
 import { numericSeverityLevel } from '@/components/Map/utils'
+import { Alarm } from '@/types'
 
 const ENLINKD_CONTAINER_ID = 'enlinkd'
 
@@ -34,6 +35,8 @@ export const useTopologyStore = defineStore('topologyStore', () => {
   const vertices = ref<TopologyVertex[]>([])
   const edges = ref<TopologyEdge[]>([])
   const alarmSeverity = ref<Record<number, AlarmSeverity>>({})
+  const edgeProtocols = ref<Record<string, string[]>>({})
+  const nodeAlarmDetails = ref<Record<number, Alarm[]>>({})
   const selectedElement = ref<TopologyElement | null>(null)
   const focusTarget = ref<string | null>(null)
   const searchQuery = ref('')
@@ -55,6 +58,9 @@ export const useTopologyStore = defineStore('topologyStore', () => {
       const defaultLayer = availableLayers.value.find(l => l.namespace === 'nodes') ?? availableLayers.value[0]
       await loadGraph(defaultLayer)
     }
+
+    // Build protocol map in the background; don't block initial render
+    buildEdgeProtocolMap()
   }
 
   const loadGraph = async (layer: TopologyLayer) => {
@@ -90,6 +96,37 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     alarmSeverity.value = severityMap
   }
 
+  const buildEdgeProtocolMap = async () => {
+    const protocolLayers = availableLayers.value.filter(l => l.namespace !== 'nodes')
+    if (protocolLayers.length === 0) return
+
+    const results = await Promise.all(
+      protocolLayers.map(async l => ({ label: l.label, graph: await getGraph(l.containerId, l.namespace) }))
+    )
+
+    const map: Record<string, string[]> = {}
+    for (const { label, graph } of results) {
+      if (!graph) continue
+      for (const e of graph.edges) {
+        const key = `${Math.min(e.source.id, e.target.id)}-${Math.max(e.source.id, e.target.id)}`
+        if (!map[key]) map[key] = []
+        if (!map[key].includes(label)) map[key].push(label)
+      }
+    }
+    edgeProtocols.value = map
+  }
+
+  const loadNodeAlarmDetails = async (nodeId: number) => {
+    if (nodeAlarmDetails.value[nodeId]) return  // already loaded
+    const alarms = await getNodeAlarms(nodeId, 10)
+    const sorted = alarms.sort((a, b) => {
+      const sevA = numericSeverityLevel(a.severity.toUpperCase() as AlarmSeverity)
+      const sevB = numericSeverityLevel(b.severity.toUpperCase() as AlarmSeverity)
+      return sevB - sevA
+    })
+    nodeAlarmDetails.value = { ...nodeAlarmDetails.value, [nodeId]: sorted.slice(0, 3) }
+  }
+
   const selectElement = (el: TopologyElement | null) => {
     selectedElement.value = el
   }
@@ -118,6 +155,8 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     vertices,
     edges,
     alarmSeverity,
+    edgeProtocols,
+    nodeAlarmDetails,
     selectedElement,
     focusTarget,
     searchQuery,
@@ -126,6 +165,8 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     loadContainers,
     loadGraph,
     loadAlarmSeverities,
+    buildEdgeProtocolMap,
+    loadNodeAlarmDetails,
     selectElement,
     focusNode,
     setSearchQuery

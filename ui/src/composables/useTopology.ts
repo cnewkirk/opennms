@@ -219,10 +219,11 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     })
 
     cy.on('tap', 'edge', (evt) => {
-      const edgeData = evt.target.data()
-      const edge = store.edges.find(e =>
-        String(e.source.id) === edgeData.source && String(e.target.id) === edgeData.target
-      )
+      const { edgeKey } = evt.target.data()
+      const edge = store.edges.find(e => {
+        const s = e.source.id; const t = e.target.id
+        return `${Math.min(s, t)}-${Math.max(s, t)}` === edgeKey
+      })
       if (edge) store.selectElement(edge)
     })
 
@@ -253,13 +254,19 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       }
     }))
 
-    const edgeElements = store.edges.map((e, i) => ({
-      data: {
-        id: `edge-${i}`,
-        source: String(e.source.id),
-        target: String(e.target.id)
+    // Deduplicate edges — the "All" layer returns one edge per protocol per pair.
+    // Collapse them to a single Cytoscape edge, keyed by the canonical (min-max) node pair.
+    const seen = new Set<string>()
+    const edgeElements: { data: Record<string, string> }[] = []
+    for (const e of store.edges) {
+      const src = e.source.id
+      const tgt = e.target.id
+      const key = `${Math.min(src, tgt)}-${Math.max(src, tgt)}`
+      if (!seen.has(key)) {
+        seen.add(key)
+        edgeElements.push({ data: { id: `edge-${key}`, source: String(src), target: String(tgt), edgeKey: key } })
       }
-    }))
+    }
 
     cy.add(nodeElements)
     cy.add(edgeElements)

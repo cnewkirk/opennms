@@ -37,6 +37,7 @@ export interface TopologyVertex {
 export interface TopologyEdge {
   source: { namespace: string; id: number }
   target: { namespace: string; id: number }
+  protocols?: string[]  // protocols that detected this edge (populated client-side on the All layer)
 }
 
 export interface TopologyGraph {

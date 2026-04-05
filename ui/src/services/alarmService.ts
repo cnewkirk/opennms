@@ -71,6 +71,18 @@ const getAlarmById = async (id: string | number): Promise<Alarm | false> => {
   }
 }
 
+const getNodeAlarms = async (nodeId: number, limit = 10): Promise<Alarm[]> => {
+  try {
+    const resp = await v2.get(endpoint, {
+      params: { '_s': `nodeId==${nodeId}`, limit }
+    })
+    if (resp.status === 204) return []
+    return resp.data?.alarm ?? []
+  } catch {
+    return []
+  }
+}
+
 const getAlarmAcknowledgments = async (id: string | number): Promise<AlarmAcknowledgment[]> => {
   try {
     const resp = await rest.get(`/acks?alarmId=${id}`)
@@ -122,6 +134,7 @@ const deleteJournalMemo = async (id: string | number): Promise<boolean> => {
 
 export {
   getAlarms,
+  getNodeAlarms,
   modifyAlarm,
   getAlarmById,
   getAlarmAcknowledgments,
