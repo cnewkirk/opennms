@@ -280,7 +280,6 @@ RUN chmod +x /entrypoint-wrapper.sh
 
 # OpenNMS SNMP client config + self-provisioning requisition
 COPY --chown=10001:10001 etc/snmp-config.xml /opt/opennms/etc/snmp-config.xml
-RUN mkdir -p /opt/opennms/etc/imports
 COPY --chown=10001:10001 etc/imports/Self.xml /opt/opennms/etc/imports/Self.xml
 
 ENTRYPOINT ["/entrypoint-wrapper.sh"]
