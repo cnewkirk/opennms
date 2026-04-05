@@ -28,20 +28,26 @@
     <div v-else-if="error" class="availability-panel__error subtitle2">{{ error }}</div>
 
     <template v-else-if="availability">
-      <!-- Percentage cards -->
+      <!-- Percentage cards grouped by IP interface -->
       <div class="availability-panel__cards">
-        <template v-for="iface in availability.ipinterfaces" :key="iface.id">
-          <div
-            v-for="svc in iface.services"
-            :key="svc.id"
-            class="avail-card"
-            :class="severityClass(svc.availability)"
-          >
-            <div class="avail-card__name subtitle2">{{ svc.name }}</div>
-            <div class="avail-card__ip caption">{{ iface.address }}</div>
-            <div class="avail-card__pct headline3">{{ formatPct(svc.availability) }}%</div>
+        <div
+          v-for="iface in availability.ipinterfaces"
+          :key="iface.id"
+          class="availability-panel__iface-group"
+        >
+          <div class="availability-panel__iface-header subtitle2">{{ iface.address }}</div>
+          <div class="availability-panel__iface-cards">
+            <div
+              v-for="svc in iface.services"
+              :key="svc.id"
+              class="avail-card"
+              :class="severityClass(svc.availability)"
+            >
+              <div class="avail-card__name subtitle2">{{ svc.name }}</div>
+              <div class="avail-card__pct headline3">{{ formatPct(svc.availability) }}%</div>
+            </div>
           </div>
-        </template>
+        </div>
       </div>
 
       <!-- Expandable timeline -->
@@ -154,7 +160,11 @@ onUnmounted(() => chartInstance?.destroy())
 .availability-panel {
   &__title   { margin-bottom: 12px; }
   &__skeleton, &__error { padding: 8px; color: var($secondary-text-on-surface); }
-  &__cards   { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+  &__cards        { margin-bottom: 12px; }
+  &__iface-group  { margin-bottom: 16px; }
+  &__iface-group:last-child { margin-bottom: 0; }
+  &__iface-header { color: var($secondary-text-on-surface); margin-bottom: 6px; }
+  &__iface-cards  { display: flex; flex-wrap: wrap; gap: 12px; }
   &__toggle  { background: none; border: none; cursor: pointer; color: var($clickable-normal); padding: 4px 0; }
   &__chart-wrap { height: 200px; margin-top: 12px; }
 }
@@ -164,7 +174,6 @@ onUnmounted(() => chartInstance?.destroy())
   min-width: 120px;
   text-align: center;
   &__name { margin-bottom: 2px; }
-  &__ip   { opacity: 0.7; margin-bottom: 4px; }
   &__pct  { font-weight: 700; }
   &--normal   { background: utils.alpha(fvars.$success, 0.12); border: 1px solid utils.alpha(fvars.$success, 0.4); }
   &--warning  { background: utils.alpha(fvars.$warning, 0.12); border: 1px solid utils.alpha(fvars.$warning, 0.4); }
