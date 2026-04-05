@@ -29,9 +29,6 @@
     -->
     <bean id="springResourceContextProvider" class="org.opennms.web.rest.support.SpringResourceContextProvider"/>
 
-    <!-- JMX Config Generator support beans (explicit declaration as fallback if component-scan misses them) -->
-    <bean id="jmxDetectJobManager" class="org.opennms.web.rest.support.jmxconfig.JmxDetectJobManager"/>
-
     <!-- Used by MenuRestService -->
     <bean id="menuTemplatePath" class="java.lang.String">
         <constructor-arg value="${opennms.home}/jetty-webapps/opennms/WEB-INF/menu/menu-template.json" />

@@ -1,0 +1,243 @@
+#!/usr/bin/env bash
+# build-dark-mode-overlay.sh
+# Builds the dark-mode/modern-ui overlay image for container testing.
+# Compiles web-assets (webpack) and the Vue menu (vite), then assembles
+# a minimal Dockerfile overlay on top of the released 35.0.4 image.
+#
+# Using 35.0.4 as base (not 35.0.5-api-tokens) avoids a Karaf feature
+# resolution crash in the api-tokens overlay.  Our vite build already
+# includes the LightDarkMode toggle, so we don't need the api-tokens
+# base for dark mode functionality.
+#
+# Usage:  ./build-dark-mode-overlay.sh
+# Result: podman image tagged  localhost/opennms/horizon:35.0.5-dark-mode
+#         Run + password setup instructions printed at the end.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+OVERLAY_DIR="$(mktemp -d)"
+IMAGE_TAG="localhost/opennms/horizon:35.0.5-dark-mode"
+ONMS_BASE_IMAGE="docker.io/opennms/horizon:35.0.4"
+
+echo "==> overlay staging dir: ${OVERLAY_DIR}"
+
+# ---------------------------------------------------------------------------
+# 1. Build web-assets (webpack) — produces dark-mode.css + modern-ui.css
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [1/4] Building core/web-assets (webpack)..."
+cd "${SCRIPT_DIR}/core/web-assets"
+# pnpm is used by this module.
+# Exit code 2 from webpack means there were errors in OTHER scss files (pre-existing
+# vaadin-theme import issues in the codebase). Our new bundles are still emitted.
+# We verify success by checking for the output files explicitly.
+pnpm run webpack || true
+# Output lands in target/dist/assets/
+WEBASSETS_DIST="${SCRIPT_DIR}/core/web-assets/target/dist/assets"
+
+if [[ ! -f "${WEBASSETS_DIST}/dark-mode.css" ]]; then
+  echo "ERROR: dark-mode.css not found in ${WEBASSETS_DIST} — webpack build failed" >&2
+  exit 1
+fi
+if [[ ! -f "${WEBASSETS_DIST}/modern-ui.css" ]]; then
+  echo "ERROR: modern-ui.css not found in ${WEBASSETS_DIST} — webpack build failed" >&2
+  exit 1
+fi
+if [[ ! -f "${WEBASSETS_DIST}/assets.json" ]]; then
+  echo "ERROR: assets.json not found in ${WEBASSETS_DIST} — webpack build failed" >&2
+  exit 1
+fi
+echo "    dark-mode.css: OK"
+echo "    modern-ui.css: OK"
+
+# ---------------------------------------------------------------------------
+# 2. Build Vue menu (vite) — produces updated index.js with dark mode toggle
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [2/4] Building ui/ menu (vite build:menu)..."
+cd "${SCRIPT_DIR}/ui"
+pnpm run build:menu
+# vite.config.menu.ts sets root='./src/menu' and outDir='./dist-menu'
+# so output lands in ui/src/menu/dist-menu/
+UI_DIST="${SCRIPT_DIR}/ui/src/menu/dist-menu"
+
+if [[ ! -f "${UI_DIST}/assets/index.js" ]]; then
+  echo "ERROR: ui dist-menu/assets/index.js not found" >&2
+  exit 1
+fi
+echo "    index.js: OK"
+
+# ---------------------------------------------------------------------------
+# 3. Build opennms-webapp-rest (needed for JMX Config Generator backend)
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [3/4] Building opennms-webapp-rest..."
+cd "${SCRIPT_DIR}"
+./compile.pl -DskipTests -Ddisable.checkstyle --projects :opennms-webapp-rest install 2>&1 | tail -5
+WEBAPP_REST_JAR="${SCRIPT_DIR}/opennms-webapp-rest/target/opennms-webapp-rest-35.0.4/WEB-INF/lib/opennms-webapp-rest-35.0.4.jar"
+if [[ ! -f "${WEBAPP_REST_JAR}" ]]; then
+  echo "ERROR: opennms-webapp-rest jar not found at ${WEBAPP_REST_JAR}" >&2
+  exit 1
+fi
+echo "    opennms-webapp-rest.jar: OK"
+
+# ---------------------------------------------------------------------------
+# 4. Stage overlay directory
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [4/4] Staging overlay..."
+
+# web-assets CSS: copy the two new bundles + their sourcemaps if present.
+mkdir -p "${OVERLAY_DIR}/assets"
+cp "${WEBASSETS_DIST}/dark-mode.css"   "${OVERLAY_DIR}/assets/"
+cp "${WEBASSETS_DIST}/modern-ui.css"   "${OVERLAY_DIR}/assets/"
+[[ -f "${WEBASSETS_DIST}/dark-mode.css.map"  ]] && cp "${WEBASSETS_DIST}/dark-mode.css.map"  "${OVERLAY_DIR}/assets/"
+[[ -f "${WEBASSETS_DIST}/modern-ui.css.map"  ]] && cp "${WEBASSETS_DIST}/modern-ui.css.map"  "${OVERLAY_DIR}/assets/"
+
+# Patch the base image's assets.json to add only the two new bundle entries.
+# We CANNOT replace assets.json wholesale — the manifest entry contains inline
+# webpack JS that must match the bundle files already in the base image.
+# Extract the new entries from our build and inject them into the base image's copy.
+podman run --rm --entrypoint cat "${ONMS_BASE_IMAGE}" \
+  /opt/opennms/jetty-webapps/opennms/assets/assets.json \
+  > "${OVERLAY_DIR}/assets/assets-base.json"
+
+python3 - "${OVERLAY_DIR}/assets/assets-base.json" \
+           "${WEBASSETS_DIST}/assets.json" \
+           "${OVERLAY_DIR}/assets/assets.json" \
+           "${OVERLAY_DIR}/assets/assets.min.json" <<'PYEOF'
+import json, sys
+
+base_path, new_path, out_path, out_min_path = sys.argv[1:]
+
+with open(base_path) as f:
+    base = json.load(f)
+with open(new_path) as f:
+    new_build = json.load(f)
+
+base['dark-mode'] = new_build['dark-mode']
+base['modern-ui']  = new_build['modern-ui']
+
+for p in (out_path, out_min_path):
+    with open(p, 'w') as f:
+        json.dump(base, f, indent=2)
+PYEOF
+echo "    assets.json: patched (added dark-mode + modern-ui to base image entries)"
+
+# Vue menu assets (full replacement — we changed index.js)
+mkdir -p "${OVERLAY_DIR}/ui-components/assets"
+cp -r "${UI_DIST}/assets/." "${OVERLAY_DIR}/ui-components/assets/"
+
+# JSP (needs full container rebuild — Jetty caches compiled JSPs)
+mkdir -p "${OVERLAY_DIR}/includes"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/includes/bootstrap.jsp" \
+   "${OVERLAY_DIR}/includes/bootstrap.jsp"
+
+# opennms-webapp-rest jar (JMX Config Generator backend)
+mkdir -p "${OVERLAY_DIR}/webapp-rest-lib"
+cp "${WEBAPP_REST_JAR}" "${OVERLAY_DIR}/webapp-rest-lib/"
+
+# Also copy .js stubs so the entry is resolvable if anything tries to load them
+cp "${WEBASSETS_DIST}/dark-mode.js"    "${OVERLAY_DIR}/assets/"
+cp "${WEBASSETS_DIST}/modern-ui.js"    "${OVERLAY_DIR}/assets/"
+[[ -f "${WEBASSETS_DIST}/dark-mode.js.map"  ]] && cp "${WEBASSETS_DIST}/dark-mode.js.map"  "${OVERLAY_DIR}/assets/"
+[[ -f "${WEBASSETS_DIST}/modern-ui.js.map"  ]] && cp "${WEBASSETS_DIST}/modern-ui.js.map"  "${OVERLAY_DIR}/assets/"
+
+# ---------------------------------------------------------------------------
+# 4. Write Dockerfile
+# ---------------------------------------------------------------------------
+# NOTE: The container's entrypoint (/entrypoint.sh) builds the JVM command
+# directly and does NOT source opennms.conf.  The only way to pass extra
+# JVM system properties is through the JAVA_OPTS environment variable,
+# which is appended verbatim to the exec call:
+#   exec java ${OPENNMS_JAVA_OPTS} ${JAVA_OPTS} -jar opennms_bootstrap.jar start
+#
+# AssetLocatorImpl reads assets.json from CLASSPATH by default (from the
+# web-assets-*.jar).  Setting org.opennms.web.assets.path overrides that
+# to the filesystem path, which is where our patched assets.json lives.
+cat > "${OVERLAY_DIR}/Dockerfile" <<DOCKERFILE
+FROM ${ONMS_BASE_IMAGE}
+
+USER root
+
+# New CSS bundles (dark-mode + modern-ui) + JS stubs + patched assets.json
+COPY --chown=10001:10001 assets/ /opt/opennms/jetty-webapps/opennms/assets/
+
+# Updated Vue menu with dark mode toggle icon
+COPY --chown=10001:10001 ui-components/assets/ /opt/opennms/jetty-webapps/opennms/ui-components/assets/
+
+# bootstrap.jsp with CSS loads + theme init script + Vaadin iframe injection
+COPY --chown=10001:10001 includes/bootstrap.jsp /opt/opennms/jetty-webapps/opennms/includes/bootstrap.jsp
+
+# jmxconfiggenerator jar must be in the Bootstrap server classpath (not WEB-INF/lib) so
+# Jetty's WebAppClassLoader can resolve org.opennms.features.jmxconfiggenerator.* classes.
+# The Karaf system repo has the jar but it is not on the Jetty/Bootstrap classpath by default.
+RUN cp /opt/opennms/system/org/opennms/features/jmxconfiggenerator/35.0.4/jmxconfiggenerator-35.0.4.jar \
+       /opt/opennms/lib/jmxconfiggenerator-35.0.4.jar
+
+# Updated opennms-webapp-rest with JMX Config Generator REST endpoints + timeout fix
+COPY --chown=10001:10001 webapp-rest-lib/opennms-webapp-rest-35.0.4.jar \
+     /opt/opennms/jetty-webapps/opennms/WEB-INF/lib/opennms-webapp-rest-35.0.4.jar
+
+# Tell AssetLocatorImpl to load assets.json from the filesystem (not the
+# classpath JAR that lacks dark-mode/modern-ui entries).
+# The entrypoint appends \${JAVA_OPTS} to the JVM exec line, so ENV is the
+# correct mechanism — opennms.conf is NOT sourced by the container entrypoint.
+ENV JAVA_OPTS="-Dorg.opennms.web.assets.path=/opt/opennms/jetty-webapps/opennms/assets/"
+
+USER 10001
+DOCKERFILE
+echo "    Dockerfile: written (ENV JAVA_OPTS sets web assets path)"
+
+# ---------------------------------------------------------------------------
+# 5. Build image
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> Building container image: ${IMAGE_TAG}"
+podman build --no-cache -t "${IMAGE_TAG}" "${OVERLAY_DIR}"
+
+echo ""
+echo "==> Build complete: ${IMAGE_TAG}"
+echo ""
+echo "==> Overlay dir (kept for inspection): ${OVERLAY_DIR}"
+echo ""
+echo "============================================================"
+echo " Run + setup (needs postgres on host):"
+echo "============================================================"
+echo ""
+echo "# 1. Start"
+echo "podman rm -f test-opennms 2>/dev/null; podman run -d --name test-opennms --privileged \\"
+echo "  -p 8980:8980 -p 8101:8101 \\"
+echo "  -e POSTGRES_HOST=host.containers.internal \\"
+echo "  -e POSTGRES_PORT=5432 \\"
+echo "  -e POSTGRES_USER=postgres \\"
+echo "  -e POSTGRES_PASSWORD=postgres \\"
+echo "  -e OPENNMS_DBNAME=opennms \\"
+echo "  -e OPENNMS_DBUSER=opennms \\"
+echo "  -e OPENNMS_DBPASS=opennms \\"
+echo "  ${IMAGE_TAG} -s"
+echo ""
+echo "# 2. Wait for startup"
+echo "until curl -s -o /dev/null -w '%{http_code}' -u admin:admin http://localhost:8980/opennms/rest/info | grep -q 200; do sleep 5; done && echo ready"
+echo ""
+echo "# 3. Set password to notdefault via Jasypt (REST API stores plaintext, breaking Jasypt verification)"
+echo "HASH=\$(podman exec test-opennms java -cp /opt/opennms/lib/jasypt-1.9.3.jar \\"
+echo "  org.jasypt.intf.cli.JasyptStringDigestCLI \\"
+echo "  input='notdefault' algorithm=SHA-256 saltSizeBytes=16 iterations=100000 2>/dev/null \\"
+echo "  | tail -3 | head -1)"
+echo "podman exec test-opennms sed -i \\"
+echo "  \"s|<password salt=\\\"true\\\">.*</password>|<password salt=\\\"true\\\">\${HASH}</password>|\" \\"
+echo "  /opt/opennms/etc/users.xml"
+echo "# users.xml auto-reloads in ~5s"
+echo ""
+echo "# 4. Open: http://localhost:8980/opennms/  (login: admin / notdefault)"
+echo ""
+echo " What to verify:"
+echo "  1. Sun/moon icon visible in the Feather app bar (top right)"
+echo "  2. Clicking it toggles dark mode on the JSP content area"
+echo "  3. Reload preserves the theme (no flash of light mode)"
+echo "  4. Topology / dashboard Vaadin iframes also go dark"
+echo ""
+echo "# Cleanup:"
+echo "  podman rm -f test-opennms"
