@@ -22,6 +22,7 @@
 
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
+import react from '@vitejs/plugin-react'
 import svgLoader from 'vite-svg-loader'
 import AutoImport from 'unplugin-auto-import/vite'
 
@@ -54,6 +55,7 @@ export default defineConfig({
         }
       }
     }),
+    react(),
     svgLoader(),
 
     // https://github.com/antfu/unplugin-auto-import
