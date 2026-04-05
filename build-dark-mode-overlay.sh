@@ -75,12 +75,13 @@ echo ""
 echo "==> [3/4] Building opennms-webapp-rest..."
 cd "${SCRIPT_DIR}"
 ./compile.pl -DskipTests -Ddisable.checkstyle --projects :opennms-webapp-rest install 2>&1 | tail -5
-WEBAPP_REST_JAR="${SCRIPT_DIR}/opennms-webapp-rest/target/opennms-webapp-rest-35.0.4/WEB-INF/lib/opennms-webapp-rest-35.0.4.jar"
-if [[ ! -f "${WEBAPP_REST_JAR}" ]]; then
-  echo "ERROR: opennms-webapp-rest jar not found at ${WEBAPP_REST_JAR}" >&2
+# Find the built jar dynamically — version may differ from base image
+WEBAPP_REST_JAR=$(find "${SCRIPT_DIR}/opennms-webapp-rest/target" -path '*/WEB-INF/lib/opennms-webapp-rest-*.jar' -newer "${SCRIPT_DIR}/opennms-webapp-rest/pom.xml" | sort | tail -1)
+if [[ -z "${WEBAPP_REST_JAR}" || ! -f "${WEBAPP_REST_JAR}" ]]; then
+  echo "ERROR: opennms-webapp-rest jar not found in target/" >&2
   exit 1
 fi
-echo "    opennms-webapp-rest.jar: OK"
+echo "    opennms-webapp-rest.jar: OK ($(basename "${WEBAPP_REST_JAR}"))"
 
 # ---------------------------------------------------------------------------
 # 4. Stage overlay directory
@@ -129,20 +130,84 @@ echo "    assets.json: patched (added dark-mode + modern-ui to base image entrie
 mkdir -p "${OVERLAY_DIR}/ui-components/assets"
 cp -r "${UI_DIST}/assets/." "${OVERLAY_DIR}/ui-components/assets/"
 
-# JSP (needs full container rebuild — Jetty caches compiled JSPs)
+# JSPs (need full container rebuild — Jetty caches compiled JSPs)
 mkdir -p "${OVERLAY_DIR}/includes"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/includes/bootstrap.jsp" \
    "${OVERLAY_DIR}/includes/bootstrap.jsp"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/index.jsp" \
+   "${OVERLAY_DIR}/index.jsp"
+# mibCompiler.jsp — redirect to Vue SPA
+mkdir -p "${OVERLAY_DIR}/admin"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/mibCompiler.jsp" \
+   "${OVERLAY_DIR}/admin/mibCompiler.jsp"
+# node.jsp — redirect to Vue SPA at /#/node/:id
+mkdir -p "${OVERLAY_DIR}/element"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/element/node.jsp" \
+   "${OVERLAY_DIR}/element/node.jsp"
 
-# opennms-webapp-rest jar (JMX Config Generator backend)
+
+# opennms-webapp-rest jar — rename to match base image version so COPY replaces it
+WEBAPP_REST_BASENAME="opennms-webapp-rest-35.0.4.jar"
 mkdir -p "${OVERLAY_DIR}/webapp-rest-lib"
-cp "${WEBAPP_REST_JAR}" "${OVERLAY_DIR}/webapp-rest-lib/"
+cp "${WEBAPP_REST_JAR}" "${OVERLAY_DIR}/webapp-rest-lib/${WEBAPP_REST_BASENAME}"
+
+# Spring context XML — base image doesn't have jmxconfig in component-scan
+mkdir -p "${OVERLAY_DIR}/spring-context"
+cp "${SCRIPT_DIR}/opennms-webapp-rest/src/main/webapp/WEB-INF/applicationContext-cxf-rest-v2.xml" \
+   "${OVERLAY_DIR}/spring-context/"
 
 # Also copy .js stubs so the entry is resolvable if anything tries to load them
 cp "${WEBASSETS_DIST}/dark-mode.js"    "${OVERLAY_DIR}/assets/"
 cp "${WEBASSETS_DIST}/modern-ui.js"    "${OVERLAY_DIR}/assets/"
 [[ -f "${WEBASSETS_DIST}/dark-mode.js.map"  ]] && cp "${WEBASSETS_DIST}/dark-mode.js.map"  "${OVERLAY_DIR}/assets/"
 [[ -f "${WEBASSETS_DIST}/modern-ui.js.map"  ]] && cp "${WEBASSETS_DIST}/modern-ui.js.map"  "${OVERLAY_DIR}/assets/"
+
+# ---------------------------------------------------------------------------
+# SNMP: snmpd daemon config + entrypoint wrapper + OpenNMS client config
+# ---------------------------------------------------------------------------
+cat > "${OVERLAY_DIR}/snmpd.conf" <<'SNMPD'
+rocommunity public 127.0.0.1
+syslocation "OpenNMS Test Container"
+syscontact "admin@localhost"
+SNMPD
+
+cat > "${OVERLAY_DIR}/entrypoint-wrapper.sh" <<'WRAPPER'
+#!/bin/bash
+set -e
+# Start snmpd (daemonizes itself) before OpenNMS entrypoint drops to uid 10001
+snmpd -c /etc/snmp/snmpd.conf
+exec /entrypoint.sh "$@"
+WRAPPER
+chmod +x "${OVERLAY_DIR}/entrypoint-wrapper.sh"
+
+mkdir -p "${OVERLAY_DIR}/etc/imports"
+
+cat > "${OVERLAY_DIR}/etc/snmp-config.xml" <<'SNMPCFG'
+<snmp-config xmlns="http://xmlns.opennms.org/xsd/config/snmp"
+    version="v2c" read-community="public" port="161" timeout="1800" retry="1">
+  <definition version="v2c" read-community="public" port="161">
+    <specific>127.0.0.1</specific>
+  </definition>
+</snmp-config>
+SNMPCFG
+
+cat > "${OVERLAY_DIR}/etc/imports/Self.xml" <<'REQUISITION'
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model-import xmlns="http://xmlns.opennms.org/xsd/config/model-import"
+    date-stamp="2026-04-05T00:00:00.000Z"
+    foreign-source="Self"
+    last-import="2026-04-05T00:00:00.000Z">
+  <node node-label="OpenNMS-Self" foreign-id="self-01">
+    <interface ip-addr="127.0.0.1" snmp-primary="P" status="1">
+      <monitored-service service-name="SNMP"/>
+      <monitored-service service-name="ICMP"/>
+    </interface>
+    <category name="Test"/>
+  </node>
+</model-import>
+REQUISITION
+
+echo "    snmpd.conf + entrypoint-wrapper.sh + snmp-config.xml + imports/Self.xml: staged"
 
 # ---------------------------------------------------------------------------
 # 4. Write Dockerfile
@@ -170,21 +235,55 @@ COPY --chown=10001:10001 ui-components/assets/ /opt/opennms/jetty-webapps/opennm
 # bootstrap.jsp with CSS loads + theme init script + Vaadin iframe injection
 COPY --chown=10001:10001 includes/bootstrap.jsp /opt/opennms/jetty-webapps/opennms/includes/bootstrap.jsp
 
-# jmxconfiggenerator jar must be in the Bootstrap server classpath (not WEB-INF/lib) so
-# Jetty's WebAppClassLoader can resolve org.opennms.features.jmxconfiggenerator.* classes.
-# The Karaf system repo has the jar but it is not on the Jetty/Bootstrap classpath by default.
-RUN cp /opt/opennms/system/org/opennms/features/jmxconfiggenerator/35.0.4/jmxconfiggenerator-35.0.4.jar \
-       /opt/opennms/lib/jmxconfiggenerator-35.0.4.jar
+# index.jsp — redirect landing page to Vue dashboard
+COPY --chown=10001:10001 index.jsp /opt/opennms/jetty-webapps/opennms/index.jsp
 
-# Updated opennms-webapp-rest with JMX Config Generator REST endpoints + timeout fix
-COPY --chown=10001:10001 webapp-rest-lib/opennms-webapp-rest-35.0.4.jar \
-     /opt/opennms/jetty-webapps/opennms/WEB-INF/lib/opennms-webapp-rest-35.0.4.jar
+# mibCompiler.jsp — redirect from Vaadin iframe to Vue SPA
+COPY --chown=10001:10001 admin/mibCompiler.jsp /opt/opennms/jetty-webapps/opennms/admin/mibCompiler.jsp
+
+# node.jsp — redirect to Vue SPA at /#/node/:id
+COPY --chown=10001:10001 element/node.jsp /opt/opennms/jetty-webapps/opennms/element/node.jsp
+
+# Patch welcome-file to index.jsp (Vue dashboard redirect) — single-line sed because
+# full web.xml overlay breaks CXF servlet mappings (source version != base image version)
+RUN sed -i 's|<welcome-file>frontPage.jsp</welcome-file>|<welcome-file>index.jsp</welcome-file>|' /opt/opennms/jetty-webapps/opennms/WEB-INF/web.xml
+
+# jmxconfiggenerator + its transitive dep namecutter must be in the Bootstrap server
+# classpath (not WEB-INF/lib) so Jetty's WebAppClassLoader can resolve them.
+RUN cp /opt/opennms/system/org/opennms/features/jmxconfiggenerator/35.0.4/jmxconfiggenerator-35.0.4.jar /opt/opennms/lib/jmxconfiggenerator-35.0.4.jar && cp /opt/opennms/system/org/opennms/features/org.opennms.features.name-cutter/35.0.4/org.opennms.features.name-cutter-35.0.4.jar /opt/opennms/lib/org.opennms.features.name-cutter-35.0.4.jar
+
+# mib-compiler + jsmiparser for SNMP MIB Compiler REST endpoints (Bootstrap classpath)
+# jsmiparser jars are embedded inside the mib-compiler OSGi bundle via Embed-Dependency.
+# The JVM can't see embedded JARs on the classpath, so we extract them separately.
+RUN cp /opt/opennms/system/org/opennms/features/org.opennms.features.mib-compiler/35.0.4/org.opennms.features.mib-compiler-35.0.4.jar /opt/opennms/lib/org.opennms.features.mib-compiler-35.0.4.jar && \
+    cd /tmp && unzip -o /opt/opennms/system/org/opennms/features/org.opennms.features.mib-compiler/35.0.4/org.opennms.features.mib-compiler-35.0.4.jar jsmiparser-api-0.14.jar jsmiparser-util-0.14.jar && \
+    mv /tmp/jsmiparser-api-0.14.jar /opt/opennms/lib/ && \
+    mv /tmp/jsmiparser-util-0.14.jar /opt/opennms/lib/
+
+# Updated opennms-webapp-rest with JMX Config + MIB Compiler REST endpoints
+COPY --chown=10001:10001 webapp-rest-lib/${WEBAPP_REST_BASENAME} /opt/opennms/jetty-webapps/opennms/WEB-INF/lib/opennms-webapp-rest-35.0.4.jar
+
+# Spring context with jmxconfig + mibcompiler packages in component-scan (base image lacks them)
+COPY --chown=10001:10001 spring-context/applicationContext-cxf-rest-v2.xml /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-cxf-rest-v2.xml
 
 # Tell AssetLocatorImpl to load assets.json from the filesystem (not the
 # classpath JAR that lacks dark-mode/modern-ui entries).
 # The entrypoint appends \${JAVA_OPTS} to the JVM exec line, so ENV is the
 # correct mechanism — opennms.conf is NOT sourced by the container entrypoint.
 ENV JAVA_OPTS="-Dorg.opennms.web.assets.path=/opt/opennms/jetty-webapps/opennms/assets/"
+
+# Install net-snmp (daemon) + net-snmp-utils (snmpwalk for verification)
+RUN microdnf install -y net-snmp net-snmp-utils && microdnf clean all
+COPY snmpd.conf /etc/snmp/snmpd.conf
+COPY entrypoint-wrapper.sh /entrypoint-wrapper.sh
+RUN chmod +x /entrypoint-wrapper.sh
+
+# OpenNMS SNMP client config + self-provisioning requisition
+COPY --chown=10001:10001 etc/snmp-config.xml /opt/opennms/etc/snmp-config.xml
+RUN mkdir -p /opt/opennms/etc/imports
+COPY --chown=10001:10001 etc/imports/Self.xml /opt/opennms/etc/imports/Self.xml
+
+ENTRYPOINT ["/entrypoint-wrapper.sh"]
 
 USER 10001
 DOCKERFILE
