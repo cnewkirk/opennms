@@ -40,6 +40,7 @@
               v-if="persesSpec"
               :title="persesSpec.title"
               :queries="[persesSpec.query]"
+              :time-range="absoluteTimeRange"
               :y-axis-label="persesSpec.yAxisLabel"
               :series-overrides="persesSpec.seriesOverrides"
             />
@@ -67,6 +68,7 @@ import GraphDataTable from './GraphDataTable.vue'
 import PersesPanel from '@/components/Perses/PersesPanel.vue'
 import { useGraphStore } from '@/stores/graphStore'
 import type { ConvertedGraphData, GraphMetricsPayload, GraphMetricsResponse, Metric, PersesGraphSpec, PreFabGraph, StartEndTime } from '@/types'
+import type { AbsoluteTimeRange } from '@perses-dev/core'
 import { FeatherButton } from '@featherds/button'
 import {
   FeatherTab,
@@ -87,6 +89,11 @@ const props = defineProps({
 const graphStore = useGraphStore()
 const persesSpec   = ref<PersesGraphSpec | null>(null)
 const rawGraphData = ref<GraphMetricsResponse | null>(null)
+
+const absoluteTimeRange = computed<AbsoluteTimeRange>(() => ({
+  start: new Date((props.time.startTime as number) * 1000),
+  end:   new Date((props.time.endTime as number) * 1000)
+}))
 const legacyModel  = ref<ConvertedGraphData>({
   title: '', verticalLabel: '', series: [], values: [],
   metrics: [], printStatements: [], properties: {}
