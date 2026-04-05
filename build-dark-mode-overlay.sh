@@ -173,9 +173,9 @@ SNMPD
 
 cat > "${OVERLAY_DIR}/entrypoint-wrapper.sh" <<'WRAPPER'
 #!/bin/bash
-set -e
-# Start snmpd (daemonizes itself) before OpenNMS entrypoint drops to uid 10001
-snmpd -c /etc/snmp/snmpd.conf
+# Start snmpd on port 1161 (no root required) in background, log to stdout.
+# Don't use set -e here — snmpd failure is non-fatal; OpenNMS should still start.
+snmpd -Lo -p /tmp/snmpd.pid -c /etc/snmp/snmpd.conf udp:1161 &
 exec /entrypoint.sh "$@"
 WRAPPER
 chmod +x "${OVERLAY_DIR}/entrypoint-wrapper.sh"
@@ -184,8 +184,8 @@ mkdir -p "${OVERLAY_DIR}/etc/imports"
 
 cat > "${OVERLAY_DIR}/etc/snmp-config.xml" <<'SNMPCFG'
 <snmp-config xmlns="http://xmlns.opennms.org/xsd/config/snmp"
-    version="v2c" read-community="public" port="161" timeout="1800" retry="1">
-  <definition version="v2c" read-community="public" port="161">
+    version="v2c" read-community="public" port="1161" timeout="1800" retry="1">
+  <definition version="v2c" read-community="public" port="1161">
     <specific>127.0.0.1</specific>
   </definition>
 </snmp-config>
