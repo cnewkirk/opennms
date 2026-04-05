@@ -145,26 +145,30 @@
               </span>
             </td>
             <td v-if="isVisible('logMessage')" class="alarms-list__html-cell" @click.stop>
-              <button
-                v-if="alarm.logMessage"
-                class="alarms-list__html-badge"
-                :class="{ active: isRaw(alarm.id, 'logMessage') }"
-                title="Toggle raw HTML"
-                @click="toggleRaw(alarm.id, 'logMessage')"
-              >HTML</button>
-              <pre v-if="isRaw(alarm.id, 'logMessage')" class="alarms-list__raw-text">{{ alarm.logMessage }}</pre>
-              <span v-else v-html="alarm.logMessage ?? '—'" class="alarms-list__html-content" />
+              <div class="alarms-list__html-cell-inner">
+                <button
+                  v-if="alarm.logMessage"
+                  class="alarms-list__html-badge"
+                  :class="{ active: isRaw(alarm.id, 'logMessage') }"
+                  title="Toggle raw HTML"
+                  @click="toggleRaw(alarm.id, 'logMessage')"
+                >HTML</button>
+                <pre v-if="isRaw(alarm.id, 'logMessage')" class="alarms-list__raw-text">{{ alarm.logMessage }}</pre>
+                <span v-else v-html="alarm.logMessage ?? '—'" class="alarms-list__html-content" />
+              </div>
             </td>
             <td v-if="isVisible('description')" class="alarms-list__html-cell" @click.stop>
-              <button
-                v-if="alarm.description"
-                class="alarms-list__html-badge"
-                :class="{ active: isRaw(alarm.id, 'description') }"
-                title="Toggle raw HTML"
-                @click="toggleRaw(alarm.id, 'description')"
-              >HTML</button>
-              <pre v-if="isRaw(alarm.id, 'description')" class="alarms-list__raw-text">{{ alarm.description }}</pre>
-              <span v-else v-html="alarm.description ?? '—'" class="alarms-list__html-content" />
+              <div class="alarms-list__html-cell-inner">
+                <button
+                  v-if="alarm.description"
+                  class="alarms-list__html-badge"
+                  :class="{ active: isRaw(alarm.id, 'description') }"
+                  title="Toggle raw HTML"
+                  @click="toggleRaw(alarm.id, 'description')"
+                >HTML</button>
+                <pre v-if="isRaw(alarm.id, 'description')" class="alarms-list__raw-text">{{ alarm.description }}</pre>
+                <span v-else v-html="alarm.description ?? '—'" class="alarms-list__html-content" />
+              </div>
             </td>
             <td v-if="isVisible('uei')" class="alarms-list__mono alarms-list__uei-cell">{{ alarm.uei }}</td>
             <td class="alarms-list__actions" @click.stop>
@@ -657,10 +661,17 @@ onMounted(() => {
   }
 
   &__html-cell {
-    max-width: 320px;
-    vertical-align: top;
-    padding-top: 7px;
-    padding-bottom: 7px;
+    vertical-align: middle;
+    padding: 0 12px;
+  }
+
+  &__html-cell-inner {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    width: 280px;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   &__html-badge {
@@ -688,10 +699,12 @@ onMounted(() => {
   }
 
   &__html-content {
+    display: inline-block;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    display: inline;
+    flex: 1;
+    min-width: 0;
     vertical-align: middle;
     pointer-events: none;
   }
