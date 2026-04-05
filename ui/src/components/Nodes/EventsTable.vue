@@ -100,15 +100,15 @@ table {
     margin: 0px;
   }
 }
-$row-opacity: 0.08;
+$row-opacity: 0.06;
 .row {
-  &--critical      { background: utils.alpha(fvars.$error, $row-opacity); }
-  &--major         { background: utils.alpha(fvars.$major, $row-opacity); }
-  &--minor         { background: utils.alpha(fvars.$minor, $row-opacity); }
-  &--warning       { background: utils.alpha(fvars.$warning, $row-opacity); }
-  &--normal        { background: utils.alpha(fvars.$success, $row-opacity); }
+  &--critical      { border-left: 3px solid var(--feather-error);         background: utils.alpha(fvars.$error,         $row-opacity); }
+  &--major         { border-left: 3px solid var(--feather-major);         background: utils.alpha(fvars.$major,         $row-opacity); }
+  &--minor         { border-left: 3px solid var(--feather-minor);         background: utils.alpha(fvars.$minor,         $row-opacity); }
+  &--warning       { border-left: 3px solid var(--feather-warning);       background: utils.alpha(fvars.$warning,       $row-opacity); }
+  &--normal        { border-left: 3px solid var(--feather-success);       background: utils.alpha(fvars.$success,       $row-opacity); }
   &--cleared,
-  &--unacknowledged { background: utils.alpha(fvars.$cleared, $row-opacity); }
-  &--indeterminate { background: utils.alpha(fvars.$indeterminate, $row-opacity); }
+  &--unacknowledged { border-left: 3px solid var(--feather-cleared);      background: utils.alpha(fvars.$cleared,       $row-opacity); }
+  &--indeterminate { border-left: 3px solid var(--feather-indeterminate); background: utils.alpha(fvars.$indeterminate, $row-opacity); }
 }
 </style>
