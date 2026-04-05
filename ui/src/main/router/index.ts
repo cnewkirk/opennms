@@ -172,6 +172,11 @@ const router = createRouter({
       component: () => import('@/containers/EventDetail.vue')
     },
     {
+      path: '/alarm/:id',
+      name: 'Alarm Detail',
+      component: () => import('@/containers/AlarmDetail.vue')
+    },
+    {
       path: '/resource-graphs',
       name: 'ResourceGraphs',
       component: () => import('@/containers/ResourceGraphs.vue'),
