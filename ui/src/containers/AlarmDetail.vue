@@ -175,6 +175,7 @@
       <div class="feather-col-12">
         <div class="card">
           <div class="headline4 card__section-title">Log Message</div>
+          <!-- TODO: sanitize with DOMPurify before rendering user content -->
           <!-- eslint-disable-next-line vue/no-v-html -->
           <div v-html="alarm.logMessage" class="card__body"></div>
         </div>
@@ -186,6 +187,7 @@
       <div class="feather-col-12">
         <div class="card">
           <div class="headline4 card__section-title">Description</div>
+          <!-- TODO: sanitize with DOMPurify before rendering user content -->
           <!-- eslint-disable-next-line vue/no-v-html -->
           <div v-html="alarm.description" class="card__body"></div>
         </div>
@@ -197,6 +199,7 @@
       <div class="feather-col-12">
         <div class="card">
           <div class="headline4 card__section-title">Operator Instructions</div>
+          <!-- TODO: sanitize with DOMPurify before rendering user content -->
           <!-- eslint-disable-next-line vue/no-v-html -->
           <div v-html="alarm.operInstruct" class="card__body"></div>
         </div>
@@ -524,6 +527,11 @@ const ticketAction = (action: 'create' | 'update' | 'close') => {
     form.appendChild(csrf)
   }
 
+  if (!csrfToken) {
+    showSnackBar({ msg: 'Cannot submit: CSRF token missing. Try reloading the page.', error: true })
+    return
+  }
+
   document.body.appendChild(form)
   form.submit()
 }
@@ -601,9 +609,7 @@ const deleteMemo = async (type: 'sticky' | 'journal') => {
   &__empty    { color: var($secondary-text-on-surface); font-style: italic; }
 
   &__header {
-    padding: 16px;
     margin-bottom: 16px;
-    border-radius: 4px;
   }
 
   &__severity {
