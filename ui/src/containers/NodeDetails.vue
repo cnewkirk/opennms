@@ -101,6 +101,13 @@
         <OutagesTable :nodeId="node.id" />
       </div>
     </div>
+
+    <!-- Resource Graphs -->
+    <div v-if="node" class="feather-row">
+      <div class="feather-col-12">
+        <ResourceGraphsPanel :nodeId="node.id" />
+      </div>
+    </div>
   </template>
 </template>
 
@@ -115,6 +122,7 @@ import InterfacesTabs from '@/components/Nodes/InterfacesTabs.vue'
 import EventsTable from '@/components/Nodes/EventsTable.vue'
 import AlarmsTable from '@/components/Nodes/AlarmsTable.vue'
 import OutagesTable from '@/components/Nodes/OutagesTable.vue'
+import ResourceGraphsPanel from '@/components/NodeDetail/ResourceGraphsPanel.vue'
 import useNodeDetail from '@/composables/useNodeDetail'
 import useNodeAvailability from '@/composables/useNodeAvailability'
 import useRole from '@/composables/useRole'
