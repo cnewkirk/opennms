@@ -74,6 +74,7 @@ export default defineConfig({
     dir: './tests',
     globals: true,
     environment: 'happy-dom',
+    setupFiles: [new URL('./tests/setup.ts', import.meta.url).pathname],
     css: {
       include: /.+/
     },
