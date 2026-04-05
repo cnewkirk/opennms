@@ -35,6 +35,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.common.base.MoreObjects;
@@ -52,26 +53,33 @@ public class OnmsDashboard implements Serializable {
 
     @Id
     @Column(name = "id", length = 36, nullable = false)
+    @XmlElement(name = "id")
     private String id;
 
     @Column(name = "name", length = 255, nullable = false)
+    @XmlElement(name = "name")
     private String name;
 
     @Column(name = "description", length = 1024)
+    @XmlElement(name = "description")
     private String description;
 
     @Column(name = "spec", nullable = false, columnDefinition = "text")
+    @XmlElement(name = "spec")
     private String spec;
 
     @Column(name = "created_by", length = 255)
+    @XmlElement(name = "createdBy")
     private String createdBy;
 
     @Column(name = "created_at", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @XmlElement(name = "createdAt")
     private Date createdAt;
 
     @Column(name = "updated_at", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @XmlElement(name = "updatedAt")
     private Date updatedAt;
 
     @PrePersist
