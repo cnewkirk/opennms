@@ -20,12 +20,37 @@ language governing permissions and limitations under the
 License.
 -->
 
-<script setup lang="ts"></script>
-
 <template>
-  <div class="alarms-container">
-    <h1>Alarms</h1>
+  <div class="feather-row">
+    <div class="feather-col-12">
+      <BreadCrumbs :items="breadcrumbs" />
+    </div>
+  </div>
+  <div class="feather-row">
+    <div class="feather-col-12">
+      <div class="card">
+        <AlarmsListTable />
+      </div>
+    </div>
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<script setup lang="ts">
+import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
+import AlarmsListTable from '@/components/Alarms/AlarmsListTable.vue'
+import { useMenuStore } from '@/stores/menuStore'
+import { type BreadCrumb } from '@/types'
+
+const menuStore = useMenuStore()
+const homeUrl = computed<string>(() => menuStore.mainMenu?.homeUrl)
+
+const breadcrumbs = computed<BreadCrumb[]>(() => [
+  { label: 'Home', to: homeUrl.value, isAbsoluteLink: true },
+  { label: 'Alarms', to: '#', position: 'last' }
+])
+</script>
+
+<style scoped lang="scss">
+@import "@featherds/styles/themes/variables";
+.card { background: var($surface); padding: 0; margin-bottom: 16px; border-radius: 4px; }
+</style>
