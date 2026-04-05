@@ -21,15 +21,16 @@
 -->
 <template>
   <div class="summary-grid">
-    <div
+    <router-link
       v-for="kpi in kpis"
       :key="kpi.label"
+      :to="kpi.to"
       class="kpi-card"
       :class="`kpi-card--${kpi.status}`"
     >
       <span class="kpi-value headline3">{{ kpi.value }}</span>
       <span class="kpi-label body2">{{ kpi.label }}</span>
-    </div>
+    </router-link>
   </div>
 </template>
 
@@ -46,12 +47,13 @@ interface Kpi {
   label: string
   value: number | string
   status: 'normal' | 'warning' | 'critical'
+  to: string
 }
 
 const kpis = ref<Kpi[]>([
-  { label: 'Active Outages', value: '—', status: 'normal' },
-  { label: 'Active Alarms', value: '—', status: 'normal' },
-  { label: 'Nodes', value: '—', status: 'normal' }
+  { label: 'Active Outages', value: '—', status: 'normal', to: '/outages' },
+  { label: 'Active Alarms',  value: '—', status: 'normal', to: '/alarms' },
+  { label: 'Total Nodes',    value: '—', status: 'normal', to: '/nodes' }
 ])
 
 const load = async () => {
@@ -65,24 +67,26 @@ const load = async () => {
     {
       label: 'Active Outages',
       value: outageCount,
-      status: outageCount > 0 ? 'critical' : 'normal'
+      status: outageCount > 0 ? 'critical' : 'normal',
+      to: '/outages'
     },
     {
       label: 'Active Alarms',
       value: alarmResp ? alarmResp.totalCount : '—',
-      status: alarmResp && alarmResp.totalCount > 0 ? 'warning' : 'normal'
+      status: alarmResp && alarmResp.totalCount > 0 ? 'warning' : 'normal',
+      to: '/alarms'
     },
     {
       label: 'Total Nodes',
       value: nodeResp ? nodeResp.totalCount : '—',
-      status: 'normal'
+      status: 'normal',
+      to: '/nodes'
     }
   ]
 }
 
 onMounted(load)
 
-// re-fetch when parent triggers refresh
 defineExpose({ refresh: load })
 </script>
 
@@ -109,6 +113,10 @@ defineExpose({ refresh: load })
   border: 1px solid var($border-light-on-surface);
   background: var($surface);
   gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+  &:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
 
   &--critical {
     border-color: var($error);
