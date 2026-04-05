@@ -28,6 +28,13 @@
       "roles": null,
       "items": [
         {
+          "id": "vueDashboard",
+          "name": "Dashboard",
+          "url": "ui/index.html#/dashboard",
+          "locationMatch": "dashboard",
+          "roles": null
+        },
+        {
           "id": "surveillanceDashboard",
           "name": "Surveillance Dashboard",
           "url": "dashboard.jsp",
@@ -507,7 +514,7 @@
         {
           "id": "jmxMetricConfigurationGenerator",
           "name": "JMX Metric Configuration Generator",
-          "url": "admin/jmxConfigGenerator.jsp",
+          "url": "ui/index.html#/jmx-config-generator",
           "locationMatch": "",
           "roles": null
         },
