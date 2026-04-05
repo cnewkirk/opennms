@@ -1,6 +1,6 @@
 {
     "name": "opennms-core-web-assets",
-    "version": "35.0.4",
+    "version": "35.0.5-SNAPSHOT",
     "description": "JavaScript Web Components for OpenNMS",
     "license": "AGPL-3.0",
     "repository": {
@@ -200,6 +200,7 @@
         "npm": ">=9"
     },
     "scripts": {
+        "postinstall": "node scripts/patch-flot-legend.js",
         "webpack": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096 --openssl-legacy-provider\" webpack --colors --display-error-details --env=development",
         "webpack-release": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096 --openssl-legacy-provider\" webpack --colors --display-error-details --env=production",
         "check-git": "node check-git.js",

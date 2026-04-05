@@ -1,0 +1,1961 @@
+/**
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
+
+// ============================================================================
+// OpenNMS Modern UI Layer
+// ============================================================================
+// A CSS modernization layer that transforms the Bootstrap 4 interface into a
+// refined, contemporary monitoring platform without touching the underlying
+// framework or JSP markup. Designed for NOC operators who live in this UI
+// for hours — every pixel serves clarity, every transition reduces fatigue.
+// ============================================================================
+
+@import "properties.scss";
+
+// ---------------------------------------------------------------------------
+// Design Tokens
+// ---------------------------------------------------------------------------
+// Centralized values so the entire UI can be tuned from one place.
+
+// Radius scale — away from boxy Bootstrap defaults toward softer shapes
+$radius-sm:  4px;
+$radius-md:  8px;
+$radius-lg:  12px;
+$radius-pill: 100px;
+
+// Elevation system — layered depth instead of flat or overblown shadows
+$shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+$shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+$shadow-xl:  0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+
+// Timing — snappy but not jarring
+$transition-fast:    120ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-normal:  200ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-smooth:  300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// Surface colors — subtle warmth to avoid the clinical blue-white of old enterprise UIs
+$surface-bg:         #f8f9fb;
+$surface-card:       #ffffff;
+$surface-header:     #f1f3f7;
+$surface-hover:      #f0f2f6;
+$border-subtle:      #e2e5ec;
+$border-light:       #edf0f5;
+
+// Navigation chrome — the Feather dock + app bar and the legacy Bootstrap
+// navbar share --feather-surface-dark (#131736, near-black navy) as their
+// background.  In light mode we lift this to a readable royal blue.
+$nav-blue-light:     #1e3d8f;
+
+// Accent — a slightly warmer, more confident blue than Bootstrap's default
+$accent:             #2563eb;
+$accent-hover:       #1d4ed8;
+$accent-soft:        rgba(37, 99, 235, 0.08);
+$accent-ring:        rgba(37, 99, 235, 0.20);
+
+// Text hierarchy
+$text-primary:       #1a1d26;
+$text-secondary:     #5a6178;
+$text-tertiary:      #8b92a8;
+
+// Severity — refined palette, less saturated for comfortable long-term viewing
+$sev-critical:       #dc2626;
+$sev-major:          #ea580c;
+$sev-minor:          #d97706;
+$sev-warning:        #ca8a04;
+$sev-normal:         #16a34a;
+$sev-indeterminate:  #2563eb;
+$sev-cleared:        #9ca3af;
+
+// Pre-computed darker variants (avoids Sass darken() deprecation)
+$border-subtle-dark:     #cdd1db;
+$accent-dark:            #1e50c0;
+$accent-darker:          #1a44a8;
+$sev-critical-dark:      #b91c1c;
+$sev-normal-dark:        #138a3e;
+$sev-warning-dark:       #a87103;
+$accent-alert-text:      #1e4fc4;
+$sev-normal-alert-text:  #128a3c;
+$sev-warning-alert-text: #8a6003;
+$sev-critical-alert-text:#b01f1f;
+
+
+// ============================================================================
+// 1. GLOBAL FOUNDATIONS
+// ============================================================================
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: $surface-bg;
+  color: $text-primary;
+  letter-spacing: -0.006em;
+  line-height: 1.6;
+}
+
+// Smooth scroll for same-page navigation
+html {
+  scroll-behavior: smooth;
+}
+
+// Selection color
+::selection {
+  background: $accent-soft;
+  color: $text-primary;
+}
+
+// Global transition on interactive elements
+a, .btn, .nav-link, .dropdown-item, .list-group-item,
+.form-control, .custom-select, .card, .badge {
+  transition: all $transition-normal;
+}
+
+
+// ============================================================================
+// 2. TYPOGRAPHY
+// ============================================================================
+
+h1, .h1 { font-weight: 700; letter-spacing: -0.025em; color: $text-primary; }
+h2, .h2 { font-weight: 600; letter-spacing: -0.02em; color: $text-primary; }
+h3, .h3 { font-weight: 600; letter-spacing: -0.015em; color: $text-primary; }
+h4, .h4 { font-weight: 600; letter-spacing: -0.01em; color: $text-primary; }
+h5, .h5 { font-weight: 600; color: $text-primary; }
+h6, .h6 { font-weight: 600; color: $text-secondary; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+
+a {
+  color: $accent;
+  text-decoration: none;
+
+  &:hover {
+    color: $accent-hover;
+    text-decoration: none;
+  }
+}
+
+.text-muted {
+  color: $text-tertiary !important;
+}
+
+small, .small {
+  color: $text-secondary;
+}
+
+
+// ============================================================================
+// 3. CARDS — the primary content container in OpenNMS
+// ============================================================================
+
+.card {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+  background: $surface-card;
+
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+}
+
+.card-header {
+  background: $surface-header;
+  border-bottom: 1px solid $border-subtle;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+  padding: 0.75rem 1rem;
+  color: $text-primary;
+
+  // When card headers contain links, keep them subtle
+  a {
+    color: $text-primary;
+    &:hover { color: $accent; }
+  }
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-footer {
+  background: $surface-header;
+  border-top: 1px solid $border-subtle;
+  padding: 0.625rem 1rem;
+  font-size: 0.85rem;
+  color: $text-secondary;
+}
+
+
+// ============================================================================
+// 4. TABLES — dense data, needs to breathe without wasting space
+// ============================================================================
+
+.table {
+  color: $text-primary;
+
+  thead th {
+    background: $surface-header;
+    border-bottom: 2px solid $border-subtle;
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $text-secondary;
+    padding: 0.625rem 0.75rem;
+    white-space: nowrap;
+  }
+
+  td {
+    // Use uniform padding — timeline-resize.js calls getComputedStyle(td).padding
+    // which returns '' for asymmetric values, causing NaN width and broken image loading.
+    padding: 0.5rem;
+    border-top: 1px solid $border-light;
+    vertical-align: middle;
+  }
+
+  // Tighter variant used widely in OpenNMS
+  &.table-sm {
+    td, th {
+      padding: 0.375rem;
+    }
+  }
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.015);
+}
+
+.table-hover tbody tr:hover {
+  background-color: $accent-soft;
+}
+
+// Tables inside cards shouldn't double-border
+.card .table {
+  margin-bottom: 0;
+
+  thead th:first-child { border-top-left-radius: 0; }
+  thead th:last-child { border-top-right-radius: 0; }
+}
+
+
+// ============================================================================
+// 5. BUTTONS
+// ============================================================================
+
+.btn {
+  border-radius: $radius-sm;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.4375rem 1rem;
+  letter-spacing: -0.005em;
+  border: 1px solid transparent;
+  box-shadow: $shadow-xs;
+  cursor: pointer;
+
+  &:focus, &.focus {
+    box-shadow: 0 0 0 3px $accent-ring;
+    outline: none;
+  }
+
+  &:active {
+    transform: translateY(0.5px);
+  }
+}
+
+.btn-primary {
+  background: $accent;
+  border-color: $accent;
+
+  &:hover, &:focus {
+    background: $accent-hover;
+    border-color: $accent-hover;
+  }
+}
+
+.btn-secondary {
+  background: $surface-card;
+  border-color: $border-subtle;
+  color: $text-primary;
+  box-shadow: $shadow-xs;
+
+  &:hover {
+    background: $surface-hover;
+    border-color: $border-subtle-dark;
+    color: $text-primary;
+  }
+
+  &:focus {
+    background: $surface-hover;
+    border-color: $accent;
+    color: $text-primary;
+  }
+}
+
+.btn-sm {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
+  border-radius: $radius-sm;
+}
+
+.btn-lg {
+  padding: 0.625rem 1.5rem;
+  font-size: 1rem;
+  border-radius: $radius-md;
+}
+
+// Outline buttons get a softer treatment
+.btn-outline-primary {
+  color: $accent;
+  border-color: $accent;
+  &:hover {
+    background: $accent-soft;
+    color: $accent-hover;
+    border-color: $accent-hover;
+  }
+}
+
+.btn-outline-secondary {
+  color: $text-secondary;
+  border-color: $border-subtle;
+  &:hover {
+    background: $surface-hover;
+    color: $text-primary;
+    border-color: $border-subtle-dark;
+  }
+}
+
+// Danger buttons: contained alarm
+.btn-danger {
+  background: $sev-critical;
+  border-color: $sev-critical;
+  &:hover {
+    background: $sev-critical-dark;
+    border-color: $sev-critical-dark;
+  }
+}
+
+.btn-success {
+  background: $sev-normal;
+  border-color: $sev-normal;
+  &:hover {
+    background: $sev-normal-dark;
+    border-color: $sev-normal-dark;
+  }
+}
+
+.btn-warning {
+  background: $sev-warning;
+  border-color: $sev-warning;
+  color: #fff;
+  &:hover {
+    background: $sev-warning-dark;
+    border-color: $sev-warning-dark;
+    color: #fff;
+  }
+}
+
+
+// ============================================================================
+// 6. FORMS — clean, modern input styling
+// ============================================================================
+
+.form-control {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-sm;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: $text-primary;
+  background: $surface-card;
+  box-shadow: $shadow-xs;
+
+  &:focus {
+    border-color: $accent;
+    box-shadow: 0 0 0 3px $accent-ring;
+    outline: none;
+  }
+
+  &::placeholder {
+    color: $text-tertiary;
+  }
+}
+
+.custom-select {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-sm;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: $text-primary;
+  background-color: $surface-card;
+  box-shadow: $shadow-xs;
+  appearance: none;
+
+  &:focus {
+    border-color: $accent;
+    box-shadow: 0 0 0 3px $accent-ring;
+    outline: none;
+  }
+}
+
+.input-group-text {
+  background: $surface-header;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-sm;
+  color: $text-secondary;
+  font-size: 0.875rem;
+}
+
+label, .col-form-label {
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: $text-secondary;
+  margin-bottom: 0.25rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-text {
+  font-size: 0.8rem;
+  color: $text-tertiary;
+}
+
+
+// ============================================================================
+// 7. DROPDOWNS
+// ============================================================================
+
+.dropdown-menu {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  padding: 0.375rem;
+  margin-top: 0.25rem;
+  animation: dropdownFadeIn 150ms ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  border-radius: $radius-sm;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: $text-primary;
+
+  &:hover, &:focus {
+    background: $accent-soft;
+    color: $accent-hover;
+  }
+
+  &.active, &:active {
+    background: $accent;
+    color: #fff;
+  }
+}
+
+.dropdown-divider {
+  border-top-color: $border-light;
+  margin: 0.25rem 0.5rem;
+}
+
+.dropdown-header {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text-tertiary;
+  padding: 0.5rem 0.75rem 0.25rem;
+}
+
+
+// ============================================================================
+// 8. BREADCRUMBS
+// ============================================================================
+
+.breadcrumb {
+  background: $surface-card;
+  padding: 0.625rem 1rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  border-radius: $radius-md;
+  border: 1px solid $border-light;
+  box-shadow: $shadow-xs;
+
+  .breadcrumb-item {
+    color: $text-tertiary;
+
+    a {
+      color: $nav-blue-light;
+      &:hover { color: lighten($nav-blue-light, 15%); }
+    }
+
+    &.active {
+      color: $text-primary;
+      font-weight: 500;
+    }
+
+    + .breadcrumb-item::before {
+      color: $text-tertiary;
+      content: "\203A"; // thin right-pointing angle
+      font-size: 1.1em;
+    }
+  }
+}
+
+
+// ============================================================================
+// 9. NAVIGATION — tabs, pills
+// ============================================================================
+
+.nav-tabs {
+  border-bottom: 2px solid $border-light;
+
+  .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    padding: 0.625rem 1rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: $text-secondary;
+    border-radius: 0;
+    transition: all $transition-fast;
+
+    &:hover {
+      color: $text-primary;
+      border-bottom-color: $border-subtle;
+      background: transparent;
+    }
+
+    &.active {
+      color: $accent;
+      border-bottom-color: $accent;
+      background: transparent;
+      font-weight: 600;
+    }
+  }
+}
+
+.nav-pills .nav-link {
+  border-radius: $radius-sm;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $text-secondary;
+
+  &.active {
+    background: $accent;
+    color: #fff;
+  }
+
+  &:hover:not(.active) {
+    background: $accent-soft;
+    color: $accent;
+  }
+}
+
+
+// ============================================================================
+// 10. BADGES — compact, modern
+// ============================================================================
+
+.badge {
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.01em;
+  padding: 0.25em 0.6em;
+  border-radius: $radius-sm;
+}
+
+.badge-pill {
+  border-radius: $radius-pill;
+  padding: 0.3em 0.7em;
+}
+
+// Severity badges: left-border accent for quick visual parsing
+.badge-severity-critical, .badge-Critical { border-left: 3px solid $sev-critical; }
+.badge-severity-major, .badge-Major       { border-left: 3px solid $sev-major; }
+.badge-severity-minor, .badge-Minor       { border-left: 3px solid $sev-minor; }
+.badge-severity-warning, .badge-Warning   { border-left: 3px solid $sev-warning; }
+.badge-severity-normal, .badge-Normal     { border-left: 3px solid $sev-normal; }
+
+
+// ============================================================================
+// 11. ALERTS
+// ============================================================================
+
+.alert {
+  border-radius: $radius-md;
+  border: none;
+  border-left: 4px solid transparent;
+  font-size: 0.875rem;
+  padding: 0.875rem 1rem;
+  box-shadow: $shadow-xs;
+}
+
+.alert-info {
+  background: rgba(37, 99, 235, 0.06);
+  border-left-color: $accent;
+  color: $accent-dark;
+}
+
+.alert-success {
+  background: rgba(22, 163, 74, 0.06);
+  border-left-color: $sev-normal;
+  color: $sev-normal-alert-text;
+}
+
+.alert-warning {
+  background: rgba(202, 138, 4, 0.08);
+  border-left-color: $sev-warning;
+  color: $sev-warning-alert-text;
+}
+
+.alert-danger {
+  background: rgba(220, 38, 38, 0.06);
+  border-left-color: $sev-critical;
+  color: $sev-critical-alert-text;
+}
+
+
+// ============================================================================
+// 12. LIST GROUPS
+// ============================================================================
+
+.list-group-item {
+  border-color: $border-light;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  transition: background $transition-fast;
+
+  &.active {
+    background: $accent;
+    border-color: $accent;
+    color: #fff;
+  }
+}
+
+.list-group-item-action:hover {
+  background: $surface-hover;
+}
+
+
+// ============================================================================
+// 13. MODALS
+// ============================================================================
+
+.modal-content {
+  border: none;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-xl;
+  overflow: hidden;
+}
+
+.modal-header {
+  border-bottom: 1px solid $border-light;
+  padding: 1rem 1.25rem;
+
+  .modal-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+}
+
+.modal-body {
+  padding: 1.25rem;
+}
+
+.modal-footer {
+  border-top: 1px solid $border-light;
+  padding: 0.875rem 1.25rem;
+}
+
+// Backdrop
+.modal-backdrop.show {
+  opacity: 0.4;
+}
+
+// Modal entrance animation
+.modal.fade .modal-dialog {
+  transition: transform $transition-smooth, opacity $transition-smooth;
+  transform: translateY(-10px) scale(0.98);
+}
+
+.modal.show .modal-dialog {
+  transform: translateY(0) scale(1);
+}
+
+
+// ============================================================================
+// 14. PAGINATION
+// ============================================================================
+
+.pagination {
+  .page-link {
+    border: 1px solid $border-subtle;
+    color: $text-secondary;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0 2px;
+    border-radius: $radius-sm;
+    transition: all $transition-fast;
+
+    &:hover {
+      background: $accent-soft;
+      border-color: $accent;
+      color: $accent;
+    }
+  }
+
+  .page-item.active .page-link {
+    background: $accent;
+    border-color: $accent;
+    color: #fff;
+    box-shadow: $shadow-sm;
+  }
+
+  .page-item:first-child .page-link,
+  .page-item:last-child .page-link {
+    border-radius: $radius-sm;
+  }
+}
+
+
+// ============================================================================
+// 15. PROGRESS BARS
+// ============================================================================
+
+.progress {
+  border-radius: $radius-pill;
+  height: 0.5rem;
+  background: $border-light;
+  overflow: hidden;
+}
+
+.progress-bar {
+  border-radius: $radius-pill;
+  transition: width $transition-smooth;
+}
+
+
+// ============================================================================
+// 16. TOOLTIPS & POPOVERS
+// ============================================================================
+
+.tooltip-inner {
+  border-radius: $radius-sm;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: $shadow-md;
+}
+
+.popover {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+
+  .popover-header {
+    background: $surface-header;
+    border-bottom: 1px solid $border-light;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: $radius-md $radius-md 0 0;
+  }
+
+  .popover-body {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+
+// ============================================================================
+// 17. OPENNMS-SPECIFIC: CONTENT BOXES (.box)
+// ============================================================================
+
+.box {
+  border-radius: $radius-md;
+  border: 1px solid $border-subtle;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+
+  h2.module-title {
+    background-color: $surface-header;
+    background-image: none; // kill the old gradient
+    border-bottom: 1px solid $border-subtle;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    padding: 0.75rem 1rem;
+    line-height: 1.4;
+  }
+
+  .bottom {
+    padding: 1rem;
+  }
+}
+
+
+// ============================================================================
+// 18. OPENNMS-SPECIFIC: SEVERITY ROWS
+// ============================================================================
+// Severity table rows get a refined left-border accent instead of the full
+// background wash — easier on the eyes during hours of monitoring.
+
+.severity {
+  .severity-critical, .severity-Critical {
+    border-left: 3px solid $sev-critical;
+    background-color: rgba($sev-critical, 0.12);
+  }
+  .severity-major, .severity-Major {
+    border-left: 3px solid $sev-major;
+    background-color: rgba($sev-major, 0.12);
+  }
+  .severity-minor, .severity-Minor {
+    border-left: 3px solid $sev-minor;
+    background-color: rgba($sev-minor, 0.12);
+  }
+  .severity-warning, .severity-Warning {
+    border-left: 3px solid $sev-warning;
+    background-color: rgba($sev-warning, 0.12);
+  }
+  .severity-indeterminate, .severity-Indeterminate {
+    border-left: 3px solid $sev-indeterminate;
+    background-color: rgba($sev-indeterminate, 0.12);
+  }
+  .severity-normal, .severity-Normal {
+    border-left: 3px solid $sev-normal;
+    background-color: rgba($sev-normal, 0.12);
+  }
+  .severity-cleared, .severity-Cleared {
+    border-left: 3px solid $sev-cleared;
+    background-color: rgba($sev-cleared, 0.12);
+  }
+}
+
+
+// ============================================================================
+// 19. OPENNMS-SPECIFIC: NODE HEADER
+// ============================================================================
+
+.nodeHeader {
+  background: $surface-card;
+  border-bottom: 1px solid $border-subtle;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: $radius-md;
+  box-shadow: $shadow-xs;
+}
+
+
+// ============================================================================
+// 20. FOOTER
+// ============================================================================
+
+#footer.card-footer {
+  background: $surface-card;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  box-shadow: $shadow-xs;
+  font-size: 0.8rem;
+  color: $text-tertiary;
+  padding: 0.625rem 1rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  // Don't stretch edge-to-edge — match the inset feel of breadcrumbs
+  margin-left: 0;
+  margin-right: 0;
+}
+
+
+// ============================================================================
+// 21. SCROLLBAR REFINEMENT (Webkit)
+// ============================================================================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: $radius-pill;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Firefox
+html {
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+  scrollbar-width: thin;
+}
+
+// Dark mode — lighten scrollbar thumb so it's visible on dark surfaces
+body.open-dark {
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+  }
+
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+
+// ============================================================================
+// 22. CLOSE BUTTON
+// ============================================================================
+
+.close {
+  opacity: 0.4;
+  font-weight: 300;
+  font-size: 1.5rem;
+  text-shadow: none;
+  transition: opacity $transition-fast;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+
+// ============================================================================
+// 23. HR
+// ============================================================================
+
+hr {
+  border-top: 1px solid $border-light;
+}
+
+
+// ============================================================================
+// 24. CODE
+// ============================================================================
+
+code {
+  background: rgba($accent, 0.06);
+  border-radius: $radius-sm;
+  padding: 0.15em 0.4em;
+  font-size: 0.85em;
+  color: $accent-darker;
+}
+
+pre {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-radius: $radius-md;
+  padding: 1rem;
+  border: none;
+  font-size: 0.85rem;
+  box-shadow: $shadow-sm;
+
+  code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+  }
+}
+
+body.open-dark pre {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+kbd {
+  background: $text-primary;
+  border-radius: $radius-sm;
+  padding: 0.15em 0.45em;
+  font-size: 0.85em;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.25);
+}
+
+
+// ============================================================================
+// 25. RESOURCE GRAPH SIDEBAR
+// ============================================================================
+
+.resource-graphs-sidebar .nav > li > a {
+  border-left-width: 3px;
+  border-radius: 0;
+  transition: all $transition-fast;
+  padding: 0.375rem 0.75rem;
+
+  &:hover {
+    background: $accent-soft;
+  }
+
+  &.active {
+    border-left-color: $accent;
+    color: $accent;
+    font-weight: 600;
+    background: $accent-soft;
+  }
+}
+
+
+// ============================================================================
+// 26. GRAPH / BACKSHIFT MODERNIZATION
+// ============================================================================
+
+// Per-resource graph cards — give them consistent card chrome
+// NOTE: no overflow:hidden here — Flot renders canvases as position:absolute inside
+// the graph-container, and tooltips/selection overlays need to escape the card boundary.
+#graph-results .card {
+  border-radius: $radius-md;
+  border: 1px solid $border-light;
+  box-shadow: $shadow-sm;
+  margin-bottom: 1.25rem;
+}
+
+// Controls strip above each graph
+.graph-aux-controls {
+  padding: 0.5rem 0.75rem;
+  background: $surface-card;
+  border-bottom: 1px solid $border-light;
+  font-size: 0.82rem;
+}
+
+// Flot legend modernisation
+.legend > div {
+  background: $surface-card !important;
+  border: 1px solid $border-light !important;
+  border-radius: $radius-sm !important;
+  box-shadow: $shadow-xs !important;
+  padding: 0.25rem 0.5rem !important;
+}
+.legend table {
+  font-size: 0.8rem;
+}
+.legendLabel {
+  color: $text-secondary;
+  padding-left: 0.25rem;
+}
+
+// flot-datatable panel (Data tab)
+.flot-datatable-tabs {
+  background: $surface-card;
+  border-bottom: 1px solid $border-light;
+  padding: 0.25rem 0.5rem 0;
+  font-size: 0.8rem;
+}
+.flot-datatable-tab {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: $radius-sm $radius-sm 0 0;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: $text-secondary;
+
+  &:hover {
+    color: $text-primary;
+    background: $surface-hover;
+  }
+}
+
+.flot-datatable-data {
+  font-size: 0.8rem;
+  // inline style background:white is overridden by dark-mode.scss; light mode is fine.
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+      background: $surface-header;
+      color: $text-secondary;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.35rem 0.5rem;
+      border-bottom: 1px solid $border-subtle;
+    }
+
+    td {
+      padding: 0.3rem 0.5rem;
+      border-bottom: 1px solid $border-light;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr:hover td {
+      background: $surface-hover;
+    }
+  }
+}
+
+// Tick labels — slightly muted vs raw black
+.flot-tick-label {
+  color: $text-tertiary;
+  font-size: 0.75rem;
+}
+
+// Time-range form strip
+#graph-results .form-group.form-row {
+  background: $surface-header;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+}
+
+
+// ============================================================================
+// 26b. DASHBOARD SEVERITY INDICATORS
+// ============================================================================
+
+.CLEARED       { background: $sev-cleared; background-image: none; border: none; border-radius: $radius-sm; }
+.NORMAL        { background: $sev-normal; background-image: none; border: none; border-radius: $radius-sm; color: #fff; }
+.INDETERMINATE { background: $sev-indeterminate; background-image: none; border: none; border-radius: $radius-sm; color: #fff; }
+.WARNING       { background: $sev-warning; background-image: none; border: none; border-radius: $radius-sm; }
+.MINOR         { background: $sev-minor; background-image: none; border: none; border-radius: $radius-sm; }
+.MAJOR         { background: $sev-major; background-image: none; border: none; border-radius: $radius-sm; color: #fff; }
+.CRITICAL      { background: $sev-critical; background-image: none; border: none; border-radius: $radius-sm; color: #fff; }
+
+
+// ============================================================================
+// 27. ANIMATION UTILITIES
+// ============================================================================
+
+// Fade-in for page content (applied via JS or page load)
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Content top spacing — prevent breadcrumb from jamming into header
+#content {
+  padding-top: 0.5rem;
+}
+
+// Content area entrance animation
+#content > .breadcrumb,
+#content > .card,
+#content > .row,
+#content > h2,
+#content > h3,
+#content > form,
+#content > .table-responsive,
+#content > table {
+  animation: fadeInUp 350ms ease-out both;
+}
+
+// Stagger children
+#content > :nth-child(1) { animation-delay: 0ms; }
+#content > :nth-child(2) { animation-delay: 40ms; }
+#content > :nth-child(3) { animation-delay: 80ms; }
+#content > :nth-child(4) { animation-delay: 120ms; }
+#content > :nth-child(5) { animation-delay: 160ms; }
+
+
+// ============================================================================
+// 28. JUMBOTRON MODERNIZATION
+// ============================================================================
+
+.jumbotron {
+  background: $surface-header;
+  border-radius: $radius-lg;
+  border: 1px solid $border-subtle;
+  box-shadow: $shadow-sm;
+  padding: 2rem;
+}
+
+
+// ============================================================================
+// 29. INPUT GROUP REFINEMENT
+// ============================================================================
+
+.input-group {
+  .input-group-text {
+    border-color: $border-subtle;
+  }
+
+  .form-control {
+    &:focus {
+      z-index: 3;
+    }
+  }
+
+  // Connected radius
+  > .form-control:not(:first-child),
+  > .custom-select:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  > .form-control:not(:last-child),
+  > .custom-select:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+
+// ============================================================================
+// 30. VAADIN 8 MODERNIZATION
+// ============================================================================
+// The Vaadin 8 Reindeer legacy theme looks dated. These overrides bring
+// Vaadin widgets (tables, buttons, panels, forms) in line with the modern
+// Bootstrap layer above, without touching the Vaadin theme files themselves.
+
+// System font stack — modern, no external font loading required
+$font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !default;
+
+// ── Core Vaadin app background ───────────────────────────────────────
+.v-ui {
+  background: $surface-bg !important;
+  color: $text-primary !important;
+  font-family: $font-system !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+.v-app {
+  background: $surface-bg !important;
+  color: $text-primary !important;
+  font-family: $font-system !important;
+}
+
+// ── Vaadin Labels ────────────────────────────────────────────────────
+.v-label {
+  color: $text-primary !important;
+}
+
+.v-caption {
+  color: $text-secondary !important;
+  font-weight: 500 !important;
+  font-size: 0.85rem !important;
+}
+
+// ── Vaadin Panels ────────────────────────────────────────────────────
+.v-panel {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-sm !important;
+}
+
+.v-panel-content {
+  background: $surface-card !important;
+  color: $text-primary !important;
+}
+
+.v-panel-caption,
+.v-panel-caption-light,
+.v-panel-caption-novscroll {
+  background: $surface-header !important;
+  background-image: none !important;
+  color: $text-primary !important;
+  border-bottom: 1px solid $border-subtle !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  padding: 0.625rem 1rem !important;
+  border-radius: $radius-md $radius-md 0 0 !important;
+}
+
+.v-panel-deco {
+  background: transparent !important;
+  display: none !important;
+}
+
+// ── Vaadin Tables ────────────────────────────────────────────────────
+.v-table {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  overflow: hidden !important;
+}
+
+.v-table-header-wrap {
+  background: $surface-header !important;
+  border-bottom: 2px solid $border-subtle !important;
+}
+
+.v-table-header-cell {
+  background: $surface-header !important;
+  background-image: none !important;
+  border-right: 1px solid $border-light !important;
+  padding: 0.5rem 0.625rem !important;
+}
+
+.v-table-caption-container {
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  color: $text-secondary !important;
+}
+
+.v-table-body {
+  border: none !important;
+}
+
+.v-table-row,
+.v-table-row-odd {
+  background: $surface-card !important;
+  transition: background $transition-fast !important;
+}
+
+.v-table-row-odd {
+  background: rgba(0, 0, 0, 0.015) !important;
+}
+
+.v-table-row:hover,
+.v-table-row-odd:hover {
+  background: $accent-soft !important;
+}
+
+.v-table-cell-content {
+  border-bottom: 1px solid $border-light !important;
+  padding: 0.375rem 0.625rem !important;
+  color: $text-primary !important;
+}
+
+.v-table-cell-wrapper {
+  line-height: 1.5 !important;
+  color: $text-primary !important;
+}
+
+.v-table-resizer {
+  border-color: $border-light !important;
+}
+
+.v-table-column-selector {
+  background: $surface-header !important;
+  border-color: $border-subtle !important;
+}
+
+// ── Vaadin Buttons ───────────────────────────────────────────────────
+.v-button {
+  background: $surface-card !important;
+  background-image: none !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-sm !important;
+  color: $text-primary !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  padding: 0.375rem 0.875rem !important;
+  box-shadow: $shadow-xs !important;
+  text-shadow: none !important;
+  cursor: pointer !important;
+  transition: all $transition-normal !important;
+
+  &:hover,
+  &:focus {
+    background: $surface-hover !important;
+    border-color: $border-subtle-dark !important;
+    box-shadow: $shadow-sm !important;
+  }
+
+  &:active {
+    transform: translateY(0.5px) !important;
+  }
+}
+
+.v-button-wrap {
+  background: transparent !important;
+  background-image: none !important;
+  padding: 0 !important;
+}
+
+.v-button-caption {
+  color: inherit !important;
+}
+
+// ── Vaadin Links ─────────────────────────────────────────────────────
+.v-link a span {
+  color: $accent !important;
+}
+
+.v-link a:hover span {
+  color: $accent-hover !important;
+}
+
+// ── Vaadin Forms ─────────────────────────────────────────────────────
+.v-textfield,
+.v-textarea,
+.v-richtextarea {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-sm !important;
+  color: $text-primary !important;
+  font-size: 0.875rem !important;
+  padding: 0.4375rem 0.75rem !important;
+  box-shadow: $shadow-xs !important;
+  transition: border-color $transition-fast, box-shadow $transition-fast !important;
+
+  &:focus {
+    border-color: $accent !important;
+    box-shadow: 0 0 0 3px $accent-ring !important;
+    outline: none !important;
+  }
+}
+
+.v-select-select,
+.v-filterselect-input {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-sm !important;
+  color: $text-primary !important;
+  font-size: 0.875rem !important;
+  padding: 0.375rem 0.625rem !important;
+}
+
+.v-filterselect-button {
+  background: $surface-header !important;
+  border-color: $border-subtle !important;
+  border-radius: 0 $radius-sm $radius-sm 0 !important;
+}
+
+.v-filterselect-suggestpopup {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-lg !important;
+  overflow: hidden !important;
+}
+
+// ── Vaadin MenuBar ───────────────────────────────────────────────────
+.v-menubar {
+  background: $surface-card !important;
+  background-image: none !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-sm !important;
+  box-shadow: $shadow-xs !important;
+}
+
+.v-menubar-menuitem {
+  color: $text-primary !important;
+  padding: 0.375rem 0.75rem !important;
+  transition: background $transition-fast !important;
+
+  &:hover {
+    background: $accent-soft !important;
+    color: $accent-hover !important;
+  }
+}
+
+.v-menubar-submenu {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-lg !important;
+  padding: 0.25rem !important;
+}
+
+.v-menubar-submenu .v-menubar-menuitem {
+  border-radius: $radius-sm !important;
+  padding: 0.375rem 0.75rem !important;
+
+  &:hover {
+    background: $accent-soft !important;
+  }
+}
+
+// ── Vaadin TabSheet ──────────────────────────────────────────────────
+.v-tabsheet-tabcontainer {
+  background: transparent !important;
+  border-bottom: 2px solid $border-light !important;
+}
+
+.v-tabsheet-tabitem .v-caption {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  margin-bottom: -2px !important;
+  color: $text-secondary !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1rem !important;
+  transition: all $transition-fast !important;
+
+  &:hover {
+    color: $text-primary !important;
+    border-bottom-color: $border-subtle !important;
+  }
+}
+
+.v-tabsheet-tabitem-selected .v-caption {
+  color: $accent !important;
+  border-bottom-color: $accent !important;
+  font-weight: 600 !important;
+}
+
+.v-tabsheet-content {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-top: none !important;
+  border-radius: 0 0 $radius-md $radius-md !important;
+}
+
+.v-tabsheet-deco {
+  display: none !important;
+}
+
+// ── Vaadin Windows / Dialogs ─────────────────────────────────────────
+.v-window {
+  background: $surface-card !important;
+  border: none !important;
+  border-radius: $radius-lg !important;
+  box-shadow: $shadow-xl !important;
+  overflow: hidden !important;
+}
+
+.v-window-outerheader,
+.v-window-header {
+  background: $surface-header !important;
+  color: $text-primary !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid $border-subtle !important;
+}
+
+.v-window-contents {
+  background: $surface-card !important;
+  color: $text-primary !important;
+}
+
+.v-window-footer {
+  background: $surface-header !important;
+  border-top: 1px solid $border-subtle !important;
+  padding: 0.625rem 1rem !important;
+}
+
+// ── Vaadin Accordion ─────────────────────────────────────────────────
+.v-accordion-item-caption {
+  background: $surface-header !important;
+  background-image: none !important;
+  border-color: $border-subtle !important;
+  color: $text-primary !important;
+  font-weight: 500 !important;
+  padding: 0.625rem 1rem !important;
+  transition: background $transition-fast !important;
+
+  &:hover {
+    background: $surface-hover !important;
+  }
+}
+
+.v-accordion-item-content {
+  background: $surface-card !important;
+  border-color: $border-subtle !important;
+}
+
+// ── Vaadin Notifications ─────────────────────────────────────────────
+.v-Notification {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-lg !important;
+  color: $text-primary !important;
+  font-size: 0.875rem !important;
+}
+
+// ── Vaadin Tree ──────────────────────────────────────────────────────
+.v-tree-node-caption {
+  color: $text-primary !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: $radius-sm !important;
+  transition: background $transition-fast !important;
+
+  &:hover {
+    background: $accent-soft !important;
+  }
+}
+
+.v-tree-node-selected {
+  background: $accent-soft !important;
+  color: $accent !important;
+}
+
+// ── Vaadin Loading Indicator ─────────────────────────────────────────
+.v-loading-indicator {
+  background-color: $accent !important;
+  height: 3px !important;
+}
+
+// ── Surveillance View caption ────────────────────────────────────────
+.v-caption-surveillance-view {
+  background-color: $surface-header !important;
+  background-image: none !important;
+  border-color: $border-subtle !important;
+  border-bottom: 1px solid $border-subtle !important;
+  color: $text-primary !important;
+  font-weight: 600 !important;
+  border-radius: $radius-md $radius-md 0 0 !important;
+}
+
+// ── Dashboard / Wallboard ────────────────────────────────────────────
+.dashboard.v-app {
+  background: $surface-bg !important;
+}
+
+.dashboard .v-portlet-slot {
+  background: $surface-card !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-sm !important;
+}
+
+.dashboard .v-portlet-header {
+  background: $surface-header !important;
+  color: $text-primary !important;
+  text-shadow: none !important;
+  border-radius: $radius-md $radius-md 0 0 !important;
+  font-weight: 600 !important;
+}
+
+.dashboard .header {
+  background-color: $surface-header !important;
+  border-color: $border-subtle !important;
+}
+
+.dashboard .v-portlet-content-wrapper {
+  border: none !important;
+}
+
+// ── Dashboard severity (in Vaadin context) ───────────────────────────
+.severity.Critical { background-image: none !important; }
+.severity.Major    { background-image: none !important; }
+.severity.Minor    { background-image: none !important; }
+.severity.Warning  { background-image: none !important; }
+.severity.Indeterminate { background-image: none !important; }
+.severity.Normal   { background-image: none !important; }
+.severity.Cleared  { background-image: none !important; }
+
+// Alert details dashlet
+.alert-details-dashlet .onms-header-cell {
+  background-color: $surface-header !important;
+  border: 1px solid $border-subtle !important;
+  color: $text-primary !important;
+  font-weight: 600 !important;
+}
+
+.alert-details-dashlet .onms-cell {
+  border: 1px solid $border-light !important;
+  background-color: $surface-card !important;
+  color: $text-primary !important;
+}
+
+// ── Vaadin SplitPanel ──────────────────────────────────────────────
+.v-splitpanel-horizontal,
+.v-splitpanel-vertical {
+  background: $surface-card !important;
+}
+
+.v-splitpanel-hsplitter,
+.v-splitpanel-vsplitter {
+  background: $border-subtle !important;
+  background-image: none !important;
+
+  div {
+    background: transparent !important;
+    background-image: none !important;
+  }
+}
+
+.v-splitpanel-hsplitter {
+  width: 4px !important;
+  cursor: col-resize !important;
+}
+
+.v-splitpanel-vsplitter {
+  height: 4px !important;
+  cursor: row-resize !important;
+}
+
+// ── Vaadin PopupView ───────────────────────────────────────────────
+.v-popupview-popup {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-lg !important;
+}
+
+// ── Vaadin DateField ───────────────────────────────────────────────
+.v-datefield [class*="textfield"] {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-sm !important;
+  color: $text-primary !important;
+}
+
+.v-datefield [class*="button"] {
+  background: $surface-header !important;
+  background-image: none !important;
+  border-color: $border-subtle !important;
+  border-radius: 0 $radius-sm $radius-sm 0 !important;
+}
+
+.v-datefield-calendarpanel {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-lg !important;
+  color: $text-primary !important;
+}
+
+.v-datefield-calendarpanel-day {
+  border-radius: $radius-sm !important;
+  transition: background $transition-fast !important;
+
+  &:hover {
+    background: $accent-soft !important;
+  }
+}
+
+.v-datefield-calendarpanel-day-selected {
+  background: $accent !important;
+  color: #fff !important;
+  border-radius: $radius-sm !important;
+}
+
+// ── Vaadin Checkbox / Radio ────────────────────────────────────────
+.v-checkbox > input,
+.v-radiobutton > input {
+  accent-color: $accent !important;
+}
+
+.v-checkbox > label,
+.v-radiobutton > label {
+  color: $text-primary !important;
+}
+
+// ── Vaadin Tooltip ─────────────────────────────────────────────────
+.v-tooltip {
+  background: $text-primary !important;
+  color: #fff !important;
+  border-radius: $radius-sm !important;
+  box-shadow: $shadow-md !important;
+  font-size: 0.8rem !important;
+  padding: 0.375rem 0.625rem !important;
+}
+
+.v-tooltip .v-tooltip-text {
+  color: #fff !important;
+}
+
+// ── Vaadin ContextMenu ─────────────────────────────────────────────
+.v-contextmenu {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-lg !important;
+  padding: 0.25rem !important;
+}
+
+.v-contextmenu .v-contextmenu-menuitem {
+  padding: 0.375rem 0.75rem !important;
+  border-radius: $radius-sm !important;
+  color: $text-primary !important;
+  transition: background $transition-fast !important;
+
+  &:hover {
+    background: $accent-soft !important;
+  }
+}
+
+// ── Vaadin Overlay / Backdrop ──────────────────────────────────────
+.v-window-modalitycurtain {
+  background: rgba(0, 0, 0, 0.35) !important;
+}
+
+// ── Generated Body (standalone Vaadin pages) ───────────────────────
+.v-generated-body {
+  background: $surface-bg !important;
+  margin: 0 !important;
+  font-family: $font-system !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+// ── Layout wrappers ────────────────────────────────────────────────
+.v-verticallayout,
+.v-horizontallayout,
+.v-gridlayout,
+.v-csslayout,
+.v-absolutelayout-wrapper {
+  color: $text-primary !important;
+}
+
+// ── Nuclear Reindeer gradient + text-shadow reset ──────────────────
+// The Reindeer/Runo legacy theme applies gradient background-images
+// and text-shadows to nearly every widget. Kill them globally so our
+// modern flat styles take effect cleanly.
+.v-panel-caption,
+.v-panel-caption-light,
+.v-table-header-cell,
+.v-table-column-selector,
+.v-button,
+.v-button-wrap,
+.v-nativebutton,
+.v-menubar,
+.v-menubar-menuitem,
+.v-menubar-submenu,
+.v-tabsheet-tabitem .v-caption,
+.v-tabsheet-tabcontainer,
+.v-accordion-item-caption,
+.v-window-outerheader,
+.v-window-header,
+.v-window-footer,
+.v-filterselect-button,
+.v-datefield [class*="button"],
+.v-splitpanel-hsplitter div,
+.v-splitpanel-vsplitter div,
+.v-Notification {
+  background-image: none !important;
+  text-shadow: none !important;
+}
+
+// ── Topology page ──────────────────────────────────────────────────
+.v-app.topo_default {
+  background: $surface-bg !important;
+  color: $text-primary !important;
+}
+
+// ── Vaadin ComboBox / FilterSelect popup ───────────────────────────
+.v-filterselect-suggestmenu {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-lg !important;
+}
+
+.v-filterselect-suggestmenu .gwt-MenuItem {
+  color: $text-primary !important;
+  padding: 0.375rem 0.75rem !important;
+  border-radius: $radius-sm !important;
+  transition: background $transition-fast !important;
+
+  &:hover,
+  &.gwt-MenuItem-selected {
+    background: $accent-soft !important;
+    color: $accent-hover !important;
+  }
+}
+
+.v-filterselect-status {
+  background: $surface-header !important;
+  border-color: $border-subtle !important;
+  color: $text-tertiary !important;
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+// ── Vaadin NativeSelect ────────────────────────────────────────────
+.v-nativeselect select {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-sm !important;
+  color: $text-primary !important;
+  padding: 0.375rem 0.625rem !important;
+}
+
+// ── Vaadin Upload ──────────────────────────────────────────────────
+.v-upload .v-button {
+  border-radius: $radius-sm !important;
+}
+
+// ── Vaadin TabSheet scroller ───────────────────────────────────────
+.v-tabsheet-scroller {
+  background: transparent !important;
+}
+
+// ── Vaadin Error/Required indicators ───────────────────────────────
+.v-errorindicator {
+  color: $sev-critical !important;
+}
+
+// ── Vaadin Info Panel (Topology sidebar) ───────────────────────────
+.info-panel {
+  background: $surface-card !important;
+  border: 1px solid $border-subtle !important;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-sm !important;
+}
+
+// ── Toolbar (Topology) ─────────────────────────────────────────────
+.toolbar {
+  background: $surface-header !important;
+  border-bottom: 1px solid $border-subtle !important;
+}
+
+.toolbar .v-button {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+
+  &:hover {
+    background: $accent-soft !important;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Light-mode navigation chrome
+// ---------------------------------------------------------------------------
+// Override the near-black nav surfaces (#131736) with a lighter royal blue.
+// body:not(.open-dark) covers both the pre-theme-load state and open-light.
+// The CSS variable --feather-surface-dark drives the Feather dock and app bar;
+// .opennms-bg-chromatic-black is the hardcoded class on the legacy Bootstrap navbar.
+
+body:not(.open-dark) {
+  --feather-surface-dark: #{$nav-blue-light};
+
+  .opennms-bg-chromatic-black {
+    background-color: $nav-blue-light !important;
+  }
+}
