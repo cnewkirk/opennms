@@ -718,18 +718,16 @@ const deleteMemo = async (type: 'sticky' | 'journal') => {
   }
 }
 
-// Row severity indicators for related alarm/situation/event tables
-// Left border at full opacity is readable in both light and dark themes;
-// a faint background tint is kept as secondary reinforcement.
+// border-left on <tr> is ignored in border-separate mode; target first td instead
 $row-opacity: 0.06;
 .row {
-  &--critical      { border-left: 3px solid var(--feather-error);         background: utils.alpha(fvars.$error,         $row-opacity); }
-  &--major         { border-left: 3px solid var(--feather-major);         background: utils.alpha(fvars.$major,         $row-opacity); }
-  &--minor         { border-left: 3px solid var(--feather-minor);         background: utils.alpha(fvars.$minor,         $row-opacity); }
-  &--warning       { border-left: 3px solid var(--feather-warning);       background: utils.alpha(fvars.$warning,       $row-opacity); }
-  &--normal        { border-left: 3px solid var(--feather-success);       background: utils.alpha(fvars.$success,       $row-opacity); }
+  &--critical      { background: utils.alpha(fvars.$error,         $row-opacity); td:first-child { border-left: 3px solid var(--feather-error); } }
+  &--major         { background: utils.alpha(fvars.$major,         $row-opacity); td:first-child { border-left: 3px solid var(--feather-major); } }
+  &--minor         { background: utils.alpha(fvars.$minor,         $row-opacity); td:first-child { border-left: 3px solid var(--feather-minor); } }
+  &--warning       { background: utils.alpha(fvars.$warning,       $row-opacity); td:first-child { border-left: 3px solid var(--feather-warning); } }
+  &--normal        { background: utils.alpha(fvars.$success,       $row-opacity); td:first-child { border-left: 3px solid var(--feather-success); } }
   &--cleared,
-  &--unacknowledged { border-left: 3px solid var(--feather-cleared);      background: utils.alpha(fvars.$cleared,       $row-opacity); }
-  &--indeterminate { border-left: 3px solid var(--feather-indeterminate); background: utils.alpha(fvars.$indeterminate, $row-opacity); }
+  &--unacknowledged { background: utils.alpha(fvars.$cleared,      $row-opacity); td:first-child { border-left: 3px solid var(--feather-cleared); } }
+  &--indeterminate { background: utils.alpha(fvars.$indeterminate, $row-opacity); td:first-child { border-left: 3px solid var(--feather-indeterminate); } }
 }
 </style>
