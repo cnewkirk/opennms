@@ -523,6 +523,7 @@ echo ""
 echo "==> [6/7] Provisioning topology nodes into OpenNMS..."
 
 REQ_FILE="$(mktemp)"
+trap 'rm -f "${REQ_FILE}"' EXIT
 cat > "${REQ_FILE}" <<'REQUISITION'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model-import xmlns="http://xmlns.opennms.org/xsd/config/model-import"
@@ -568,7 +569,6 @@ cat > "${REQ_FILE}" <<'REQUISITION'
 REQUISITION
 
 podman cp "${REQ_FILE}" test-opennms:/opt/opennms/etc/imports/Topology-Lab.xml
-rm -f "${REQ_FILE}"
 
 # Trigger import via REST (provisiond picks it up within seconds)
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
