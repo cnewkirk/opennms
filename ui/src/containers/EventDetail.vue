@@ -13,7 +13,7 @@
        https://www.gnu.org/licenses/agpl-3.0.txt
 
   Unless required by applicable law or agreed to in writing,
-  software distributed under the LICENSE is distributed on an
+  software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
   either express or implied.  See the License for the specific
   language governing permissions and limitations under the
@@ -118,7 +118,7 @@
     </div>
 
     <!-- Log Message -->
-    <div class="feather-row">
+    <div v-if="event.logMessage" class="feather-row">
       <div class="feather-col-12">
         <div class="card">
           <div class="headline4 card__section-title">Log Message</div>
@@ -128,7 +128,7 @@
     </div>
 
     <!-- Description -->
-    <div class="feather-row">
+    <div v-if="event.description" class="feather-row">
       <div class="feather-col-12">
         <div class="card">
           <div class="headline4 card__section-title">Description</div>
@@ -153,7 +153,7 @@
         <div class="card">
           <div class="headline4 card__section-title">Parameters</div>
           <dl class="event-detail__grid">
-            <template v-for="param in event.parameters" :key="param.name">
+            <template v-for="(param, index) in event.parameters" :key="`${param.name}_${index}`">
               <dt>{{ param.name }}</dt>
               <dd>{{ param.value }}</dd>
             </template>
@@ -185,7 +185,7 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 ])
 
 const severityClass = computed<string>(() =>
-  event.value ? event.value.severity.toLowerCase() : ''
+  event.value ? `${event.value.severity.toLowerCase()}-color` : ''
 )
 </script>
 
@@ -246,12 +246,5 @@ const severityClass = computed<string>(() =>
   }
 }
 
-// Severity background colors — matches EventsTable.vue palette
-.indeterminate { background: rgba(200, 200, 200, 0.4); }
-.cleared       { background: rgba(200, 200, 200, 0.4); }
-.normal        { background: rgba(133, 217, 165, 0.4); }
-.warning       { background: rgba(255, 175, 34, 0.4); }
-.minor         { background: rgba(255, 137, 0, 0.4); }
-.major         { background: rgba(215, 58, 58, 0.4); }
-.critical      { background: rgba(153, 0, 0, 0.4); }
+@import "@/styles/severities";
 </style>
