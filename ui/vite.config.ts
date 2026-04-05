@@ -89,6 +89,9 @@ export default defineConfig({
     }
   },
   root: './src/main',
+  // DO NOT REMOVE: base: './' is required alongside --base=/opennms/ui/ in the build
+  // script. Without it, vite ignores the CLI --base flag and emits /assets/... paths
+  // (server root) instead of /opennms/ui/assets/... — breaking the entire UI.
   base: './',
   // make sure we get environment variables from .env files in the main ui directory
   // path is relative to 'root' defined just above
