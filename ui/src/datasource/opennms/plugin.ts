@@ -21,6 +21,8 @@ export interface OpenNMSTimeSeries {
 /** Return value of getTimeSeriesData */
 export interface OpenNMSTimeSeriesData {
   timeRange: AbsoluteTimeRange
+  /** Required by Perses getCommonTimeScale — skips series entries where stepMs is undefined */
+  stepMs: number
   series: OpenNMSTimeSeries[]
 }
 
