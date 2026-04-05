@@ -23,6 +23,12 @@ package org.opennms.web.rest.support.jmxconfig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.opennms.features.jmxconfiggenerator.jmxconfig.JmxDatacollectionConfiggenerator;
 import org.opennms.features.jmxconfiggenerator.jmxconfig.JmxHelper;
@@ -43,6 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JmxDetectJob implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(JmxDetectJob.class);
+    private static final long TIMEOUT_SECONDS = 120L;
 
     private final DetectRequest request;
     private volatile DetectJobStatus.Status status = DetectJobStatus.Status.PENDING;
@@ -56,6 +63,29 @@ public class JmxDetectJob implements Runnable {
     @Override
     public void run() {
         status = DetectJobStatus.Status.RUNNING;
+        ExecutorService inner = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> future = inner.submit(this::doDetect);
+            future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            LOG.warn("JMX detection timed out after {}s for {}", TIMEOUT_SECONDS, request.getConnection());
+            error = "JMX detection timed out after " + TIMEOUT_SECONDS + " seconds";
+            status = DetectJobStatus.Status.ERROR;
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            LOG.warn("JMX detection failed for {}: {}", request.getConnection(), cause.getMessage(), cause);
+            error = cause.getMessage();
+            status = DetectJobStatus.Status.ERROR;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            error = "JMX detection interrupted";
+            status = DetectJobStatus.Status.ERROR;
+        } finally {
+            inner.shutdownNow();
+        }
+    }
+
+    private void doDetect() {
         try {
             JmxConnectionConfig connConfig = new JmxConnectionConfigBuilder()
                     .withUrl(request.getConnection())
@@ -76,9 +106,7 @@ public class JmxDetectJob implements Runnable {
                 status = DetectJobStatus.Status.DONE;
             }
         } catch (Exception e) {
-            LOG.warn("JMX detection failed for {}: {}", request.getConnection(), e.getMessage(), e);
-            error = e.getMessage();
-            status = DetectJobStatus.Status.ERROR;
+            throw new RuntimeException(e);
         }
     }
 
