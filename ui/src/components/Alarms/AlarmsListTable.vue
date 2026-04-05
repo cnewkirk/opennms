@@ -145,11 +145,27 @@
                 {{ alarm.ackUser }}
               </span>
             </td>
-            <td v-if="isVisible('logMessage')" class="alarms-list__truncate-cell" :title="alarm.logMessage">
-              <span v-html="alarm.logMessage ?? '—'" />
+            <td v-if="isVisible('logMessage')" class="alarms-list__html-cell" @click.stop>
+              <button
+                v-if="alarm.logMessage"
+                class="alarms-list__html-badge"
+                :class="{ active: isRaw(alarm.id, 'logMessage') }"
+                title="Toggle raw HTML"
+                @click="toggleRaw(alarm.id, 'logMessage')"
+              >HTML</button>
+              <pre v-if="isRaw(alarm.id, 'logMessage')" class="alarms-list__raw-text">{{ alarm.logMessage }}</pre>
+              <span v-else v-html="alarm.logMessage ?? '—'" class="alarms-list__html-content" />
             </td>
-            <td v-if="isVisible('description')" class="alarms-list__truncate-cell" :title="alarm.description">
-              <span v-html="alarm.description ?? '—'" />
+            <td v-if="isVisible('description')" class="alarms-list__html-cell" @click.stop>
+              <button
+                v-if="alarm.description"
+                class="alarms-list__html-badge"
+                :class="{ active: isRaw(alarm.id, 'description') }"
+                title="Toggle raw HTML"
+                @click="toggleRaw(alarm.id, 'description')"
+              >HTML</button>
+              <pre v-if="isRaw(alarm.id, 'description')" class="alarms-list__raw-text">{{ alarm.description }}</pre>
+              <span v-else v-html="alarm.description ?? '—'" class="alarms-list__html-content" />
             </td>
             <td v-if="isVisible('uei')" class="alarms-list__mono alarms-list__uei-cell">{{ alarm.uei }}</td>
             <td class="alarms-list__actions" @click.stop>
@@ -223,6 +239,13 @@ const showColumnMenu = ref(false)
 const visibleColumns = ref<string[]>([...DEFAULT_VISIBLE])
 
 const isVisible = (key: string) => visibleColumns.value.includes(key)
+
+const rawMode = ref<Record<string, boolean>>({})
+const isRaw = (alarmId: number | string, field: string) => !!rawMode.value[`${alarmId}:${field}`]
+const toggleRaw = (alarmId: number | string, field: string) => {
+  const key = `${alarmId}:${field}`
+  rawMode.value = { ...rawMode.value, [key]: !rawMode.value[key] }
+}
 
 const toggleColumn = (key: string) => {
   const idx = visibleColumns.value.indexOf(key)
@@ -632,12 +655,59 @@ onMounted(() => {
     max-width: 300px;
   }
 
-  &__truncate-cell {
-    max-width: 300px;
+  &__html-cell {
+    max-width: 320px;
+    vertical-align: top;
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+
+  &__html-badge {
+    @include body-small;
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-family: monospace;
+    letter-spacing: 0.02em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var($border-light-on-surface);
+    background: var($shade-4);
+    color: var($secondary-text-on-surface);
+    cursor: pointer;
+    vertical-align: middle;
+    margin-right: 6px;
+    flex-shrink: 0;
+    &:hover { background: var($shade-3); }
+    &.active {
+      background: var($primary);
+      color: var($primary-text-on-color);
+      border-color: var($primary);
+    }
+  }
+
+  &__html-content {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    > span { pointer-events: none; }
+    display: inline;
+    vertical-align: middle;
+    pointer-events: none;
+  }
+
+  &__raw-text {
+    @include body-small;
+    font-family: monospace;
+    font-size: 0.72rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 4px 0 0 0;
+    padding: 6px 8px;
+    background: var($shade-4);
+    border-radius: 3px;
+    color: var($primary-text-on-surface);
+    max-height: 160px;
+    overflow-y: auto;
   }
 
   &__uei-cell {
