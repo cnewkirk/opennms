@@ -24,9 +24,16 @@ import { defineStore } from 'pinia'
 import { getContainers, getGraph } from '@/services/topologyService'
 import { getAlarms, getNodeAlarms } from '@/services/alarmService'
 import { getNodeEnlinkd, NodeEnlinkdData } from '@/services/enlinkdService'
+import { getNodeById, getNodeIpInterfaces } from '@/services/nodeService'
 import { TopologyVertex, TopologyEdge, TopologyLayer, TopologyElement, AlarmSeverity } from '@/types/topology'
 import { numericSeverityLevel } from '@/components/Map/utils'
-import { Alarm } from '@/types'
+import { Alarm, Node, IpInterface } from '@/types'
+
+export interface NodeDetail {
+  node: Node
+  ipInterfaces: IpInterface[]
+  enlinkd: NodeEnlinkdData | null
+}
 
 export interface EdgeDetail {
   srcNodeId: number
@@ -46,6 +53,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
 
   const alarmSeverity = ref<Record<number, AlarmSeverity>>({})
   const nodeAlarmDetails = ref<Record<number, Alarm[]>>({})
+  const nodeDetails = ref<Record<number, NodeDetail>>({})
   const edgeLinkDetails = ref<Record<string, EdgeDetail>>({})
   const selectedElement = ref<TopologyElement | null>(null)
   const focusTarget = ref<string | null>(null)
@@ -180,6 +188,25 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     alarmSeverity.value = severityMap
   }
 
+  const loadNodeDetail = async (nodeId: number) => {
+    if (nodeDetails.value[nodeId]) return
+    const [nodeResp, ifaceResp, enlinkdResp] = await Promise.all([
+      getNodeById(String(nodeId)),
+      getNodeIpInterfaces(String(nodeId), { limit: 25, offset: 0 }),
+      getNodeEnlinkd(nodeId)
+    ])
+    if (!nodeResp) return
+    nodeDetails.value = {
+      ...nodeDetails.value,
+      [nodeId]: {
+        node: nodeResp as Node,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ipInterfaces: (ifaceResp && (ifaceResp as any) !== false) ? ifaceResp.ipInterface : [],
+        enlinkd: enlinkdResp
+      }
+    }
+  }
+
   const loadEdgeLinkDetail = async (edgeKey: string, srcNodeId: number, tgtNodeId: number) => {
     if (edgeLinkDetails.value[edgeKey]) return
     const [src, tgt] = await Promise.all([getNodeEnlinkd(srcNodeId), getNodeEnlinkd(tgtNodeId)])
@@ -228,6 +255,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     layoutKey,
     alarmSeverity,
     nodeAlarmDetails,
+    nodeDetails,
     edgeLinkDetails,
     selectedElement,
     focusTarget,
@@ -238,6 +266,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     toggleLayer,
     setAllLayers,
     loadAlarmSeverities,
+    loadNodeDetail,
     loadEdgeLinkDetail,
     loadNodeAlarmDetails,
     selectElement,

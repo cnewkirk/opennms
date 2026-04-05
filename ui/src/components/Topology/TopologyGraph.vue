@@ -11,6 +11,7 @@
       No nodes found for this layer.
     </div>
     <div ref="graphContainer" class="topology-graph__canvas" />
+    <TopologyDetailPanel />
   </div>
 </template>
 
@@ -18,6 +19,7 @@
 import { FeatherSpinner } from '@featherds/progress'
 import useTopology from '@/composables/useTopology'
 import { useTopologyStore } from '@/stores/topologyStore'
+import TopologyDetailPanel from './TopologyDetailPanel.vue'
 
 const store = useTopologyStore()
 const graphContainer = ref<HTMLElement | null>(null)

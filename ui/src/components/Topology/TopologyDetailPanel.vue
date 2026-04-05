@@ -1,151 +1,209 @@
 <template>
-  <FeatherDrawer
-    v-model="isVisible"
-    :labels="{ close: 'Close', title: panelTitle }"
-    width="380px"
-  >
-    <div class="detail-panel">
+  <Transition name="topo-panel">
+    <div v-if="isVisible" class="topo-panel">
+      <div class="topo-panel__header">
+        <span class="topo-panel__title">{{ panelTitle }}</span>
+        <button type="button" class="topo-panel__close" @click="store.selectElement(null)">✕</button>
+      </div>
 
-      <!-- ═══ NODE DETAIL ═══ -->
-      <template v-if="vertex">
-        <div class="detail-panel__row">
-          <span class="detail-panel__key">Label</span>
-          <span class="detail-panel__val">{{ vertex.label }}</span>
-        </div>
-        <div v-if="vertex.ipAddress" class="detail-panel__row">
-          <span class="detail-panel__key">IP Address</span>
-          <span class="detail-panel__val">{{ vertex.ipAddress }}</span>
-        </div>
-        <div v-if="vertex.id" class="detail-panel__row">
-          <span class="detail-panel__key">Node ID</span>
-          <span class="detail-panel__val">{{ vertex.id }}</span>
-        </div>
-        <div v-if="vertex.namespace" class="detail-panel__row">
-          <span class="detail-panel__key">Namespace</span>
-          <span class="detail-panel__val">{{ vertex.namespace }}</span>
-        </div>
-        <div v-if="vertex.tooltipText" class="detail-panel__row">
-          <span class="detail-panel__key">Info</span>
-          <span class="detail-panel__val detail-panel__val--html" v-html="vertex.tooltipText" />
-        </div>
+      <div class="topo-panel__body">
 
-        <template v-if="nodeAlarms.length">
-          <div class="detail-panel__section-header">Active Alarms</div>
-          <div v-for="alarm in nodeAlarms" :key="alarm.id" class="detail-panel__alarm">
-            <span :class="['detail-panel__badge', alarm.severity.toLowerCase()]">{{ alarm.severity }}</span>
-            <span class="detail-panel__alarm-msg">{{ alarm.logMessage }}</span>
+        <!-- ═══ NODE DETAIL ═══ -->
+        <template v-if="vertex">
+
+          <!-- Loading shimmer -->
+          <div v-if="nodeDetailLoading" class="topo-panel__loading">
+            <FeatherSpinner />
+            <span>Loading node detail…</span>
+          </div>
+
+          <template v-else>
+            <!-- Alarms -->
+            <template v-if="nodeAlarms.length">
+              <div class="topo-panel__section">Alarms</div>
+              <div v-for="alarm in nodeAlarms" :key="alarm.id" class="topo-panel__alarm">
+                <span :class="['topo-panel__badge', alarm.severity.toLowerCase()]">{{ alarm.severity }}</span>
+                <span class="topo-panel__alarm-msg">{{ alarm.logMessage }}</span>
+              </div>
+            </template>
+            <div v-else-if="severityBadge" class="topo-panel__row">
+              <span class="topo-panel__key">Alarm Severity</span>
+              <span :class="['topo-panel__badge', severityBadge.toLowerCase()]">{{ severityBadge }}</span>
+            </div>
+
+            <!-- System info -->
+            <div class="topo-panel__section">System</div>
+            <div class="topo-panel__row">
+              <span class="topo-panel__key">Node ID</span>
+              <span class="topo-panel__val">{{ vertex.id }}</span>
+            </div>
+            <div v-if="nodeDetail?.node.sysName" class="topo-panel__row">
+              <span class="topo-panel__key">SNMP Name</span>
+              <span class="topo-panel__val">{{ nodeDetail.node.sysName }}</span>
+            </div>
+            <div v-if="nodeDetail?.node.sysDescription" class="topo-panel__row">
+              <span class="topo-panel__key">Description</span>
+              <span class="topo-panel__val topo-panel__val--truncate" :title="nodeDetail.node.sysDescription">
+                {{ truncate(nodeDetail.node.sysDescription, 80) }}
+              </span>
+            </div>
+            <div v-if="nodeDetail?.node.sysLocation" class="topo-panel__row">
+              <span class="topo-panel__key">Location</span>
+              <span class="topo-panel__val">{{ stripQuotes(nodeDetail.node.sysLocation) }}</span>
+            </div>
+            <div v-if="nodeDetail?.node.sysContact" class="topo-panel__row">
+              <span class="topo-panel__key">Contact</span>
+              <span class="topo-panel__val">{{ stripQuotes(nodeDetail.node.sysContact) }}</span>
+            </div>
+            <div v-if="nodeDetail?.node.foreignSource" class="topo-panel__row">
+              <span class="topo-panel__key">Provisioned</span>
+              <span class="topo-panel__val">{{ nodeDetail.node.foreignSource }} / {{ nodeDetail.node.foreignId }}</span>
+            </div>
+            <div v-if="nodeDetail?.node.categories?.length" class="topo-panel__row">
+              <span class="topo-panel__key">Categories</span>
+              <div class="topo-panel__chips">
+                <span v-for="cat in nodeDetail.node.categories" :key="cat.name" class="topo-panel__cat-chip">
+                  {{ cat.name }}
+                </span>
+              </div>
+            </div>
+
+            <!-- IP Interfaces -->
+            <template v-if="nodeDetail?.ipInterfaces.length">
+              <div class="topo-panel__section">Interfaces</div>
+              <div
+                v-for="iface in sortedInterfaces"
+                :key="iface.id"
+                class="topo-panel__iface"
+                :class="{ 'topo-panel__iface--primary': iface.snmpPrimary === 'P' }"
+              >
+                <span class="topo-panel__iface-name">{{ iface.snmpInterface?.ifName || iface.snmpInterface?.ifDescr || '—' }}</span>
+                <span class="topo-panel__iface-ip">{{ iface.ipAddress }}</span>
+                <span v-if="iface.snmpPrimary === 'P'" class="topo-panel__iface-badge">primary</span>
+                <span v-if="iface.isDown" class="topo-panel__iface-badge topo-panel__iface-badge--down">down</span>
+              </div>
+            </template>
+
+            <!-- Protocol IDs from EnLinkd -->
+            <template v-if="nodeDetail?.enlinkd">
+              <div class="topo-panel__section">Protocol IDs</div>
+              <div v-if="nodeDetail.enlinkd.lldpElementNode" class="topo-panel__row">
+                <span class="topo-panel__key">LLDP</span>
+                <span class="topo-panel__val topo-panel__val--mono">
+                  {{ formatMacFromElem(nodeDetail.enlinkd.lldpElementNode.lldpChassisId) }}
+                  <span class="topo-panel__val--dim"> · {{ nodeDetail.enlinkd.lldpElementNode.lldpSysName }}</span>
+                </span>
+              </div>
+              <div v-if="nodeDetail.enlinkd.ospfElementNode" class="topo-panel__row">
+                <span class="topo-panel__key">OSPF</span>
+                <span class="topo-panel__val topo-panel__val--mono">
+                  {{ nodeDetail.enlinkd.ospfElementNode.ospfRouterId }}
+                  <span class="topo-panel__val--dim"> · v{{ nodeDetail.enlinkd.ospfElementNode.ospfVersionNumber }}, {{ nodeDetail.enlinkd.ospfElementNode.ospfAdminStat }}</span>
+                </span>
+              </div>
+              <div v-if="nodeDetail.enlinkd.isisElementNode" class="topo-panel__row">
+                <span class="topo-panel__key">IS-IS</span>
+                <span class="topo-panel__val topo-panel__val--mono">
+                  {{ nodeDetail.enlinkd.isisElementNode.isisSysID }}
+                  <span class="topo-panel__val--dim"> · {{ nodeDetail.enlinkd.isisElementNode.isisSysAdminState }}</span>
+                </span>
+              </div>
+            </template>
+          </template>
+
+          <div class="topo-panel__actions">
+            <FeatherButton text @click="goToNodeDetail">View Full Node Detail</FeatherButton>
           </div>
         </template>
-        <div v-else-if="severityBadge" class="detail-panel__row">
-          <span class="detail-panel__key">Alarm Severity</span>
-          <span :class="['detail-panel__badge', severityBadge.toLowerCase()]">{{ severityBadge }}</span>
-        </div>
 
-        <div class="detail-panel__actions">
-          <FeatherButton text @click="goToNodeDetail">View Node Detail</FeatherButton>
-        </div>
-      </template>
-
-      <!-- ═══ EDGE DETAIL ═══ -->
-      <template v-else-if="edge">
-        <!-- Endpoints row -->
-        <div class="detail-panel__endpoints">
-          <span class="detail-panel__endpoint">{{ sourceLabel }}</span>
-          <span class="detail-panel__endpoint-sep">↔</span>
-          <span class="detail-panel__endpoint">{{ targetLabel }}</span>
-        </div>
-
-        <!-- IPs if known -->
-        <div v-if="sourceIp || targetIp" class="detail-panel__endpoints detail-panel__endpoints--sub">
-          <span class="detail-panel__endpoint-ip">{{ sourceIp }}</span>
-          <span class="detail-panel__endpoint-sep"></span>
-          <span class="detail-panel__endpoint-ip">{{ targetIp }}</span>
-        </div>
-
-        <!-- Protocol chips -->
-        <div v-if="edgeProtocols.length" class="detail-panel__chips">
-          <span v-for="p in edgeProtocols" :key="p" class="detail-panel__chip">{{ p }}</span>
-        </div>
-
-        <!-- Loading state -->
-        <div v-if="detailLoading" class="detail-panel__loading">
-          <FeatherSpinner />
-          <span>Loading link detail…</span>
-        </div>
-
-        <template v-else-if="edgeDetail">
-          <!-- LLDP section -->
-          <template v-if="lldpLinks.length">
-            <div class="detail-panel__proto-header">LLDP</div>
-            <div v-for="(pair, i) in lldpLinks" :key="i" class="detail-panel__proto-block">
-              <div class="detail-panel__link-row">
-                <span class="detail-panel__link-node">{{ pair.srcName }}</span>
-                <span class="detail-panel__link-iface">{{ pair.srcPort }}</span>
-                <span class="detail-panel__link-arrow">→</span>
-                <span class="detail-panel__link-node">{{ pair.tgtName }}</span>
-                <span class="detail-panel__link-iface">{{ pair.tgtPort }}</span>
-              </div>
-              <div v-if="pair.srcMac || pair.tgtMac" class="detail-panel__link-macs">
-                <span v-if="pair.srcMac">{{ pair.srcMac }}</span>
-                <span v-if="pair.srcMac && pair.tgtMac"> → </span>
-                <span v-if="pair.tgtMac">{{ pair.tgtMac }}</span>
-              </div>
-            </div>
-          </template>
-
-          <!-- OSPF section -->
-          <template v-if="ospfLinks.length">
-            <div class="detail-panel__proto-header">OSPF</div>
-            <div v-if="ospfRouterIds" class="detail-panel__kv">
-              <span class="detail-panel__kv-key">Router IDs</span>
-              <span class="detail-panel__kv-val">{{ ospfRouterIds }}</span>
-            </div>
-            <div v-for="(link, i) in ospfLinks" :key="i" class="detail-panel__proto-block">
-              <div class="detail-panel__link-row">
-                <span class="detail-panel__link-node">{{ link.srcName }}</span>
-                <span v-if="link.localIp" class="detail-panel__link-iface">{{ link.localIp }}</span>
-                <span class="detail-panel__link-arrow">↔</span>
-                <span class="detail-panel__link-node">{{ link.tgtName }}</span>
-                <span v-if="link.remoteIp" class="detail-panel__link-iface">{{ link.remoteIp }}</span>
-              </div>
-              <div v-if="link.mask" class="detail-panel__link-macs">subnet: {{ link.mask }}</div>
-            </div>
-          </template>
-
-          <!-- IS-IS section -->
-          <template v-if="isisLinks.length">
-            <div class="detail-panel__proto-header">IS-IS</div>
-            <div v-if="isisSysIds" class="detail-panel__kv">
-              <span class="detail-panel__kv-key">SysIDs</span>
-              <span class="detail-panel__kv-val">{{ isisSysIds }}</span>
-            </div>
-            <div v-for="(link, i) in isisLinks" :key="i" class="detail-panel__proto-block">
-              <div class="detail-panel__link-row">
-                <span class="detail-panel__link-node">{{ link.srcName }}</span>
-                <span v-if="link.localCirc" class="detail-panel__link-iface">circ {{ link.localCirc }}</span>
-                <span class="detail-panel__link-arrow">↔</span>
-                <span class="detail-panel__link-node">{{ link.tgtName }}</span>
-                <span v-if="link.remotePort" class="detail-panel__link-iface">{{ link.remotePort }}</span>
-              </div>
-              <div class="detail-panel__link-macs">
-                state: {{ link.adjState }}
-                <span v-if="link.adjType"> · {{ link.adjType }}</span>
-              </div>
-            </div>
-          </template>
-
-          <div v-if="!lldpLinks.length && !ospfLinks.length && !isisLinks.length"
-               class="detail-panel__empty">
-            No L2/L3 detail available for this link.
+        <!-- ═══ EDGE DETAIL ═══ -->
+        <template v-else-if="edge">
+          <div class="topo-panel__endpoints">
+            <span class="topo-panel__endpoint">{{ sourceLabel }}</span>
+            <span class="topo-panel__endpoint-sep">↔</span>
+            <span class="topo-panel__endpoint">{{ targetLabel }}</span>
           </div>
+          <div v-if="sourceIp || targetIp" class="topo-panel__endpoints topo-panel__endpoints--sub">
+            <span class="topo-panel__endpoint-ip">{{ sourceIp }}</span>
+            <span class="topo-panel__endpoint-sep"></span>
+            <span class="topo-panel__endpoint-ip">{{ targetIp }}</span>
+          </div>
+          <div v-if="edgeProtocols.length" class="topo-panel__chips">
+            <span v-for="p in edgeProtocols" :key="p" class="topo-panel__chip">{{ p }}</span>
+          </div>
+
+          <div v-if="detailLoading" class="topo-panel__loading">
+            <FeatherSpinner />
+            <span>Loading link detail…</span>
+          </div>
+
+          <template v-else-if="edgeDetail">
+            <template v-if="lldpLinks.length">
+              <div class="topo-panel__section">LLDP</div>
+              <div v-for="(pair, i) in lldpLinks" :key="i" class="topo-panel__proto-block">
+                <div class="topo-panel__link-row">
+                  <span class="topo-panel__link-node">{{ pair.srcName }}</span>
+                  <span class="topo-panel__link-iface">{{ pair.srcPort }}</span>
+                  <span class="topo-panel__link-arrow">→</span>
+                  <span class="topo-panel__link-node">{{ pair.tgtName }}</span>
+                  <span class="topo-panel__link-iface">{{ pair.tgtPort }}</span>
+                </div>
+                <div v-if="pair.srcMac || pair.tgtMac" class="topo-panel__link-sub">
+                  {{ pair.srcMac }}<span v-if="pair.srcMac && pair.tgtMac"> → </span>{{ pair.tgtMac }}
+                </div>
+              </div>
+            </template>
+
+            <template v-if="ospfLinks.length">
+              <div class="topo-panel__section">OSPF</div>
+              <div v-if="ospfRouterIds" class="topo-panel__kv">
+                <span class="topo-panel__kv-key">Router IDs</span>
+                <span class="topo-panel__kv-val">{{ ospfRouterIds }}</span>
+              </div>
+              <div v-for="(link, i) in ospfLinks" :key="i" class="topo-panel__proto-block">
+                <div class="topo-panel__link-row">
+                  <span class="topo-panel__link-node">{{ link.srcName }}</span>
+                  <span v-if="link.localIp" class="topo-panel__link-iface">{{ link.localIp }}</span>
+                  <span class="topo-panel__link-arrow">↔</span>
+                  <span class="topo-panel__link-node">{{ link.tgtName }}</span>
+                  <span v-if="link.remoteIp" class="topo-panel__link-iface">{{ link.remoteIp }}</span>
+                </div>
+                <div v-if="link.mask" class="topo-panel__link-sub">subnet: {{ link.mask }}</div>
+              </div>
+            </template>
+
+            <template v-if="isisLinks.length">
+              <div class="topo-panel__section">IS-IS</div>
+              <div v-if="isisSysIds" class="topo-panel__kv">
+                <span class="topo-panel__kv-key">SysIDs</span>
+                <span class="topo-panel__kv-val">{{ isisSysIds }}</span>
+              </div>
+              <div v-for="(link, i) in isisLinks" :key="i" class="topo-panel__proto-block">
+                <div class="topo-panel__link-row">
+                  <span class="topo-panel__link-node">{{ link.srcName }}</span>
+                  <span v-if="link.localCirc" class="topo-panel__link-iface">circ {{ link.localCirc }}</span>
+                  <span class="topo-panel__link-arrow">↔</span>
+                  <span class="topo-panel__link-node">{{ link.tgtName }}</span>
+                  <span v-if="link.remotePort" class="topo-panel__link-iface">{{ link.remotePort }}</span>
+                </div>
+                <div class="topo-panel__link-sub">
+                  state: {{ link.adjState }}<span v-if="link.adjType"> · {{ link.adjType }}</span>
+                </div>
+              </div>
+            </template>
+
+            <div v-if="!lldpLinks.length && !ospfLinks.length && !isisLinks.length" class="topo-panel__empty">
+              No L2/L3 detail available for this link.
+            </div>
+          </template>
         </template>
-      </template>
+
+      </div>
     </div>
-  </FeatherDrawer>
+  </Transition>
 </template>
 
 <script setup lang="ts">
-import { FeatherDrawer } from '@featherds/drawer'
 import { FeatherButton } from '@featherds/button'
 import { FeatherSpinner } from '@featherds/progress'
 import { useTopologyStore } from '@/stores/topologyStore'
@@ -155,10 +213,7 @@ import { extractNodeId } from '@/services/enlinkdService'
 const store = useTopologyStore()
 const router = useRouter()
 
-const isVisible = computed({
-  get: () => store.selectedElement !== null,
-  set: (val) => { if (!val) store.selectElement(null) }
-})
+const isVisible = computed(() => store.selectedElement !== null)
 
 const vertex = computed(() => {
   const el = store.selectedElement
@@ -171,12 +226,12 @@ const edge = computed(() => {
 })
 
 const panelTitle = computed(() => {
-  if (vertex.value) return vertex.value.label ?? 'Node Detail'
+  if (vertex.value) return vertex.value.label ?? 'Node'
   if (edge.value) return 'Link Detail'
   return ''
 })
 
-// ── Node detail ──────────────────────────────────────────────────────────────
+// ── Node detail ───────────────────────────────────────────────────────────────
 
 const severityBadge = computed(() => {
   if (!vertex.value?.id) return null
@@ -194,9 +249,41 @@ const nodeAlarms = computed(() => {
   return store.nodeAlarmDetails[nodeId.value] ?? []
 })
 
-watch(nodeId, (id) => {
-  if (id !== null && store.alarmSeverity[id]) store.loadNodeAlarmDetails(id)
+const nodeDetail = computed(() => {
+  if (!nodeId.value) return null
+  return store.nodeDetails[nodeId.value] ?? null
+})
+
+const nodeDetailLoading = ref(false)
+
+watch(nodeId, async (id) => {
+  if (id === null) return
+  const tasks: Promise<void>[] = []
+  if (store.alarmSeverity[id]) tasks.push(store.loadNodeAlarmDetails(id))
+  if (!store.nodeDetails[id]) {
+    nodeDetailLoading.value = true
+    tasks.push(store.loadNodeDetail(id).finally(() => { nodeDetailLoading.value = false }))
+  }
+  await Promise.all(tasks)
 }, { immediate: true })
+
+const sortedInterfaces = computed(() => {
+  if (!nodeDetail.value) return []
+  return [...nodeDetail.value.ipInterfaces].sort((a, b) => {
+    if (a.snmpPrimary === 'P') return -1
+    if (b.snmpPrimary === 'P') return 1
+    return (a.ipAddress ?? '').localeCompare(b.ipAddress ?? '')
+  })
+})
+
+const truncate = (s: string, n: number) => s.length > n ? s.slice(0, n) + '…' : s
+const stripQuotes = (s: string) => s.replace(/^"|"$/g, '').trim()
+const formatMacFromElem = (s: string) => {
+  const m = s.match(/macAddress:([a-f0-9]{12})/i)
+  if (!m) return s
+  const h = m[1]
+  return `${h.slice(0,2)}:${h.slice(2,4)}:${h.slice(4,6)}:${h.slice(6,8)}:${h.slice(8,10)}:${h.slice(10)}`
+}
 
 const goToNodeDetail = () => {
   if (vertex.value?.id) router.push(`/node/${vertex.value.id}`)
@@ -223,161 +310,97 @@ watch(edge, async (e) => {
   }
 }, { immediate: true })
 
-const edgeDetail = computed(() => {
-  if (!edgeKey.value) return null
-  return store.edgeLinkDetails[edgeKey.value] ?? null
-})
-
+const edgeDetail = computed(() => edgeKey.value ? store.edgeLinkDetails[edgeKey.value] ?? null : null)
 const edgeProtocols = computed(() => edge.value?.protocols ?? [])
 
 const sourceLabel = computed(() => {
   if (!edge.value) return ''
-  const v = store.vertices.find(v => v.id === String(edge.value!.source.id))
-  return v?.label ?? String(edge.value.source.id)
+  return store.vertices.find(v => v.id === String(edge.value!.source.id))?.label ?? String(edge.value.source.id)
 })
-
 const targetLabel = computed(() => {
   if (!edge.value) return ''
-  const v = store.vertices.find(v => v.id === String(edge.value!.target.id))
-  return v?.label ?? String(edge.value.target.id)
+  return store.vertices.find(v => v.id === String(edge.value!.target.id))?.label ?? String(edge.value.target.id)
 })
+const sourceIp = computed(() => store.vertices.find(v => v.id === String(edge.value?.source.id ?? ''))?.ipAddress ?? '')
+const targetIp = computed(() => store.vertices.find(v => v.id === String(edge.value?.target.id ?? ''))?.ipAddress ?? '')
 
-const sourceIp = computed(() => {
-  if (!edge.value) return ''
-  return store.vertices.find(v => v.id === String(edge.value!.source.id))?.ipAddress ?? ''
-})
-
-const targetIp = computed(() => {
-  if (!edge.value) return ''
-  return store.vertices.find(v => v.id === String(edge.value!.target.id))?.ipAddress ?? ''
-})
-
-// ── String parsers for enlinkd API format ─────────────────────────────────────
-// Values like "eth1(ifindex:3)(macAddress:ee476eb73421)" → "eth1"
+// ── String parsers ────────────────────────────────────────────────────────────
 const ifaceName = (s: string) => s.split('(')[0].trim()
-// "(macAddress:b65c76867284)" or "leaf-01(macAddress:...)" → "b65c:7686:7284" styled
 const macFromStr = (s: string) => {
   const m = s.match(/macAddress:([a-f0-9]{12})/i)
   if (!m) return ''
   const h = m[1]
   return `${h.slice(0,4)}:${h.slice(4,8)}:${h.slice(8)}`
 }
-// "eth1()(ifindex:3)(10.101.1.1)" → "10.101.1.1"
 const ipFromOspfPort = (s: string) => {
   const parts = s.split('(')
   for (const p of parts) {
-    const clean = p.replace(')', '').trim()
-    if (/^\d+\.\d+\.\d+\.\d+$/.test(clean)) return clean
+    const c = p.replace(')', '').trim()
+    if (/^\d+\.\d+\.\d+\.\d+$/.test(c)) return c
   }
   return ''
 }
-// "leaf-01(router id:10.255.0.21)" → { name: "leaf-01", id: "10.255.0.21" }
-const parseRouter = (s: string) => ({
-  name: s.split('(')[0].trim(),
-  id: s.match(/router id:([^)]+)/)?.[1]?.trim() ?? ''
-})
-// "leaf-01(ISSysID:00010aff0015)" → { name: "leaf-01", sysId: "00010aff0015" }
-const parseIsis = (s: string) => ({
-  name: s.split('(')[0].trim(),
-  sysId: s.match(/ISSysID:([^)]+)/)?.[1]?.trim() ?? ''
-})
-// "(mask:255.255.255.252)" → "255.255.255.252"
 const parseMask = (s: string) => s.match(/mask:([^)]+)/)?.[1]?.trim() ?? ''
-// "eth1()(ifindex:2)" → "eth1"
 const isisFaceFromPort = (s: string) => s.split('(')[0].trim() || s
 
-// ── LLDP computed ─────────────────────────────────────────────────────────────
+// ── LLDP / OSPF / IS-IS computed ─────────────────────────────────────────────
 const lldpLinks = computed(() => {
   if (!edgeDetail.value || !edge.value) return []
   const { src, tgt, srcNodeId, tgtNodeId } = edgeDetail.value
   const result: { srcName: string, srcPort: string, srcMac: string, tgtName: string, tgtPort: string, tgtMac: string }[] = []
-
-  const addLinks = (data: typeof src, fromNodeId: number, toNodeId: number, fromName: string) => {
+  const add = (data: typeof src, toNodeId: number, fromName: string) => {
     if (!data) return
     for (const l of data.lldpLinkNodes) {
       if (extractNodeId(l.lldpRemChassisIdUrl) !== String(toNodeId)) continue
-      result.push({
-        srcName: fromName,
-        srcPort: ifaceName(l.lldpLocalPort),
-        srcMac: macFromStr(l.lldpLocalPort),
-        tgtName: l.lldpRemInfo,
-        tgtPort: ifaceName(l.ldpRemPort),
-        tgtMac: macFromStr(l.ldpRemPort)
-      })
+      result.push({ srcName: fromName, srcPort: ifaceName(l.lldpLocalPort), srcMac: macFromStr(l.lldpLocalPort), tgtName: l.lldpRemInfo, tgtPort: ifaceName(l.ldpRemPort), tgtMac: macFromStr(l.ldpRemPort) })
     }
   }
-
-  addLinks(src, srcNodeId, tgtNodeId, sourceLabel.value)
-  addLinks(tgt, tgtNodeId, srcNodeId, targetLabel.value)
+  add(src, tgtNodeId, sourceLabel.value)
+  add(tgt, srcNodeId, targetLabel.value)
   return result
 })
 
-// ── OSPF computed ─────────────────────────────────────────────────────────────
 const ospfRouterIds = computed(() => {
   if (!edgeDetail.value) return ''
-  const srcId = edgeDetail.value.src?.ospfElementNode?.ospfRouterId ?? ''
-  const tgtId = edgeDetail.value.tgt?.ospfElementNode?.ospfRouterId ?? ''
-  if (!srcId && !tgtId) return ''
-  return `${srcId} ↔ ${tgtId}`
+  const s = edgeDetail.value.src?.ospfElementNode?.ospfRouterId ?? ''
+  const t = edgeDetail.value.tgt?.ospfElementNode?.ospfRouterId ?? ''
+  return (s && t) ? `${s} ↔ ${t}` : ''
 })
-
 const ospfLinks = computed(() => {
   if (!edgeDetail.value || !edge.value) return []
   const { src, tgt, srcNodeId, tgtNodeId } = edgeDetail.value
   const result: { srcName: string, localIp: string, tgtName: string, remoteIp: string, mask: string }[] = []
-
-  const addLinks = (data: typeof src, toNodeId: number, fromName: string) => {
+  const add = (data: typeof src, toNodeId: number, fromName: string) => {
     if (!data) return
     for (const l of data.ospfLinkNodes) {
       if (extractNodeId(l.ospfRemRouterUrl) !== String(toNodeId)) continue
-      const remR = parseRouter(l.ospfRemRouterId)
-      result.push({
-        srcName: fromName,
-        localIp: l.ospfLocalPort ? ipFromOspfPort(l.ospfLocalPort) : '',
-        tgtName: remR.name,
-        remoteIp: ipFromOspfPort(l.ospfRemPort),
-        mask: parseMask(l.ospfLinkInfo)
-      })
+      result.push({ srcName: fromName, localIp: l.ospfLocalPort ? ipFromOspfPort(l.ospfLocalPort) : '', tgtName: l.ospfRemRouterId.split('(')[0].trim(), remoteIp: ipFromOspfPort(l.ospfRemPort), mask: parseMask(l.ospfLinkInfo) })
     }
   }
-
-  addLinks(src, tgtNodeId, sourceLabel.value)
-  addLinks(tgt, srcNodeId, targetLabel.value)
+  add(src, tgtNodeId, sourceLabel.value)
+  add(tgt, srcNodeId, targetLabel.value)
   return result
 })
 
-// ── IS-IS computed ────────────────────────────────────────────────────────────
 const isisSysIds = computed(() => {
   if (!edgeDetail.value) return ''
-  const srcSysId = edgeDetail.value.src?.isisElementNode?.isisSysID ?? ''
-  const tgtSysId = edgeDetail.value.tgt?.isisElementNode?.isisSysID ?? ''
-  if (!srcSysId && !tgtSysId) return ''
-  return `${srcSysId} ↔ ${tgtSysId}`
+  const s = edgeDetail.value.src?.isisElementNode?.isisSysID ?? ''
+  const t = edgeDetail.value.tgt?.isisElementNode?.isisSysID ?? ''
+  return (s && t) ? `${s} ↔ ${t}` : ''
 })
-
 const isisLinks = computed(() => {
   if (!edgeDetail.value || !edge.value) return []
   const { src, tgt, srcNodeId, tgtNodeId } = edgeDetail.value
   const result: { srcName: string, localCirc: string, tgtName: string, remotePort: string, adjState: string, adjType: string }[] = []
-
-  const addLinks = (data: typeof src, toNodeId: number, fromName: string) => {
+  const add = (data: typeof src, toNodeId: number, fromName: string) => {
     if (!data) return
     for (const l of data.isisLinkNodes) {
       if (extractNodeId(l.isisISAdjUrl) !== String(toNodeId)) continue
-      const adj = parseIsis(l.isisISAdjNeighSysID)
-      result.push({
-        srcName: fromName,
-        localCirc: String(l.isisCircIfIndex),
-        tgtName: adj.name || String(toNodeId),
-        remotePort: isisFaceFromPort(l.isisISAdjNeighPort),
-        adjState: l.isisISAdjState,
-        adjType: l.isisISAdjNeighSysType.replace('IntermediateSystem', '').replace('l1', 'L1').replace('l2', 'L2')
-      })
+      result.push({ srcName: fromName, localCirc: String(l.isisCircIfIndex), tgtName: l.isisISAdjNeighSysID.split('(')[0].trim(), remotePort: isisFaceFromPort(l.isisISAdjNeighPort), adjState: l.isisISAdjState, adjType: l.isisISAdjNeighSysType.replace('IntermediateSystem', '').replace('l2', 'L2').replace('l1', 'L1') })
     }
   }
-
-  addLinks(src, tgtNodeId, sourceLabel.value)
-  addLinks(tgt, srcNodeId, targetLabel.value)
+  add(src, tgtNodeId, sourceLabel.value)
+  add(tgt, srcNodeId, targetLabel.value)
   return result
 })
 </script>
@@ -386,18 +409,86 @@ const isisLinks = computed(() => {
 @import "@featherds/styles/themes/variables";
 @import "@/styles/severities";
 
-.detail-panel {
-  padding: 16px;
-  overflow-y: auto;
+.topo-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 360px;
+  background: var($surface);
+  border-left: 1px solid var($border-on-surface);
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.15);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var($border-on-surface);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var($secondary-text-on-surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+
+    &:hover {
+      background: var($shade-2);
+    }
+  }
+
+  &__body {
+    padding: 14px 16px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  // Slide-in transition
+  &-enter-active, &-leave-active {
+    transition: transform 0.2s ease, opacity 0.15s ease;
+  }
+  &-enter-from, &-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  // ── shared ──
+  &__section {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var($primary);
+    margin: 14px 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var($border-on-surface);
+
+    &:first-child { margin-top: 0; }
+  }
 
   &__row {
     display: flex;
     flex-direction: column;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   &__key {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var($secondary-text-on-surface);
@@ -405,12 +496,18 @@ const isisLinks = computed(() => {
   }
 
   &__val {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     word-break: break-all;
 
-    &--html :deep(p) {
-      margin: 0 0 4px;
-      &:last-child { margin-bottom: 0; }
+    &--mono { font-family: monospace; font-size: 0.82rem; }
+
+    &--dim { color: var($secondary-text-on-surface); }
+
+    &--truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: help;
     }
   }
 
@@ -420,14 +517,6 @@ const isisLinks = computed(() => {
     border-radius: 4px;
     font-size: 0.78rem;
     font-weight: bold;
-  }
-
-  &__section-header {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var($secondary-text-on-surface);
-    margin: 4px 0 8px;
   }
 
   &__alarm {
@@ -443,22 +532,95 @@ const isisLinks = computed(() => {
     flex: 1;
   }
 
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  &__chip {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background-color: var($primary);
+    color: #fff;
+  }
+
+  &__cat-chip {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    border: 1px solid var($border-on-surface);
+    color: var($secondary-text-on-surface);
+  }
+
+  // Interfaces
+  &__iface {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    font-size: 0.83rem;
+
+    &--primary &-ip { font-weight: 600; }
+
+    &-name {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var($secondary-text-on-surface);
+      min-width: 36px;
+    }
+
+    &-ip {
+      font-family: monospace;
+      font-size: 0.82rem;
+      flex: 1;
+    }
+
+    &-badge {
+      font-size: 0.68rem;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: var($primary);
+      color: #fff;
+
+      &--down {
+        background: var($error);
+      }
+    }
+  }
+
   &__actions {
     margin-top: 16px;
   }
 
-  // Edge-specific styles
+  &__loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    font-size: 0.85rem;
+    color: var($secondary-text-on-surface);
+  }
 
+  &__empty {
+    font-size: 0.85rem;
+    color: var($secondary-text-on-surface);
+    padding: 12px 0;
+  }
+
+  // Edge-specific
   &__endpoints {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 6px;
 
-    &--sub {
-      margin-top: -4px;
-      margin-bottom: 10px;
-    }
+    &--sub { margin-top: -4px; margin-bottom: 10px; }
   }
 
   &__endpoint {
@@ -481,47 +643,7 @@ const isisLinks = computed(() => {
     flex-shrink: 0;
   }
 
-  &__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-
-  &__chip {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    background-color: var($primary);
-    color: #fff;
-  }
-
-  &__loading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 0;
-    font-size: 0.85rem;
-    color: var($secondary-text-on-surface);
-  }
-
-  &__proto-header {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-    color: var($primary);
-    margin: 14px 0 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var($border-on-surface);
-  }
-
-  &__proto-block {
-    margin-bottom: 8px;
-    padding-left: 4px;
-  }
+  &__proto-block { margin-bottom: 8px; padding-left: 4px; }
 
   &__link-row {
     display: flex;
@@ -531,9 +653,7 @@ const isisLinks = computed(() => {
     font-size: 0.82rem;
   }
 
-  &__link-node {
-    font-weight: 600;
-  }
+  &__link-node { font-weight: 600; }
 
   &__link-iface {
     font-family: monospace;
@@ -544,12 +664,9 @@ const isisLinks = computed(() => {
     border-radius: 3px;
   }
 
-  &__link-arrow {
-    color: var($secondary-text-on-surface);
-    flex-shrink: 0;
-  }
+  &__link-arrow { color: var($secondary-text-on-surface); flex-shrink: 0; }
 
-  &__link-macs {
+  &__link-sub {
     font-size: 0.75rem;
     font-family: monospace;
     color: var($secondary-text-on-surface);
@@ -573,15 +690,6 @@ const isisLinks = computed(() => {
     flex-shrink: 0;
   }
 
-  &__kv-val {
-    font-family: monospace;
-    font-size: 0.8rem;
-  }
-
-  &__empty {
-    font-size: 0.85rem;
-    color: var($secondary-text-on-surface);
-    padding: 12px 0;
-  }
+  &__kv-val { font-family: monospace; font-size: 0.8rem; }
 }
 </style>

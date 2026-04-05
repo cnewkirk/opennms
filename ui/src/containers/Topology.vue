@@ -11,7 +11,6 @@
       @reset-layout="graphRef?.resetLayout()"
     />
     <TopologyGraph ref="graphRef" />
-    <TopologyDetailPanel />
   </div>
 </template>
 
@@ -19,7 +18,6 @@
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import TopologyToolbar from '@/components/Topology/TopologyToolbar.vue'
 import TopologyGraph from '@/components/Topology/TopologyGraph.vue'
-import TopologyDetailPanel from '@/components/Topology/TopologyDetailPanel.vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { useMenuStore } from '@/stores/menuStore'
 import { BreadCrumb } from '@/types'
