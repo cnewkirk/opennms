@@ -233,8 +233,8 @@ const buildCriteria = (): string => {
     }
   }
 
-  if (ackStatus.value === 'unacked') parts.push('ackTime==null')
-  else if (ackStatus.value === 'acked') parts.push('ackTime!=null')
+  if (ackStatus.value === 'unacked') parts.push('alarmAckTime==null')
+  else if (ackStatus.value === 'acked') parts.push('alarmAckTime!=null')
 
   if (nodeSearch.value.trim()) {
     parts.push(`nodeLabel==*${nodeSearch.value.trim()}*`)
