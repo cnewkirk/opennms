@@ -23,9 +23,17 @@
 import { defineStore } from 'pinia'
 import { getContainers, getGraph } from '@/services/topologyService'
 import { getAlarms, getNodeAlarms } from '@/services/alarmService'
+import { getNodeEnlinkd, NodeEnlinkdData } from '@/services/enlinkdService'
 import { TopologyVertex, TopologyEdge, TopologyLayer, TopologyElement, AlarmSeverity } from '@/types/topology'
 import { numericSeverityLevel } from '@/components/Map/utils'
 import { Alarm } from '@/types'
+
+export interface EdgeDetail {
+  srcNodeId: number
+  tgtNodeId: number
+  src: NodeEnlinkdData | null
+  tgt: NodeEnlinkdData | null
+}
 
 const ENLINKD_CONTAINER_ID = 'enlinkd'
 
@@ -38,6 +46,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
 
   const alarmSeverity = ref<Record<number, AlarmSeverity>>({})
   const nodeAlarmDetails = ref<Record<number, Alarm[]>>({})
+  const edgeLinkDetails = ref<Record<string, EdgeDetail>>({})
   const selectedElement = ref<TopologyElement | null>(null)
   const focusTarget = ref<string | null>(null)
   const searchQuery = ref('')
@@ -171,6 +180,12 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     alarmSeverity.value = severityMap
   }
 
+  const loadEdgeLinkDetail = async (edgeKey: string, srcNodeId: number, tgtNodeId: number) => {
+    if (edgeLinkDetails.value[edgeKey]) return
+    const [src, tgt] = await Promise.all([getNodeEnlinkd(srcNodeId), getNodeEnlinkd(tgtNodeId)])
+    edgeLinkDetails.value = { ...edgeLinkDetails.value, [edgeKey]: { srcNodeId, tgtNodeId, src, tgt } }
+  }
+
   const loadNodeAlarmDetails = async (nodeId: number) => {
     if (nodeAlarmDetails.value[nodeId]) return
     const alarms = await getNodeAlarms(nodeId, 10)
@@ -213,6 +228,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     layoutKey,
     alarmSeverity,
     nodeAlarmDetails,
+    edgeLinkDetails,
     selectedElement,
     focusTarget,
     searchQuery,
@@ -222,6 +238,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     toggleLayer,
     setAllLayers,
     loadAlarmSeverities,
+    loadEdgeLinkDetail,
     loadNodeAlarmDetails,
     selectElement,
     focusNode,
