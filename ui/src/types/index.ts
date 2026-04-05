@@ -162,7 +162,21 @@ export interface MapNode {
   alarm: Alarm[]
 }
 
+export interface AlarmMemo {
+  body: string | null
+  author: string | null
+  created: number | null
+  updated: number | null
+}
+
+export interface AlarmAcknowledgment {
+  ackUser: string
+  ackAction: string
+  ackTime: number
+}
+
 export interface Alarm {
+  // existing fields (used by list views, dashboard widget, map)
   id: string
   severity: string
   nodeId: number
@@ -171,6 +185,28 @@ export interface Alarm {
   count: number
   lastEventTime: number
   logMessage: string
+  // detail-page fields
+  firstEventTime?: number
+  ipAddress?: string
+  serviceType?: { id: number; name: string }
+  ackTime?: number
+  ackUser?: string
+  description?: string
+  operInstruct?: string
+  reductionKey?: string
+  managedObjectType?: string
+  managedObjectInstance?: string
+  troubleTicketId?: string
+  troubleTicketState?: string
+  isSituation?: boolean
+  isPartOfSituation?: boolean
+  relatedAlarms?: Alarm[]       // populated when isSituation=true
+  relatedSituations?: Alarm[]   // populated when isPartOfSituation=true
+  lastEvent?: { id: number }
+  stickyMemo?: AlarmMemo
+  reductionKeyMemo?: AlarmMemo
+  location?: string
+  nodeLocation?: string
 }
 
 export interface Event {
