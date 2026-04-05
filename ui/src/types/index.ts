@@ -569,6 +569,27 @@ export interface Expression {
   metricName: string
 }
 
+/** Visual config for a single series rendered by PersesPanel */
+export interface PersesSeriesOverride {
+  /** Matches the query label / series name */
+  name: string
+  color?: string
+  type?: 'line' | 'area' | 'stack'
+}
+
+/**
+ * Output of RrdGraphConverter.toPersesGraphSpec().
+ * Contains a single batch query (all DEFs + CDEFs) and per-series visual overrides.
+ */
+export interface PersesGraphSpec {
+  title: string
+  yAxisLabel: string
+  /** Single batched query — all sources and expressions for this graph */
+  query: import('@/datasource/opennms').OpenNMSBatchQuerySpec
+  seriesOverrides: PersesSeriesOverride[]
+  printStatements: PrintStatement[]
+}
+
 export interface Plugin {
   extensionClass?: string
   extensionId: string

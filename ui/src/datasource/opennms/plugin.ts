@@ -1,5 +1,5 @@
 import { fetchMeasurements } from './client'
-import type { OpenNMSQuerySpec, MeasurementsPayload, MeasurementsSource } from './types'
+import type { OpenNMSQuerySpec, OpenNMSBatchQuerySpec, MeasurementsPayload, MeasurementsSource } from './types'
 import type { AbsoluteTimeRange } from '@perses-dev/core'
 
 /** Context passed to getTimeSeriesData — mirrors Perses TimeSeriesQueryContext */
@@ -37,7 +37,7 @@ export interface OpenNMSTimeSeriesData {
  */
 export const OpenNMSTimeSeriesQueryPlugin = {
   async getTimeSeriesData(
-    spec: OpenNMSQuerySpec,
+    spec: OpenNMSQuerySpec | OpenNMSBatchQuerySpec,
     context: OpenNMSQueryContext
   ): Promise<OpenNMSTimeSeriesData> {
     const { timeRange, suggestedStepMs } = context
@@ -45,25 +45,51 @@ export const OpenNMSTimeSeriesQueryPlugin = {
     const end = timeRange.end.getTime()
     const step = Math.max(suggestedStepMs ?? 300_000, 60_000)
 
-    const payload: MeasurementsPayload = { start, end, step, source: [] }
+    let payload: MeasurementsPayload
 
-    if (spec.expression) {
-      payload.expression = [
-        {
-          value: spec.expression,
-          label: spec.label ?? spec.attribute,
-          transient: spec.transient ?? false
-        }
-      ]
-    } else {
-      const source: MeasurementsSource = {
-        aggregation: spec.aggregation,
-        attribute: spec.attribute,
-        label: spec.label ?? spec.attribute,
-        resourceId: spec.resourceId,
-        transient: spec.transient ?? false
+    if ('batch' in spec && spec.batch) {
+      // Batch mode: all DEF sources + CDEF expressions in one call.
+      // Required when CDEF expressions reference DEF variable names.
+      payload = {
+        start, end, step,
+        source: spec.sources.map(s => ({
+          aggregation: s.aggregation,
+          attribute: s.attribute,
+          label: s.label,
+          resourceId: s.resourceId,
+          transient: s.transient ?? false
+        }))
       }
-      payload.source = [source]
+      if (spec.expressions.length > 0) {
+        payload.expression = spec.expressions.map(e => ({
+          value: e.value,
+          label: e.label,
+          transient: e.transient ?? false
+        }))
+      }
+    } else {
+      // Single-query mode (original behavior)
+      const singleSpec = spec as OpenNMSQuerySpec
+      payload = { start, end, step, source: [] }
+
+      if (singleSpec.expression) {
+        payload.expression = [
+          {
+            value: singleSpec.expression,
+            label: singleSpec.label ?? singleSpec.attribute,
+            transient: singleSpec.transient ?? false
+          }
+        ]
+      } else {
+        const source: MeasurementsSource = {
+          aggregation: singleSpec.aggregation,
+          attribute: singleSpec.attribute,
+          label: singleSpec.label ?? singleSpec.attribute,
+          resourceId: singleSpec.resourceId,
+          transient: singleSpec.transient ?? false
+        }
+        payload.source = [source]
+      }
     }
 
     const response = await fetchMeasurements(payload)

@@ -12,7 +12,7 @@ import { TimeSeriesChart } from '@perses-dev/panels-plugin'
 import { usePerses } from '@/composables/usePerses'
 import { buildPersesTheme } from '@/theme/persesTheme'
 import { OpenNMSPlugin } from '@/datasource/opennms'
-import type { OpenNMSQuerySpec } from '@/datasource/opennms'
+import type { OpenNMSQuerySpec, OpenNMSBatchQuerySpec } from '@/datasource/opennms'
 
 // Build a PluginLoader that eagerly provides the TimeSeriesChart panel plugin
 // and the OpenNMS time-series query plugin.
@@ -45,7 +45,7 @@ const pluginLoader = dynamicImportPluginLoader([
 
 interface Props {
   title: string
-  queries: OpenNMSQuerySpec[]
+  queries: Array<OpenNMSQuerySpec | OpenNMSBatchQuerySpec>
   yAxisLabel?: string
   seriesOverrides?: Array<{ name: string; color?: string; type?: 'line' | 'area' | 'stack' }>
 }

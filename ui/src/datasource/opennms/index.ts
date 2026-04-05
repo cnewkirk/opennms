@@ -15,4 +15,4 @@ export const OpenNMSPlugin = {
 
 export { OpenNMSTimeSeriesQueryPlugin } from './plugin'
 export { QueryEditor } from './QueryEditor'
-export type { OpenNMSQuerySpec } from './types'
+export type { OpenNMSQuerySpec, OpenNMSBatchQuerySpec } from './types'

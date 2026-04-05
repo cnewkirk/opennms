@@ -14,6 +14,30 @@ export interface OpenNMSQuerySpec {
   transient?: boolean
 }
 
+/**
+ * A batch of DEF sources and CDEF expressions for a single /rest/measurements call.
+ * Use this when a graph has CDEF metrics that reference DEF variable names — they
+ * must all be in the same request body for the server-side JEXL evaluation to work.
+ */
+export interface OpenNMSBatchQuerySpec {
+  /** Discriminator so the plugin can detect batch vs. single-query mode */
+  batch: true
+  /** DEF metrics (raw RRD attribute fetches) */
+  sources: Array<{
+    resourceId: string
+    attribute: string
+    aggregation: 'AVERAGE' | 'MIN' | 'MAX' | 'LAST'
+    label: string
+    transient?: boolean
+  }>
+  /** CDEF/expression metrics (JEXL expressions evaluated server-side) */
+  expressions: Array<{
+    value: string
+    label: string
+    transient?: boolean
+  }>
+}
+
 /** Shape of a single source entry in the /rest/measurements request body */
 export interface MeasurementsSource {
   aggregation: string
