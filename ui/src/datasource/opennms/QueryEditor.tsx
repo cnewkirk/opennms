@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Box from '@mui/material/Box'
@@ -12,12 +12,8 @@ interface QueryEditorProps {
 const AGGREGATIONS = ['AVERAGE', 'MIN', 'MAX', 'LAST'] as const
 
 export const QueryEditor: React.FC<QueryEditorProps> = ({ value, onChange }) => {
-  const [spec, setSpec] = useState<OpenNMSQuerySpec>(value)
-
   const update = (patch: Partial<OpenNMSQuerySpec>) => {
-    const updated = { ...spec, ...patch }
-    setSpec(updated)
-    onChange(updated)
+    onChange({ ...value, ...patch })
   }
 
   return (
@@ -25,7 +21,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({ value, onChange }) => 
       <TextField
         label="Resource ID"
         size="small"
-        value={spec.resourceId ?? ''}
+        value={value.resourceId ?? ''}
         onChange={e => update({ resourceId: e.target.value })}
         helperText="e.g. node[1].interfaceSnmp[eth0-000000000000]"
         fullWidth
@@ -33,7 +29,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({ value, onChange }) => 
       <TextField
         label="Attribute"
         size="small"
-        value={spec.attribute ?? ''}
+        value={value.attribute ?? ''}
         onChange={e => update({ attribute: e.target.value })}
         helperText="e.g. ifInOctets"
         fullWidth
@@ -42,7 +38,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({ value, onChange }) => 
         select
         label="Aggregation"
         size="small"
-        value={spec.aggregation ?? 'AVERAGE'}
+        value={value.aggregation ?? 'AVERAGE'}
         onChange={e => update({ aggregation: e.target.value as OpenNMSQuerySpec['aggregation'] })}
         fullWidth
       >
@@ -53,7 +49,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({ value, onChange }) => 
       <TextField
         label="Label (optional)"
         size="small"
-        value={spec.label ?? ''}
+        value={value.label ?? ''}
         onChange={e => update({ label: e.target.value || undefined })}
         fullWidth
       />
