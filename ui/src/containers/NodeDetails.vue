@@ -81,6 +81,13 @@
       </div>
     </div>
 
+    <!-- Alarms -->
+    <div v-if="node" class="feather-row">
+      <div class="feather-col-12">
+        <AlarmsTable :nodeId="node.id" :nodeLabel="node.label" />
+      </div>
+    </div>
+
     <!-- Events -->
     <div v-if="node" class="feather-row">
       <div class="feather-col-12">
@@ -106,6 +113,7 @@ import CategoryPanel from '@/components/NodeDetail/CategoryPanel.vue'
 import AvailabilityPanel from '@/components/NodeDetail/AvailabilityPanel.vue'
 import InterfacesTabs from '@/components/Nodes/InterfacesTabs.vue'
 import EventsTable from '@/components/Nodes/EventsTable.vue'
+import AlarmsTable from '@/components/Nodes/AlarmsTable.vue'
 import OutagesTable from '@/components/Nodes/OutagesTable.vue'
 import useNodeDetail from '@/composables/useNodeDetail'
 import useNodeAvailability from '@/composables/useNodeAvailability'

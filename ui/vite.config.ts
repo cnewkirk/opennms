@@ -100,6 +100,7 @@ export default defineConfig({
     // (e.g. var(--feather-surface) → --feather-surface). Use esbuild instead.
     cssMinify: 'esbuild',
     rollupOptions: {
+      external: ['@hookform/resolvers/zod', 'react-router-dom'],
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
