@@ -5,7 +5,7 @@ import type { MeasurementsPayload, MeasurementsResponse } from './types'
  * Auth is handled by session cookies (same-origin request).
  */
 export async function fetchMeasurements(payload: MeasurementsPayload): Promise<MeasurementsResponse> {
-  const response = await fetch('/rest/measurements', {
+  const response = await fetch('/opennms/rest/measurements', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

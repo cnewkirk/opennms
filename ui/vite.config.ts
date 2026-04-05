@@ -89,6 +89,10 @@ export default defineConfig({
     }
   },
   root: './src/main',
+  // Relative base so built index.html references ./assets/... paths that resolve
+  // correctly when served from /opennms/ui/ — absolute paths (/assets/...) would
+  // resolve to the server root and 404.
+  base: './',
   // make sure we get environment variables from .env files in the main ui directory
   // path is relative to 'root' defined just above
   envDir: '../..',

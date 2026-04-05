@@ -15,7 +15,7 @@ export function usePerses(
   containerRef: Ref<HTMLElement | null>,
   specRef: Ref<PanelSpec>,
   renderFn: (spec: PanelSpec) => ReturnType<typeof createElement>
-): void {
+): { rerender: () => void } {
   let root: Root | null = null
 
   watch([containerRef, specRef], ([el, spec], [prevEl]) => {
@@ -34,4 +34,12 @@ export function usePerses(
     root?.unmount()
     root = null
   })
+
+  function rerender() {
+    if (root && specRef.value) {
+      root.render(renderFn(specRef.value))
+    }
+  }
+
+  return { rerender }
 }

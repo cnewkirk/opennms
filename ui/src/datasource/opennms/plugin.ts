@@ -104,6 +104,7 @@ export const OpenNMSTimeSeriesQueryPlugin = {
 
     return {
       timeRange: { start: timeRange.start, end: timeRange.end },
+      stepMs: step,
       series
     }
   }

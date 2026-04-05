@@ -60,6 +60,7 @@
     "@featherds/textarea": "0.12.43",
     "@featherds/tooltip": "0.12.43",
     "@featherds/utils": "0.12.43",
+    "@hookform/resolvers": "^5.2.2",
     "@mui/material": "^6.1.10",
     "@mui/system": "^6.1.10",
     "@perses-dev/components": "^0.50.3",
