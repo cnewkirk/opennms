@@ -57,8 +57,9 @@ import { useEventStore } from '@/stores/eventStore'
 import useQueryParameters from '@/composables/useQueryParams'
 import { Event, QueryParameters } from '@/types'
 
+const props = defineProps<{ nodeId: string }>()
+
 const eventStore = useEventStore()
-const route = useRoute()
 
 const getEvents = async (payload: QueryParameters) => {
   eventStore.getEvents(payload)
@@ -71,7 +72,7 @@ const getEventsTotalCount = () => {
 const { queryParameters, updateQueryParameters } = useQueryParameters({
   limit: 5,
   offset: 0,
-  _s: `node.id==${route.params.id}`
+  _s: `node.id==${props.nodeId}`
 }, getEvents)
 
 const events = computed(() => eventStore.events)
