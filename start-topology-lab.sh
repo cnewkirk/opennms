@@ -498,3 +498,85 @@ for node_def in "${NODES[@]}"; do
 
   echo "    started: ${name} (mgmt: ${mgmt_ip}, role: ${role})"
 done
+
+# ---------------------------------------------------------------------------
+# Phase 5: Attach test-opennms to management network
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [5/7] Attaching test-opennms to ${MGMT_NET}..."
+
+if podman network inspect "${MGMT_NET}" \
+     --format '{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null \
+   | grep -q "test-opennms"; then
+  echo "    already connected, skipping"
+else
+  podman network connect \
+    --ip 10.100.0.10 \
+    "${MGMT_NET}" test-opennms
+  echo "    connected test-opennms (10.100.0.10)"
+fi
+
+# ---------------------------------------------------------------------------
+# Phase 6: Drop requisition and trigger import
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [6/7] Provisioning topology nodes into OpenNMS..."
+
+REQ_FILE="$(mktemp)"
+cat > "${REQ_FILE}" <<'REQUISITION'
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model-import xmlns="http://xmlns.opennms.org/xsd/config/model-import"
+    date-stamp="2026-04-05T00:00:00.000Z"
+    foreign-source="Topology-Lab"
+    last-import="2026-04-05T00:00:00.000Z">
+  <node node-label="spine-01" foreign-id="topo-spine-01">
+    <interface ip-addr="10.100.0.11" snmp-primary="P" status="1">
+      <monitored-service service-name="SNMP"/>
+      <monitored-service service-name="ICMP"/>
+    </interface>
+    <category name="Topology-Lab"/>
+  </node>
+  <node node-label="spine-02" foreign-id="topo-spine-02">
+    <interface ip-addr="10.100.0.12" snmp-primary="P" status="1">
+      <monitored-service service-name="SNMP"/>
+      <monitored-service service-name="ICMP"/>
+    </interface>
+    <category name="Topology-Lab"/>
+  </node>
+  <node node-label="leaf-01" foreign-id="topo-leaf-01">
+    <interface ip-addr="10.100.0.21" snmp-primary="P" status="1">
+      <monitored-service service-name="SNMP"/>
+      <monitored-service service-name="ICMP"/>
+    </interface>
+    <category name="Topology-Lab"/>
+  </node>
+  <node node-label="leaf-02" foreign-id="topo-leaf-02">
+    <interface ip-addr="10.100.0.22" snmp-primary="P" status="1">
+      <monitored-service service-name="SNMP"/>
+      <monitored-service service-name="ICMP"/>
+    </interface>
+    <category name="Topology-Lab"/>
+  </node>
+  <node node-label="leaf-03" foreign-id="topo-leaf-03">
+    <interface ip-addr="10.100.0.23" snmp-primary="P" status="1">
+      <monitored-service service-name="SNMP"/>
+      <monitored-service service-name="ICMP"/>
+    </interface>
+    <category name="Topology-Lab"/>
+  </node>
+</model-import>
+REQUISITION
+
+podman cp "${REQ_FILE}" test-opennms:/opt/opennms/etc/imports/Topology-Lab.xml
+rm -f "${REQ_FILE}"
+
+# Trigger import via REST (provisiond picks it up within seconds)
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+  -u admin:notdefault \
+  -X PUT \
+  "http://localhost:8980/opennms/rest/requisitions/Topology-Lab/import?rescanExisting=true")
+if [[ "${HTTP_CODE}" == "202" ]]; then
+  echo "    Import triggered (HTTP 202)"
+else
+  echo "    WARNING: import REST call returned HTTP ${HTTP_CODE} (may still work if file was copied)"
+fi
