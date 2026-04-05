@@ -33,9 +33,9 @@ describe('OpenNMSTimeSeriesQueryPlugin', () => {
 
     expect(result.series).toHaveLength(1)
     expect(result.series[0].name).toBe('ifInOctets')
-    // Values should be [timestamp_seconds, value]
-    expect(result.series[0].values[0]).toEqual([1700000000, 100.0])
-    expect(result.series[0].values[1]).toEqual([1700000300, 200.0])
+    // Values should be [timestamp_ms, value]
+    expect(result.series[0].values[0]).toEqual([1700000000000, 100.0])
+    expect(result.series[0].values[1]).toEqual([1700000300000, 200.0])
   })
 
   test('passes null values through as null', async () => {

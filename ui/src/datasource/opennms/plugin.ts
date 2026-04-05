@@ -9,7 +9,7 @@ export interface OpenNMSQueryContext {
   datasource?: unknown
 }
 
-/** A single data point: [timestamp_seconds, value | null] */
+/** A single data point: [timestamp_ms, value | null] */
 export type TimeSeriesValuePair = [number, number | null]
 
 /** One time series returned by the plugin */
@@ -28,7 +28,7 @@ export interface OpenNMSTimeSeriesData {
  * OpenNMS measurements datasource plugin for Perses.
  *
  * Accepts an OpenNMSQuerySpec and a time range context, fetches data from
- * /rest/measurements, and returns series with timestamps in seconds.
+ * /rest/measurements, and returns series with timestamps in milliseconds.
  *
  * This intentionally uses a plain-object pattern rather than directly
  * implementing a Perses plugin interface because Perses 0.50.3 does not
@@ -71,7 +71,7 @@ export const OpenNMSTimeSeriesQueryPlugin = {
     const series: OpenNMSTimeSeries[] = response.labels.map((label, colIdx) => ({
       name: label,
       values: response.timestamps.map((ts, rowIdx): TimeSeriesValuePair => [
-        ts / 1000,
+        ts,
         response.columns[colIdx]?.values[rowIdx] ?? null
       ])
     }))
