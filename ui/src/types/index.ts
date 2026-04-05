@@ -184,11 +184,19 @@ export interface Event {
   logMessage: string
   nodeId: number
   nodeLabel: string
-  parameters: Array<any>
+  parameters: Array<{ name: string; value: string; type?: string }>
   severity: string
   source: string
   time: number
   uei: string
+  // Fields used by event detail page
+  ipAddress?: string
+  serviceName?: string
+  serviceId?: number
+  alarmId?: number
+  operatorInstruction?: string
+  systemId?: string
+  nodeLocation?: string
 }
 
 export interface MonitoringLocation {

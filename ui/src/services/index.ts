@@ -56,7 +56,7 @@ import { getAliases, getCredentialsByAlias, addCredentials, updateCredentials } 
 
 import { getAlarms, modifyAlarm } from './alarmService'
 import { getOutages, getActiveOutages, getActiveOutageCount } from './outageService'
-import { getEvents } from './eventService'
+import { getEvents, getEventById } from './eventService'
 import { getNodeIfServices } from './ifService'
 import { getIpInterfaces, getNodeIpInterfaceQuery } from './ipInterfaceService'
 import { search } from './searchService'
@@ -84,6 +84,7 @@ export default {
   getNodes,
   getAlarms,
   getEvents,
+  getEventById,
   modifyAlarm,
   getOutages,
   getActiveOutages,
