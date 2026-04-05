@@ -179,6 +179,7 @@ const { showSnackBar } = useSnackbar()
 const PAGE_SIZE = 25
 
 const ALL_SEVERITIES = ['CRITICAL', 'MAJOR', 'MINOR', 'WARNING', 'NORMAL', 'CLEARED']
+const DEFAULT_SEVERITIES = ['CRITICAL', 'MAJOR', 'MINOR', 'WARNING', 'NORMAL']
 
 const ACK_OPTIONS = [
   { label: 'All',    value: 'all'    as const },
@@ -206,7 +207,7 @@ const sortField = ref('lastEventTime')
 const sortDesc  = ref(true)
 
 // Filters
-const selectedSeverities = ref<string[]>(['CRITICAL', 'MAJOR', 'MINOR', 'WARNING', 'NORMAL'])
+const selectedSeverities = ref<string[]>([...DEFAULT_SEVERITIES])
 const ackStatus  = ref<'all' | 'unacked' | 'acked'>('unacked')
 const nodeSearch = ref('')
 const timeRange  = ref<'24h' | '7d' | '30d' | 'all'>('all')
@@ -214,7 +215,8 @@ const timeRange  = ref<'24h' | '7d' | '30d' | 'all'>('all')
 let searchDebounce: ReturnType<typeof setTimeout> | null = null
 
 const hasActiveFilters = computed(() =>
-  selectedSeverities.value.length !== ALL_SEVERITIES.length - 1 || // default excludes CLEARED
+  selectedSeverities.value.length !== DEFAULT_SEVERITIES.length ||
+  DEFAULT_SEVERITIES.some(s => !selectedSeverities.value.includes(s)) ||
   ackStatus.value !== 'unacked' ||
   nodeSearch.value.trim() !== '' ||
   timeRange.value !== 'all'
@@ -300,7 +302,7 @@ const toggleSeverity = (sev: string) => {
 }
 
 const resetFilters = () => {
-  selectedSeverities.value = ['CRITICAL', 'MAJOR', 'MINOR', 'WARNING', 'NORMAL']
+  selectedSeverities.value = [...DEFAULT_SEVERITIES]
   ackStatus.value = 'unacked'
   nodeSearch.value = ''
   timeRange.value = 'all'
