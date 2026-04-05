@@ -580,3 +580,61 @@ if [[ "${HTTP_CODE}" == "202" ]]; then
 else
   echo "    WARNING: import REST call returned HTTP ${HTTP_CODE} (may still work if file was copied)"
 fi
+
+# ---------------------------------------------------------------------------
+# Phase 7: Wait for OSPF convergence
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [7/7] Waiting for OSPF convergence (cap: 120s)..."
+
+CONVERGED=false
+for i in $(seq 1 24); do
+  # Check spine-01 has 3 Full OSPF neighbors
+  count=$(podman exec topo-spine-01 vtysh -c "show ip ospf neighbor" 2>/dev/null \
+          | grep -c "Full/" || true)
+  if [[ "${count}" -ge 3 ]]; then
+    CONVERGED=true
+    echo "    OSPF converged after $((i * 5))s (spine-01 sees ${count} Full neighbors)"
+    break
+  fi
+  printf "    ... waiting (%ds, spine-01 Full neighbors: %d/3)\r" "$((i * 5))" "${count}"
+  sleep 5
+done
+echo ""
+
+if [[ "${CONVERGED}" == "false" ]]; then
+  echo "ERROR: OSPF did not converge within 120s. Diagnostics:" >&2
+  echo "--- spine-01 ospf neighbors ---" >&2
+  podman exec topo-spine-01 vtysh -c "show ip ospf neighbor" >&2 || true
+  echo "--- spine-01 isis neighbors ---" >&2
+  podman exec topo-spine-01 vtysh -c "show isis neighbor" >&2 || true
+  echo "--- spine-01 lldp neighbors ---" >&2
+  podman exec topo-spine-01 lldpcli show neighbors >&2 || true
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Summary
+# ---------------------------------------------------------------------------
+echo ""
+echo "============================================================"
+echo " Topology Lab is UP"
+echo "============================================================"
+echo ""
+echo " Nodes:"
+for node_def in "${NODES[@]}"; do
+  read -ra parts <<< "$node_def"
+  printf "   %-18s  %s  (%s)\n" "${parts[0]}" "${parts[1]}" "${parts[2]}"
+done
+echo ""
+echo " Verify topology layers:"
+echo "   OSPF:  podman exec topo-spine-01 vtysh -c 'show ip ospf neighbor'"
+echo "   ISIS:  podman exec topo-spine-01 vtysh -c 'show isis neighbor'"
+echo "   LLDP:  podman exec topo-spine-01 lldpcli show neighbors"
+echo "   SNMP:  snmpwalk -v2c -c public 10.100.0.11 LLDP-MIB::lldpRemTable"
+echo ""
+echo " Wait ~30-60s for EnLinkd to collect, then open:"
+echo "   http://localhost:8980/opennms/  → navigate to /#/topology"
+echo ""
+echo " Teardown:  ./start-topology-lab.sh --teardown"
+echo "============================================================"
