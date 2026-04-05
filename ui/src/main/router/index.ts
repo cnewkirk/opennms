@@ -71,6 +71,15 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      redirect: '/dashboard'
+    },
+    {
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: () => import('@/containers/Dashboard.vue')
+    },
+    {
+      path: '/home',
       name: 'home',
       component: Home
     },
@@ -285,6 +294,22 @@ const router = createRouter({
       path: '/event-config/create',
       name: 'Event Configuration Create',
       component: () => import('@/containers/EventConfigEventCreate.vue')
+    },
+    {
+      path: '/jmx-config-generator',
+      name: 'JMX Config Generator',
+      component: () => import('@/containers/JmxConfigGenerator.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access JMX Config Generator.' })
+            router.push(from.path)
+          }
+        }
+
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
     },
     {
       path: '/:pathMatch(.*)*', // catch other paths and redirect

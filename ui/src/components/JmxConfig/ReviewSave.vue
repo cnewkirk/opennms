@@ -136,8 +136,8 @@ const download = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
 @use "@featherds/styles/mixins/typography" as typo;
+@import "@featherds/styles/themes/variables";
 
 .review-save {
   max-width: 800px;

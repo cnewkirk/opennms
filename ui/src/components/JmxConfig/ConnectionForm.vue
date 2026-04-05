@@ -99,8 +99,8 @@ const isValid = computed(() =>
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
 @use "@featherds/styles/mixins/typography" as typo;
+@import "@featherds/styles/themes/variables";
 
 .connection-form {
   max-width: 600px;
