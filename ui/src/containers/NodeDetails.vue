@@ -82,16 +82,16 @@
     </div>
 
     <!-- Events -->
-    <div class="feather-row">
+    <div v-if="node" class="feather-row">
       <div class="feather-col-12">
-        <EventsTable />
+        <EventsTable :nodeId="node.id" />
       </div>
     </div>
 
     <!-- Outages -->
-    <div class="feather-row">
+    <div v-if="node" class="feather-row">
       <div class="feather-col-12">
-        <OutagesTable />
+        <OutagesTable :nodeId="node.id" />
       </div>
     </div>
   </template>

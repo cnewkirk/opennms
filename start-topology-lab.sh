@@ -12,7 +12,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TOPO_IMAGE="localhost/opennms/topology-node:latest"
-FRR_BASE="quay.io/frrouting/frr:9.1.0"
+FRR_BASE="alpine:3.19"
 
 TEARDOWN_ONLY=false
 FORCE_REBUILD=false
@@ -99,6 +99,7 @@ else
   cat > "${BUILD_DIR}/snmpd.conf" <<'SNMPD'
 master agentx
 agentXSocket /var/agentx/master
+agentXPerms 0666 0755
 rocommunity public
 syslocation "OpenNMS Topology Lab"
 syscontact "admin@localhost"
@@ -113,6 +114,10 @@ set -e
 mkdir -p /var/agentx
 chmod 755 /var/agentx
 
+# FRR runtime dirs
+mkdir -p /var/run/frr /var/log/frr
+chown frr:frr /var/run/frr /var/log/frr 2>/dev/null || true
+
 # Start snmpd (master AgentX agent) — must be up before subagents connect
 /usr/sbin/snmpd -Lo -p /tmp/snmpd.pid -c /etc/snmp/snmpd.conf
 sleep 1
@@ -126,25 +131,30 @@ if [[ "${ROLE}" == "leaf" ]]; then
   ip link set dummy0 up
 fi
 
-# Start lldpd as AgentX subagent (-x = AgentX, -d = debug/foreground logs)
+# Start lldpd as AgentX subagent (-x = AgentX)
 lldpd -x &
 sleep 1
 
-# Start FRR (zebra + ospfd + isisd via watchfrr)
-exec /usr/lib/frr/docker-start
+# Start FRR (zebra + ospfd + isisd via watchfrr, same as docker-start)
+source /usr/lib/frr/frrcommon.sh
+exec /usr/lib/frr/watchfrr $(daemon_list)
 ENTRY
   chmod +x "${BUILD_DIR}/entrypoint.sh"
 
   # ---- Dockerfile ----
   cat > "${BUILD_DIR}/Dockerfile" <<DOCKERFILE
 FROM ${FRR_BASE}
-USER root
 RUN apk update && apk add --no-cache \
+    frr \
+    frr-snmp \
     lldpd \
     net-snmp \
     net-snmp-tools \
     iproute2
-RUN mkdir -p /var/agentx
+RUN mkdir -p /var/agentx /var/run/frr /var/log/frr /etc/frr && \
+    addgroup -S frr 2>/dev/null || true && \
+    adduser -S -G frr frr 2>/dev/null || true && \
+    chown frr:frr /var/run/frr /var/log/frr /etc/frr
 COPY snmpd.conf /etc/snmp/snmpd.conf
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
@@ -172,6 +182,37 @@ for entry in "${P2P_NETS[@]}"; do
 done
 
 # ---------------------------------------------------------------------------
+# Phase 2b: Configure bridge multicast forwarding for LLDP
+# ---------------------------------------------------------------------------
+# Linux bridges drop IEEE reserved multicast (01:80:c2:00:00:00-0f) by default.
+# LLDP uses 01:80:c2:00:00:0e (bit 14 = 0x4000 in group_fwd_mask).
+# Multicast snooping must also be disabled (no IGMP querier in lab).
+# This must be done inside the podman VM via `podman machine ssh`.
+echo ""
+echo "==> [2b] Configuring bridge multicast forwarding for LLDP..."
+
+ALL_NETS=("${MGMT_NET}")
+for entry in "${P2P_NETS[@]}"; do
+  ALL_NETS+=("${entry%%:*}")
+done
+
+BRIDGE_CMDS=""
+for net in "${ALL_NETS[@]}"; do
+  br=$(podman network inspect "$net" 2>/dev/null \
+       | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['network_interface'])" 2>/dev/null || true)
+  if [[ -n "$br" ]]; then
+    BRIDGE_CMDS+="echo 0 > /sys/class/net/${br}/bridge/multicast_snooping 2>/dev/null;"
+    BRIDGE_CMDS+="echo 0x4000 > /sys/class/net/${br}/bridge/group_fwd_mask 2>/dev/null;"
+    echo "    configured LLDP forwarding: ${net} -> ${br}"
+  fi
+done
+
+if [[ -n "$BRIDGE_CMDS" ]]; then
+  podman machine ssh -- "bash -c '${BRIDGE_CMDS}exit 0'" 2>/dev/null || \
+    echo "    WARNING: could not configure bridge multicast (rootless/non-VM mode?)"
+fi
+
+# ---------------------------------------------------------------------------
 # Phase 3: Stage per-node FRR configs
 # ---------------------------------------------------------------------------
 echo ""
@@ -197,6 +238,9 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
+zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
+isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
 cat > "${CONFIGS}/spine-01/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/spine-01/frr.conf" <<'FRR'
@@ -215,6 +259,7 @@ interface eth1
  ip address 10.101.1.1/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -223,6 +268,7 @@ interface eth2
  ip address 10.101.2.1/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -231,6 +277,7 @@ interface eth3
  ip address 10.101.3.1/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -256,6 +303,9 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
+zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
+isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
 cat > "${CONFIGS}/spine-02/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/spine-02/frr.conf" <<'FRR'
@@ -274,6 +324,7 @@ interface eth1
  ip address 10.101.4.1/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -282,6 +333,7 @@ interface eth2
  ip address 10.101.5.1/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -290,6 +342,7 @@ interface eth3
  ip address 10.101.6.1/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -315,6 +368,9 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
+zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
+isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
 cat > "${CONFIGS}/leaf-01/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/leaf-01/frr.conf" <<'FRR'
@@ -333,6 +389,7 @@ interface eth1
  ip address 10.101.1.2/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -341,6 +398,7 @@ interface eth2
  ip address 10.101.4.2/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -366,6 +424,9 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
+zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
+isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
 cat > "${CONFIGS}/leaf-02/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/leaf-02/frr.conf" <<'FRR'
@@ -384,6 +445,7 @@ interface eth1
  ip address 10.101.2.2/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -392,6 +454,7 @@ interface eth2
  ip address 10.101.5.2/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -417,6 +480,9 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
+zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
+isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
 cat > "${CONFIGS}/leaf-03/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/leaf-03/frr.conf" <<'FRR'
@@ -435,6 +501,7 @@ interface eth1
  ip address 10.101.3.2/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
@@ -443,6 +510,7 @@ interface eth2
  ip address 10.101.6.2/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
+ ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !

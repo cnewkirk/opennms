@@ -48,11 +48,12 @@ import { useNodeStore } from '@/stores/nodeStore'
 import useQueryParameters from '@/composables/useQueryParams'
 import { QueryParameters } from '@/types'
 
+const props = defineProps<{ nodeId: string }>()
+
 const nodeStore = useNodeStore()
-const route = useRoute()
 
 const getNodeOutages = async (payload: QueryParameters) => {
-  nodeStore.getNodeOutages({ id: route.params.id as string, queryParameters: payload })
+  nodeStore.getNodeOutages({ id: props.nodeId, queryParameters: payload })
 }
 
 const getOutagesTotalCount = () => {

@@ -22,7 +22,7 @@
 
 <template>
   <div v-if="adminRole" class="admin-bar">
-    <FeatherButton :disabled="rescanning" @click="rescan">
+    <FeatherButton primary :disabled="rescanning" @click="rescan">
       {{ rescanning ? 'Rescanning…' : 'Rescan' }}
     </FeatherButton>
 
