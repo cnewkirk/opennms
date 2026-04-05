@@ -70,6 +70,19 @@
         >{{ opt.label }}</button>
       </div>
     </div>
+
+    <div class="alarms-list__filter-group alarms-list__col-menu-wrap">
+      <span class="alarms-list__filter-label caption">&nbsp;</span>
+      <button class="alarms-list__col-btn" @click.stop="showColumnMenu = !showColumnMenu">
+        Columns ▾
+      </button>
+      <div v-if="showColumnMenu" class="alarms-list__col-menu" @click.stop>
+        <label v-for="col in COLUMN_DEFS" :key="col.key" class="alarms-list__col-item">
+          <input type="checkbox" :checked="isVisible(col.key)" @change="toggleColumn(col.key)" />
+          {{ col.label }}
+        </label>
+      </div>
+    </div>
   </div>
 
   <!-- Loading skeleton -->
@@ -95,14 +108,18 @@
       <table class="alarms-list__table">
         <thead>
           <tr>
-            <th class="sortable" @click="setSort('severity')">Severity<span class="sort-icon">{{ sortIndicator('severity') }}</span></th>
-            <th class="sortable" @click="setSort('id')">ID<span class="sort-icon">{{ sortIndicator('id') }}</span></th>
-            <th>Node</th>
-            <th>Service</th>
-            <th>IP</th>
-            <th class="sortable" @click="setSort('count')">Count<span class="sort-icon">{{ sortIndicator('count') }}</span></th>
-            <th class="sortable" @click="setSort('lastEventTime')">Last Event<span class="sort-icon">{{ sortIndicator('lastEventTime') }}</span></th>
-            <th>Ack</th>
+            <th v-if="isVisible('severity')" class="sortable" @click="setSort('severity')">Severity<span class="sort-icon">{{ sortIndicator('severity') }}</span></th>
+            <th v-if="isVisible('id')" class="sortable" @click="setSort('id')">ID<span class="sort-icon">{{ sortIndicator('id') }}</span></th>
+            <th v-if="isVisible('nodeLabel')">Node</th>
+            <th v-if="isVisible('service')">Service</th>
+            <th v-if="isVisible('ipAddress')">IP</th>
+            <th v-if="isVisible('count')" class="sortable" @click="setSort('count')">Count<span class="sort-icon">{{ sortIndicator('count') }}</span></th>
+            <th v-if="isVisible('lastEventTime')" class="sortable" @click="setSort('lastEventTime')">Last Event<span class="sort-icon">{{ sortIndicator('lastEventTime') }}</span></th>
+            <th v-if="isVisible('firstEventTime')" class="sortable" @click="setSort('firstEventTime')">First Event<span class="sort-icon">{{ sortIndicator('firstEventTime') }}</span></th>
+            <th v-if="isVisible('ackStatus')">Ack</th>
+            <th v-if="isVisible('logMessage')" class="alarms-list__col-wide">Log Message</th>
+            <th v-if="isVisible('description')" class="alarms-list__col-wide">Description</th>
+            <th v-if="isVisible('uei')">UEI</th>
             <th></th>
           </tr>
         </thead>
@@ -113,20 +130,28 @@
             class="alarms-list__row"
             @click="router.push(`/alarm/${alarm.id}`)"
           >
-            <td><SeverityBadge :severity="alarm.severity" /></td>
-            <td class="alarms-list__mono">{{ alarm.id }}</td>
-            <td>
+            <td v-if="isVisible('severity')"><SeverityBadge :severity="alarm.severity" /></td>
+            <td v-if="isVisible('id')" class="alarms-list__mono">{{ alarm.id }}</td>
+            <td v-if="isVisible('nodeLabel')">
               <router-link :to="`/node/${alarm.nodeId}`" @click.stop>{{ alarm.nodeLabel }}</router-link>
             </td>
-            <td>{{ alarm.serviceType?.name ?? '—' }}</td>
-            <td class="alarms-list__mono">{{ alarm.ipAddress ?? '—' }}</td>
-            <td>{{ alarm.count }}</td>
-            <td v-date>{{ alarm.lastEventTime }}</td>
-            <td class="alarms-list__ack-cell">
+            <td v-if="isVisible('service')">{{ alarm.serviceType?.name ?? '—' }}</td>
+            <td v-if="isVisible('ipAddress')" class="alarms-list__mono">{{ alarm.ipAddress ?? '—' }}</td>
+            <td v-if="isVisible('count')">{{ alarm.count }}</td>
+            <td v-if="isVisible('lastEventTime')" v-date>{{ alarm.lastEventTime }}</td>
+            <td v-if="isVisible('firstEventTime')" v-date>{{ alarm.firstEventTime }}</td>
+            <td v-if="isVisible('ackStatus')" class="alarms-list__ack-cell">
               <span v-if="alarm.ackTime" class="caption alarms-list__ack-user" :title="`Acked by ${alarm.ackUser}`">
                 {{ alarm.ackUser }}
               </span>
             </td>
+            <td v-if="isVisible('logMessage')" class="alarms-list__truncate-cell" :title="alarm.logMessage">
+              <span v-html="alarm.logMessage ?? '—'" />
+            </td>
+            <td v-if="isVisible('description')" class="alarms-list__truncate-cell" :title="alarm.description">
+              <span v-html="alarm.description ?? '—'" />
+            </td>
+            <td v-if="isVisible('uei')" class="alarms-list__mono alarms-list__uei-cell">{{ alarm.uei }}</td>
             <td class="alarms-list__actions" @click.stop>
               <button
                 class="alarms-list__action-btn"
@@ -172,9 +197,42 @@ import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import { getAlarms, modifyAlarm } from '@/services/alarmService'
 import { type Alarm, type QueryParameters, type AlarmQueryParameters } from '@/types'
 import useSnackbar from '@/composables/useSnackbar'
+import { loadAlarmPreferences, saveAlarmPreferences } from '@/services/localStorageService'
 
 const router = useRouter()
 const { showSnackBar } = useSnackbar()
+
+const COLUMN_DEFS = [
+  { key: 'severity',       label: 'Severity',    sortField: 'severity',       defaultOn: true  },
+  { key: 'id',             label: 'ID',          sortField: 'id',             defaultOn: true  },
+  { key: 'nodeLabel',      label: 'Node',        sortField: null,             defaultOn: true  },
+  { key: 'service',        label: 'Service',     sortField: null,             defaultOn: true  },
+  { key: 'ipAddress',      label: 'IP',          sortField: null,             defaultOn: true  },
+  { key: 'count',          label: 'Count',       sortField: 'count',          defaultOn: true  },
+  { key: 'lastEventTime',  label: 'Last Event',  sortField: 'lastEventTime',  defaultOn: true  },
+  { key: 'ackStatus',      label: 'Ack',         sortField: null,             defaultOn: true  },
+  { key: 'logMessage',     label: 'Log Message', sortField: null,             defaultOn: true  },
+  { key: 'description',    label: 'Description', sortField: null,             defaultOn: true  },
+  { key: 'uei',            label: 'UEI',         sortField: null,             defaultOn: false },
+  { key: 'firstEventTime', label: 'First Event', sortField: 'firstEventTime', defaultOn: false },
+]
+
+const DEFAULT_VISIBLE = COLUMN_DEFS.filter(c => c.defaultOn).map(c => c.key)
+
+const showColumnMenu = ref(false)
+const visibleColumns = ref<string[]>([...DEFAULT_VISIBLE])
+
+const isVisible = (key: string) => visibleColumns.value.includes(key)
+
+const toggleColumn = (key: string) => {
+  const idx = visibleColumns.value.indexOf(key)
+  if (idx >= 0) {
+    visibleColumns.value.splice(idx, 1)
+  } else {
+    visibleColumns.value.push(key)
+  }
+  saveAlarmPreferences({ visibleColumns: [...visibleColumns.value] })
+}
 
 const PAGE_SIZE = 25
 
@@ -318,7 +376,12 @@ watch(nodeSearch, () => {
   }, 300)
 })
 
-onUnmounted(() => { if (searchDebounce) clearTimeout(searchDebounce) })
+const closeColumnMenu = () => { showColumnMenu.value = false }
+
+onUnmounted(() => {
+  if (searchDebounce) clearTimeout(searchDebounce)
+  document.removeEventListener('click', closeColumnMenu)
+})
 
 const doAction = async (alarm: Alarm, action: 'ack' | 'unack' | 'escalate' | 'clear') => {
   actionLoading.value[alarm.id] = action
@@ -347,7 +410,14 @@ const paginationText = computed(() => {
   return `Showing ${start}–${end} of ${totalCount.value} alarms`
 })
 
-onMounted(load)
+onMounted(() => {
+  const prefs = loadAlarmPreferences()
+  if (prefs?.visibleColumns?.length) {
+    visibleColumns.value = prefs.visibleColumns
+  }
+  document.addEventListener('click', closeColumnMenu)
+  load()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -515,6 +585,68 @@ onMounted(load)
   }
 
   &__ack-cell { white-space: nowrap; }
+
+  &__col-menu-wrap {
+    position: relative;
+  }
+
+  &__col-btn {
+    @include body-small;
+    background: none;
+    border: 1px solid var($border-light-on-surface);
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+    color: var($primary-text-on-surface);
+    white-space: nowrap;
+    &:hover { background: var($shade-4); }
+  }
+
+  &__col-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 100;
+    background: var($surface);
+    border: 1px solid var($border-light-on-surface);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 8px 0;
+    min-width: 160px;
+  }
+
+  &__col-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    @include body-small;
+    color: var($primary-text-on-surface);
+    &:hover { background: var($shade-4); }
+    input[type="checkbox"] { cursor: pointer; accent-color: var($primary); }
+  }
+
+  &__col-wide {
+    min-width: 180px;
+    max-width: 300px;
+  }
+
+  &__truncate-cell {
+    max-width: 300px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    > span { pointer-events: none; }
+  }
+
+  &__uei-cell {
+    max-width: 240px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.7rem;
+  }
 
   &__ack-user {
     @include body-small;

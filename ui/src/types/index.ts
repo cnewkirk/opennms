@@ -653,8 +653,13 @@ export interface NodePreferences {
   nodeFilter?: NodeQueryFilter
 }
 
+export interface AlarmPreferences {
+  visibleColumns?: string[]
+}
+
 export interface OpenNmsPreferences {
   nodePreferences: NodePreferences
+  alarmPreferences?: AlarmPreferences
   isSideMenuExpanded?: boolean
 }
 

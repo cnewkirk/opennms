@@ -21,7 +21,7 @@
 ///
 
 import { useNodeQuery } from '@/components/Nodes/hooks/useNodeQuery'
-import { NodePreferences, OpenNmsPreferences } from '@/types'
+import { AlarmPreferences, NodePreferences, OpenNmsPreferences } from '@/types'
 
 const OPENNMS_PREFERENCES_STORAGE_KEY = 'opennms-preferences'
 
@@ -84,10 +84,23 @@ const getCircularReplacer = () => {
   }
 }
 
+const saveAlarmPreferences = (data: AlarmPreferences) => {
+  const prefs = loadPreferences() || defaultPreferences()
+  prefs.alarmPreferences = data
+  savePreferences(prefs)
+}
+
+const loadAlarmPreferences = (): AlarmPreferences | null => {
+  const prefs = loadPreferences() || defaultPreferences()
+  return prefs.alarmPreferences ?? null
+}
+
 export {
+  loadAlarmPreferences,
   loadDefaultPreferences,
   loadNodePreferences,
   loadPreferences,
+  saveAlarmPreferences,
   saveNodePreferences,
   savePreferences
 }
