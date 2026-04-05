@@ -154,3 +154,287 @@ DOCKERFILE
   podman build --no-cache -t "${TOPO_IMAGE}" "${BUILD_DIR}"
   echo "    Build complete."
 fi
+
+# ---------------------------------------------------------------------------
+# Phase 2: Create networks
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [2/7] Creating podman networks..."
+
+podman network create --subnet "${MGMT_SUBNET}" "${MGMT_NET}"
+echo "    created: ${MGMT_NET} (${MGMT_SUBNET})"
+
+for entry in "${P2P_NETS[@]}"; do
+  net="${entry%%:*}"
+  subnet="${entry##*:}"
+  podman network create --subnet "${subnet}" "${net}"
+  echo "    created: ${net} (${subnet})"
+done
+
+# ---------------------------------------------------------------------------
+# Phase 3: Stage per-node FRR configs
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [3/7] Staging FRR configs..."
+
+# Fixed location so bind-mount paths survive manual container restarts
+CONFIGS="${SCRIPT_DIR}/.topology-lab/configs"
+rm -rf "${CONFIGS}"
+mkdir -p "${CONFIGS}"
+echo "    config staging dir: ${CONFIGS}"
+
+# vtysh.conf is identical for all nodes
+VTYSH_CONF="service integrated-vtysh-config"
+
+# ---- spine-01 ----
+mkdir -p "${CONFIGS}/spine-01"
+cat > "${CONFIGS}/spine-01/daemons" <<'DAEMONS'
+zebra=yes
+ospfd=yes
+isisd=yes
+bgpd=no
+ripd=no
+ospf6d=no
+DAEMONS
+cat > "${CONFIGS}/spine-01/vtysh.conf" <<< "${VTYSH_CONF}"
+cat > "${CONFIGS}/spine-01/frr.conf" <<'FRR'
+frr version 9.1
+frr defaults traditional
+hostname spine-01
+agentx
+!
+interface lo
+ ip address 10.255.0.11/32
+!
+interface eth1
+ description link-to-leaf-01
+ ip address 10.101.1.1/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+interface eth2
+ description link-to-leaf-02
+ ip address 10.101.2.1/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+interface eth3
+ description link-to-leaf-03
+ ip address 10.101.3.1/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+router ospf
+ ospf router-id 10.255.0.11
+ network 10.255.0.11/32 area 0.0.0.0
+!
+router isis FABRIC
+ net 49.0001.0aff.000b.00
+ is-type level-2-only
+ metric-style wide
+!
+FRR
+
+# ---- spine-02 ----
+mkdir -p "${CONFIGS}/spine-02"
+cat > "${CONFIGS}/spine-02/daemons" <<'DAEMONS'
+zebra=yes
+ospfd=yes
+isisd=yes
+bgpd=no
+ripd=no
+ospf6d=no
+DAEMONS
+cat > "${CONFIGS}/spine-02/vtysh.conf" <<< "${VTYSH_CONF}"
+cat > "${CONFIGS}/spine-02/frr.conf" <<'FRR'
+frr version 9.1
+frr defaults traditional
+hostname spine-02
+agentx
+!
+interface lo
+ ip address 10.255.0.12/32
+!
+interface eth1
+ description link-to-leaf-01
+ ip address 10.101.4.1/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+interface eth2
+ description link-to-leaf-02
+ ip address 10.101.5.1/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+interface eth3
+ description link-to-leaf-03
+ ip address 10.101.6.1/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+router ospf
+ ospf router-id 10.255.0.12
+ network 10.255.0.12/32 area 0.0.0.0
+!
+router isis FABRIC
+ net 49.0001.0aff.000c.00
+ is-type level-2-only
+ metric-style wide
+!
+FRR
+
+# ---- leaf-01 ----
+mkdir -p "${CONFIGS}/leaf-01"
+cat > "${CONFIGS}/leaf-01/daemons" <<'DAEMONS'
+zebra=yes
+ospfd=yes
+isisd=yes
+bgpd=no
+ripd=no
+ospf6d=no
+DAEMONS
+cat > "${CONFIGS}/leaf-01/vtysh.conf" <<< "${VTYSH_CONF}"
+cat > "${CONFIGS}/leaf-01/frr.conf" <<'FRR'
+frr version 9.1
+frr defaults traditional
+hostname leaf-01
+agentx
+!
+interface lo
+ ip address 10.255.0.21/32
+!
+interface eth1
+ description uplink-to-spine-01
+ ip address 10.101.1.2/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+interface eth2
+ description uplink-to-spine-02
+ ip address 10.101.4.2/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+router ospf
+ ospf router-id 10.255.0.21
+ network 10.255.0.21/32 area 0.0.0.0
+!
+router isis FABRIC
+ net 49.0001.0aff.0015.00
+ is-type level-2-only
+ metric-style wide
+!
+FRR
+
+# ---- leaf-02 ----
+mkdir -p "${CONFIGS}/leaf-02"
+cat > "${CONFIGS}/leaf-02/daemons" <<'DAEMONS'
+zebra=yes
+ospfd=yes
+isisd=yes
+bgpd=no
+ripd=no
+ospf6d=no
+DAEMONS
+cat > "${CONFIGS}/leaf-02/vtysh.conf" <<< "${VTYSH_CONF}"
+cat > "${CONFIGS}/leaf-02/frr.conf" <<'FRR'
+frr version 9.1
+frr defaults traditional
+hostname leaf-02
+agentx
+!
+interface lo
+ ip address 10.255.0.22/32
+!
+interface eth1
+ description uplink-to-spine-01
+ ip address 10.101.2.2/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+interface eth2
+ description uplink-to-spine-02
+ ip address 10.101.5.2/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+router ospf
+ ospf router-id 10.255.0.22
+ network 10.255.0.22/32 area 0.0.0.0
+!
+router isis FABRIC
+ net 49.0001.0aff.0016.00
+ is-type level-2-only
+ metric-style wide
+!
+FRR
+
+# ---- leaf-03 ----
+mkdir -p "${CONFIGS}/leaf-03"
+cat > "${CONFIGS}/leaf-03/daemons" <<'DAEMONS'
+zebra=yes
+ospfd=yes
+isisd=yes
+bgpd=no
+ripd=no
+ospf6d=no
+DAEMONS
+cat > "${CONFIGS}/leaf-03/vtysh.conf" <<< "${VTYSH_CONF}"
+cat > "${CONFIGS}/leaf-03/frr.conf" <<'FRR'
+frr version 9.1
+frr defaults traditional
+hostname leaf-03
+agentx
+!
+interface lo
+ ip address 10.255.0.23/32
+!
+interface eth1
+ description uplink-to-spine-01
+ ip address 10.101.3.2/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+interface eth2
+ description uplink-to-spine-02
+ ip address 10.101.6.2/30
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ isis circuit-type level-2-only
+ isis network point-to-point
+!
+router ospf
+ ospf router-id 10.255.0.23
+ network 10.255.0.23/32 area 0.0.0.0
+!
+router isis FABRIC
+ net 49.0001.0aff.0017.00
+ is-type level-2-only
+ metric-style wide
+!
+FRR
+
+echo "    FRR configs staged for all 5 nodes."
