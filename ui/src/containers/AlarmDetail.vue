@@ -123,9 +123,9 @@
               <dd>{{ alarm.managedObjectInstance }}</dd>
             </template>
 
-            <template v-if="alarm.troubleTicketId">
+            <template v-if="alarm.troubleTicket">
               <dt>Ticket ID</dt>
-              <dd>{{ alarm.troubleTicketId }}</dd>
+              <dd>{{ alarm.troubleTicket }}</dd>
             </template>
 
             <template v-if="alarm.troubleTicketState">
@@ -195,13 +195,13 @@
     </div>
 
     <!-- Operator Instructions -->
-    <div v-if="alarm.operInstruct" class="feather-row">
+    <div v-if="alarm.operatorInstructions" class="feather-row">
       <div class="feather-col-12">
         <div class="card">
           <div class="headline4 card__section-title">Operator Instructions</div>
           <!-- TODO: sanitize with DOMPurify before rendering user content -->
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div v-html="alarm.operInstruct" class="card__body"></div>
+          <div v-html="alarm.operatorInstructions" class="card__body"></div>
         </div>
       </div>
     </div>
@@ -453,7 +453,7 @@ const isAcknowledged = computed(() => !!alarm.value?.ackTime)
 const canCreateTicket = computed(() =>
   !alarm.value?.troubleTicketState || alarm.value.troubleTicketState === 'CREATE_FAILED'
 )
-const canUpdateTicket = computed(() => !!alarm.value?.troubleTicketId)
+const canUpdateTicket = computed(() => !!alarm.value?.troubleTicket)
 const canCloseTicket = computed(() =>
   alarm.value?.troubleTicketState === 'OPEN' ||
   alarm.value?.troubleTicketState === 'CLOSE_FAILED'

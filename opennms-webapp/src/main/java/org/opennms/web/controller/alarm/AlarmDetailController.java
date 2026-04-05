@@ -110,10 +110,12 @@ public class AlarmDetailController extends MultiActionController {
     public ModelAndView detail(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
         // Redirect to Vue SPA — set opennms.alarms.vueEnabled=false in opennms.conf to revert to legacy view
         if (!"false".equals(System.getProperty("opennms.alarms.vueEnabled", "true"))) {
-            final String alarmId = httpServletRequest.getParameter("id");
-            if (alarmId != null && !alarmId.isEmpty()) {
-                httpServletResponse.sendRedirect(httpServletRequest.getContextPath() + "/ui/index.html#/alarm/" + alarmId);
+            try {
+                final int numericId = Integer.parseInt(httpServletRequest.getParameter("id"));
+                httpServletResponse.sendRedirect(httpServletRequest.getContextPath() + "/ui/index.html#/alarm/" + numericId);
                 return null;
+            } catch (NumberFormatException ignored) {
+                // fall through to legacy JSP which handles invalid/missing ID with proper error handling
             }
         }
 

@@ -192,11 +192,11 @@ export interface Alarm {
   ackTime?: number
   ackUser?: string
   description?: string
-  operInstruct?: string
+  operatorInstructions?: string
   reductionKey?: string
   managedObjectType?: string
   managedObjectInstance?: string
-  troubleTicketId?: string
+  troubleTicket?: string
   troubleTicketState?: string
   isSituation?: boolean
   isPartOfSituation?: boolean

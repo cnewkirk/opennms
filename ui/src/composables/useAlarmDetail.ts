@@ -39,7 +39,7 @@ const useAlarmDetail = (id: string) => {
     const [alarmResult, acksResult, eventsResult] = await Promise.all([
       getAlarmById(id),
       getAlarmAcknowledgments(id),
-      getEvents({ _s: `alarmId==${id}`, limit: 20, orderBy: 'id', order: SORT.DESCENDING })
+      getEvents({ _s: `alarm.id==${id}`, limit: 20, orderBy: 'id', order: SORT.DESCENDING })
     ])
 
     if (!alarmResult) {
