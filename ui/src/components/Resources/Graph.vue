@@ -66,6 +66,7 @@ import type { PropType } from 'vue'
 import RrdGraphConverter from './utils/RrdGraphConverter.class'
 import GraphDataTable from './GraphDataTable.vue'
 import PersesPanel from '@/components/Perses/PersesPanel.vue'
+import { formatTimestamps, getFormattedLegendStatements } from './utils/LegendFormatter'
 import { useGraphStore } from '@/stores/graphStore'
 import type { ConvertedGraphData, GraphMetricsPayload, GraphMetricsResponse, Metric, PersesGraphSpec, PreFabGraph, StartEndTime } from '@/types'
 import type { AbsoluteTimeRange } from '@perses-dev/core'
@@ -142,7 +143,12 @@ const render = async () => {
       }))
     }
 
-    rawGraphData.value = await graphStore.getGraphMetrics(payload)
+    const graphMetrics = await graphStore.getGraphMetrics(payload)
+    if (graphMetrics) {
+      let formatted = formatTimestamps(graphMetrics, props.time.format)
+      formatted = getFormattedLegendStatements(formatted, converter.model)
+      rawGraphData.value = formatted
+    }
   } catch (error) {
     console.error('Could not render graph for', props.definition, error)
     emit('addGraphDefinition')
