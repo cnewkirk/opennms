@@ -76,16 +76,17 @@ const { queryParameters, updateQueryParameters } = useQueryParameters({
 }, getEvents)
 
 const events = computed(() => eventStore.events)
-const getRowClass = (data: Event) => data.severity.toLowerCase()
+const getRowClass = (data: Event) => `row--${data.severity.toLowerCase()}`
 </script>
 
 <style
   lang="scss"
   scoped
 >
+@use '@featherds/styles/themes/variables' as fvars;
+@use '@featherds/styles/themes/utils';
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/themes/variables";
 .card {
   @include elevation(2);
   padding: 15px;
@@ -99,12 +100,15 @@ table {
     margin: 0px;
   }
 }
-.warning {
-  background: rgba(255, 175, 34, 0.5);
-  color: var($state-color-on-surface);
-}
-.normal {
-  background: rgba(133, 217, 165, 0.5);
-  color: var($state-color-on-surface);
+$row-opacity: 0.08;
+.row {
+  &--critical      { background: utils.alpha(fvars.$error, $row-opacity); }
+  &--major         { background: utils.alpha(fvars.$major, $row-opacity); }
+  &--minor         { background: utils.alpha(fvars.$minor, $row-opacity); }
+  &--warning       { background: utils.alpha(fvars.$warning, $row-opacity); }
+  &--normal        { background: utils.alpha(fvars.$success, $row-opacity); }
+  &--cleared,
+  &--unacknowledged { background: utils.alpha(fvars.$cleared, $row-opacity); }
+  &--indeterminate { background: utils.alpha(fvars.$indeterminate, $row-opacity); }
 }
 </style>

@@ -79,9 +79,9 @@ let chartInstance: Chart | null = null
 const formatPct = (v: number) => (Math.round(v * 100) / 100).toFixed(2)
 
 const severityClass = (pct: number) => {
-  if (pct >= 99) return 'avail-card--green'
-  if (pct >= 95) return 'avail-card--amber'
-  return 'avail-card--red'
+  if (pct >= 99) return 'avail-card--normal'
+  if (pct >= 95) return 'avail-card--warning'
+  return 'avail-card--critical'
 }
 
 const now = Date.now()
@@ -147,6 +147,8 @@ onUnmounted(() => chartInstance?.destroy())
 </script>
 
 <style lang="scss" scoped>
+@use '@featherds/styles/themes/variables' as fvars;
+@use '@featherds/styles/themes/utils';
 @import "@featherds/styles/themes/variables";
 .card { background: var($surface); padding: 16px; margin-bottom: 16px; }
 .availability-panel {
@@ -164,8 +166,8 @@ onUnmounted(() => chartInstance?.destroy())
   &__name { margin-bottom: 2px; }
   &__ip   { opacity: 0.7; margin-bottom: 4px; }
   &__pct  { font-weight: 700; }
-  &--green { background: rgba(102,187,106,0.15); border: 1px solid rgba(102,187,106,0.5); }
-  &--amber { background: rgba(255,193,7,0.15);   border: 1px solid rgba(255,193,7,0.5); }
-  &--red   { background: rgba(227,93,91,0.15);   border: 1px solid rgba(227,93,91,0.5); }
+  &--normal   { background: utils.alpha(fvars.$success, 0.12); border: 1px solid utils.alpha(fvars.$success, 0.4); }
+  &--warning  { background: utils.alpha(fvars.$warning, 0.12); border: 1px solid utils.alpha(fvars.$warning, 0.4); }
+  &--critical { background: utils.alpha(fvars.$error, 0.12);   border: 1px solid utils.alpha(fvars.$error, 0.4); }
 }
 </style>
