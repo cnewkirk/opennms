@@ -188,8 +188,40 @@ cat > "${OVERLAY_DIR}/etc/snmp-config.xml" <<'SNMPCFG'
   <definition version="v2c" read-community="public" port="1161">
     <specific>127.0.0.1</specific>
   </definition>
+  <definition version="v2c" read-community="public" port="161">
+    <range begin="10.100.0.10" end="10.100.0.25"/>
+  </definition>
 </snmp-config>
 SNMPCFG
+
+cat > "${OVERLAY_DIR}/etc/enlinkd-configuration.xml" <<'ENLINKD'
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<enlinkd-configuration threads="3"
+                     executor-queue-size="100"
+                     executor-threads="5"
+                     discovery-bridge-threads="1"
+                     initial_sleep_time="30000"
+                     bridge_topology_interval="30000"
+                     topology_interval="30000"
+                     cdp_rescan_interval="30000"
+                     lldp_rescan_interval="30000"
+                     bridge_rescan_interval="30000"
+                     ospf_rescan_interval="30000"
+                     isis_rescan_interval="30000"
+                     cdp-priority="1000"
+                     lldp-priority="2000"
+                     bridge-priority="10000"
+                     ospf-priority="3000"
+                     isis-priority="4000"
+                     use-cdp-discovery="true"
+                     use-bridge-discovery="true"
+                     use-lldp-discovery="true"
+                     use-ospf-discovery="true"
+                     use-isis-discovery="true"
+                     disable-bridge-vlan-discovery="false"
+                     max_bft="100"
+                     />
+ENLINKD
 
 cat > "${OVERLAY_DIR}/etc/imports/Self.xml" <<'REQUISITION'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -207,7 +239,7 @@ cat > "${OVERLAY_DIR}/etc/imports/Self.xml" <<'REQUISITION'
 </model-import>
 REQUISITION
 
-echo "    snmpd.conf + entrypoint-wrapper.sh + snmp-config.xml + imports/Self.xml: staged"
+echo "    snmpd.conf + entrypoint-wrapper.sh + snmp-config.xml + enlinkd-configuration.xml + imports/Self.xml: staged"
 
 # ---------------------------------------------------------------------------
 # 4. Write Dockerfile
@@ -280,6 +312,7 @@ RUN chmod +x /entrypoint-wrapper.sh
 
 # OpenNMS SNMP client config + self-provisioning requisition
 COPY --chown=10001:10001 etc/snmp-config.xml /opt/opennms/etc/snmp-config.xml
+COPY --chown=10001:10001 etc/enlinkd-configuration.xml /opt/opennms/etc/enlinkd-configuration.xml
 COPY --chown=10001:10001 etc/imports/Self.xml /opt/opennms/etc/imports/Self.xml
 
 ENTRYPOINT ["/entrypoint-wrapper.sh"]
