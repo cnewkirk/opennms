@@ -77,9 +77,9 @@
               label="Alarm"
             />
           </td>
-          <td>{{ alarm.id }}</td>
+          <td><router-link :to="`/alarm/${alarm.id}`">{{ alarm.id }}</router-link></td>
           <td>{{ alarm.severity }}</td>
-          <td>{{ alarm.nodeLabel }}</td>
+          <td><router-link :to="`/node/${alarm.nodeId}`">{{ alarm.nodeLabel }}</router-link></td>
           <td>{{ alarm.uei }}</td>
           <td>{{ alarm.count }}</td>
           <td v-date>{{ alarm.lastEventTime }}</td>
