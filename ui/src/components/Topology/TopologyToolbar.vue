@@ -25,8 +25,8 @@
         :key="p"
         class="topology-toolbar__legend-item"
       >
-        <svg width="18" height="4" class="topology-toolbar__legend-line">
-          <line x1="0" y1="2" x2="18" y2="2" :stroke="getProtocolColor(p)" stroke-width="3" stroke-linecap="round"/>
+        <svg width="18" height="6" class="topology-toolbar__legend-line">
+          <line x1="0" y1="3" x2="18" y2="3" :stroke="getProtocolColor(p)" stroke-width="3" stroke-linecap="round"/>
         </svg>
         <span>{{ p }}</span>
       </div>
