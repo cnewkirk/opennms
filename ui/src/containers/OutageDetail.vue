@@ -13,7 +13,7 @@
        https://www.gnu.org/licenses/agpl-3.0.txt
 
   Unless required by applicable law or agreed to in writing,
-  software distributed under the LICENSE is distributed on an
+  software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
   either express or implied.  See the License for the specific
   language governing permissions and limitations under the
@@ -123,7 +123,7 @@
       </div>
     </div>
   </template>
-</script>
+</template>
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
