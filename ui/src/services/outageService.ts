@@ -47,7 +47,13 @@ const getOutages = async (params: Record<string, string | number>): Promise<Outa
     if (resp.status === 204) {
       return { outage: [], totalCount: 0, count: 0, offset: 0 }
     }
-    return resp.data
+    const data: OutagesApiResponse = resp.data
+    // v2 API nests service name at monitoredService.serviceType.name — normalize to top-level
+    data.outage = (data.outage ?? []).map(o => ({
+      ...o,
+      serviceName: o.serviceName ?? o.monitoredService?.serviceType?.name
+    }))
+    return data
   } catch {
     return false
   }
