@@ -21,8 +21,12 @@
 ///
 
 import cytoscape, { Core } from 'cytoscape'
+import cxtmenu from 'cytoscape-cxtmenu'
 import { Ref } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
+import { TopologyVertex } from '@/types/topology'
+
+cytoscape.use(cxtmenu)
 
 // Read a Feather DS CSS custom property value from the document at runtime.
 // Cytoscape renders to canvas so CSS variables don't apply directly —
@@ -115,6 +119,25 @@ const buildStylesheet = (): any[] => {
         'width': 4,
         'opacity': 1
       }
+    },
+    // User-defined edges — dashed, distinct color
+    {
+      selector: 'edge.user-defined',
+      css: {
+        'line-style': 'dashed',
+        'line-dash-pattern': [8, 4] as unknown as undefined,
+        'line-color': multiEdgeColor || '#1f78c1',
+        'opacity': 0.8
+      }
+    },
+    // Linking mode — highlight candidate target nodes
+    {
+      selector: 'node.link-target-candidate',
+      css: {
+        'border-width': 3,
+        'border-color': selectedColor || '#005eb8',
+        'border-style': 'dashed'
+      }
     }
   ]
 }
@@ -204,6 +227,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     } as cytoscape.LayoutOptions).run()
   }
 
+  const pendingLinkTarget = ref<TopologyVertex | null>(null)
+
   // --- Cytoscape setup ---
 
   const initCytoscape = () => {
@@ -220,6 +245,18 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     })
 
     cy.on('tap', 'node', (evt) => {
+      if (store.linkMode) {
+        const targetId = evt.target.id()
+        const sourceId = store.linkSourceVertex?.id
+        if (targetId && sourceId && targetId !== sourceId) {
+          const targetVertex = store.vertices.find(v => v.id === targetId)
+          if (targetVertex) {
+            store.cancelLinkMode()
+            pendingLinkTarget.value = targetVertex
+          }
+        }
+        return
+      }
       const nodeData = evt.target.data()
       const vertex = store.vertices.find(v => v.id === nodeData.id)
       if (vertex) store.selectElement(vertex)
@@ -236,11 +273,42 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     })
 
     cy.on('tap', (evt) => {
-      if (evt.target === cy) store.selectElement(null)
+      if (evt.target === cy) {
+        if (store.linkMode) {
+          store.cancelLinkMode()
+          return
+        }
+        store.selectElement(null)
+      }
     })
 
     // Auto-save whenever the user finishes dragging a node
     cy.on('dragfree', 'node', saveLayout)
+
+    // Context menu for nodes (right-click)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(cy as any).cxtmenu({
+      selector: 'node',
+      commands: [
+        {
+          content: 'Create Link',
+          select: (ele: cytoscape.SingularElementReturnValue) => {
+            const vertex = store.vertices.find(v => v.id === ele.id())
+            if (vertex) store.startLinkMode(vertex)
+          }
+        }
+      ],
+      fillColor: cssVar('--feather-surface') || '#1e1e2e',
+      activeFillColor: cssVar('--feather-primary') || '#1f78c1',
+      activePadding: 10,
+      indicatorSize: 14,
+      separatorWidth: 3,
+      spotlightPadding: 4,
+      adaptativeNodeSpotlightRadius: true,
+      minSpotlightRadius: 20,
+      maxSpotlightRadius: 38,
+      itemTextShadowColor: 'transparent'
+    })
   }
 
   const rebuildStylesheet = () => {
@@ -286,6 +354,16 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       if ((edge.data('protocolCount') ?? 1) > 1) edge.addClass('multi-protocol')
     })
 
+    // Apply user-defined class for dashed styling
+    cy.edges().forEach(edge => {
+      const key = edge.data('edgeKey')
+      const storeEdge = store.edges.find(e => {
+        const s = e.source.id; const t = e.target.id
+        return `${Math.min(s, t)}-${Math.max(s, t)}` === key
+      })
+      if (storeEdge?.userDefined) edge.addClass('user-defined')
+    })
+
     applySeverityClasses()
     runLayout()
   }
@@ -320,6 +398,19 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     }
   })
 
+  // When link mode activates/deactivates, update node styling
+  watch(() => store.linkMode, (active) => {
+    if (!cy) return
+    if (active) {
+      const sourceId = store.linkSourceVertex?.id
+      cy.nodes().forEach(n => {
+        if (n.id() !== sourceId) n.addClass('link-target-candidate')
+      })
+    } else {
+      cy.nodes().removeClass('link-target-candidate')
+    }
+  })
+
   // Rebuild stylesheet when the OS/app color scheme changes so dark mode is respected
   if (typeof window !== 'undefined') {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rebuildStylesheet)
@@ -338,7 +429,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy = null
   })
 
-  return { getCy: () => cy, saveLayout, resetLayout }
+  return { getCy: () => cy, saveLayout, resetLayout, pendingLinkTarget }
 }
 
 export default useTopology
