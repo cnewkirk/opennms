@@ -69,3 +69,42 @@ describe('dashboardConfigService', () => {
     expect(loaded.widgets[0].x).toBe(saved.widgets[0].x)
   })
 })
+
+describe('dashboardStore', () => {
+  beforeEach(() => {
+    Object.keys(store).forEach(k => delete store[k])
+    setActivePinia(createPinia())
+    vi.restoreAllMocks()
+  })
+
+  test('updateLayout merges x/y/w/h onto matching widgets', async () => {
+    const { useDashboardStore } = await import('@/stores/dashboardStore')
+    const dashStore = useDashboardStore()
+    // simulate gridstack reporting new positions
+    dashStore.updateLayout([
+      { id: 'widget-summary', x: 0, y: 0, w: 12, h: 3 },
+      { id: 'widget-outages', x: 0, y: 3, w: 4, h: 2 }
+    ])
+    const summary = dashStore.widgets.find(w => w.id === 'widget-summary')
+    expect(summary?.h).toBe(3)
+    const outages = dashStore.widgets.find(w => w.id === 'widget-outages')
+    expect(outages?.w).toBe(4)
+    expect(outages?.y).toBe(3)
+  })
+
+  test('updateLayout ignores unknown ids', async () => {
+    const { useDashboardStore } = await import('@/stores/dashboardStore')
+    const dashStore = useDashboardStore()
+    const before = dashStore.widgets.length
+    dashStore.updateLayout([{ id: 'nonexistent', x: 0, y: 0, w: 6, h: 2 }])
+    expect(dashStore.widgets.length).toBe(before)
+  })
+
+  test('reset restores default widget count', async () => {
+    const { useDashboardStore } = await import('@/stores/dashboardStore')
+    const dashStore = useDashboardStore()
+    dashStore.removeWidget('widget-summary')
+    dashStore.reset()
+    expect(dashStore.widgets.length).toBe(4)
+  })
+})
