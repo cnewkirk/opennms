@@ -352,6 +352,11 @@ const router = createRouter({
       component: () => import('@/containers/WallboardConfig.vue')
     },
     {
+      path: '/surveillance-dashboard',
+      name: 'Surveillance Dashboard',
+      component: () => import('@/containers/SurveillanceDashboard.vue')
+    },
+    {
       path: '/mib-compiler',
       name: 'SNMP MIB Compiler',
       component: () => import('@/containers/MibCompiler.vue'),
