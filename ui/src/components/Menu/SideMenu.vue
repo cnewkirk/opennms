@@ -257,7 +257,7 @@ const topPanels = computed<MenuListEntry[]>(() => {
 
 .open-light {
   #opennms-sidebar-control {
-    --feather-dock-background: #0081ad;
+    --feather-dock-background-color: #0081ad;
     --feather-dock-color: #fff;
   }
 }
