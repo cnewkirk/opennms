@@ -82,6 +82,11 @@ html:not(.open-dark) {
 a {
   text-decoration: none;
   color: var($clickable-normal);
+  // Override Feather's a:visited { color: --feather-clickable-visited } which is pink in dark mode.
+  // !important needed because Feather's base styles load after App.vue styles in the CSS bundle.
+  &:visited {
+    color: var($clickable-normal) !important;
+  }
 }
 .pointer {
   cursor: pointer !important;
