@@ -118,7 +118,7 @@ public class SurveillanceViewConfigRestServiceTest {
         assertEquals(1, roundTripped.getViews().size());
         View rt = roundTripped.getViews().get(0);
         assertEquals("default", rt.getName());
-        assertEquals(300, rt.getRefreshSeconds());
+        assertEquals(300, (int) rt.getRefreshSeconds());
         assertEquals(1, rt.getRows().size());
         assertEquals("Switches", rt.getRows().get(0).getLabel());
         assertEquals("Switches", rt.getRows().get(0).getCategories().get(0).getName());
