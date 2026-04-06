@@ -21,6 +21,7 @@
     License.
 
 --%>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/alarms"); %>
 <%@page language="java" contentType="text/html" session="true" %>
 
 <%@page import="org.springframework.web.context.support.WebApplicationContextUtils" %>

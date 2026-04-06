@@ -21,6 +21,7 @@
     License.
 
 --%>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/outages"); %>
 <%@page language="java"
 	contentType="text/html"
 	session="true"

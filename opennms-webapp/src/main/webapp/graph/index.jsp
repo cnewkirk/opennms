@@ -21,6 +21,7 @@
     License.
 
 --%>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/resource-graphs"); %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%@ page import="org.opennms.web.utils.Bootstrap" %>
