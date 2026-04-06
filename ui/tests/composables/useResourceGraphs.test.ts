@@ -35,7 +35,7 @@ describe('useResourceGraphs', () => {
     localStorage.clear()
   })
 
-  test('fetches resources and builds highlights', async () => {
+  test('fetches resources and builds resource groups', async () => {
     vi.spyOn(resourceService, 'getResourceForNode').mockResolvedValue(mockTopResource)
     vi.spyOn(graphService, 'getGraphDefinitionsByResourceId').mockResolvedValue(mockDefs)
 
@@ -51,10 +51,14 @@ describe('useResourceGraphs', () => {
     expect(wrapper.vm.error).toBeNull()
     expect(wrapper.vm.resources).toHaveLength(1)
     expect(wrapper.vm.resources[0].id).toBe('node[1].nodeSnmp[]')
-    expect(wrapper.vm.highlights).toEqual([
-      { resourceId: 'node[1].nodeSnmp[]', definition: 'nodeSnmp.cpuPercentage', label: 'SNMP Node Data' },
-      { resourceId: 'node[1].nodeSnmp[]', definition: 'nodeSnmp.memoryUsage',   label: 'SNMP Node Data' }
-    ])
+    expect(wrapper.vm.resourceGroups).toEqual([{
+      typeLabel: 'SNMP Node Data',
+      resources: [{
+        resourceId: 'node[1].nodeSnmp[]',
+        label: 'SNMP Node Data',
+        definitions: ['nodeSnmp.cpuPercentage', 'nodeSnmp.memoryUsage']
+      }]
+    }])
   })
 
   test('sets error when resource fetch fails', async () => {
@@ -68,7 +72,7 @@ describe('useResourceGraphs', () => {
 
     expect(wrapper.vm.error).toBe('Could not load resources for this node')
     expect(wrapper.vm.resources).toHaveLength(0)
-    expect(wrapper.vm.highlights).toHaveLength(0)
+    expect(wrapper.vm.resourceGroups).toHaveLength(0)
   })
 
   test('saveChart appends to savedCharts and writes localStorage', async () => {
