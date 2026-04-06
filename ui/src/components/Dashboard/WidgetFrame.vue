@@ -21,7 +21,7 @@
 -->
 <template>
   <div class="widget-frame">
-    <div class="widget-header">
+    <div class="widget-header widget-drag-handle">
       <span class="widget-title subtitle1">{{ title }}</span>
       <div class="widget-actions">
         <button
@@ -107,6 +107,11 @@ defineEmits<{
   padding: 12px 16px 8px;
   border-bottom: 1px solid var($border-light-on-surface);
   flex-shrink: 0;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .widget-title {
