@@ -48,9 +48,18 @@ const mainMenu = computed<MainMenu>(() => menuStore.mainMenu)
 const plugins = computed<Plugin[]>(() => pluginStore.plugins)
 const isExpanded = ref<boolean>(menuStore.sideMenuExpanded() ?? false)
 
-// Map legacy JSP URLs to Vue SPA routes
+// Map legacy JSP/HTM URLs to Vue SPA routes.
+// Add an entry here whenever a Vaadin/JSP page is replaced by a Vue route.
 const legacyToVueRoutes: Record<string, string> = {
-  'graph/index.jsp': 'ui/index.html#/resource-graphs'
+  'dashboard.jsp':                  'ui/index.html#/dashboard',
+  'alarm/index.htm':                'ui/index.html#/alarms',
+  'outage/index.jsp':               'ui/index.html#/outages',
+  'graph/index.jsp':                'ui/index.html#/resource-graphs',
+  'topology':                       'ui/index.html#/topology',
+  'admin/jmxConfigGenerator.jsp':   'ui/index.html#/jmx-config-generator',
+  'admin/mibCompiler.jsp':          'ui/index.html#/mib-compiler',
+  'admin/wallboardConfig.jsp':      'ui/index.html#/wallboard-config',
+  'vaadin-wallboard':               'ui/index.html#/wallboard-config'
 }
 
 const getMenuLink = (menuItem: MenuItem) => {
@@ -270,5 +279,12 @@ const topPanels = computed<MenuListEntry[]>(() => {
     --feather-dock-background-color: #0081ad;
     --feather-dock-color: #fff;
   }
+}
+
+// Sidebar nav links must never change color based on visit history.
+// The global a:visited rule sets --feather-clickable-normal which is wrong
+// for nav context; inherit keeps the dock's own color.
+#opennms-sidebar-control a:visited {
+  color: inherit !important;
 }
 </style>
