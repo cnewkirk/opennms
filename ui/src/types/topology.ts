@@ -38,6 +38,12 @@ export interface TopologyEdge {
   source: { namespace: string; id: number }
   target: { namespace: string; id: number }
   protocols?: string[]  // protocols that detected this edge (populated client-side on the All layer)
+  userDefined?: boolean
+  dbId?: number
+  linkLabel?: string
+  componentLabelA?: string
+  componentLabelZ?: string
+  owner?: string
 }
 
 export interface TopologyGraph {

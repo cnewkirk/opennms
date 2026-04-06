@@ -22,6 +22,8 @@
 
 import { defineStore } from 'pinia'
 import { getContainers, getGraph } from '@/services/topologyService'
+import { getUserDefinedLinks, createUserDefinedLink, deleteUserDefinedLink, UserDefinedLinkPayload } from '@/services/userDefinedLinkService'
+import { useAuthStore } from '@/stores/authStore'
 import { getAlarms, getNodeAlarms } from '@/services/alarmService'
 import { getNodeEnlinkd, NodeEnlinkdData } from '@/services/enlinkdService'
 import { getNodeById, getNodeIpInterfaces } from '@/services/nodeService'
@@ -61,6 +63,13 @@ export const useTopologyStore = defineStore('topologyStore', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  // Link creation mode
+  const linkMode = ref(false)
+  const linkSourceVertex = ref<TopologyVertex | null>(null)
+
+  // User-defined links (stored separately, merged into edges computed)
+  const userDefinedEdges = ref<TopologyEdge[]>([])
+
   // Protocol layers are everything except the server-side "All" rollup (namespace 'nodes')
   const protocolLayers = computed<TopologyLayer[]>(() =>
     availableLayers.value.filter(l => l.namespace !== 'nodes')
@@ -97,6 +106,24 @@ export const useTopologyStore = defineStore('topologyStore', () => {
         }
       }
     }
+
+    // Merge user-defined edges
+    for (const ude of userDefinedEdges.value) {
+      const key = `${Math.min(ude.source.id, ude.target.id)}-${Math.max(ude.source.id, ude.target.id)}`
+      const existing = map.get(key)
+      if (!existing) {
+        map.set(key, { ...ude, protocols: ['User Defined'] })
+      } else if (!existing.protocols.includes('User Defined')) {
+        existing.protocols.push('User Defined')
+        existing.userDefined = true
+        existing.dbId = ude.dbId
+        existing.linkLabel = ude.linkLabel
+        existing.componentLabelA = ude.componentLabelA
+        existing.componentLabelZ = ude.componentLabelZ
+        existing.owner = ude.owner
+      }
+    }
+
     return Array.from(map.values())
   })
 
@@ -246,6 +273,95 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     }
   }
 
+  const startLinkMode = (sourceVertex: TopologyVertex) => {
+    linkMode.value = true
+    linkSourceVertex.value = sourceVertex
+    selectedElement.value = null
+  }
+
+  const cancelLinkMode = () => {
+    linkMode.value = false
+    linkSourceVertex.value = null
+  }
+
+  const loadUserDefinedLinks = async () => {
+    const links = await getUserDefinedLinks()
+    userDefinedEdges.value = links.map(l => ({
+      source: { namespace: 'nodes', id: l['node-id-a'] },
+      target: { namespace: 'nodes', id: l['node-id-z'] },
+      userDefined: true,
+      dbId: l['db-id'],
+      linkLabel: l['link-label'],
+      componentLabelA: l['component-label-a'],
+      componentLabelZ: l['component-label-z'],
+      owner: l['owner']
+    }))
+  }
+
+  const addUserDefinedLink = async (
+    nodeIdA: number, componentLabelA: string,
+    nodeIdZ: number, componentLabelZ: string,
+    linkLabel: string
+  ): Promise<boolean> => {
+    const authStore = useAuthStore()
+    const owner = authStore.whoAmI?.id ?? 'unknown'
+    const linkId = `udl-${nodeIdA}-${nodeIdZ}-${Date.now()}`
+
+    // Optimistic: add edge immediately
+    const tempEdge: TopologyEdge = {
+      source: { namespace: 'nodes', id: nodeIdA },
+      target: { namespace: 'nodes', id: nodeIdZ },
+      userDefined: true,
+      linkLabel,
+      componentLabelA,
+      componentLabelZ,
+      owner
+    }
+    userDefinedEdges.value = [...userDefinedEdges.value, tempEdge]
+
+    const payload: UserDefinedLinkPayload = {
+      'node-id-a': nodeIdA,
+      'component-label-a': componentLabelA,
+      'node-id-z': nodeIdZ,
+      'component-label-z': componentLabelZ,
+      'link-id': linkId,
+      'link-label': linkLabel,
+      'owner': owner
+    }
+
+    const dbId = await createUserDefinedLink(payload)
+    if (dbId !== null) {
+      const idx = userDefinedEdges.value.indexOf(tempEdge)
+      if (idx >= 0) {
+        const updated = { ...tempEdge, dbId }
+        userDefinedEdges.value = [
+          ...userDefinedEdges.value.slice(0, idx),
+          updated,
+          ...userDefinedEdges.value.slice(idx + 1)
+        ]
+      }
+      return true
+    } else {
+      userDefinedEdges.value = userDefinedEdges.value.filter(e => e !== tempEdge)
+      return false
+    }
+  }
+
+  const removeUserDefinedLink = async (dbId: number): Promise<boolean> => {
+    const edge = userDefinedEdges.value.find(e => e.dbId === dbId)
+    if (!edge) return false
+
+    userDefinedEdges.value = userDefinedEdges.value.filter(e => e.dbId !== dbId)
+    selectedElement.value = null
+
+    const ok = await deleteUserDefinedLink(dbId)
+    if (!ok) {
+      userDefinedEdges.value = [...userDefinedEdges.value, edge]
+      return false
+    }
+    return true
+  }
+
   return {
     availableLayers,
     protocolLayers,
@@ -262,6 +378,9 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     searchQuery,
     loading,
     error,
+    linkMode,
+    linkSourceVertex,
+    userDefinedEdges,
     loadContainers,
     toggleLayer,
     setAllLayers,
@@ -271,6 +390,11 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     loadNodeAlarmDetails,
     selectElement,
     focusNode,
-    setSearchQuery
+    setSearchQuery,
+    startLinkMode,
+    cancelLinkMode,
+    loadUserDefinedLinks,
+    addUserDefinedLink,
+    removeUserDefinedLink
   }
 })
