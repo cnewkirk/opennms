@@ -19,6 +19,19 @@
       >{{ layer.label }}</button>
     </div>
 
+    <div v-if="presentProtocols.length" class="topology-toolbar__legend">
+      <div
+        v-for="p in presentProtocols"
+        :key="p"
+        class="topology-toolbar__legend-item"
+      >
+        <svg width="18" height="4" class="topology-toolbar__legend-line">
+          <line x1="0" y1="2" x2="18" y2="2" :stroke="getProtocolColor(p)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <span>{{ p }}</span>
+      </div>
+    </div>
+
     <FeatherInput
       v-model="searchText"
       label="Search nodes"
@@ -42,6 +55,7 @@ import { FeatherInput } from '@featherds/input'
 import { FeatherButton } from '@featherds/button'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { useDebounceFn } from '@vueuse/core'
+import { getProtocolColor } from './protocolColors'
 
 const emit = defineEmits<{
   'save-layout': []
@@ -49,6 +63,14 @@ const emit = defineEmits<{
 }>()
 
 const store = useTopologyStore()
+
+const presentProtocols = computed<string[]>(() => {
+  const seen = new Set<string>()
+  for (const e of store.edges) {
+    for (const p of (e.protocols ?? [])) seen.add(p)
+  }
+  return Array.from(seen).sort()
+})
 
 const allActive = computed(() =>
   store.protocolLayers.length > 0 &&
@@ -107,6 +129,27 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
     &:not(:disabled):hover {
       opacity: 0.8;
     }
+  }
+
+  &__legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 10px;
+  }
+
+  &__legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var($secondary-text-on-surface);
+    white-space: nowrap;
+  }
+
+  &__legend-line {
+    flex-shrink: 0;
   }
 
   &__search {
