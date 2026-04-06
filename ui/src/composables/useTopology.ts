@@ -227,6 +227,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     } as cytoscape.LayoutOptions).run()
   }
 
+  const pendingLinkSource = ref<TopologyVertex | null>(null)
   const pendingLinkTarget = ref<TopologyVertex | null>(null)
 
   // --- Cytoscape setup ---
@@ -251,6 +252,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         if (targetId && sourceId && targetId !== sourceId) {
           const targetVertex = store.vertices.find(v => v.id === targetId)
           if (targetVertex) {
+            pendingLinkSource.value = store.linkSourceVertex
             store.cancelLinkMode()
             pendingLinkTarget.value = targetVertex
           }
@@ -429,7 +431,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy = null
   })
 
-  return { getCy: () => cy, saveLayout, resetLayout, pendingLinkTarget }
+  return { getCy: () => cy, saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget }
 }
 
 export default useTopology

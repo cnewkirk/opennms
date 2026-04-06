@@ -44,7 +44,7 @@ const store = useTopologyStore()
 const { showSnackBar } = useSnackbar()
 const graphContainer = ref<HTMLElement | null>(null)
 
-const { saveLayout, resetLayout, pendingLinkTarget } = useTopology(graphContainer)
+const { saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget } = useTopology(graphContainer)
 
 // Modal state
 const showLinkModal = ref(false)
@@ -53,9 +53,10 @@ const linkTargetForModal = ref<TopologyVertex | null>(null)
 
 watch(pendingLinkTarget, (target) => {
   if (target) {
-    linkSourceForModal.value = store.linkSourceVertex
+    linkSourceForModal.value = pendingLinkSource.value
     linkTargetForModal.value = target
     showLinkModal.value = true
+    pendingLinkSource.value = null
     pendingLinkTarget.value = null
   }
 })
