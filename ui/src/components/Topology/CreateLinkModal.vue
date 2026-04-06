@@ -15,24 +15,24 @@
         <form v-else class="create-link-modal__body" @submit.prevent="submit">
           <!-- Source node -->
           <div class="create-link-modal__node-section">
-            <span class="create-link-modal__node-label">{{ sourceLabel }}</span>
-            <FeatherSelect
-              label="Interface"
-              :options="sourceInterfaces"
-              v-model="sourceInterface"
-              text-prop="label"
-            />
+            <label class="create-link-modal__node-label">{{ sourceLabel }}</label>
+            <select v-model="sourceInterfaceIdx" class="create-link-modal__select">
+              <option :value="-1" disabled>Select interface…</option>
+              <option v-for="(iface, i) in sourceInterfaces" :key="i" :value="i">
+                {{ iface.label }}
+              </option>
+            </select>
           </div>
 
           <!-- Target node -->
           <div class="create-link-modal__node-section">
-            <span class="create-link-modal__node-label">{{ targetLabel }}</span>
-            <FeatherSelect
-              label="Interface"
-              :options="targetInterfaces"
-              v-model="targetInterface"
-              text-prop="label"
-            />
+            <label class="create-link-modal__node-label">{{ targetLabel }}</label>
+            <select v-model="targetInterfaceIdx" class="create-link-modal__select">
+              <option :value="-1" disabled>Select interface…</option>
+              <option v-for="(iface, i) in targetInterfaces" :key="i" :value="i">
+                {{ iface.label }}
+              </option>
+            </select>
           </div>
 
           <!-- Link label -->
@@ -59,16 +59,14 @@
 <script setup lang="ts">
 import { FeatherButton } from '@featherds/button'
 import { FeatherInput } from '@featherds/input'
-import { FeatherSelect } from '@featherds/select'
 import { FeatherSpinner } from '@featherds/progress'
 import { getNodeIpInterfaces, getNodeSnmpInterfaces } from '@/services/nodeService'
 import { TopologyVertex } from '@/types/topology'
 import { IpInterface, SnmpInterface } from '@/types'
-import { ISelectItemType } from '@featherds/select'
 
-interface InterfaceOption extends ISelectItemType {
+interface InterfaceOption {
   label: string
-  _value: string
+  componentLabel: string
 }
 
 const props = defineProps<{
@@ -82,8 +80,8 @@ const emit = defineEmits<{
   create: [nodeIdA: number, componentLabelA: string, nodeIdZ: number, componentLabelZ: string, linkLabel: string]
 }>()
 
-const sourceInterface = ref<InterfaceOption | undefined>()
-const targetInterface = ref<InterfaceOption | undefined>()
+const sourceInterfaceIdx = ref(-1)
+const targetInterfaceIdx = ref(-1)
 const linkLabel = ref('')
 const loadingInterfaces = ref(false)
 const sourceInterfaces = ref<InterfaceOption[]>([])
@@ -93,8 +91,8 @@ const sourceLabel = computed(() => props.sourceVertex?.label ?? 'Source')
 const targetLabel = computed(() => props.targetVertex?.label ?? 'Target')
 
 const canSubmit = computed(() =>
-  sourceInterface.value !== undefined &&
-  targetInterface.value !== undefined &&
+  sourceInterfaceIdx.value >= 0 &&
+  targetInterfaceIdx.value >= 0 &&
   linkLabel.value.trim().length > 0
 )
 
@@ -122,7 +120,7 @@ const buildInterfaceList = async (nodeId: string): Promise<InterfaceOption[]> =>
     const name = snmp.ifName || snmp.ifDescr || `ifIndex ${snmp.ifIndex}`
     const ip = ifIndexToIp.get(snmp.ifIndex)
     const label = ip ? `${name} (${ip})` : name
-    options.push({ label, _value: name })
+    options.push({ label, componentLabel: name })
     coveredIfIndices.add(snmp.ifIndex)
   }
 
@@ -133,7 +131,7 @@ const buildInterfaceList = async (nodeId: string): Promise<InterfaceOption[]> =>
     const label = ip.hostName && ip.hostName !== ip.ipAddress
       ? `${ip.ipAddress} (${ip.hostName})`
       : ip.ipAddress
-    options.push({ label, _value: ip.ipAddress })
+    options.push({ label, componentLabel: ip.ipAddress })
   }
 
   options.sort((a, b) => a.label.localeCompare(b.label))
@@ -143,8 +141,8 @@ const buildInterfaceList = async (nodeId: string): Promise<InterfaceOption[]> =>
 watch(() => [props.visible, props.sourceVertex, props.targetVertex], async ([vis]) => {
   if (!vis || !props.sourceVertex?.id || !props.targetVertex?.id) return
 
-  sourceInterface.value = undefined
-  targetInterface.value = undefined
+  sourceInterfaceIdx.value = -1
+  targetInterfaceIdx.value = -1
   linkLabel.value = ''
   loadingInterfaces.value = true
 
@@ -168,8 +166,8 @@ const submit = () => {
   if (isNaN(nodeIdA) || isNaN(nodeIdZ)) return
 
   emit('create',
-    nodeIdA, sourceInterface.value!._value,
-    nodeIdZ, targetInterface.value!._value,
+    nodeIdA, sourceInterfaces.value[sourceInterfaceIdx.value].componentLabel,
+    nodeIdZ, targetInterfaces.value[targetInterfaceIdx.value].componentLabel,
     linkLabel.value.trim()
   )
 }
@@ -252,6 +250,22 @@ const submit = () => {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var($secondary-text-on-surface);
+  }
+
+  &__select {
+    appearance: auto;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid var($border-on-surface);
+    background: var($background);
+    color: var($primary-text-on-surface);
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &:focus {
+      outline: 2px solid var($primary);
+      outline-offset: -1px;
+    }
   }
 
   &__input {
