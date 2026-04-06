@@ -36,7 +36,8 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 onMounted(async () => {
   await Promise.all([
     store.loadContainers(),
-    store.loadAlarmSeverities()
+    store.loadAlarmSeverities(),
+    store.loadUserDefinedLinks()
   ])
 })
 </script>
