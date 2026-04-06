@@ -20,77 +20,87 @@
 /// License.
 ///
 <template>
-  <div class="feather-row">
-    <div class="feather-col-12 container">
-      <router-link
-        v-if="!isSingleGraph"
-        :to="`/resource-graphs/graphs/${label}/${definition}/${resourceId}`"
-        target="_blank"
-      >
-        <FeatherButton secondary class="single-graph-btn">Open</FeatherButton>
-      </router-link>
-      <div v-if="persesSpec?.title" class="graph-title">{{ persesSpec.title }}</div>
-      <FeatherTabContainer class="graph-data-tabs">
-        <template v-slot:tabs>
-          <FeatherTab>Graph</FeatherTab>
-          <FeatherTab>Data</FeatherTab>
-        </template>
-        <FeatherTabPanel>
-          <div class="panel-wrapper">
-            <div class="chart-area">
-              <PersesPanel
-                v-if="persesSpec"
-                :title="persesSpec.title"
-                :queries="[persesSpec.query]"
-                :time-range="absoluteTimeRange"
-                :y-axis-label="persesSpec.yAxisLabel"
-                :palette="persesSpec.palette"
-                :visual-mode="persesSpec.visualMode"
-              />
-              <div v-else class="panel-error">No graph data available</div>
-            </div>
-            <div v-if="legendRows.length" class="legend-table-wrap">
-              <table class="legend-table">
-                <thead>
-                  <tr>
-                    <th class="legend-color-col"></th>
-                    <th class="legend-name-col">Series</th>
-                    <th class="legend-val-col">Last</th>
-                    <th class="legend-val-col">Min</th>
-                    <th class="legend-val-col">Max</th>
-                    <th class="legend-val-col">Avg</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="row in legendRows" :key="row.name">
-                    <td class="legend-color-col">
-                      <span class="legend-swatch" :style="{ backgroundColor: row.color }"></span>
-                    </td>
-                    <td class="legend-name-col" :title="row.name">{{ row.name }}</td>
-                    <td class="legend-val-col">{{ row.last }}</td>
-                    <td class="legend-val-col">{{ row.min }}</td>
-                    <td class="legend-val-col">{{ row.max }}</td>
-                    <td class="legend-val-col">{{ row.avg }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </FeatherTabPanel>
-        <FeatherTabPanel>
-          <div class="panel-wrapper">
-            <GraphDataTable
-              v-if="rawGraphData"
-              :id="`${label}-${definition}`"
-              :convertedGraphData="legacyModel"
-              :graphData="rawGraphData"
-            />
-            <div v-else-if="dataError" class="panel-error">{{ dataError }}</div>
-            <div v-else class="panel-error">Loading data...</div>
-          </div>
-        </FeatherTabPanel>
-      </FeatherTabContainer>
+  <div class="graph-card">
+    <!-- Title bar -->
+    <div class="graph-card__title-bar">
+      <span class="graph-card__title">{{ persesSpec?.title ?? definition }}</span>
+      <div class="graph-card__title-actions">
+        <button
+          v-if="pinnable"
+          class="graph-card__pin-btn"
+          :class="{ 'graph-card__pin-btn--active': pinned }"
+          :title="pinned ? 'Unpin graph' : 'Pin to top'"
+          @click="emit('toggle-pin')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 17v5" />
+            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+          </svg>
+        </button>
+        <router-link
+          v-if="!isSingleGraph"
+          :to="`/resource-graphs/graphs/${label}/${definition}/${resourceId}`"
+          target="_blank"
+          class="graph-card__open-link"
+        >Open ↗</router-link>
+      </div>
     </div>
+
+    <!-- Chart -->
+    <div class="graph-card__chart">
+      <PersesPanel
+        v-if="persesSpec"
+        :title="persesSpec.title"
+        :queries="[persesSpec.query]"
+        :time-range="absoluteTimeRange"
+        :y-axis-label="persesSpec.yAxisLabel"
+        :palette="persesSpec.palette"
+        :visual-mode="persesSpec.visualMode"
+      />
+      <div v-else class="graph-card__no-data">No graph data available</div>
+    </div>
+
+    <!-- Legend -->
+    <table v-if="legendRows.length" class="graph-card__legend">
+      <thead>
+        <tr>
+          <th class="graph-card__legend-color"></th>
+          <th class="graph-card__legend-name">Series</th>
+          <th class="graph-card__legend-val">Last</th>
+          <th class="graph-card__legend-val">Min</th>
+          <th class="graph-card__legend-val">Max</th>
+          <th class="graph-card__legend-val">Avg</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="row in legendRows" :key="row.name">
+          <td class="graph-card__legend-color">
+            <span class="graph-card__swatch" :style="{ backgroundColor: row.color }"></span>
+          </td>
+          <td class="graph-card__legend-name" :title="row.name">{{ row.name }}</td>
+          <td class="graph-card__legend-val">{{ row.last }}</td>
+          <td class="graph-card__legend-val">{{ row.min }}</td>
+          <td class="graph-card__legend-val">{{ row.max }}</td>
+          <td class="graph-card__legend-val">{{ row.avg }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Data table — only on single-graph (full) page -->
+    <template v-if="isSingleGraph">
+      <div class="graph-card__data-divider"></div>
+      <div class="graph-card__data-section">
+        <div class="graph-card__data-heading">Raw Data</div>
+        <GraphDataTable
+          v-if="rawGraphData"
+          :id="`${label}-${definition}`"
+          :convertedGraphData="legacyModel"
+          :graphData="rawGraphData"
+        />
+        <div v-else-if="dataError" class="graph-card__no-data">{{ dataError }}</div>
+        <div v-else class="graph-card__no-data">Loading data...</div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -104,21 +114,17 @@ import { useGraphStore } from '@/stores/graphStore'
 import { format as d3Format } from 'd3'
 import type { ConvertedGraphData, GraphMetricsPayload, GraphMetricsResponse, Metric, PersesGraphSpec, PreFabGraph, StartEndTime } from '@/types'
 import type { AbsoluteTimeRange } from '@perses-dev/core'
-import { FeatherButton } from '@featherds/button'
-import {
-  FeatherTab,
-  FeatherTabContainer,
-  FeatherTabPanel
-} from '@featherds/tabs'
 
-const emit = defineEmits(['addGraphDefinition'])
+const emit = defineEmits(['addGraphDefinition', 'toggle-pin'])
 
 const props = defineProps({
   definition:    { required: true, type: String },
   resourceId:    { required: true, type: String },
   time:          { required: true, type: Object as PropType<StartEndTime> },
   label:         { required: true, type: String },
-  isSingleGraph: { required: true, type: Boolean }
+  isSingleGraph: { required: true, type: Boolean },
+  pinnable:      { type: Boolean, default: false },
+  pinned:        { type: Boolean, default: false }
 })
 
 const graphStore = useGraphStore()
@@ -201,7 +207,7 @@ const render = async () => {
     persesSpec.value  = converter.toPersesGraphSpec()
     legacyModel.value = converter.model
 
-    // Fetch raw measurements for the Data tab
+    // Fetch raw measurements for legend stats (and Data tab on single-graph page)
     const metrics: Metric[] = converter.model.metrics.map((m: Metric): Metric => ({
       aggregation: m.aggregation,
       attribute: m.attribute,
@@ -247,119 +253,167 @@ onMounted(render)
 </script>
 
 <style scoped lang="scss">
-.container {
-  position: relative;
-}
-.panel-wrapper {
-  height: 470px;
-}
-.chart-area {
-  height: 300px;
-}
-.graph-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--feather-secondary-text-on-surface);
-  text-align: center;
-  padding: 8px 0 0;
-  letter-spacing: 0.01em;
-}
+@import "@featherds/styles/themes/variables";
 
-.graph-data-tabs {
-  margin-top: 16px;
-}
-.single-graph-btn {
-  position: absolute;
-  top: 12px;
-  right: 70px;
-  z-index: 1;
-}
-.panel-error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
-  color: var(--feather-disabled-text-on-surface);
-}
-
-/* ── Grafana-style legend table ── */
-.legend-table-wrap {
-  max-height: 160px;
-  overflow-y: auto;
-  margin-top: 2px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--feather-border-on-surface) transparent;
-}
-.legend-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: none;
-  font-family: var(--feather-font-family);
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--feather-primary-text-on-surface);
-}
-.legend-table th {
-  font-weight: 500;
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  text-align: left;
-  padding: 4px 10px 4px 0;
-  border: none;
-  border-bottom: 1px solid var(--feather-border-on-surface);
-  color: var(--feather-secondary-text-on-surface);
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
-  background: var(--feather-surface);
-}
-.legend-table td {
-  padding: 3px 10px 3px 0;
-  border: none;
-  border-bottom: 1px solid transparent;
-  white-space: nowrap;
+.graph-card {
+  border: 1px solid var($border-light-on-surface);
+  border-radius: 4px;
+  background: var($surface);
   overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* Subtle divider only between rows, not on the last one */
-.legend-table tbody tr + tr td {
-  border-top: 1px solid var(--feather-border-light-on-surface);
-}
-.legend-table tbody tr:hover td {
-  background: var(--feather-border-light-on-surface);
-}
-.legend-color-col {
-  width: 20px;
-  padding-left: 2px !important;
-  padding-right: 6px !important;
-}
-.legend-swatch {
-  display: inline-block;
-  width: 4px;
-  height: 14px;
-  border-radius: 2px;
-  vertical-align: middle;
-}
-.legend-name-col {
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.legend-val-col {
-  text-align: right !important;
-  font-variant-numeric: tabular-nums;
-  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
-  font-size: 0.6875rem;
-  color: var(--feather-secondary-text-on-surface);
-  width: 72px;
-}
-</style>
 
-<style lang="scss">
-.graph-data-tabs {
-  ul {
-    margin-left: 37px !important;
+  &__title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 6px;
+  }
+
+  &__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var($secondary-text-on-surface);
+    letter-spacing: 0.01em;
+  }
+
+  &__open-link {
+    font-size: 0.75rem;
+    color: var($clickable-normal);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    &:hover { text-decoration: underline; }
+  }
+
+  &__title-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  &__pin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 3px;
+    background: none;
+    color: var($secondary-text-on-surface);
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s, color 0.15s;
+    &:hover { opacity: 1; }
+    &--active {
+      opacity: 1;
+      color: var($primary);
+      svg { fill: currentColor; }
+    }
+  }
+
+  &__chart {
+    height: 280px;
+    padding: 0 8px;
+  }
+
+  &__no-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    color: var($disabled-text-on-surface);
+    font-size: 0.8125rem;
+  }
+
+  /* ── Legend ── */
+  &__legend {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+    font-family: var(--feather-font-family);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var($primary-text-on-surface);
+    margin-top: 2px;
+  }
+
+  &__legend th {
+    font-weight: 500;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+    padding: 4px 10px 4px 0;
+    border: none;
+    border-top: 1px solid var($border-light-on-surface);
+    border-bottom: 1px solid var($border-light-on-surface);
+    color: var($secondary-text-on-surface);
+    white-space: nowrap;
+    background: var($surface);
+  }
+
+  &__legend td {
+    padding: 3px 10px 3px 0;
+    border: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__legend tbody tr + tr td {
+    border-top: 1px solid var($border-light-on-surface);
+  }
+
+  &__legend tbody tr:hover td {
+    background: var($border-light-on-surface);
+  }
+
+  &__legend-color {
+    width: 20px;
+    padding-left: 10px !important;
+    padding-right: 6px !important;
+  }
+
+  &__swatch {
+    display: inline-block;
+    width: 4px;
+    height: 14px;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+
+  &__legend-name {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__legend-val {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+    font-size: 0.6875rem;
+    color: var($secondary-text-on-surface);
+    width: 60px;
+    padding-right: 10px !important;
+  }
+
+  /* ── Data section (single-graph page only) ── */
+  &__data-divider {
+    border-top: 1px solid var($border-light-on-surface);
+    margin: 12px 14px 0;
+  }
+
+  &__data-section {
+    padding: 14px;
+  }
+
+  &__data-heading {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var($secondary-text-on-surface);
+    margin-bottom: 10px;
   }
 }
 </style>
