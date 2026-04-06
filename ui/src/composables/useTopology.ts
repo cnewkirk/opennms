@@ -25,6 +25,7 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import { Ref } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
+import { getProtocolColor, parallelOffsets } from '@/components/Topology/protocolColors'
 
 cytoscape.use(cxtmenu)
 
@@ -54,8 +55,6 @@ const SPINE_TIER_SELECTOR =
 const buildStylesheet = (): any[] => {
   const defaultNodeColor = cssVar('--feather-primary')
   const selectedColor    = cssVar('--feather-primary-dark')
-  const edgeColor        = cssVar('--feather-border-on-surface')
-  const multiEdgeColor   = cssVar('--feather-primary')
   const labelBg          = cssVar('--feather-surface') || '#0d1117'
 
   return [
@@ -96,20 +95,11 @@ const buildStylesheet = (): any[] => {
     {
       selector: 'edge',
       css: {
-        'width': 2,
-        'line-color': edgeColor || '#4a5568',
+        'width': 3,
+        'line-color': 'data(color)',
         'target-arrow-shape': 'none',
         'curve-style': 'bezier',
-        'opacity': 0.65
-      }
-    },
-    // Multi-protocol edges — thicker, colored to signal convergence of multiple layers
-    {
-      selector: 'edge.multi-protocol',
-      css: {
-        'width': 4,
-        'line-color': multiEdgeColor || '#1f78c1',
-        'opacity': 0.85
+        'opacity': 0.75
       }
     },
     {
@@ -120,13 +110,12 @@ const buildStylesheet = (): any[] => {
         'opacity': 1
       }
     },
-    // User-defined edges — dashed, distinct color
+    // User-defined edges — dashed
     {
       selector: 'edge.user-defined',
       css: {
         'line-style': 'dashed',
         'line-dash-pattern': [8, 4] as unknown as undefined,
-        'line-color': multiEdgeColor || '#1f78c1',
         'opacity': 0.8
       }
     },
@@ -332,38 +321,47 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       }
     }))
 
-    // store.edges are already deduplicated (one per physical pair) with protocols[] attached
-    const edgeElements = store.edges.map(e => {
+    // Expand each store edge into N parallel Cytoscape edges, one per protocol.
+    // All parallel edges for a pair share the same edgeKey for tap/tooltip grouping.
+    const edgeElements: { data: Record<string, unknown> }[] = []
+    for (const e of store.edges) {
       const src = e.source.id
       const tgt = e.target.id
       const key = `${Math.min(src, tgt)}-${Math.max(src, tgt)}`
-      return {
-        data: {
-          id: `edge-${key}`,
-          source: String(src),
-          target: String(tgt),
-          edgeKey: key,
-          protocolCount: e.protocols?.length ?? 1
-        }
-      }
-    })
+      const protocols = (e.protocols && e.protocols.length > 0) ? e.protocols : ['unknown']
+      const offsets = parallelOffsets(protocols.length)
+
+      protocols.forEach((protocol, i) => {
+        const safeId = protocol.toLowerCase().replace(/[\s/]+/g, '-')
+        edgeElements.push({
+          data: {
+            id: `edge-${key}-${safeId}`,
+            source: String(src),
+            target: String(tgt),
+            edgeKey: key,
+            protocol,
+            color: getProtocolColor(protocol),
+            offset: offsets[i]
+          }
+        })
+      })
+    }
 
     cy.add(nodeElements)
     cy.add(edgeElements)
 
-    // Apply multi-protocol class for visual distinction
+    // Apply per-edge curve offsets and user-defined dashed style programmatically
     cy.edges().forEach(edge => {
-      if ((edge.data('protocolCount') ?? 1) > 1) edge.addClass('multi-protocol')
-    })
-
-    // Apply user-defined class for dashed styling
-    cy.edges().forEach(edge => {
-      const key = edge.data('edgeKey')
-      const storeEdge = store.edges.find(e => {
-        const s = e.source.id; const t = e.target.id
-        return `${Math.min(s, t)}-${Math.max(s, t)}` === key
-      })
-      if (storeEdge?.userDefined) edge.addClass('user-defined')
+      const offset = edge.data('offset') as number
+      if (offset === 0) {
+        edge.style('curve-style', 'straight')
+      } else {
+        edge.style('curve-style', 'bezier')
+        edge.style('control-point-distances', offset)
+      }
+      if ((edge.data('protocol') as string) === 'User Defined') {
+        edge.addClass('user-defined')
+      }
     })
 
     applySeverityClasses()
