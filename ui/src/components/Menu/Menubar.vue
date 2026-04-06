@@ -283,7 +283,6 @@ body {
 
   .header-wrapper.feather-app-bar-wrapper .header {
     background-color: #0081ad;
-    border-bottom: none;
   }
 
   .header-wrapper.feather-app-bar-wrapper .header-content {
@@ -316,9 +315,10 @@ body {
   }
 }
 
-// remove elevation from menubar
+// remove elevation and border from menubar (both themes)
 .header-wrapper.feather-app-bar-wrapper .header {
   box-shadow: none;
+  border-bottom: none;
 }
 
 .header-wrapper.feather-app-bar-wrapper a.skip {
