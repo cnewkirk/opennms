@@ -51,7 +51,6 @@ const isExpanded = ref<boolean>(menuStore.sideMenuExpanded() ?? false)
 // Map legacy JSP/HTM URLs to Vue SPA routes.
 // Add an entry here whenever a Vaadin/JSP page is replaced by a Vue route.
 const legacyToVueRoutes: Record<string, string> = {
-  'dashboard.jsp':                  'ui/index.html#/dashboard',
   'alarm/index.htm':                'ui/index.html#/alarms',
   'outage/index.jsp':               'ui/index.html#/outages',
   'graph/index.jsp':                'ui/index.html#/resource-graphs',
