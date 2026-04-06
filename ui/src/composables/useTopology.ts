@@ -341,7 +341,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
             edgeKey: key,
             protocol,
             color: getProtocolColor(protocol),
-            offset: offsets[i]
+            offset: offsets[i],
+            userDefined: e.userDefined ?? false
           }
         })
       })
@@ -359,7 +360,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         edge.style('curve-style', 'bezier')
         edge.style('control-point-distances', offset)
       }
-      if ((edge.data('protocol') as string) === 'User Defined') {
+      if (edge.data('userDefined')) {
         edge.addClass('user-defined')
       }
     })
