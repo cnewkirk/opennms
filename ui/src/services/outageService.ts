@@ -21,7 +21,7 @@
 ///
 
 import { v2 } from './axiosInstances'
-import { OutagesApiResponse } from '@/types'
+import { type Outage, OutagesApiResponse } from '@/types'
 
 const endpoint = '/outages'
 
@@ -68,4 +68,13 @@ const getActiveOutageCount = async (categories: string[]): Promise<number> => {
   return resp ? resp.totalCount : 0
 }
 
-export { getOutages, getActiveOutages, getActiveOutageCount, buildActiveOutageCriteria }
+const getOutage = async (id: number | string): Promise<Outage | false> => {
+  try {
+    const resp = await v2.get(`${endpoint}/${id}`)
+    return resp.data as Outage
+  } catch {
+    return false
+  }
+}
+
+export { getOutages, getActiveOutages, getActiveOutageCount, buildActiveOutageCriteria, getOutage }
