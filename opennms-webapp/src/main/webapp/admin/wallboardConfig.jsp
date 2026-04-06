@@ -21,19 +21,5 @@
     License.
 
 --%>
-<%@page language="java"
-        contentType="text/html"
-        session="true"
-        %>
-
-<%@ page import="org.opennms.web.utils.Bootstrap" %>
-<% Bootstrap.with(pageContext)
-          .headTitle("Ops Board Configuration")
-          .breadcrumb("Admin", "admin/index.jsp")
-          .breadcrumb("Ops Board Configuration")
-          .build(request);
-%>
-<jsp:directive.include file="/includes/bootstrap.jsp" />
-
-<iframe name="wallboard-config" src="admin/wallboard-config" class="vaadin-fullscreen" frameborder="0"></iframe>
-<jsp:include page="/includes/bootstrap-footer.jsp" flush="true"/>
+<%@page language="java" contentType="text/html" session="true" %>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/wallboard-config"); %>
