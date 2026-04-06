@@ -342,6 +342,11 @@ const router = createRouter({
       }
     },
     {
+      path: '/surveillance-views-config',
+      name: 'Surveillance Views Config',
+      component: () => import('@/containers/SurveillanceViewsConfig.vue')
+    },
+    {
       path: '/mib-compiler',
       name: 'SNMP MIB Compiler',
       component: () => import('@/containers/MibCompiler.vue'),
