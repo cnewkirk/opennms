@@ -20,17 +20,24 @@
 /// License.
 ///
 
+import { rest } from './axiosInstances'
+
 export type WidgetType = 'summary' | 'outages' | 'alarms' | 'nodes'
 
 export interface WidgetConfig {
   id: string
   type: WidgetType
   title: string
+  // gridstack layout
+  x: number
+  y: number
+  w: number
+  h: number
+  // widget settings
   categories: string[]
   limit: number
-  refreshInterval: number  // seconds
-  severities: string[]     // for alarm widgets
-  colSpan: 3 | 4 | 6 | 12
+  refreshInterval: number
+  severities: string[]
 }
 
 export interface DashboardConfig {
@@ -39,62 +46,33 @@ export interface DashboardConfig {
 }
 
 const STORAGE_KEY = 'opennms.dashboard.config'
-const CONFIG_VERSION = 1
+const CONFIG_VERSION = 2
+const USER_PROP_KEY = 'ui.dashboard.layout'
 
 const defaultConfig = (): DashboardConfig => ({
   version: CONFIG_VERSION,
   widgets: [
-    {
-      id: 'widget-summary',
-      type: 'summary',
-      title: 'Network Summary',
-      categories: [],
-      limit: 0,
-      refreshInterval: 60,
-      severities: [],
-      colSpan: 12
-    },
-    {
-      id: 'widget-outages',
-      type: 'outages',
-      title: 'Active Outages',
-      categories: [],
-      limit: 10,
-      refreshInterval: 60,
-      severities: [],
-      colSpan: 6
-    },
-    {
-      id: 'widget-alarms',
-      type: 'alarms',
-      title: 'Active Alarms',
-      categories: [],
-      limit: 10,
-      refreshInterval: 60,
-      severities: ['CRITICAL', 'MAJOR', 'MINOR'],
-      colSpan: 6
-    },
-    {
-      id: 'widget-nodes',
-      type: 'nodes',
-      title: 'Nodes',
-      categories: [],
-      limit: 10,
-      refreshInterval: 120,
-      severities: [],
-      colSpan: 12
-    }
+    { id: 'widget-summary', type: 'summary', title: 'Network Summary',  x: 0, y: 0, w: 12, h: 2, categories: [], limit: 0,  refreshInterval: 60,  severities: [] },
+    { id: 'widget-outages', type: 'outages', title: 'Active Outages',   x: 0, y: 2, w: 6,  h: 3, categories: [], limit: 10, refreshInterval: 60,  severities: [] },
+    { id: 'widget-alarms',  type: 'alarms',  title: 'Active Alarms',    x: 6, y: 2, w: 6,  h: 3, categories: [], limit: 10, refreshInterval: 60,  severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
+    { id: 'widget-nodes',   type: 'nodes',   title: 'Nodes',            x: 0, y: 5, w: 12, h: 3, categories: [], limit: 10, refreshInterval: 120, severities: [] }
   ]
 })
+
+/** Returns true if the parsed config has the new x/y/w/h layout fields */
+const isValidV2Config = (config: DashboardConfig): boolean =>
+  config.version === CONFIG_VERSION &&
+  config.widgets.length > 0 &&
+  typeof config.widgets[0].x === 'number' &&
+  typeof config.widgets[0].y === 'number' &&
+  typeof config.widgets[0].h === 'number'
 
 const loadConfig = (): DashboardConfig => {
   try {
     const json = localStorage.getItem(STORAGE_KEY)
     if (json) {
       const parsed = JSON.parse(json) as DashboardConfig
-      if (parsed.version === CONFIG_VERSION) {
-        return parsed
-      }
+      if (isValidV2Config(parsed)) return parsed
     }
   } catch {
     // corrupt storage — fall through to default
@@ -112,4 +90,25 @@ const resetConfig = (): DashboardConfig => {
   return config
 }
 
-export { loadConfig, saveConfig, resetConfig, defaultConfig }
+const loadFromServer = async (username: string): Promise<DashboardConfig | null> => {
+  try {
+    const resp = await rest.get(`users/${username}/properties/${USER_PROP_KEY}`)
+    const json = resp.data?.value as string | undefined
+    if (!json) return null
+    const parsed = JSON.parse(json) as DashboardConfig
+    if (isValidV2Config(parsed)) return parsed
+  } catch {
+    // 404 or parse error — no server config yet
+  }
+  return null
+}
+
+const saveToServer = async (username: string, config: DashboardConfig): Promise<void> => {
+  try {
+    await rest.put(`users/${username}/properties/${USER_PROP_KEY}`, { value: JSON.stringify(config) })
+  } catch {
+    // non-fatal — localStorage is the fallback
+  }
+}
+
+export { loadConfig, saveConfig, resetConfig, defaultConfig, loadFromServer, saveToServer }
