@@ -63,9 +63,12 @@ const defaultConfig = (): DashboardConfig => ({
 const isValidV2Config = (config: DashboardConfig): boolean =>
   config.version === CONFIG_VERSION &&
   config.widgets.length > 0 &&
-  typeof config.widgets[0].x === 'number' &&
-  typeof config.widgets[0].y === 'number' &&
-  typeof config.widgets[0].h === 'number'
+  config.widgets.every(w =>
+    typeof w.x === 'number' &&
+    typeof w.y === 'number' &&
+    typeof w.w === 'number' &&
+    typeof w.h === 'number'
+  )
 
 const loadConfig = (): DashboardConfig => {
   try {
