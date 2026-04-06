@@ -84,6 +84,7 @@ public class SurveillanceViewConfigRestService {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Replace surveillance view configuration", operationId = "putSurveillanceViewConfig")
     public Response putConfig(SurveillanceViewConfigDto dto, @Context SecurityContext securityContext) {
         if (!securityContext.isUserInRole(Authentication.ROLE_ADMIN)) {
@@ -91,6 +92,10 @@ public class SurveillanceViewConfigRestService {
         }
         if (dto == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(Map.of("error", "Request body required")).build();
+        }
+        if (dto.getViews() == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("error", "views must not be null")).build();
         }
         String defaultView = dto.getDefaultView();
         if (defaultView != null && !defaultView.isEmpty()) {
@@ -196,7 +201,7 @@ public class SurveillanceViewConfigRestService {
         public void setDefaultView(String v) { this.defaultView = v; }
 
         public List<ViewDto> getViews() { return views; }
-        public void setViews(List<ViewDto> v) { this.views = v; }
+        public void setViews(List<ViewDto> v) { this.views = v != null ? v : new ArrayList<>(); }
     }
 
     public static class ViewDto {
