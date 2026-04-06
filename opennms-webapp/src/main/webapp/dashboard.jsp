@@ -21,7 +21,9 @@
     License.
 
 --%>
-<%@ page import="org.opennms.core.utils.WebSecurityUtils" %><%--
+<%@ page import="org.opennms.core.utils.WebSecurityUtils" %>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/dashboard"); %>
+<%--
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
