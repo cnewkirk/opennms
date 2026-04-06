@@ -66,14 +66,6 @@
               <span v-else>&mdash;</span>
             </dd>
 
-            <dt>Last Event</dt>
-            <dd>
-              <router-link v-if="alarm.lastEvent" :to="`/event/${alarm.lastEvent.id}`">
-                <span v-date>{{ alarm.lastEventTime }}</span>
-              </router-link>
-              <span v-else v-date>{{ alarm.lastEventTime }}</span>
-            </dd>
-
             <dt>Interface</dt>
             <dd>
               <a
@@ -83,9 +75,6 @@
               <span v-else-if="alarm.ipAddress">{{ alarm.ipAddress }}</span>
               <span v-else>&mdash;</span>
             </dd>
-
-            <dt>First Event</dt>
-            <dd v-date>{{ alarm.firstEventTime }}</dd>
 
             <dt>Service</dt>
             <dd>
@@ -107,11 +96,22 @@
               <dd>{{ alarm.nodeLocation }}</dd>
             </template>
 
-            <dt>Count</dt>
-            <dd>{{ alarm.count }}</dd>
-
             <dt>UEI</dt>
             <dd class="alarm-detail__uei">{{ alarm.uei }}</dd>
+
+            <dt>Last Event</dt>
+            <dd>
+              <router-link v-if="alarm.lastEvent" :to="`/event/${alarm.lastEvent.id}`">
+                <span v-date>{{ alarm.lastEventTime }}</span>
+              </router-link>
+              <span v-else v-date>{{ alarm.lastEventTime }}</span>
+            </dd>
+
+            <dt>First Event</dt>
+            <dd v-date>{{ alarm.firstEventTime }}</dd>
+
+            <dt>Count</dt>
+            <dd>{{ alarm.count }}</dd>
 
             <template v-if="alarm.managedObjectType">
               <dt>Managed Object Type</dt>
