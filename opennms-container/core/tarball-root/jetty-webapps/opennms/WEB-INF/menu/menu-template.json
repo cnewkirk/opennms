@@ -213,6 +213,13 @@
         {
           "id": "resourceGraphs",
           "name": "Resource Graphs",
+          "url": "ui/index.html#/resource-graphs",
+          "locationMatch": "performance",
+          "roles": null
+        },
+        {
+          "id": "resourceGraphsOld",
+          "name": "Resource Graphs (Legacy)",
           "url": "graph/index.jsp",
           "locationMatch": "performance",
           "roles": null
@@ -709,6 +716,13 @@
         "id": "changePassword",
         "name": "Change Password",
         "url": "account/selfService/newPasswordEntry",
+        "locationMatch": null,
+        "roles": null
+      },
+      {
+        "id": "apiTokens",
+        "name": "API Tokens",
+        "url": "account/selfService/apiTokens.jsp",
         "locationMatch": null,
         "roles": null
       },
