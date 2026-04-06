@@ -20,41 +20,51 @@
   License.
 -->
 <template>
-  <div class="dashboard-grid">
+  <div
+    ref="gridContainerRef"
+    class="grid-stack"
+  >
     <div
       v-for="widget in widgets"
       :key="widget.id"
-      class="dashboard-cell"
-      :style="{ gridColumn: `span ${widget.colSpan}` }"
+      :ref="el => registerItemRef(widget.id, el as HTMLElement)"
+      class="grid-stack-item"
+      :gs-id="widget.id"
+      :gs-x="widget.x"
+      :gs-y="widget.y"
+      :gs-w="widget.w"
+      :gs-h="widget.h"
     >
-      <WidgetFrame
-        :title="widget.title"
-        :loading="loadingMap[widget.id]"
-        @refresh="refreshWidget(widget.id)"
-        @configure="openConfig(widget)"
-        @remove="dashboardStore.removeWidget(widget.id)"
-      >
-        <SummaryWidget
-          v-if="widget.type === 'summary'"
-          :ref="el => registerRef(widget.id, el)"
-          :config="widget"
-        />
-        <OutagesWidget
-          v-else-if="widget.type === 'outages'"
-          :ref="el => registerRef(widget.id, el)"
-          :config="widget"
-        />
-        <AlarmsWidget
-          v-else-if="widget.type === 'alarms'"
-          :ref="el => registerRef(widget.id, el)"
-          :config="widget"
-        />
-        <NodesWidget
-          v-else-if="widget.type === 'nodes'"
-          :ref="el => registerRef(widget.id, el)"
-          :config="widget"
-        />
-      </WidgetFrame>
+      <div class="grid-stack-item-content">
+        <WidgetFrame
+          :title="widget.title"
+          :loading="loadingMap[widget.id]"
+          @refresh="refreshWidget(widget.id)"
+          @configure="openConfig(widget)"
+          @remove="onRemove(widget.id)"
+        >
+          <SummaryWidget
+            v-if="widget.type === 'summary'"
+            :ref="el => registerWidgetRef(widget.id, el)"
+            :config="widget"
+          />
+          <OutagesWidget
+            v-else-if="widget.type === 'outages'"
+            :ref="el => registerWidgetRef(widget.id, el)"
+            :config="widget"
+          />
+          <AlarmsWidget
+            v-else-if="widget.type === 'alarms'"
+            :ref="el => registerWidgetRef(widget.id, el)"
+            :config="widget"
+          />
+          <NodesWidget
+            v-else-if="widget.type === 'nodes'"
+            :ref="el => registerWidgetRef(widget.id, el)"
+            :config="widget"
+          />
+        </WidgetFrame>
+      </div>
     </div>
   </div>
 
@@ -68,8 +78,10 @@
 </template>
 
 <script setup lang="ts">
+import { type GridStackNode } from 'gridstack'
 import { useDashboardStore } from '@/stores/dashboardStore'
 import { type WidgetConfig } from '@/services/dashboardConfigService'
+import useDashboardLayout from '@/composables/useDashboardLayout'
 import WidgetFrame from './WidgetFrame.vue'
 import WidgetConfigDialog from './WidgetConfigDialog.vue'
 import SummaryWidget from './widgets/SummaryWidget.vue'
@@ -80,15 +92,30 @@ import NodesWidget from './widgets/NodesWidget.vue'
 const dashboardStore = useDashboardStore()
 const widgets = computed(() => dashboardStore.widgets)
 
-// ref map for calling refresh() on each widget instance
+const gridContainerRef = ref<HTMLElement | null>(null)
+const itemRefs: Record<string, HTMLElement | null> = {}
 const widgetRefs = ref<Record<string, { refresh: () => void } | null>>({})
 const loadingMap = ref<Record<string, boolean>>({})
 const configuringWidget = ref<WidgetConfig | null>(null)
 
+const registerItemRef = (id: string, el: HTMLElement | null) => {
+  if (el) {
+    itemRefs[id] = el
+  } else {
+    delete itemRefs[id]
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const registerRef = (id: string, el: any) => {
+const registerWidgetRef = (id: string, el: any) => {
   widgetRefs.value[id] = el as { refresh: () => void } | null
 }
+
+const onLayoutChange = (items: GridStackNode[]) => {
+  dashboardStore.updateLayout(items)
+}
+
+const { addItem, removeItem } = useDashboardLayout(gridContainerRef, onLayoutChange)
 
 const refreshWidget = async (widgetId: string) => {
   loadingMap.value[widgetId] = true
@@ -105,10 +132,38 @@ const onConfigSaved = (updated: WidgetConfig) => {
   configuringWidget.value = null
 }
 
-// auto-refresh based on each widget's refreshInterval
+const onRemove = (widgetId: string) => {
+  const el = itemRefs[widgetId]
+  if (el) removeItem(el)
+  delete itemRefs[widgetId]
+  if (refreshTimers[widgetId]) {
+    clearInterval(refreshTimers[widgetId])
+    delete refreshTimers[widgetId]
+  }
+  delete widgetRefs.value[widgetId]
+  delete loadingMap.value[widgetId]
+  dashboardStore.removeWidget(widgetId)
+}
+
+// When a widget is added programmatically (via Dashboard.vue toolbar),
+// wait for Vue to render the new item then register it with gridstack
+watch(
+  () => widgets.value.map(w => w.id),
+  (newIds, oldIds = []) => {
+    const added = newIds.filter(id => !oldIds.includes(id))
+    nextTick(() => {
+      for (const id of added) {
+        const el = itemRefs[id]
+        if (el) addItem(el)
+      }
+    })
+  }
+)
+
+// auto-refresh timers
 const refreshTimers: Record<string, ReturnType<typeof setInterval>> = {}
 
-const startTimers = () => {
+onMounted(() => {
   for (const widget of widgets.value) {
     if (widget.refreshInterval > 0) {
       refreshTimers[widget.id] = setInterval(
@@ -117,28 +172,22 @@ const startTimers = () => {
       )
     }
   }
-}
+})
 
-const clearTimers = () => {
-  for (const timer of Object.values(refreshTimers)) {
-    clearInterval(timer)
-  }
-}
-
-onMounted(startTimers)
-onUnmounted(clearTimers)
+onUnmounted(() => {
+  for (const timer of Object.values(refreshTimers)) clearInterval(timer)
+})
 </script>
 
 <style scoped lang="scss">
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-  padding: 16px;
-  align-items: start;
+// gridstack needs full height to lay out correctly
+.grid-stack {
+  width: 100%;
 }
 
-.dashboard-cell {
-  min-height: 0;
+// ensure widget content fills the gridstack item
+.grid-stack-item-content {
+  height: 100%;
+  overflow: hidden;
 }
 </style>
