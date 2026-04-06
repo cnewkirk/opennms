@@ -280,6 +280,15 @@ body {
 
 .open-light {
   @include open-light;
+
+  .header-wrapper.feather-app-bar-wrapper .header {
+    background-color: #0081ad;
+    border-bottom: none;
+  }
+
+  .header-wrapper.feather-app-bar-wrapper .header-content {
+    color: #fff;
+  }
 }
 
 .open-dark {
