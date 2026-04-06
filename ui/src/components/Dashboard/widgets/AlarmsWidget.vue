@@ -38,11 +38,27 @@
     >
       <thead>
         <tr>
-          <th v-if="col('severity')">Severity</th>
-          <th v-if="col('node')">Node</th>
+          <th
+            v-if="col('severity')"
+            :class="sortClass('severity')"
+            @click="toggleSort('severity')"
+          >Severity</th>
+          <th
+            v-if="col('node')"
+            :class="sortClass('node')"
+            @click="toggleSort('node')"
+          >Node</th>
           <th v-if="col('message')">Message</th>
-          <th v-if="col('count')">Count</th>
-          <th v-if="col('time')">Time</th>
+          <th
+            v-if="col('count')"
+            :class="sortClass('count')"
+            @click="toggleSort('count')"
+          >Count</th>
+          <th
+            v-if="col('time')"
+            :class="sortClass('time')"
+            @click="toggleSort('time')"
+          >Time</th>
         </tr>
       </thead>
       <tbody>
@@ -86,18 +102,34 @@ import { FeatherIcon } from '@featherds/icon'
 import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import API from '@/services'
-import { type WidgetConfig } from '@/services/dashboardConfigService'
+import { type WidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Alarm, type QueryParameters } from '@/types'
+import { useDashboardStore } from '@/stores/dashboardStore'
 
 const props = defineProps<{
   config: WidgetConfig
 }>()
 
+const store = useDashboardStore()
 const alarms = ref<Alarm[]>([])
 const totalCount = ref(0)
 
-/** Returns true if the given column key is enabled (undefined/empty = all on). */
 const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
+
+const sortClass = (key: string) => {
+  const def = WIDGET_COLUMNS.alarms.find(c => c.key === key)
+  if (!def?.sortField) return ''
+  if (props.config.sortBy !== key) return 'sortable'
+  return props.config.sortDir === 'desc' ? 'sort-desc' : 'sort-asc'
+}
+
+const toggleSort = (key: string) => {
+  const def = WIDGET_COLUMNS.alarms.find(c => c.key === key)
+  if (!def?.sortField) return
+  const newDir: 'asc' | 'desc' =
+    props.config.sortBy === key && props.config.sortDir === 'asc' ? 'desc' : 'asc'
+  store.updateWidget({ ...props.config, sortBy: key, sortDir: newDir })
+}
 
 const buildAlarmCriteria = (): string => {
   const parts: string[] = []
@@ -121,6 +153,14 @@ const load = async () => {
   const params: QueryParameters = { limit: props.config.limit }
   const criteria = buildAlarmCriteria()
   if (criteria) params._s = criteria
+  if (props.config.sortBy) {
+    const def = WIDGET_COLUMNS.alarms.find(c => c.key === props.config.sortBy)
+    if (def?.sortField) {
+      params.orderBy = def.sortField
+      // QueryParameters.order is typed as Feather SORT; cast to satisfy TS
+      params.order = (props.config.sortDir ?? 'asc') as typeof params.order
+    }
+  }
 
   const resp = await API.getAlarms(params)
   if (resp) {
@@ -184,6 +224,12 @@ defineExpose({ refresh: load })
     @include subtitle2;
     color: var($secondary-text-on-surface);
     font-weight: 600;
+    user-select: none;
+
+    &.sortable { cursor: pointer; }
+    &.sort-asc, &.sort-desc { cursor: pointer; color: var($primary-text-on-surface); }
+    &.sort-asc::after  { content: ' ▴'; }
+    &.sort-desc::after { content: ' ▾'; }
   }
 
   tbody tr:hover {

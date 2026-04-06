@@ -59,8 +59,17 @@ const getOutages = async (params: Record<string, string | number>): Promise<Outa
   }
 }
 
-const getActiveOutages = async (categories: string[], limit = 10, offset = 0): Promise<OutagesApiResponse | false> => {
-  return getOutages({ _s: buildActiveOutageCriteria(categories), limit, offset })
+const getActiveOutages = async (
+  categories: string[],
+  limit = 10,
+  offset = 0,
+  orderBy?: string,
+  order?: 'asc' | 'desc'
+): Promise<OutagesApiResponse | false> => {
+  const params: Record<string, string | number> = { _s: buildActiveOutageCriteria(categories), limit, offset }
+  if (orderBy) params.orderBy = orderBy
+  if (order) params.order = order
+  return getOutages(params)
 }
 
 const getActiveOutageCount = async (categories: string[]): Promise<number> => {

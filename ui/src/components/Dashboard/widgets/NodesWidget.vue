@@ -45,8 +45,16 @@
     >
       <thead>
         <tr>
-          <th v-if="col('node')">Node</th>
-          <th v-if="col('location')">Location</th>
+          <th
+            v-if="col('node')"
+            :class="sortClass('node')"
+            @click="toggleSort('node')"
+          >Node</th>
+          <th
+            v-if="col('location')"
+            :class="sortClass('location')"
+            @click="toggleSort('location')"
+          >Location</th>
           <th v-if="col('categories')">Categories</th>
         </tr>
       </thead>
@@ -82,21 +90,44 @@
 import { FeatherIcon } from '@featherds/icon'
 import InfoIcon from '@featherds/icon/action/Info'
 import API from '@/services'
-import { type WidgetConfig } from '@/services/dashboardConfigService'
+import { type WidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Node, type QueryParameters } from '@/types'
 import { getNodeCriteria } from '@/components/Nodes/utils'
+import { useDashboardStore } from '@/stores/dashboardStore'
 
 const props = defineProps<{
   config: WidgetConfig
 }>()
 
+const store = useDashboardStore()
 const nodes = ref<Node[]>([])
 const totalCount = ref(0)
 
 const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
 
+const sortClass = (key: string) => {
+  const def = WIDGET_COLUMNS.nodes.find(c => c.key === key)
+  if (!def?.sortField) return ''
+  if (props.config.sortBy !== key) return 'sortable'
+  return props.config.sortDir === 'desc' ? 'sort-desc' : 'sort-asc'
+}
+
+const toggleSort = (key: string) => {
+  const def = WIDGET_COLUMNS.nodes.find(c => c.key === key)
+  if (!def?.sortField) return
+  const newDir: 'asc' | 'desc' =
+    props.config.sortBy === key && props.config.sortDir === 'asc' ? 'desc' : 'asc'
+  store.updateWidget({ ...props.config, sortBy: key, sortDir: newDir })
+}
+
 const load = async () => {
-  const params: QueryParameters = { limit: props.config.limit, orderBy: 'label' }
+  const sortByKey = props.config.sortBy
+  const sortDef = sortByKey ? WIDGET_COLUMNS.nodes.find(c => c.key === sortByKey) : null
+  const params: QueryParameters = {
+    limit: props.config.limit,
+    orderBy: sortDef?.sortField ?? 'label',
+    order: (props.config.sortDir ?? 'asc') as QueryParameters['order']
+  }
 
   if (props.config.categories.length === 1) {
     params._s = `categories.name==${props.config.categories[0]}`
@@ -166,6 +197,12 @@ defineExpose({ refresh: load })
     @include subtitle2;
     color: var($secondary-text-on-surface);
     font-weight: 600;
+    user-select: none;
+
+    &.sortable { cursor: pointer; }
+    &.sort-asc, &.sort-desc { cursor: pointer; color: var($primary-text-on-surface); }
+    &.sort-asc::after  { content: ' ▴'; }
+    &.sort-desc::after { content: ' ▾'; }
   }
 
   tbody tr:hover {

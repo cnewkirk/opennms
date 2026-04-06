@@ -27,26 +27,28 @@ export type WidgetType = 'summary' | 'outages' | 'alarms' | 'nodes'
 export interface ColumnDef {
   key: string
   label: string
+  /** API `orderBy` value for this column. Absent = column is not sortable. */
+  sortField?: string
 }
 
 /** Available columns per widget type. Order determines display order. */
 export const WIDGET_COLUMNS: Record<Exclude<WidgetType, 'summary'>, ColumnDef[]> = {
   alarms: [
-    { key: 'severity', label: 'Severity' },
-    { key: 'node',     label: 'Node' },
+    { key: 'severity', label: 'Severity',  sortField: 'severity' },
+    { key: 'node',     label: 'Node',      sortField: 'nodeLabel' },
     { key: 'message',  label: 'Message' },
-    { key: 'count',    label: 'Count' },
-    { key: 'time',     label: 'Time' }
+    { key: 'count',    label: 'Count',     sortField: 'count' },
+    { key: 'time',     label: 'Time',      sortField: 'lastEventTime' }
   ],
   outages: [
-    { key: 'node',    label: 'Node' },
-    { key: 'service', label: 'Service' },
-    { key: 'ip',      label: 'IP Address' },
-    { key: 'since',   label: 'Since' }
+    { key: 'node',    label: 'Node',       sortField: 'nodeLabel' },
+    { key: 'service', label: 'Service',    sortField: 'serviceName' },
+    { key: 'ip',      label: 'IP Address', sortField: 'ipAddress' },
+    { key: 'since',   label: 'Since',      sortField: 'ifLostService' }
   ],
   nodes: [
-    { key: 'node',       label: 'Node' },
-    { key: 'location',   label: 'Location' },
+    { key: 'node',       label: 'Node',       sortField: 'label' },
+    { key: 'location',   label: 'Location',   sortField: 'location' },
     { key: 'categories', label: 'Categories' }
   ]
 }
@@ -74,6 +76,10 @@ export interface WidgetConfig {
   severities: string[]
   /** Visible column keys. Undefined / empty = all columns (backward compat). */
   columns?: string[]
+  /** Column key the table is currently sorted by. */
+  sortBy?: string
+  /** Sort direction. Defaults to 'asc' when sortBy is set. */
+  sortDir?: 'asc' | 'desc'
 }
 
 export interface DashboardConfig {

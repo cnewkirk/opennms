@@ -41,10 +41,26 @@
     >
       <thead>
         <tr>
-          <th v-if="col('node')">Node</th>
-          <th v-if="col('service')">Service</th>
-          <th v-if="col('ip')">IP Address</th>
-          <th v-if="col('since')">Since</th>
+          <th
+            v-if="col('node')"
+            :class="sortClass('node')"
+            @click="toggleSort('node')"
+          >Node</th>
+          <th
+            v-if="col('service')"
+            :class="sortClass('service')"
+            @click="toggleSort('service')"
+          >Service</th>
+          <th
+            v-if="col('ip')"
+            :class="sortClass('ip')"
+            @click="toggleSort('ip')"
+          >IP Address</th>
+          <th
+            v-if="col('since')"
+            :class="sortClass('since')"
+            @click="toggleSort('since')"
+          >Since</th>
         </tr>
       </thead>
       <tbody>
@@ -80,20 +96,48 @@
 import { FeatherIcon } from '@featherds/icon'
 import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
 import { getActiveOutages } from '@/services/outageService'
-import { type WidgetConfig } from '@/services/dashboardConfigService'
+import { type WidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Outage } from '@/types'
+import { useDashboardStore } from '@/stores/dashboardStore'
 
 const props = defineProps<{
   config: WidgetConfig
 }>()
 
+const store = useDashboardStore()
 const outages = ref<Outage[]>([])
 const totalCount = ref(0)
 
 const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
 
+const sortClass = (key: string) => {
+  const def = WIDGET_COLUMNS.outages.find(c => c.key === key)
+  if (!def?.sortField) return ''
+  if (props.config.sortBy !== key) return 'sortable'
+  return props.config.sortDir === 'desc' ? 'sort-desc' : 'sort-asc'
+}
+
+const toggleSort = (key: string) => {
+  const def = WIDGET_COLUMNS.outages.find(c => c.key === key)
+  if (!def?.sortField) return
+  const newDir: 'asc' | 'desc' =
+    props.config.sortBy === key && props.config.sortDir === 'asc' ? 'desc' : 'asc'
+  store.updateWidget({ ...props.config, sortBy: key, sortDir: newDir })
+}
+
 const load = async () => {
-  const resp = await getActiveOutages(props.config.categories, props.config.limit)
+  let orderBy: string | undefined
+  if (props.config.sortBy) {
+    const def = WIDGET_COLUMNS.outages.find(c => c.key === props.config.sortBy)
+    if (def?.sortField) orderBy = def.sortField
+  }
+  const resp = await getActiveOutages(
+    props.config.categories,
+    props.config.limit,
+    0,
+    orderBy,
+    props.config.sortDir
+  )
   if (resp) {
     outages.value = resp.outage
     totalCount.value = resp.totalCount
@@ -155,6 +199,12 @@ defineExpose({ refresh: load })
     @include subtitle2;
     color: var($secondary-text-on-surface);
     font-weight: 600;
+    user-select: none;
+
+    &.sortable { cursor: pointer; }
+    &.sort-asc, &.sort-desc { cursor: pointer; color: var($primary-text-on-surface); }
+    &.sort-asc::after  { content: ' ▴'; }
+    &.sort-desc::after { content: ' ▾'; }
   }
 
   tbody tr:hover {
