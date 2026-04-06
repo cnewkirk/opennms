@@ -24,6 +24,39 @@ import { rest } from './axiosInstances'
 
 export type WidgetType = 'summary' | 'outages' | 'alarms' | 'nodes'
 
+export interface ColumnDef {
+  key: string
+  label: string
+}
+
+/** Available columns per widget type. Order determines display order. */
+export const WIDGET_COLUMNS: Record<Exclude<WidgetType, 'summary'>, ColumnDef[]> = {
+  alarms: [
+    { key: 'severity', label: 'Severity' },
+    { key: 'node',     label: 'Node' },
+    { key: 'message',  label: 'Message' },
+    { key: 'count',    label: 'Count' },
+    { key: 'time',     label: 'Time' }
+  ],
+  outages: [
+    { key: 'node',    label: 'Node' },
+    { key: 'service', label: 'Service' },
+    { key: 'ip',      label: 'IP Address' },
+    { key: 'since',   label: 'Since' }
+  ],
+  nodes: [
+    { key: 'node',       label: 'Node' },
+    { key: 'location',   label: 'Location' },
+    { key: 'categories', label: 'Categories' }
+  ]
+}
+
+const DEFAULT_COLUMNS: Record<Exclude<WidgetType, 'summary'>, string[]> = {
+  alarms:  ['severity', 'node', 'message', 'count'],
+  outages: ['node', 'service', 'ip'],
+  nodes:   ['node', 'location', 'categories']
+}
+
 export interface WidgetConfig {
   id: string
   type: WidgetType
@@ -39,6 +72,8 @@ export interface WidgetConfig {
   limit: number
   refreshInterval: number
   severities: string[]
+  /** Visible column keys. Undefined / empty = all columns (backward compat). */
+  columns?: string[]
 }
 
 export interface DashboardConfig {
@@ -54,9 +89,9 @@ const defaultConfig = (): DashboardConfig => ({
   version: CONFIG_VERSION,
   widgets: [
     { id: 'widget-summary', type: 'summary', title: 'Network Summary',  x: 0, y: 0, w: 12, h: 2, categories: [], limit: 0,  refreshInterval: 60,  severities: [] },
-    { id: 'widget-outages', type: 'outages', title: 'Active Outages',   x: 0, y: 2, w: 6,  h: 3, categories: [], limit: 10, refreshInterval: 60,  severities: [] },
-    { id: 'widget-alarms',  type: 'alarms',  title: 'Active Alarms',    x: 6, y: 2, w: 6,  h: 3, categories: [], limit: 10, refreshInterval: 60,  severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
-    { id: 'widget-nodes',   type: 'nodes',   title: 'Nodes',            x: 0, y: 5, w: 12, h: 3, categories: [], limit: 10, refreshInterval: 120, severities: [] }
+    { id: 'widget-outages', type: 'outages', title: 'Active Outages',   x: 0, y: 2, w: 6,  h: 3, categories: [], limit: 10, refreshInterval: 60,  severities: [],                                 columns: DEFAULT_COLUMNS.outages },
+    { id: 'widget-alarms',  type: 'alarms',  title: 'Active Alarms',    x: 6, y: 2, w: 6,  h: 3, categories: [], limit: 10, refreshInterval: 60,  severities: ['CRITICAL', 'MAJOR', 'MINOR'],     columns: DEFAULT_COLUMNS.alarms },
+    { id: 'widget-nodes',   type: 'nodes',   title: 'Nodes',            x: 0, y: 5, w: 12, h: 3, categories: [], limit: 10, refreshInterval: 120, severities: [],                                 columns: DEFAULT_COLUMNS.nodes }
   ]
 })
 

@@ -41,9 +41,10 @@
     >
       <thead>
         <tr>
-          <th>Node</th>
-          <th>Service</th>
-          <th>IP Address</th>
+          <th v-if="col('node')">Node</th>
+          <th v-if="col('service')">Service</th>
+          <th v-if="col('ip')">IP Address</th>
+          <th v-if="col('since')">Since</th>
         </tr>
       </thead>
       <tbody>
@@ -51,11 +52,18 @@
           v-for="outage in outages"
           :key="outage.outageId"
         >
-          <td class="node-label">
+          <td
+            v-if="col('node')"
+            class="node-label"
+          >
             <router-link :to="`/node/${outage.nodeId}`">{{ outage.nodeLabel }}</router-link>
           </td>
-          <td>{{ outage.serviceName }}</td>
-          <td>{{ outage.ipAddress }}</td>
+          <td v-if="col('service')">{{ outage.serviceName }}</td>
+          <td v-if="col('ip')">{{ outage.ipAddress }}</td>
+          <td
+            v-if="col('since')"
+            class="since"
+          >{{ outage.ifLostService ? new Date(outage.ifLostService).toLocaleString() : '—' }}</td>
         </tr>
       </tbody>
     </table>
@@ -81,6 +89,8 @@ const props = defineProps<{
 
 const outages = ref<Outage[]>([])
 const totalCount = ref(0)
+
+const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
 
 const load = async () => {
   const resp = await getActiveOutages(props.config.categories, props.config.limit)
@@ -160,6 +170,11 @@ defineExpose({ refresh: load })
 
 .node-label {
   font-weight: 500;
+}
+
+.since {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .more-hint {

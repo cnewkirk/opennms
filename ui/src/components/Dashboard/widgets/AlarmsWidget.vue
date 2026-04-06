@@ -38,10 +38,11 @@
     >
       <thead>
         <tr>
-          <th>Severity</th>
-          <th>Node</th>
-          <th>Message</th>
-          <th>Count</th>
+          <th v-if="col('severity')">Severity</th>
+          <th v-if="col('node')">Node</th>
+          <th v-if="col('message')">Message</th>
+          <th v-if="col('count')">Count</th>
+          <th v-if="col('time')">Time</th>
         </tr>
       </thead>
       <tbody>
@@ -50,14 +51,24 @@
           :key="alarm.id"
           :class="`row--${alarm.severity.toLowerCase()}`"
         >
-          <td>
+          <td v-if="col('severity')">
             <SeverityBadge :severity="alarm.severity" />
           </td>
-          <td>
+          <td v-if="col('node')">
             <router-link :to="`/node/${alarm.nodeId}`">{{ alarm.nodeLabel }}</router-link>
           </td>
-          <td class="log-msg">{{ alarm.logMessage }}</td>
-          <td class="count">{{ alarm.count }}</td>
+          <td
+            v-if="col('message')"
+            class="log-msg"
+          >{{ alarm.logMessage }}</td>
+          <td
+            v-if="col('count')"
+            class="count"
+          >{{ alarm.count }}</td>
+          <td
+            v-if="col('time')"
+            class="time"
+          >{{ alarm.lastEventTime ? new Date(alarm.lastEventTime).toLocaleString() : '—' }}</td>
         </tr>
       </tbody>
     </table>
@@ -84,6 +95,9 @@ const props = defineProps<{
 
 const alarms = ref<Alarm[]>([])
 const totalCount = ref(0)
+
+/** Returns true if the given column key is enabled (undefined/empty = all on). */
+const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
 
 const buildAlarmCriteria = (): string => {
   const parts: string[] = []
@@ -192,6 +206,11 @@ defineExpose({ refresh: load })
 
 .count {
   text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.time {
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 

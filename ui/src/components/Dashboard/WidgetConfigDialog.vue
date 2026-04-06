@@ -76,6 +76,22 @@
         class="config-field"
       />
 
+      <div
+        v-if="draft.type !== 'summary' && availableColumns.length"
+        class="config-field"
+      >
+        <p class="field-label">Visible Columns</p>
+        <div class="column-list">
+          <FeatherCheckbox
+            v-for="col in availableColumns"
+            :key="col.key"
+            v-model="selectedColumns[col.key]"
+          >
+            {{ col.label }}
+          </FeatherCheckbox>
+        </div>
+      </div>
+
       <FeatherSelect
         v-model="selectedRefreshInterval"
         :options="refreshOptions"
@@ -101,7 +117,7 @@ import { FeatherButton } from '@featherds/button'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { FeatherInput } from '@featherds/input'
 import { FeatherSelect } from '@featherds/select'
-import { type WidgetConfig } from '@/services/dashboardConfigService'
+import { type WidgetConfig, WIDGET_COLUMNS, type ColumnDef } from '@/services/dashboardConfigService'
 import { type Category } from '@/types'
 import API from '@/services'
 
@@ -116,6 +132,10 @@ const emit = defineEmits<{
 }>()
 
 const SEVERITIES = ['CRITICAL', 'MAJOR', 'MINOR', 'WARNING', 'NORMAL', 'INDETERMINATE']
+
+const availableColumns = computed<ColumnDef[]>(() =>
+  draft.value.type !== 'summary' ? (WIDGET_COLUMNS[draft.value.type] ?? []) : []
+)
 
 const refreshOptions = [
   { label: '30 seconds', value: 30 },
@@ -134,6 +154,7 @@ const draft = ref<WidgetConfig>({ ...props.widgetConfig })
 // checkbox maps for multi-select
 const selectedCategories = ref<Record<string, boolean>>({})
 const selectedSeverities = ref<Record<string, boolean>>({})
+const selectedColumns = ref<Record<string, boolean>>({})
 
 const selectedRefreshInterval = ref(
   refreshOptions.find(o => o.value === props.widgetConfig.refreshInterval) ?? refreshOptions[1]
@@ -148,6 +169,13 @@ watch(
     selectedSeverities.value = {}
     for (const s of cfg.severities) selectedSeverities.value[s] = true
     selectedRefreshInterval.value = refreshOptions.find(o => o.value === cfg.refreshInterval) ?? refreshOptions[1]
+    selectedColumns.value = {}
+    if (cfg.type !== 'summary') {
+      const cols = WIDGET_COLUMNS[cfg.type] ?? []
+      // if columns is unset treat all as enabled
+      const enabled = cfg.columns?.length ? cfg.columns : cols.map(c => c.key)
+      for (const c of cols) selectedColumns.value[c.key] = enabled.includes(c.key)
+    }
   },
   { immediate: true }
 )
@@ -168,7 +196,10 @@ const save = () => {
     severities: Object.entries(selectedSeverities.value)
       .filter(([, v]) => v)
       .map(([k]) => k),
-    refreshInterval: selectedRefreshInterval.value?.value ?? 60
+    refreshInterval: selectedRefreshInterval.value?.value ?? 60,
+    columns: draft.value.type !== 'summary'
+      ? Object.entries(selectedColumns.value).filter(([, v]) => v).map(([k]) => k)
+      : undefined
   }
   emit('save', saved)
 }
@@ -200,7 +231,8 @@ const save = () => {
 }
 
 .category-list,
-.severity-list {
+.severity-list,
+.column-list {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 16px;

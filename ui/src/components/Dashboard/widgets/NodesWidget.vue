@@ -43,16 +43,11 @@
       v-else
       class="node-table"
     >
-      <colgroup>
-        <col style="width: 40%" />
-        <col style="width: 25%" />
-        <col style="width: 35%" />
-      </colgroup>
       <thead>
         <tr>
-          <th>Node</th>
-          <th>Location</th>
-          <th>Categories</th>
+          <th v-if="col('node')">Node</th>
+          <th v-if="col('location')">Location</th>
+          <th v-if="col('categories')">Categories</th>
         </tr>
       </thead>
       <tbody>
@@ -60,11 +55,11 @@
           v-for="node in nodes"
           :key="node.id"
         >
-          <td>
+          <td v-if="col('node')">
             <router-link :to="`/node/${getNodeCriteria(node)}`">{{ node.label }}</router-link>
           </td>
-          <td>{{ node.location || '—' }}</td>
-          <td>
+          <td v-if="col('location')">{{ node.location || '—' }}</td>
+          <td v-if="col('categories')">
             <span
               v-for="cat in node.categories"
               :key="cat.id"
@@ -97,6 +92,8 @@ const props = defineProps<{
 
 const nodes = ref<Node[]>([])
 const totalCount = ref(0)
+
+const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
 
 const load = async () => {
   const params: QueryParameters = { limit: props.config.limit, orderBy: 'label' }
