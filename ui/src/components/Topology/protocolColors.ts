@@ -38,7 +38,7 @@ export const PROTOCOL_COLORS: Record<string, string> = {
   'user-defined': '#A0AEC0',
 }
 
-const FALLBACK_COLOR = '#718096'
+export const FALLBACK_COLOR = '#718096'
 
 /**
  * Returns the hex color for a given protocol name.

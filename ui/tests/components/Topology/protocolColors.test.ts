@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getProtocolColor, parallelOffsets, PROTOCOL_COLORS } from '@/components/Topology/protocolColors'
+import { getProtocolColor, parallelOffsets, PROTOCOL_COLORS, FALLBACK_COLOR } from '@/components/Topology/protocolColors'
 
 describe('getProtocolColor', () => {
   it('returns the correct hex for known protocols (case-insensitive)', () => {
@@ -11,7 +11,7 @@ describe('getProtocolColor', () => {
   })
 
   it('returns fallback color for unknown protocols', () => {
-    expect(getProtocolColor('unknown-protocol')).toBe('#718096')
+    expect(getProtocolColor('unknown-protocol')).toBe(FALLBACK_COLOR)
   })
 
   it('handles "User Defined" as a known protocol', () => {
