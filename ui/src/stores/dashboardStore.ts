@@ -21,6 +21,7 @@
 ///
 
 import { defineStore } from 'pinia'
+import type { GridStackNode } from 'gridstack'
 import {
   type WidgetConfig,
   type DashboardConfig,
@@ -31,14 +32,6 @@ import {
   saveToServer
 } from '@/services/dashboardConfigService'
 import { useMenuStore } from '@/stores/menuStore'
-
-interface GridStackNode {
-  id?: string
-  x?: number
-  y?: number
-  w?: number
-  h?: number
-}
 
 export const useDashboardStore = defineStore('dashboardStore', () => {
   const config = ref<DashboardConfig>(loadConfig())
@@ -57,6 +50,10 @@ export const useDashboardStore = defineStore('dashboardStore', () => {
       if (username) saveToServer(username, config.value)
     }, 2000)
   }
+
+  onScopeDispose(() => {
+    if (syncTimer) clearTimeout(syncTimer)
+  })
 
   /** Called on mount — try server first, fall back to localStorage */
   const initialize = async () => {
