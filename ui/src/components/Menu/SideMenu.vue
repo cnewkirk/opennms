@@ -54,6 +54,7 @@ const legacyToVueRoutes: Record<string, string> = {
   'alarm/index.htm':                   'ui/index.html#/alarms',
   'dashboard.jsp':                     'ui/index.html#/surveillance-dashboard',
   'surveillance-view.jsp':             'ui/index.html#/surveillance-dashboard',
+  'element/nodeList.htm':              'ui/index.html#/nodes',
   'outage/index.jsp':                  'ui/index.html#/outages',
   'graph/index.jsp':                'ui/index.html#/resource-graphs',
   'topology':                       'ui/index.html#/topology',

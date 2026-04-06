@@ -162,10 +162,8 @@
     <bean name="/alarm/list.htm" class="org.opennms.web.controller.alarm.AlarmFilterController"/>
 
     <alias name="/alarm/detail.htm" alias="/alarm/detail.jsp"/>
-    <bean name="/alarm/detail.htm" class="org.opennms.web.controller.alarm.AlarmDetailController">
-        <property name="alarmRepository" ref="alarmRepository"/>
-        <property name="webEventRepository" ref="webEventRepository"/>
-        <property name="defaultShortLimit" value="20"/>
+    <bean name="/alarm/detail.htm" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <property name="viewName" value="alarm/detail"/>
     </bean>
 
     <bean name="/alarm/saveStickyMemo.htm" class="org.opennms.web.controller.alarm.AlarmDetailController">
