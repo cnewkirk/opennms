@@ -71,7 +71,14 @@ const getActiveOutageCount = async (categories: string[]): Promise<number> => {
 const getOutage = async (id: number | string): Promise<Outage | false> => {
   try {
     const resp = await v2.get(`${endpoint}/${id}`)
-    return resp.data as Outage
+    const o = resp.data
+    // v2 single-outage response uses nested objects — normalize to flat fields
+    return {
+      ...o,
+      serviceName: o.serviceName ?? o.monitoredService?.serviceType?.name,
+      lostServiceEventId: o.lostServiceEventId ?? o.serviceLostEvent?.id,
+      regainedServiceEventId: o.regainedServiceEventId ?? o.serviceRegainedEvent?.id ?? null
+    } as Outage
   } catch {
     return false
   }
