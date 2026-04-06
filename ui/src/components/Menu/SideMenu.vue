@@ -198,10 +198,10 @@ const topPanels = computed<MenuListEntry[]>(() => {
 
   #opennms-sidebar-control {
     --feather-dock-header-offset: 3.75rem;
-  
+
     // tighten spacing between toggle button and top of menu items
     --feather-dock-content-padding-top: 3em;
-    --feather-dock-toggle-top: 2em;
+    --feather-dock-toggle-top: 3em;
   }
 
   // fix Sidenav toggle button placement
@@ -252,6 +252,13 @@ const topPanels = computed<MenuListEntry[]>(() => {
         padding: 0 0.1rem;
       }
     }
+  }
+}
+
+.open-light {
+  #opennms-sidebar-control {
+    --feather-dock-background: #0081ad;
+    --feather-dock-color: #fff;
   }
 }
 </style>
