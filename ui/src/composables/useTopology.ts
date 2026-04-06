@@ -286,7 +286,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       if (!cy) return
       const edgeKey = evt.target.data('edgeKey') as string
       const parallelEdges = cy.edges(`[edgeKey = "${edgeKey}"]`)
-      const protocols = parallelEdges.map(e => e.data('protocol') as string)
+      const protocols = [...new Set(parallelEdges.map(e => e.data('protocol') as string))]
 
       const srcId = String(evt.target.data('source'))
       const tgtId = String(evt.target.data('target'))
@@ -298,6 +298,10 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     })
 
     cy.on('mouseout', 'edge', () => {
+      edgeTooltip.value = null
+    })
+
+    cy.on('viewport', () => {
       edgeTooltip.value = null
     })
 
