@@ -20,7 +20,7 @@
 /// License.
 ///
 
-import { rest } from './axiosInstances'
+import { v2 } from './axiosInstances'
 
 export interface DetectRequest {
   serviceName: string
@@ -68,16 +68,16 @@ export interface GenerateResponse {
 const BASE = 'jmx-config'
 
 export const startDetect = async (request: DetectRequest): Promise<string> => {
-  const resp = await rest.post(`${BASE}/detect`, request)
+  const resp = await v2.post(`${BASE}/detect`, request)
   return resp.data.jobId as string
 }
 
 export const pollDetect = async (jobId: string): Promise<DetectJobStatus> => {
-  const resp = await rest.get(`${BASE}/detect/${jobId}`)
+  const resp = await v2.get(`${BASE}/detect/${jobId}`)
   return resp.data as DetectJobStatus
 }
 
 export const generate = async (request: GenerateRequest): Promise<GenerateResponse> => {
-  const resp = await rest.post(`${BASE}/generate`, request)
+  const resp = await v2.post(`${BASE}/generate`, request)
   return resp.data as GenerateResponse
 }
