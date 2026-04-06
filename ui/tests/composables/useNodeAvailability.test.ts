@@ -52,8 +52,8 @@ describe('buildAvailabilityChartData', () => {
 
   test('splits into up/down/up segments around a resolved outage', () => {
     const outage: Outage = {
-      outageId: 42, nodeId: 1, ipAddress: '10.0.0.1', serviceName: 'ICMP',
-      nodeLabel: '', location: '', hostname: '', serviceIs: 1,
+      id: 42, outageId: 42, nodeId: 1, ipAddress: '10.0.0.1', serviceName: 'ICMP',
+      nodeLabel: '', location: '', hostname: '', serviceId: 1,
       ifLostService: 1010000, ifRegainedService: 1020000
     }
     const { datasets, downSegmentMeta } = buildAvailabilityChartData(
@@ -72,8 +72,8 @@ describe('buildAvailabilityChartData', () => {
 
   test('caps an active outage at window end', () => {
     const outage: Outage = {
-      outageId: 99, nodeId: 1, ipAddress: '10.0.0.1', serviceName: 'ICMP',
-      nodeLabel: '', location: '', hostname: '', serviceIs: 1,
+      id: 99, outageId: 99, nodeId: 1, ipAddress: '10.0.0.1', serviceName: 'ICMP',
+      nodeLabel: '', location: '', hostname: '', serviceId: 1,
       ifLostService: 1050000, ifRegainedService: null
     }
     const { datasets } = buildAvailabilityChartData(

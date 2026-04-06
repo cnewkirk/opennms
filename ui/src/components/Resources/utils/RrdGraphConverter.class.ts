@@ -132,15 +132,22 @@ class RrdGraphConverter extends RrdGraphVisitor {
       .filter((s: Series) => s.name && s.type !== 'hidden')
       .map((s: Series) => ({
         name: s.name as string,
+        metric: (s.metric ?? s.name) as string,
         color: s.color as string | undefined,
         type: (s.type === 'stack' ? 'stack' : s.type === 'area' ? 'area' : 'line') as PersesSeriesOverride['type']
       }))
+
+    const palette: string[] = seriesOverrides.map(s => s.color).filter((c): c is string => Boolean(c))
+    const types = seriesOverrides.map(s => s.type)
+    const visualMode: 'line' | 'area' | 'stack' = types.includes('stack') ? 'stack' : types.includes('area') ? 'area' : 'line'
 
     return {
       title: this.model.title as string,
       yAxisLabel: this.model.verticalLabel as string,
       query: { batch: true, sources, expressions },
       seriesOverrides,
+      palette,
+      visualMode,
       printStatements: this.model.printStatements
     }
   }

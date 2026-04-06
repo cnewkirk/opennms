@@ -71,7 +71,7 @@ export const buildAvailabilityChartData = (
           upSegments.push({ x: [cursor, lostAt], y: label })
         }
         downSegments.push({ x: [lostAt, regainedAt], y: label })
-        downSegmentMeta.push({ outageId: outage.outageId })
+        downSegmentMeta.push({ outageId: outage.outageId ?? outage.id })
         cursor = regainedAt
       }
       if (cursor < windowEnd) {
