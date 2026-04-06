@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
 import AddIcon from '@featherds/icon/action/Add'
@@ -76,14 +77,15 @@ const addMenuOpen = ref(false)
 const WIDGET_TYPES: WidgetType[] = ['summary', 'outages', 'alarms', 'nodes']
 
 const WIDGET_DEFAULTS: Record<WidgetType, Partial<WidgetConfig>> = {
-  summary: { title: 'Network Summary', colSpan: 12, limit: 0 },
-  outages: { title: 'Active Outages', colSpan: 6, limit: 10 },
-  alarms:  { title: 'Active Alarms',  colSpan: 6, limit: 10, severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
-  nodes:   { title: 'Nodes',          colSpan: 12, limit: 10 }
+  summary: { title: 'Network Summary', w: 12, h: 2 },
+  outages: { title: 'Active Outages',  w: 6,  h: 3, limit: 10 },
+  alarms:  { title: 'Active Alarms',   w: 6,  h: 3, limit: 10, severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
+  nodes:   { title: 'Nodes',           w: 12, h: 3, limit: 10 }
 }
 
 const addWidget = (type: WidgetType) => {
   addMenuOpen.value = false
+  // place new widget at bottom (y=999 lets gridstack find the next open row)
   const widget: WidgetConfig = {
     id: `widget-${type}-${Date.now()}`,
     type,
@@ -91,7 +93,10 @@ const addWidget = (type: WidgetType) => {
     refreshInterval: 60,
     severities: [],
     limit: 10,
-    colSpan: 6,
+    x: 0,
+    y: 999,
+    w: 6,
+    h: 3,
     title: '',
     ...WIDGET_DEFAULTS[type]
   }
@@ -102,6 +107,11 @@ const confirmReset = () => {
   dashboardStore.reset()
   showSnackBar({ msg: 'Dashboard reset to defaults.' })
 }
+
+// server-first initialization
+onMounted(() => {
+  dashboardStore.initialize()
+})
 </script>
 
 <style scoped lang="scss">
