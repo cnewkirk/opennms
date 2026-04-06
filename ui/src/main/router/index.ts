@@ -182,6 +182,16 @@ const router = createRouter({
       component: () => import('@/containers/AlarmDetail.vue')
     },
     {
+      path: '/outages',
+      name: 'Outages',
+      component: () => import('@/containers/Outages.vue')
+    },
+    {
+      path: '/outage/:id',
+      name: 'Outage Detail',
+      component: () => import('@/containers/OutageDetail.vue')
+    },
+    {
       path: '/resource-graphs',
       name: 'ResourceGraphs',
       component: () => import('@/containers/ResourceGraphs.vue'),
