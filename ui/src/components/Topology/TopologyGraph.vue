@@ -19,6 +19,7 @@
 
     <div ref="graphContainer" class="topology-graph__canvas" />
     <TopologyDetailPanel />
+    <TopologyEdgeTooltip :tooltip="edgeTooltip" />
 
     <CreateLinkModal
       :visible="showLinkModal"
@@ -38,13 +39,14 @@ import useSnackbar from '@/composables/useSnackbar'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
 import TopologyDetailPanel from './TopologyDetailPanel.vue'
+import TopologyEdgeTooltip from './TopologyEdgeTooltip.vue'
 import CreateLinkModal from './CreateLinkModal.vue'
 
 const store = useTopologyStore()
 const { showSnackBar } = useSnackbar()
 const graphContainer = ref<HTMLElement | null>(null)
 
-const { saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget } = useTopology(graphContainer)
+const { saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget, edgeTooltip } = useTopology(graphContainer)
 
 // Modal state
 const showLinkModal = ref(false)

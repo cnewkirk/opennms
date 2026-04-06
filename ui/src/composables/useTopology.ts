@@ -135,6 +135,15 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   const store = useTopologyStore()
   let cy: Core | null = null
 
+  interface EdgeTooltipState {
+    x: number
+    y: number
+    protocols: string[]
+    srcLabel: string
+    tgtLabel: string
+  }
+  const edgeTooltip = ref<EdgeTooltipState | null>(null)
+
   // --- Layout persistence (localStorage) ---
 
   const localStorageKey = (): string => {
@@ -271,6 +280,25 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         }
         store.selectElement(null)
       }
+    })
+
+    cy.on('mouseover', 'edge', (evt) => {
+      if (!cy) return
+      const edgeKey = evt.target.data('edgeKey') as string
+      const parallelEdges = cy.edges(`[edgeKey = "${edgeKey}"]`)
+      const protocols = parallelEdges.map(e => e.data('protocol') as string)
+
+      const srcId = String(evt.target.data('source'))
+      const tgtId = String(evt.target.data('target'))
+      const srcLabel = cy.getElementById(srcId)?.data('label') as string ?? srcId
+      const tgtLabel = cy.getElementById(tgtId)?.data('label') as string ?? tgtId
+
+      const pos = evt.renderedPosition ?? { x: 0, y: 0 }
+      edgeTooltip.value = { x: pos.x, y: pos.y, protocols, srcLabel, tgtLabel }
+    })
+
+    cy.on('mouseout', 'edge', () => {
+      edgeTooltip.value = null
     })
 
     // Auto-save whenever the user finishes dragging a node
@@ -430,7 +458,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy = null
   })
 
-  return { getCy: () => cy, saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget }
+  return { getCy: () => cy, saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget, edgeTooltip }
 }
 
 export default useTopology
