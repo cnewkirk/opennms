@@ -293,16 +293,30 @@ export interface IpInterface {
 }
 
 export interface Outage {
+  id: number
   nodeId: number
   ipAddress: string
-  serviceIs: number
+  serviceId: number
   nodeLabel: string
   location: string
   hostname: string
-  serviceName: string
-  outageId: number
+  serviceName?: string
+  /** v2 API outage ID field */
+  outageId?: number
   ifLostService?: number        // ms timestamp — present in v2 API responses
   ifRegainedService?: number | null  // null means still active
+  monitoredService?: {
+    serviceType?: { name: string; id: number }
+    [key: string]: unknown
+  }
+  /** ID of the event that caused the outage (lost service event) */
+  lostServiceEventId?: number
+  /** ID of the event that resolved the outage (regained service event) */
+  regainedServiceEventId?: number | null
+  /** Location from which the outage was detected (perspective monitoring) */
+  perspectiveLocation?: string | null
+  /** Requisition (foreign source) the node belongs to */
+  foreignSource?: string | null
 }
 
 export interface IfService {
@@ -571,8 +585,10 @@ export interface Expression {
 
 /** Visual config for a single series rendered by PersesPanel */
 export interface PersesSeriesOverride {
-  /** Matches the query label / series name */
+  /** Display name (from graph legend) */
   name: string
+  /** Metric/label name matching the API response label */
+  metric: string
   color?: string
   type?: 'line' | 'area' | 'stack'
 }
@@ -587,6 +603,10 @@ export interface PersesGraphSpec {
   /** Single batched query — all sources and expressions for this graph */
   query: import('@/datasource/opennms').OpenNMSBatchQuerySpec
   seriesOverrides: PersesSeriesOverride[]
+  /** Ordered color palette matching the expected API series order (non-transient sources, then expressions) */
+  palette: string[]
+  /** Dominant visual mode derived from the graph definition's series types */
+  visualMode: 'line' | 'area' | 'stack'
   printStatements: PrintStatement[]
 }
 
