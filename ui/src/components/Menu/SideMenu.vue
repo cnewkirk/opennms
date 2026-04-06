@@ -48,15 +48,25 @@ const mainMenu = computed<MainMenu>(() => menuStore.mainMenu)
 const plugins = computed<Plugin[]>(() => pluginStore.plugins)
 const isExpanded = ref<boolean>(menuStore.sideMenuExpanded() ?? false)
 
+// Map legacy JSP URLs to Vue SPA routes
+const legacyToVueRoutes: Record<string, string> = {
+  'graph/index.jsp': 'ui/index.html#/resource-graphs'
+}
+
 const getMenuLink = (menuItem: MenuItem) => {
   if (mainMenu.value?.baseHref && menuItem.url) {
     if (menuItem.isExternalLink && menuItem.isExternalLink === true) {
       return menuItem.url
     }
 
+    const vueRoute = legacyToVueRoutes[menuItem.url]
+    if (vueRoute) {
+      return `${mainMenu.value.baseHref}${vueRoute}`
+    }
+
     return `${mainMenu.value.baseHref}${menuItem.url}`
   }
-  
+
   return '#'
 }
 

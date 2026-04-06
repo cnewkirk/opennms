@@ -68,6 +68,7 @@ const hasSnmpInfo = computed(() =>
   background: var($surface);
   padding: 16px;
   margin-bottom: 16px;
+  border-radius: 8px;
 }
 .info-panel {
   &__title { margin-bottom: 12px; }
@@ -79,7 +80,7 @@ const hasSnmpInfo = computed(() =>
     dt { color: var($secondary-text-on-surface); font-weight: 600; white-space: nowrap; }
     dd { margin: 0; word-break: break-word; }
   }
-  &__desc  { font-style: italic; }
+  &__desc  { font-style: italic; white-space: pre-wrap; overflow-wrap: break-word; }
   &__empty { color: var($secondary-text-on-surface); margin: 4px 0 0; }
 }
 </style>

@@ -52,6 +52,7 @@ const editCategoriesUrl = computed(
   background: var(--feather-surface);
   padding: 16px;
   margin-bottom: 16px;
+  border-radius: 8px;
 }
 
 .category-panel {

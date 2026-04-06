@@ -27,6 +27,7 @@ import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
 import { FeatherIcon } from '@featherds/icon'
 import MoreVert from '@featherds/icon/navigation/MoreVert'
 import { markRaw, PropType } from 'vue'
+import { useRouter } from 'vue-router'
 import { Node } from '@/types'
 
 const props = defineProps({
@@ -44,6 +45,7 @@ const props = defineProps({
   }
 })
 
+const router = useRouter()
 const menu = markRaw(MoreVert)
 
 const linkItems = [
@@ -63,6 +65,11 @@ const linkItems = [
 ]
 
 const onNodeLink = (name: string, node: Node) => {
+  // Use Vue router for pages that have Vue equivalents
+  if (name === 'graphs') {
+    router.push(`/node/${node.id}`)
+    return
+  }
   const link = mapLink(name, node)
   window.location.assign(`${props.baseHref}${link}`)
 }

@@ -26,13 +26,15 @@
       {{ rescanning ? 'Rescanning…' : 'Rescan' }}
     </FeatherButton>
 
-    <a v-if="hasSNMPPrimary" :href="updateSnmpUrl" class="admin-bar__link">
+    <FeatherButton v-if="snmpPrimaryIp" secondary as-anchor :href="updateSnmpUrl">
       Update SNMP
-    </a>
-    <a :href="scheduleOutageUrl" class="admin-bar__link">Schedule Outage</a>
-    <a v-if="foreignSource" :href="editRequisitionUrl" class="admin-bar__link">
+    </FeatherButton>
+    <FeatherButton secondary as-anchor :href="scheduleOutageUrl">
+      Schedule Outage
+    </FeatherButton>
+    <FeatherButton v-if="foreignSource" secondary as-anchor :href="editRequisitionUrl">
       Edit in Requisition
-    </a>
+    </FeatherButton>
   </div>
 </template>
 
@@ -44,7 +46,7 @@ import { v2 } from '@/services/axiosInstances'
 
 const props = defineProps<{
   nodeId: string
-  hasSNMPPrimary: boolean
+  snmpPrimaryIp?: string
   foreignSource?: string
 }>()
 
@@ -65,10 +67,10 @@ const rescan = async () => {
   }
 }
 
-const updateSnmpUrl = computed(() => `/opennms/admin/snmpConfig.htm?node=${props.nodeId}`)
+const updateSnmpUrl = computed(() => `/opennms/admin/updateSnmp.jsp?node=${props.nodeId}&ipaddr=${props.snmpPrimaryIp}`)
 const scheduleOutageUrl = computed(() => `/opennms/admin/sched-outages/editoutage.jsp`)
 const editRequisitionUrl = computed(
-  () => `/opennms/admin/editForeignSource.jsp?foreignSource=${props.foreignSource}`
+  () => `/opennms/admin/ng-requisitions/index.jsp#/requisitions/${props.foreignSource}`
 )
 </script>
 
@@ -81,6 +83,10 @@ const editRequisitionUrl = computed(
   gap: 12px;
   padding: 8px 0;
   flex-wrap: wrap;
+
+  :deep(.btn) {
+    border-radius: 8px;
+  }
 
   &__link {
     color: var($clickable-normal);
