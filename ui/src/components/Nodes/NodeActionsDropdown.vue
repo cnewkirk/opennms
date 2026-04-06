@@ -70,6 +70,11 @@ const onNodeLink = (name: string, node: Node) => {
     router.push(`/node/${node.id}`)
     return
   }
+  if (name === 'events' || name === 'alarms' || name === 'view-outages') {
+    const tab = name === 'view-outages' ? 'outages' : name
+    router.push(`/node/${node.id}?tab=${tab}`)
+    return
+  }
   const link = mapLink(name, node)
   window.location.assign(`${props.baseHref}${link}`)
 }

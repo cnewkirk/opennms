@@ -81,24 +81,10 @@
       </div>
     </div>
 
-    <!-- Alarms -->
+    <!-- Alarms / Events / Outages -->
     <div v-if="node" class="feather-row">
       <div class="feather-col-12">
-        <AlarmsTable :nodeId="node.id" :nodeLabel="node.label" />
-      </div>
-    </div>
-
-    <!-- Events -->
-    <div v-if="node" class="feather-row">
-      <div class="feather-col-12">
-        <EventsTable :nodeId="node.id" />
-      </div>
-    </div>
-
-    <!-- Outages -->
-    <div v-if="node" class="feather-row">
-      <div class="feather-col-12">
-        <OutagesTable :nodeId="node.id" />
+        <NodeActivityTab :nodeId="node.id" :nodeLabel="node.label" :defaultTab="defaultTab" />
       </div>
     </div>
 
@@ -119,9 +105,7 @@ import NodeInfoPanel from '@/components/NodeDetail/NodeInfoPanel.vue'
 import CategoryPanel from '@/components/NodeDetail/CategoryPanel.vue'
 import AvailabilityPanel from '@/components/NodeDetail/AvailabilityPanel.vue'
 import InterfacesTabs from '@/components/Nodes/InterfacesTabs.vue'
-import EventsTable from '@/components/Nodes/EventsTable.vue'
-import AlarmsTable from '@/components/Nodes/AlarmsTable.vue'
-import OutagesTable from '@/components/Nodes/OutagesTable.vue'
+import NodeActivityTab from '@/components/NodeDetail/NodeActivityTab.vue'
 import ResourceGraphsPanel from '@/components/NodeDetail/ResourceGraphsPanel.vue'
 import useNodeDetail from '@/composables/useNodeDetail'
 import useNodeAvailability from '@/composables/useNodeAvailability'
@@ -132,6 +116,7 @@ import { BreadCrumb } from '@/types'
 const route = useRoute()
 const menuStore = useMenuStore()
 const id = route.params.id as string
+const defaultTab = computed(() => (route.query.tab as string) || 'alarms')
 
 const { node, loading: nodeLoading, error: nodeError } = useNodeDetail(id)
 const {
