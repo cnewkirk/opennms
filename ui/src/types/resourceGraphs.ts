@@ -28,3 +28,19 @@ export interface HighlightItem {
   definition: string   // pre-fab graph name, e.g. "nodeSnmp.cpuPercentage"
   label: string        // resource label for display
 }
+
+export interface PinIdentifier {
+  resourceId: string
+  definition: string
+}
+
+export interface ResourceWithDefinitions {
+  resourceId: string
+  label: string
+  definitions: string[]
+}
+
+export interface ResourceGroup {
+  typeLabel: string
+  resources: ResourceWithDefinitions[]
+}
