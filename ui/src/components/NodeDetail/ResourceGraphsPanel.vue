@@ -33,12 +33,23 @@
     </div>
 
     <template v-else>
-      <!-- Highlights -->
-      <div class="resource-graphs-panel__section-title headline4">Highlights</div>
-      <ResourceHighlights
-        :highlights="highlights"
+      <!-- Pinned Graphs -->
+      <div class="resource-graphs-panel__section-title headline4">Pinned Graphs</div>
+      <PinnedGraphs
+        :pinnedItems="pinnedItems"
         :time="highlightTime"
-        :loading="loading"
+        :hasPerNodePins="hasPerNodePins"
+        @toggle-pin="togglePin"
+        @set-as-default="setAsDefault"
+      />
+
+      <!-- Resource Categories -->
+      <div class="resource-graphs-panel__section-title headline4">Browse by Category</div>
+      <ResourceAccordion
+        :groups="resourceGroups"
+        :time="highlightTime"
+        :isPinned="isPinned"
+        @toggle-pin="togglePin"
       />
 
       <!-- Saved Charts -->
@@ -73,17 +84,22 @@
 </template>
 
 <script setup lang="ts">
-import ResourceHighlights from './ResourceHighlights.vue'
+import PinnedGraphs from './PinnedGraphs.vue'
+import ResourceAccordion from './ResourceAccordion.vue'
 import CustomChart from './ResourceQueryBuilder/CustomChart.vue'
 import QueryBuilder from './ResourceQueryBuilder/QueryBuilder.vue'
 import useResourceGraphs from '@/composables/useResourceGraphs'
+import usePinnedGraphs from '@/composables/usePinnedGraphs'
 import type { StartEndTime } from '@/types'
-import type { SavedChart } from '@/types/resourceGraphs'
+import type { SavedChart, HighlightItem } from '@/types/resourceGraphs'
 
 const props = defineProps<{ nodeId: string }>()
 
-const { resources, highlights, savedCharts, loading, error, saveChart, deleteChart, refresh } =
+const { resources, resourceGroups, savedCharts, loading, error, saveChart, deleteChart, refresh } =
   useResourceGraphs(props.nodeId)
+
+const { pinnedItems, isPinned, togglePin, setAsDefault, hasPerNodePins } =
+  usePinnedGraphs(props.nodeId, () => resourceGroups.value)
 
 // ── Time range ──────────────────────────────────────────────────────────────
 
@@ -125,8 +141,6 @@ const applyCustom = () => {
   }
 }
 
-// Graph.vue StartEndTime uses unix seconds (it multiplies by 1000 internally)
-// StartEndTime.startTime / endTime accept string | number
 const highlightTime = computed<StartEndTime>(() => ({
   startTime: Math.floor(globalRange.value.start / 1000),
   endTime: Math.floor(globalRange.value.end / 1000),
