@@ -183,22 +183,10 @@
                   :key="column.id"
                 >
                   <td v-if="isSelectedColumn(column, 'id')">
-                    <a
-                      :href="computeNodeLink(node.id)"
-                      @click="onNodeLinkClick(node.id)"
-                      target="_blank"
-                    >
-                      {{ node.id }}
-                    </a>
+                    <router-link :to="`/node/${node.id}`">{{ node.id }}</router-link>
                   </td>
                   <td v-if="isSelectedColumn(column, 'label')">
-                    <a
-                      :href="computeNodeLink(node.id)"
-                      @click="onNodeLinkClick(node.id)"
-                      target="_blank"
-                    >
-                      {{ node.label }}
-                    </a>
+                    <router-link :to="`/node/${node.id}`">{{ node.label }}</router-link>
                   </td>
 
                   <ManagementIPTooltipCell
@@ -244,7 +232,7 @@
                   <FeatherButton
                     icon="Edit"
                     class="edit-icon"
-                    @click="() => onNodeLinkClick(node.id)"
+                    @click="() => $router.push(`/node/${node.id}`)"
                   >
                     <FeatherIcon
                       :icon="Edit"
@@ -485,9 +473,6 @@ const computeNodeIpInterfaceLink = (nodeId: number | string, ipAddress: string) 
   return `${mainMenu.value.baseHref}element/interface.jsp?node=${nodeId}&intf=${ipAddress}`
 }
 
-const onNodeLinkClick = (nodeId: number | string) => {
-  window.location.assign(computeNodeLink(nodeId))
-}
 
 const hasExtendedSearchParams = computed(() => {
   return hasAnyExtendedSearchValues(nodeStructureStore.queryFilter.extendedSearch)
