@@ -132,6 +132,32 @@
             <span v-for="p in edgeProtocols" :key="p" class="topo-panel__chip">{{ p }}</span>
           </div>
 
+          <!-- User-defined link details -->
+          <template v-if="isUserDefinedEdge && edge">
+            <div class="topo-panel__section">User Defined Link</div>
+            <div v-if="edge.linkLabel" class="topo-panel__row">
+              <span class="topo-panel__key">Label</span>
+              <span class="topo-panel__val">{{ edge.linkLabel }}</span>
+            </div>
+            <div v-if="edge.componentLabelA" class="topo-panel__row">
+              <span class="topo-panel__key">{{ sourceLabel }} Port</span>
+              <span class="topo-panel__val topo-panel__val--mono">{{ edge.componentLabelA }}</span>
+            </div>
+            <div v-if="edge.componentLabelZ" class="topo-panel__row">
+              <span class="topo-panel__key">{{ targetLabel }} Port</span>
+              <span class="topo-panel__val topo-panel__val--mono">{{ edge.componentLabelZ }}</span>
+            </div>
+            <div v-if="edge.owner" class="topo-panel__row">
+              <span class="topo-panel__key">Created by</span>
+              <span class="topo-panel__val">{{ edge.owner }}</span>
+            </div>
+            <div class="topo-panel__actions">
+              <FeatherButton text :disabled="deletingLink" @click="onDeleteLink">
+                {{ deletingLink ? 'Deleting…' : 'Delete Link' }}
+              </FeatherButton>
+            </div>
+          </template>
+
           <div v-if="detailLoading" class="topo-panel__loading">
             <FeatherSpinner />
             <span>Loading link detail…</span>
@@ -211,10 +237,32 @@ import { useTopologyStore } from '@/stores/topologyStore'
 import { isVertex } from '@/types/topology'
 import { extractNodeId } from '@/services/enlinkdService'
 
+import useSnackbar from '@/composables/useSnackbar'
+
 const store = useTopologyStore()
 const router = useRouter()
+const { showSnackBar } = useSnackbar()
 
 const isVisible = computed(() => store.selectedElement !== null)
+
+const isUserDefinedEdge = computed(() => {
+  const el = store.selectedElement
+  return el && !isVertex(el) && el.userDefined === true
+})
+
+const deletingLink = ref(false)
+const onDeleteLink = async () => {
+  const el = store.selectedElement
+  if (!el || isVertex(el) || !el.dbId) return
+  deletingLink.value = true
+  const ok = await store.removeUserDefinedLink(el.dbId)
+  if (ok) {
+    showSnackBar({ msg: 'Link deleted.' })
+  } else {
+    showSnackBar({ msg: 'Failed to delete link.', error: true })
+  }
+  deletingLink.value = false
+}
 
 const vertex = computed(() => {
   const el = store.selectedElement
