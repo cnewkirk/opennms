@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { ref } from 'vue'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 
@@ -23,7 +23,6 @@ vi.mock('gridstack', () => {
 
 import { GridStack } from 'gridstack'
 import useDashboardLayout from '@/composables/useDashboardLayout'
-import { defaultConfig } from '@/services/dashboardConfigService'
 
 describe('useDashboardLayout', () => {
   beforeEach(() => {
@@ -33,12 +32,11 @@ describe('useDashboardLayout', () => {
 
   test('initializes gridstack on mount', () => {
     const container = ref<HTMLElement | null>(document.createElement('div'))
-    const widgets = ref(defaultConfig().widgets)
     const onLayoutChange = vi.fn()
 
     mount(defineComponent({
       setup() {
-        useDashboardLayout(container, widgets, onLayoutChange)
+        useDashboardLayout(container, onLayoutChange)
         return {}
       },
       template: '<div />'
@@ -49,11 +47,10 @@ describe('useDashboardLayout', () => {
 
   test('destroys gridstack on unmount', async () => {
     const container = ref<HTMLElement | null>(document.createElement('div'))
-    const widgets = ref(defaultConfig().widgets)
 
     const wrapper = mount(defineComponent({
       setup() {
-        useDashboardLayout(container, widgets, vi.fn())
+        useDashboardLayout(container, vi.fn())
         return {}
       },
       template: '<div />'
@@ -69,11 +66,10 @@ describe('useDashboardLayout', () => {
 
   test('registers change and resize handlers on init', () => {
     const container = ref<HTMLElement | null>(document.createElement('div'))
-    const widgets = ref(defaultConfig().widgets)
 
     mount(defineComponent({
       setup() {
-        useDashboardLayout(container, widgets, vi.fn())
+        useDashboardLayout(container, vi.fn())
         return {}
       },
       template: '<div />'

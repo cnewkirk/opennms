@@ -58,7 +58,7 @@
           >{{ cat }}</option>
         </select>
       </div>
-      <FeatherButton icon text @click="removeItem(i)">
+      <FeatherButton text @click="removeItem(i)">
         <FeatherIcon :icon="DeleteIcon" />
       </FeatherButton>
     </div>

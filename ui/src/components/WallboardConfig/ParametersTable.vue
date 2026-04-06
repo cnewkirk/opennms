@@ -42,7 +42,7 @@
         class="val-input"
         @update:modelValue="emitUpdate"
       />
-      <FeatherButton icon text @click="removeRow(i)">
+      <FeatherButton text @click="removeRow(i)">
         <FeatherIcon :icon="DeleteIcon" />
       </FeatherButton>
     </div>

@@ -24,7 +24,7 @@
   <div class="view-list">
     <div class="view-list-header">
       <span class="list-label">Views</span>
-      <FeatherButton icon text @click="$emit('add')" :disabled="disabled">
+      <FeatherButton text @click="$emit('add')" :disabled="disabled">
         <FeatherIcon :icon="AddIcon" />
       </FeatherButton>
     </div>
@@ -38,7 +38,7 @@
     >
       <span class="view-name">{{ view.name || '(unnamed)' }}</span>
       <span v-if="view.name === defaultView" class="default-badge">default</span>
-      <FeatherButton icon text class="delete-btn" @click.stop="$emit('delete', i)" :disabled="disabled">
+      <FeatherButton text class="delete-btn" @click.stop="$emit('delete', i)" :disabled="disabled">
         <FeatherIcon :icon="DeleteIcon" />
       </FeatherButton>
     </div>

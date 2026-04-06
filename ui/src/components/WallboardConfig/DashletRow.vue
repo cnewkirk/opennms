@@ -26,13 +26,13 @@
       <span class="dashlet-type-badge">{{ local.dashletName }}</span>
       <span class="dashlet-title">{{ local.title || '(untitled)' }}</span>
       <div class="row-actions">
-        <FeatherButton icon text @click.stop="$emit('moveUp')" :disabled="isFirst">
+        <FeatherButton text @click.stop="$emit('moveUp')" :disabled="isFirst">
           <FeatherIcon :icon="UpIcon" />
         </FeatherButton>
-        <FeatherButton icon text @click.stop="$emit('moveDown')" :disabled="isLast">
+        <FeatherButton text @click.stop="$emit('moveDown')" :disabled="isLast">
           <FeatherIcon :icon="DownIcon" />
         </FeatherButton>
-        <FeatherButton icon text @click.stop="$emit('delete')">
+        <FeatherButton text @click.stop="$emit('delete')">
           <FeatherIcon :icon="DeleteIcon" />
         </FeatherButton>
         <FeatherIcon :icon="expanded ? CollapseIcon : ExpandIcon" class="expand-icon" />

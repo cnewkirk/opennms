@@ -24,7 +24,7 @@
   <div class="wallboard-list">
     <div class="list-header">
       <span class="list-label">Boards</span>
-      <FeatherButton icon text @click="$emit('add')" :disabled="disabled">
+      <FeatherButton text @click="$emit('add')" :disabled="disabled">
         <FeatherIcon :icon="AddIcon" />
       </FeatherButton>
     </div>
@@ -38,7 +38,7 @@
     >
       <span class="board-title">{{ board.title || '(untitled)' }}</span>
       <span v-if="board.default" class="default-badge">default</span>
-      <FeatherButton icon text class="delete-btn" @click.stop="$emit('delete', i)" :disabled="disabled">
+      <FeatherButton text class="delete-btn" @click.stop="$emit('delete', i)" :disabled="disabled">
         <FeatherIcon :icon="DeleteIcon" />
       </FeatherButton>
     </div>

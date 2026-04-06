@@ -20,10 +20,9 @@
 /// License.
 ///
 
-import { GridStack, type GridStackNode, type GridStackOptions } from 'gridstack'
+import { GridStack, type GridItemHTMLElement, type GridStackNode, type GridStackOptions } from 'gridstack'
 import 'gridstack/dist/gridstack.min.css'
 import { onMounted, onUnmounted, type Ref } from 'vue'
-import { type WidgetConfig } from '@/services/dashboardConfigService'
 
 const GRID_OPTIONS: GridStackOptions = {
   column: 12,
@@ -38,15 +37,13 @@ const GRID_OPTIONS: GridStackOptions = {
  * Reusable composable for gridstack drag+drop/resize grids.
  *
  * Usage:
- *   const { addItem, removeItem } = useDashboardLayout(containerRef, widgets, onLayoutChange)
+ *   const { addItem, removeItem } = useDashboardLayout(containerRef, onLayoutChange)
  *
  * @param containerRef - ref to the gridstack container div
- * @param widgets      - reactive list of widget configs (read on mount; changes handled via addItem/removeItem)
  * @param onLayoutChange - called with updated GridStackNode[] on every drag/resize
  */
 const useDashboardLayout = (
   containerRef: Ref<HTMLElement | null>,
-  widgets: Ref<WidgetConfig[]>,
   onLayoutChange: (items: GridStackNode[]) => void
 ) => {
   let grid: ReturnType<typeof GridStack.init> | null = null
@@ -62,8 +59,8 @@ const useDashboardLayout = (
     })
 
     // Fired after resize handle released — reports the resized item
-    grid.on('resizestop', (_event: Event, el: HTMLElement) => {
-      const node = (el as any).gridstackNode as GridStackNode | undefined
+    grid.on('resizestop', (_event: Event, el: GridItemHTMLElement) => {
+      const node = el.gridstackNode
       if (node) onLayoutChange([node])
     })
   })

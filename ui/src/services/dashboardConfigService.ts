@@ -29,10 +29,11 @@ export interface WidgetConfig {
   type: WidgetType
   title: string
   // gridstack layout
-  x: number
-  y: number
-  w: number
-  h: number
+  x?: number
+  y?: number
+  w?: number
+  h?: number
+  colSpan?: number
   // widget settings
   categories: string[]
   limit: number
