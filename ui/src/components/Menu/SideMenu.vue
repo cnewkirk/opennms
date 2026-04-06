@@ -58,8 +58,9 @@ const legacyToVueRoutes: Record<string, string> = {
   'topology':                       'ui/index.html#/topology',
   'admin/jmxConfigGenerator.jsp':   'ui/index.html#/jmx-config-generator',
   'admin/mibCompiler.jsp':          'ui/index.html#/mib-compiler',
-  'admin/wallboardConfig.jsp':      'ui/index.html#/wallboard-config',
-  'vaadin-wallboard':               'ui/index.html#/wallboard-config'
+  'admin/wallboardConfig.jsp':         'ui/index.html#/wallboard-config',
+  'admin/surveillanceViewsConfig.jsp': 'ui/index.html#/surveillance-views-config',
+  'vaadin-wallboard':                  'ui/index.html#/wallboard-config'
 }
 
 const getMenuLink = (menuItem: MenuItem) => {

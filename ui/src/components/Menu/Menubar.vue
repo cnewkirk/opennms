@@ -340,4 +340,9 @@ body {
     margin-right:5px;
   }
 }
+
+// App bar nav links must never change color based on visit history.
+.feather-app-bar-wrapper a:visited {
+  color: inherit !important;
+}
 </style>
