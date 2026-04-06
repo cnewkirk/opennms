@@ -64,8 +64,9 @@ import { FeatherSpinner } from '@featherds/progress'
 import { getNodeIpInterfaces, getNodeSnmpInterfaces } from '@/services/nodeService'
 import { TopologyVertex } from '@/types/topology'
 import { IpInterface, SnmpInterface } from '@/types'
+import { ISelectItemType } from '@featherds/select'
 
-interface InterfaceOption {
+interface InterfaceOption extends ISelectItemType {
   label: string
   _value: string
 }
@@ -81,8 +82,8 @@ const emit = defineEmits<{
   create: [nodeIdA: number, componentLabelA: string, nodeIdZ: number, componentLabelZ: string, linkLabel: string]
 }>()
 
-const sourceInterface = ref<InterfaceOption | null>(null)
-const targetInterface = ref<InterfaceOption | null>(null)
+const sourceInterface = ref<InterfaceOption | undefined>()
+const targetInterface = ref<InterfaceOption | undefined>()
 const linkLabel = ref('')
 const loadingInterfaces = ref(false)
 const sourceInterfaces = ref<InterfaceOption[]>([])
@@ -92,8 +93,8 @@ const sourceLabel = computed(() => props.sourceVertex?.label ?? 'Source')
 const targetLabel = computed(() => props.targetVertex?.label ?? 'Target')
 
 const canSubmit = computed(() =>
-  sourceInterface.value !== null &&
-  targetInterface.value !== null &&
+  sourceInterface.value !== undefined &&
+  targetInterface.value !== undefined &&
   linkLabel.value.trim().length > 0
 )
 
@@ -142,8 +143,8 @@ const buildInterfaceList = async (nodeId: string): Promise<InterfaceOption[]> =>
 watch(() => [props.visible, props.sourceVertex, props.targetVertex], async ([vis]) => {
   if (!vis || !props.sourceVertex?.id || !props.targetVertex?.id) return
 
-  sourceInterface.value = null
-  targetInterface.value = null
+  sourceInterface.value = undefined
+  targetInterface.value = undefined
   linkLabel.value = ''
   loadingInterfaces.value = true
 
