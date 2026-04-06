@@ -3,13 +3,13 @@ import { ref } from 'vue'
 import { getResourceForNode } from '@/services/resourceService'
 import { getGraphDefinitionsByResourceId } from '@/services/graphService'
 import type { Resource } from '@/types'
-import type { SavedChart, HighlightItem } from '@/types/resourceGraphs'
+import type { SavedChart, ResourceGroup } from '@/types/resourceGraphs'
 
 const storageKey = (nodeId: string) => `resource-charts:${nodeId}`
 
 const useResourceGraphs = (nodeId: string) => {
   const resources = ref<Resource[]>([])
-  const highlights = ref<HighlightItem[]>([])
+  const resourceGroups = ref<ResourceGroup[]>([])
   const savedCharts = ref<SavedChart[]>([])
   const loading = ref(true)
   const error = ref<string | null>(null)
@@ -43,17 +43,23 @@ const useResourceGraphs = (nodeId: string) => {
     const defResults = await Promise.all(
       children.map(async (r) => {
         const resp = await getGraphDefinitionsByResourceId(r.id)
-        return { resourceId: r.id, label: r.label, definitions: resp.name ?? [] }
+        return { resource: r, definitions: resp.name ?? [] }
       })
     )
 
-    highlights.value = defResults.flatMap(r =>
-      r.definitions.map(def => ({
-        resourceId: r.resourceId,
-        definition: def,
-        label: r.label
-      }))
-    )
+    // Group by typeLabel
+    const groupMap = new Map<string, ResourceGroup>()
+    for (const { resource: r, definitions } of defResults) {
+      if (!definitions.length) continue
+      const existing = groupMap.get(r.typeLabel)
+      const entry = { resourceId: r.id, label: r.label, definitions }
+      if (existing) {
+        existing.resources.push(entry)
+      } else {
+        groupMap.set(r.typeLabel, { typeLabel: r.typeLabel, resources: [entry] })
+      }
+    }
+    resourceGroups.value = Array.from(groupMap.values())
 
     loading.value = false
   }
@@ -70,7 +76,7 @@ const useResourceGraphs = (nodeId: string) => {
 
   fetch()
 
-  return { resources, highlights, savedCharts, loading, error, saveChart, deleteChart, refresh: fetch }
+  return { resources, resourceGroups, savedCharts, loading, error, saveChart, deleteChart, refresh: fetch }
 }
 
 export default useResourceGraphs
