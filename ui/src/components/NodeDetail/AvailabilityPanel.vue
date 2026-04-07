@@ -28,36 +28,46 @@
     <div v-else-if="error" class="availability-panel__error subtitle2">{{ error }}</div>
 
     <template v-else-if="availability">
-      <!-- Percentage cards grouped by IP interface -->
-      <div class="availability-panel__cards">
-        <div
-          v-for="iface in availability.ipinterfaces"
-          :key="iface.id"
-          class="availability-panel__iface-group"
-        >
-          <div class="availability-panel__iface-header subtitle2">{{ iface.address }}</div>
-          <div class="availability-panel__iface-cards">
-            <div
-              v-for="svc in iface.services"
-              :key="svc.id"
-              class="avail-card"
-              :class="severityClass(svc.availability)"
-            >
-              <div class="avail-card__name subtitle2">{{ svc.name }}</div>
-              <div class="avail-card__pct headline3">{{ formatPct(svc.availability) }}%</div>
+      <!-- Problems mode: all healthy -->
+      <ClearSummary
+        v-if="problemsOnly && allHealthy"
+        message="All services healthy"
+        :expandable="true"
+        @expand="showAll = true"
+      />
+
+      <template v-else>
+        <!-- Percentage cards grouped by IP interface -->
+        <div class="availability-panel__cards">
+          <div
+            v-for="iface in displayedInterfaces"
+            :key="iface.id"
+            class="availability-panel__iface-group"
+          >
+            <div class="availability-panel__iface-header subtitle2">{{ iface.address }}</div>
+            <div class="availability-panel__iface-cards">
+              <div
+                v-for="svc in iface.services"
+                :key="svc.id"
+                class="avail-card"
+                :class="severityClass(svc.availability)"
+              >
+                <div class="avail-card__name subtitle2">{{ svc.name }}</div>
+                <div class="avail-card__pct headline3">{{ formatPct(svc.availability) }}%</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Expandable timeline -->
-      <button class="availability-panel__toggle subtitle2" @click="showChart = !showChart">
-        {{ showChart ? '▲ Hide timeline' : '▼ Show timeline' }}
-      </button>
+        <!-- Expandable timeline -->
+        <button class="availability-panel__toggle subtitle2" @click="showChart = !showChart">
+          {{ showChart ? '▲ Hide timeline' : '▼ Show timeline' }}
+        </button>
 
-      <div v-if="showChart" class="availability-panel__chart-wrap">
-        <canvas ref="canvasRef" />
-      </div>
+        <div v-if="showChart" class="availability-panel__chart-wrap">
+          <canvas ref="canvasRef" />
+        </div>
+      </template>
     </template>
   </div>
 </template>
@@ -67,6 +77,7 @@ import { Chart, registerables } from 'chart.js'
 import { format } from 'date-fns'
 import { NodeAvailability } from '@/types'
 import { AvailabilityChartData, DownSegmentMeta } from '@/composables/useNodeAvailability'
+import ClearSummary from '@/components/Common/ClearSummary.vue'
 
 Chart.register(...registerables)
 
@@ -76,7 +87,33 @@ const props = defineProps<{
   downSegmentMeta: DownSegmentMeta[]
   loading: boolean
   error: string | null
+  problemsOnly?: boolean
 }>()
+
+const showAll = ref(false)
+
+const allHealthy = computed(() => {
+  if (!props.availability?.ipinterfaces?.length) return true
+  return props.availability.ipinterfaces.every(iface =>
+    iface.services.every(svc => svc.availability >= 100)
+  )
+})
+
+const filteredInterfaces = computed(() => {
+  if (!props.availability?.ipinterfaces) return []
+  return props.availability.ipinterfaces
+    .map(iface => ({
+      ...iface,
+      services: iface.services.filter(svc => svc.availability < 100)
+    }))
+    .filter(iface => iface.services.length > 0)
+})
+
+const displayedInterfaces = computed(() => {
+  if (!props.availability?.ipinterfaces) return []
+  if (props.problemsOnly && !showAll.value) return filteredInterfaces.value
+  return props.availability.ipinterfaces
+})
 
 const showChart = ref(false)
 const canvasRef = ref<HTMLCanvasElement | null>(null)

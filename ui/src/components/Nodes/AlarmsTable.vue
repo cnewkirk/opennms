@@ -79,7 +79,7 @@ import { getNodeEnlinkd, extractNodeId } from '@/services/enlinkdService'
 import useQueryParameters from '@/composables/useQueryParams'
 import { Alarm, QueryParameters, Node } from '@/types'
 
-const props = defineProps<{ nodeId: string; nodeLabel: string }>()
+const props = defineProps<{ nodeId: string; nodeLabel: string; extraFiql?: string }>()
 
 const numericNodeId = computed(() => Number(props.nodeId))
 
@@ -173,7 +173,9 @@ const totalCount = ref(0)
 
 const buildFiql = () => {
   const ids = [numericNodeId.value, ...relatedNodeIds.value]
-  return ids.map(id => `node.id==${id}`).join(',')
+  const nodePart = ids.map(id => `node.id==${id}`).join(',')
+  if (props.extraFiql) return `(${nodePart});${props.extraFiql}`
+  return nodePart
 }
 
 const fetchAlarms = async (params: QueryParameters) => {

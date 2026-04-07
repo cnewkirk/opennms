@@ -48,12 +48,14 @@ import { useNodeStore } from '@/stores/nodeStore'
 import useQueryParameters from '@/composables/useQueryParams'
 import { QueryParameters } from '@/types'
 
-const props = defineProps<{ nodeId: string }>()
+const props = defineProps<{ nodeId: string; filterFiql?: string }>()
 
 const nodeStore = useNodeStore()
 
 const getNodeOutages = async (payload: QueryParameters) => {
-  nodeStore.getNodeOutages({ id: props.nodeId, queryParameters: payload })
+  const params: QueryParameters = { ...payload }
+  if (props.filterFiql) params._s = props.filterFiql
+  nodeStore.getNodeOutages({ id: props.nodeId, queryParameters: params })
 }
 
 const getOutagesTotalCount = () => {

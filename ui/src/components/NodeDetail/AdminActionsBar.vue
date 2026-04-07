@@ -26,7 +26,7 @@
       {{ rescanning ? 'Rescanning…' : 'Rescan' }}
     </FeatherButton>
 
-    <FeatherButton v-if="snmpPrimaryIp" secondary as-anchor :href="updateSnmpUrl">
+    <FeatherButton v-if="resolvedSnmpIp" secondary as-anchor :href="updateSnmpUrl">
       Update SNMP
     </FeatherButton>
     <FeatherButton secondary as-anchor :href="scheduleOutageUrl">
@@ -46,7 +46,6 @@ import { v2 } from '@/services/axiosInstances'
 
 const props = defineProps<{
   nodeId: string
-  snmpPrimaryIp?: string
   foreignSource?: string
 }>()
 
@@ -54,6 +53,17 @@ const { adminRole } = useRole()
 const { showSnackBar } = useSnackbar()
 
 const rescanning = ref(false)
+const resolvedSnmpIp = ref<string | null>(null)
+
+onMounted(async () => {
+  try {
+    const resp = await v2.get(`/nodes/${props.nodeId}/ipinterfaces`, {
+      params: { _s: 'snmpPrimary==P', limit: 1 }
+    })
+    const ifaces = resp.data?.ipInterface ?? []
+    if (ifaces.length > 0) resolvedSnmpIp.value = ifaces[0].ipAddress ?? null
+  } catch { /* non-critical, button just won't show */ }
+})
 
 const rescan = async () => {
   rescanning.value = true
@@ -67,7 +77,7 @@ const rescan = async () => {
   }
 }
 
-const updateSnmpUrl = computed(() => `/opennms/admin/updateSnmp.jsp?node=${props.nodeId}&ipaddr=${props.snmpPrimaryIp}`)
+const updateSnmpUrl = computed(() => `/opennms/admin/updateSnmp.jsp?node=${props.nodeId}&ipaddr=${resolvedSnmpIp.value}`)
 const scheduleOutageUrl = computed(() => `/opennms/admin/sched-outages/editoutage.jsp`)
 const editRequisitionUrl = computed(
   () => `/opennms/admin/ng-requisitions/index.jsp#/requisitions/${props.foreignSource}`
