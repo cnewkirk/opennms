@@ -223,6 +223,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
           animate: false,
           padding: 30
         }).run()
+        cy.fit(undefined, 30)
         return
       }
     }
@@ -593,12 +594,25 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rebuildStylesheet)
   }
 
+  let resizeObserver: ResizeObserver | null = null
+
   onMounted(() => {
     initCytoscape()
     if (store.vertices.length > 0) syncElements()
+
+    if (containerRef.value) {
+      resizeObserver = new ResizeObserver(() => {
+        if (!cy) return
+        cy.resize()
+        cy.fit(undefined, 30)
+      })
+      resizeObserver.observe(containerRef.value)
+    }
   })
 
   onBeforeUnmount(() => {
+    resizeObserver?.disconnect()
+    resizeObserver = null
     if (typeof window !== 'undefined') {
       window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', rebuildStylesheet)
     }
