@@ -650,7 +650,7 @@ table {
   .btn.btn-icon-table {
     width: 2.25rem;
     height: 2.25rem;
-    border-radius: 100%;
+    border-radius: vars.$border-radius-round;
   }
 }
 </style>

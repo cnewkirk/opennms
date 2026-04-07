@@ -68,6 +68,7 @@ const filteredFiles = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/typography";
 
@@ -129,7 +130,7 @@ const filteredFiles = computed(() => {
   right: 0.5rem;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: vars.$border-radius-round;
   background: var($warning);
 }
 

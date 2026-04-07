@@ -357,7 +357,7 @@ onMounted(async () => {
   display: inline-block;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: vars.$border-radius-round;
   margin-right: 6px;
   vertical-align: middle;
 
