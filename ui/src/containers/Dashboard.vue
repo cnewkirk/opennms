@@ -56,7 +56,9 @@
       </div>
     </div>
 
-    <DashboardGrid />
+    <div class="dashboard-grid-wrapper">
+      <DashboardGrid />
+    </div>
   </div>
 </template>
 
@@ -128,8 +130,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px 0;
+  padding: 16px 32px 8px;
   flex-shrink: 0;
+}
+
+.dashboard-grid-wrapper {
+  flex: 1;
+  padding: 0 24px 16px;
+  overflow: auto;
 }
 
 .toolbar-actions {

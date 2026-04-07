@@ -725,14 +725,21 @@ onMounted(() => {
   }
 
   &__html-content {
-    display: inline-block;
+    display: block;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    max-height: 1.5em;
     flex: 1;
     min-width: 0;
     vertical-align: middle;
     pointer-events: none;
+
+    // Block-level elements (p, div, etc) inside v-html bypass white-space:nowrap.
+    // Force them to display inline so the parent's nowrap and text-overflow apply.
+    :deep(p), :deep(div), :deep(li) {
+      display: inline;
+    }
   }
 
   &__raw-text {

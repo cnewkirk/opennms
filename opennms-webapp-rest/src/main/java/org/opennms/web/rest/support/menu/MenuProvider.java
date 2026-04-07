@@ -53,6 +53,7 @@ public class MenuProvider {
     public static final String ZENITH_CONNECT_ENABLED_KEY = "opennms.zenithConnect.enabled";
     public static final String ZENITH_CONNECT_BASE_URL_KEY = "opennms.zenithConnect.zenithBaseUrl";
     public static final String ZENITH_CONNECT_RELATIVE_URL_KEY = "opennms.zenithConnect.zenithRelativeUrl";
+    public static final String DEFAULT_PERSPECTIVE_KEY = "opennms.ui.defaultPerspective";
 
     private static final ImmutableSet<String> ADMIN_ROLES = ImmutableSet.of(
         Authentication.ROLE_ADMIN,
@@ -118,6 +119,9 @@ public class MenuProvider {
                 Strings.nullToEmpty(menuRequestContext.getSystemProperty(ZENITH_CONNECT_ENABLED_KEY, "false")).equals("true");
         mainMenu.zenithConnectBaseUrl = menuRequestContext.getSystemProperty(ZENITH_CONNECT_BASE_URL_KEY, "");
         mainMenu.zenithConnectRelativeUrl = menuRequestContext.getSystemProperty(ZENITH_CONNECT_RELATIVE_URL_KEY, "");
+
+        final String rawPerspective = Strings.nullToEmpty(menuRequestContext.getSystemProperty(DEFAULT_PERSPECTIVE_KEY, "problems")).trim().toLowerCase();
+        mainMenu.defaultPerspective = rawPerspective.equals("all") ? "all" : "problems";
 
         mainMenu.noticeStatus = menuRequestContext.getNoticeStatus();
 

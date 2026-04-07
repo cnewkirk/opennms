@@ -9,10 +9,16 @@
       <label class="alarms-table__toggle">
         <input type="checkbox" v-model="showEnlinkd" />
         <span>Adjacent nodes (EnLinkd)</span>
+        <span v-if="showEnlinkd && !relatedLoading" class="alarms-table__toggle-count">
+          {{ enlinkdNodeIds.length ? `${enlinkdNodeIds.length} found` : 'none found' }}
+        </span>
       </label>
       <label class="alarms-table__toggle">
         <input type="checkbox" v-model="showIfAlias" />
         <span>ifAlias-referenced nodes</span>
+        <span v-if="showIfAlias && !relatedLoading" class="alarms-table__toggle-count">
+          {{ ifAliasNodeIds.length ? `${ifAliasNodeIds.length} found` : 'none found' }}
+        </span>
       </label>
       <span v-if="relatedLoading" class="alarms-table__related-loading caption">Searching…</span>
     </div>
@@ -101,7 +107,8 @@ watch([showEnlinkd, showIfAlias], () => {
 // Related node IDs resolved from toggles
 const enlinkdNodeIds = ref<number[]>([])
 const ifAliasNodeIds = ref<number[]>([])
-const relatedLoading = ref(false)
+const relatedLoadingCount = ref(0)
+const relatedLoading = computed(() => relatedLoadingCount.value > 0)
 
 const relatedNodeIds = computed<number[]>(() => {
   const ids = new Set<number>()
@@ -152,17 +159,17 @@ const loadIfAliasNodes = async () => {
 
 watch(showEnlinkd, async (on) => {
   if (on && enlinkdNodeIds.value.length === 0) {
-    relatedLoading.value = true
+    relatedLoadingCount.value++
     await loadEnlinkdNodes()
-    relatedLoading.value = false
+    relatedLoadingCount.value--
   }
 }, { immediate: true })
 
 watch(showIfAlias, async (on) => {
   if (on && ifAliasNodeIds.value.length === 0) {
-    relatedLoading.value = true
+    relatedLoadingCount.value++
     await loadIfAliasNodes()
-    relatedLoading.value = false
+    relatedLoadingCount.value--
   }
 }, { immediate: true })
 
@@ -195,9 +202,13 @@ const { queryParameters, updateQueryParameters } = useQueryParameters(
   fetchAlarms
 )
 
-// Re-fetch when related node IDs change
+// Re-fetch when related node IDs change — must call fetchAlarms directly because
+// Pagination only fires fetchAlarms on mount and user page interaction, not when
+// queryParameters changes externally.
 watch(relatedNodeIds, () => {
-  updateQueryParameters({ ...queryParameters.value, offset: 0 })
+  const params = { ...queryParameters.value, offset: 0 }
+  queryParameters.value = params
+  fetchAlarms(params)
 })
 
 const rowClass = (alarm: Alarm) => {
@@ -241,6 +252,16 @@ table {
     font-size: 0.875rem;
     user-select: none;
     input { cursor: pointer; }
+  }
+
+  &__toggle-count {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var($secondary-text-on-surface);
+    background: var($shade-4);
+    border-radius: 10px;
+    padding: 1px 7px;
+    margin-left: 4px;
   }
 
   &__related-loading {

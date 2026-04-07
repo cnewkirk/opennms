@@ -21,17 +21,48 @@
 ///
 
 import { defineStore } from 'pinia'
+import { useMenuStore } from '@/stores/menuStore'
+
+export type Perspective = 'problems' | 'all'
 
 const STORAGE_KEY = 'onms.perspective'
 
+/** Migrate legacy 'full' value stored by previous versions. */
+const migrateStoredValue = (stored: string | null): Perspective | null => {
+  if (stored === 'full') return 'all'   // one-time migration
+  if (stored === 'problems' || stored === 'all') return stored
+  return null
+}
+
 export const usePerspectiveStore = defineStore('perspectiveStore', () => {
-  const perspective = ref<'problems' | 'full'>(
-    (localStorage.getItem(STORAGE_KEY) as 'problems' | 'full') ?? 'problems'
+  const menuStore = useMenuStore()
+
+  // Has the user ever explicitly chosen a perspective in this browser?
+  const stored = migrateStoredValue(localStorage.getItem(STORAGE_KEY))
+
+  // Resolve the initial value:
+  //   1. explicit user preference (localStorage)
+  //   2. server-configured default (mainMenu.defaultPerspective, loaded async)
+  //   3. hard fallback: 'problems'
+  const perspective = ref<Perspective>(stored ?? 'problems')
+
+  // Once the menu loads, apply the server default if the user has no stored preference.
+  // Uses a one-shot watcher so it doesn't override explicit user choices later.
+  const _applied = ref(false)
+  watch(
+    () => menuStore.mainMenu?.defaultPerspective,
+    (serverDefault) => {
+      if (_applied.value) return
+      if (!stored && serverDefault) {
+        perspective.value = serverDefault === 'all' ? 'all' : 'problems'
+      }
+      _applied.value = true
+    }
   )
 
   const isProblems = computed(() => perspective.value === 'problems')
 
-  function setPerspective(value: 'problems' | 'full') {
+  function setPerspective(value: Perspective) {
     perspective.value = value
     localStorage.setItem(STORAGE_KEY, value)
   }

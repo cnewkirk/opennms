@@ -79,6 +79,12 @@ html:not(.open-dark) {
     width: 100%;
   }
 }
+
+// Feather grid has horizontal gutters but no vertical gap.
+// Add breathing room between stacked rows on every page.
+.feather-row + .feather-row {
+  margin-top: 12px;
+}
 a {
   text-decoration: none;
   color: var($clickable-normal);
