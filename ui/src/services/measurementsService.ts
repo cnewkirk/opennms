@@ -1,5 +1,5 @@
 import { rest, v2 } from './axiosInstances'
-import { SnmpInterface, SnmpInterfaceApiResponse, IpInterface } from '@/types'
+import { SnmpInterface, SnmpInterfaceApiResponse, IpInterface, IpInterfaceApiResponse } from '@/types'
 
 export interface InterfaceUtil {
   inBps: number   // bits/sec inbound
@@ -118,7 +118,8 @@ export const fetchNodeIpInterfaces = async (nodeId: number): Promise<IpInterface
   try {
     const resp = await v2.get(`/nodes/${nodeId}/ipinterfaces?limit=100`)
     if (resp.status === 204) return []
-    return resp.data?.ipInterface ?? []
+    const data: IpInterfaceApiResponse = resp.data
+    return data.ipInterface ?? []
   } catch {
     return []
   }

@@ -67,6 +67,7 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .edge-tooltip {
@@ -75,7 +76,7 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
   pointer-events: none;
   background: var($surface);
   border: 1px solid var($border-on-surface);
-  border-radius: 6px;
+  border-radius: vars.$border-radius-sm;
   padding: 8px 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   min-width: 160px;

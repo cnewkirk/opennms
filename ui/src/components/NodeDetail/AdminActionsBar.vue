@@ -85,6 +85,7 @@ const editRequisitionUrl = computed(
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .admin-bar {
@@ -95,7 +96,7 @@ const editRequisitionUrl = computed(
   flex-wrap: wrap;
 
   :deep(.btn) {
-    border-radius: 8px;
+    border-radius: vars.$border-radius-sm;
   }
 
   &__link {

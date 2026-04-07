@@ -189,7 +189,7 @@ const submit = () => {
 
 .create-link-modal {
   background: var($surface);
-  border-radius: 8px;
+  border-radius: vars.$border-radius-sm;
   width: 440px;
   max-height: 80vh;
   overflow-y: auto;

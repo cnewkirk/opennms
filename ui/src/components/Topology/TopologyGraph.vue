@@ -96,6 +96,7 @@ defineExpose({ saveLayout, resetLayout })
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .topology-graph {
@@ -137,7 +138,7 @@ defineExpose({ saveLayout, resetLayout })
     padding: 8px 20px;
     background: var($surface);
     border: 2px solid var($primary);
-    border-radius: 8px;
+    border-radius: vars.$border-radius-sm;
     font-size: 0.9rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }

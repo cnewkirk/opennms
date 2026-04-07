@@ -762,6 +762,7 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 
@@ -769,7 +770,7 @@ onMounted(async () => {
   padding: 30px;
   margin: 30px;
 
-  border-radius: 8px;
+  border-radius: vars.$border-radius-sm;
   background-color: #ffffff;
 
   .title {
@@ -789,7 +790,7 @@ onMounted(async () => {
     border-style: solid;
     border-color: var(variables.$border-on-surface);
     padding: 10px;
-    border-radius: 8px;
+    border-radius: vars.$border-radius-sm;
 
     .label {
       font-weight: 600;
