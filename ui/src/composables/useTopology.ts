@@ -26,7 +26,8 @@ import { Ref } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
 import { getProtocolColor, parallelOffsets, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
-import { useWeathermapStore } from '@/stores/weathermapStore'
+import { useWeathermapStore, EdgeLabelData } from '@/stores/weathermapStore'
+import { useEdgeLabelStore } from '@/stores/edgeLabelStore'
 
 cytoscape.use(cxtmenu)
 
@@ -159,6 +160,7 @@ const buildStylesheet = (): any[] => {
 const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   const store = useTopologyStore()
   const wmStore = useWeathermapStore()
+  const elStore = useEdgeLabelStore()
   let cy: Core | null = null
 
   interface EdgeTooltipState {
@@ -168,6 +170,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     srcLabel: string
     tgtLabel: string
     util?: { utilPct: number; inBps: number; outBps: number } | null
+    labelData?: EdgeLabelData | null
   }
   const edgeTooltip = ref<EdgeTooltipState | null>(null)
 
@@ -322,7 +325,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
       const pos = evt.renderedPosition ?? { x: 0, y: 0 }
       const util = wmStore.edgeUtilMap[edgeKey] ?? null
-      edgeTooltip.value = { x: pos.x, y: pos.y, protocols, srcLabel, tgtLabel, util }
+      const labelData = wmStore.edgeLabelData[edgeKey] ?? null
+      edgeTooltip.value = { x: pos.x, y: pos.y, protocols, srcLabel, tgtLabel, util, labelData }
     })
 
     cy.on('mouseout', 'edge', () => {
@@ -429,6 +433,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     applySeverityClasses()
     applyWeathermapStyles()
     applyNodeDownStyles()
+    applyEdgeLabels()
     runLayout()
   }
 
@@ -451,19 +456,72 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         const util = wmStore.edgeUtilMap[key]
         if (!util) {
           // revert to protocol color if data disappears
-          edge.removeClass('weathermap')
-          edge.data('wmLabel', '')
           edge.style('line-color', edge.data('color'))
           edge.style('width', 3)
           return
         }
-        const color = utilizationColor(util.utilPct)
-        const width = throughputWidth(util.inBps + util.outBps)
-        const label = `${Math.round(util.utilPct)}% · ↑${formatBitsPerSec(util.inBps)} ↓${formatBitsPerSec(util.outBps)}`
-        edge.data('wmLabel', label)
-        edge.style('line-color', color)
-        edge.style('width', width)
-        edge.addClass('weathermap')
+        edge.style('line-color', utilizationColor(util.utilPct))
+        edge.style('width', throughputWidth(util.inBps + util.outBps))
+      })
+    })
+  }
+
+  /**
+   * Build the multi-line label string for a single edge from enabled fields.
+   * Returns empty string if no fields are enabled or no data available.
+   */
+  const composeEdgeLabel = (key: string): string => {
+    const parts: string[] = []
+
+    // Utilization line (from weathermap data)
+    const util = wmStore.edgeUtilMap[key]
+    if (elStore.showUtilization && util) {
+      parts.push(`${Math.round(util.utilPct)}% · ↑${formatBitsPerSec(util.inBps)} ↓${formatBitsPerSec(util.outBps)}`)
+    }
+
+    // Port / IP / MAC / speed lines (from edgeLabelData)
+    const d = wmStore.edgeLabelData[key]
+    if (d) {
+      // Port: combine local and remote if both enabled, otherwise show whichever is enabled
+      if (elStore.showLocalPort || elStore.showRemotePort) {
+        const local  = elStore.showLocalPort  ? d.localIfName  : undefined
+        const remote = elStore.showRemotePort ? d.remotePortId : undefined
+        if (local && remote) parts.push(`${local} ↔ ${remote}`)
+        else if (local)  parts.push(local)
+        else if (remote) parts.push(remote)
+      }
+
+      if (elStore.showIp && (d.localIp || d.remoteIp)) {
+        if (d.localIp && d.remoteIp) parts.push(`${d.localIp} ↔ ${d.remoteIp}`)
+        else parts.push(d.localIp ?? d.remoteIp ?? '')
+      }
+
+      if (elStore.showMac && d.localMac) parts.push(d.localMac)
+
+      if (elStore.showSpeed && d.ifSpeed) parts.push(`${formatBitsPerSec(d.ifSpeed)}bps`)
+    }
+
+    return parts.join('\n')
+  }
+
+  /**
+   * Stamp the composed label onto every edge in a single cy.batch().
+   * Adds the 'weathermap' CSS class (which enables the label stylesheet rule) when
+   * a label is present; removes it when empty so no blank label pill is shown.
+   */
+  const applyEdgeLabels = () => {
+    if (!cy) return
+    cy.batch(() => {
+      cy!.edges().forEach(edge => {
+        const key = edge.data('edgeKey') as string
+        const label = composeEdgeLabel(key)
+        if (label) {
+          edge.data('wmLabel', label)
+          edge.addClass('weathermap')
+        } else {
+          edge.data('wmLabel', '')
+          edge.removeClass('weathermap')
+        }
       })
     })
   }
@@ -490,8 +548,17 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
   watch(() => store.alarmSeverity, applySeverityClasses, { deep: true })
 
-  watch(() => wmStore.edgeUtilMap, applyWeathermapStyles)
+  watch(() => wmStore.edgeUtilMap, () => { applyWeathermapStyles(); applyEdgeLabels() })
+  watch(() => wmStore.edgeLabelData, applyEdgeLabels)
   watch(() => wmStore.nodeDownMap, applyNodeDownStyles)
+  watch(() => [
+    elStore.showUtilization,
+    elStore.showLocalPort,
+    elStore.showRemotePort,
+    elStore.showIp,
+    elStore.showMac,
+    elStore.showSpeed,
+  ], applyEdgeLabels)
 
   watch(() => store.focusTarget, (nodeID) => {
     if (!cy || !nodeID) return
