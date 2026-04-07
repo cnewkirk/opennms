@@ -25,7 +25,8 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import { Ref } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
-import { getProtocolColor, parallelOffsets } from '@/components/Topology/protocolColors'
+import { getProtocolColor, parallelOffsets, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
+import { useWeathermapStore } from '@/stores/weathermapStore'
 
 cytoscape.use(cxtmenu)
 
@@ -127,12 +128,37 @@ const buildStylesheet = (): any[] => {
         'border-color': selectedColor || '#005eb8',
         'border-style': 'dashed'
       }
-    }
+    },
+    // Weathermap: edge with live utilization label
+    {
+      selector: 'edge.weathermap',
+      css: {
+        'label': 'data(wmLabel)',
+        'font-size': 9,
+        'color': '#ffffff',
+        'text-background-color': '#2d3748',
+        'text-background-opacity': 0.85,
+        'text-background-padding': '2px',
+        'text-rotation': 'autorotate',
+        'text-margin-y': -8,
+        'text-background-shape': 'roundrectangle'
+      }
+    },
+    // Weathermap: down node — red fill
+    {
+      selector: 'node.node-down',
+      css: {
+        'background-color': '#FC8181',
+        'border-color': '#E53E3E',
+        'border-width': 3
+      }
+    },
   ]
 }
 
 const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   const store = useTopologyStore()
+  const wmStore = useWeathermapStore()
   let cy: Core | null = null
 
   interface EdgeTooltipState {
@@ -347,6 +373,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       data: {
         id: v.id,
         label: v.label ?? v.id,
+        baseLabel: v.label ?? v.id,   // preserved for down-node label mutation
         nodeID: v.nodeID ?? v.id,
         ipAddress: v.ipAddress,
         namespace: v.namespace
@@ -412,9 +439,54 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     })
   }
 
+  const applyWeathermapStyles = () => {
+    if (!cy) return
+    cy.batch(() => {
+      cy!.edges().forEach(edge => {
+        const key = edge.data('edgeKey') as string
+        const util = wmStore.edgeUtilMap[key]
+        if (!util) {
+          // revert to protocol color if data disappears
+          edge.removeClass('weathermap')
+          edge.style('line-color', edge.data('color'))
+          edge.style('width', 3)
+          return
+        }
+        const color = utilizationColor(util.utilPct)
+        const width = throughputWidth(util.inBps + util.outBps)
+        const label = `${Math.round(util.utilPct)}% · ↑${formatBitsPerSec(util.inBps)} ↓${formatBitsPerSec(util.outBps)}`
+        edge.data('wmLabel', label)
+        edge.style('line-color', color)
+        edge.style('width', width)
+        edge.addClass('weathermap')
+      })
+    })
+  }
+
+  const applyNodeDownStyles = () => {
+    if (!cy) return
+    cy.batch(() => {
+      cy!.nodes().forEach(node => {
+        const numericId = parseInt(node.id(), 10)
+        const isDown = !isNaN(numericId) && wmStore.nodeDownMap[numericId] === true
+        const base = node.data('baseLabel') as string ?? node.id()
+        if (isDown) {
+          node.addClass('node-down')
+          node.data('label', base + '\n▼ DOWN')
+        } else {
+          node.removeClass('node-down')
+          node.data('label', base)
+        }
+      })
+    })
+  }
+
   watch(() => [store.vertices, store.edges], syncElements, { deep: true })
 
   watch(() => store.alarmSeverity, applySeverityClasses, { deep: true })
+
+  watch(() => wmStore.edgeUtilMap, applyWeathermapStyles, { deep: true })
+  watch(() => wmStore.nodeDownMap, applyNodeDownStyles, { deep: true })
 
   watch(() => store.focusTarget, (nodeID) => {
     if (!cy || !nodeID) return
