@@ -39,11 +39,20 @@
       ></span>
       {{ p }}
     </div>
+    <div v-if="tooltip.util" class="edge-tooltip__util">
+      <span
+        class="edge-tooltip__util-badge"
+        :style="{ backgroundColor: utilizationColor(tooltip.util.utilPct) }"
+      >{{ Math.round(tooltip.util.utilPct) }}%</span>
+      <span class="edge-tooltip__util-rates">
+        ↑ {{ formatBitsPerSec(tooltip.util.inBps) }}bps &nbsp; ↓ {{ formatBitsPerSec(tooltip.util.outBps) }}bps
+      </span>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getProtocolColor } from './protocolColors'
+import { getProtocolColor, utilizationColor, formatBitsPerSec } from './protocolColors'
 
 export interface EdgeTooltipState {
   x: number
@@ -51,6 +60,7 @@ export interface EdgeTooltipState {
   protocols: string[]
   srcLabel: string
   tgtLabel: string
+  util?: { utilPct: number; inBps: number; outBps: number } | null
 }
 
 defineProps<{ tooltip: EdgeTooltipState | null }>()
@@ -94,6 +104,31 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
     height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
+  }
+
+  &__util {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var($border-on-surface);
+  }
+
+  &__util-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  &__util-rates {
+    font-size: 0.72rem;
+    color: var($secondary-text-on-surface);
+    white-space: nowrap;
   }
 }
 </style>

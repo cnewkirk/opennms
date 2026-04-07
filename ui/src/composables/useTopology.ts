@@ -167,6 +167,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     protocols: string[]
     srcLabel: string
     tgtLabel: string
+    util?: { utilPct: number; inBps: number; outBps: number } | null
   }
   const edgeTooltip = ref<EdgeTooltipState | null>(null)
 
@@ -320,7 +321,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       const tgtLabel = cy.getElementById(tgtId)?.data('label') as string ?? tgtId
 
       const pos = evt.renderedPosition ?? { x: 0, y: 0 }
-      edgeTooltip.value = { x: pos.x, y: pos.y, protocols, srcLabel, tgtLabel }
+      const util = wmStore.edgeUtilMap[edgeKey] ?? null
+      edgeTooltip.value = { x: pos.x, y: pos.y, protocols, srcLabel, tgtLabel, util }
     })
 
     cy.on('mouseout', 'edge', () => {
