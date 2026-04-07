@@ -72,7 +72,7 @@
         <span class="edge-tooltip__field-name">MAC</span>
         <span>{{ tooltip.labelData.localMac }}</span>
       </div>
-      <div v-if="tooltip.labelData.ifSpeed" class="edge-tooltip__field">
+      <div v-if="tooltip.labelData.ifSpeed != null && tooltip.labelData.ifSpeed > 0" class="edge-tooltip__field">
         <span class="edge-tooltip__field-name">Speed</span>
         <span>{{ formatBitsPerSec(tooltip.labelData.ifSpeed) }}bps</span>
       </div>
