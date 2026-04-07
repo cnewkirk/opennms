@@ -47,11 +47,12 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
   }
 
   const _fetchAll = async () => {
-    if (_activeEdges.length === 0) return
+    const edges = _activeEdges   // snapshot to prevent mid-flight mutation on rapid start() calls
+    if (edges.length === 0) return
 
     // Collect unique node IDs from all edges
     const nodeIds = new Set<number>()
-    for (const e of _activeEdges) {
+    for (const e of edges) {
       nodeIds.add(e.source.id)
       nodeIds.add(e.target.id)
     }
@@ -80,7 +81,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
 
     // Fetch utilization for each edge in parallel
     const edgeResults = await Promise.allSettled(
-      _activeEdges.map(async (e) => {
+      edges.map(async (e) => {
         const key = edgeKey(e.source.id, e.target.id)
         const srcIface = nodeSnmpMap[e.source.id]
         const tgtIface = nodeSnmpMap[e.target.id]
@@ -128,6 +129,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
   }
 
   const start = async (vertices: TopologyVertex[], edges: TopologyEdge[]) => {
+    // _activeVertices kept for potential future use (e.g., marking isolated/unconnected nodes as down)
     _activeVertices = vertices
     _activeEdges = edges
     if (_timer) clearTimeout(_timer)
