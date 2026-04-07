@@ -10,18 +10,25 @@
   <table v-else class="links-table">
     <thead>
       <tr>
-        <th>Protocol</th>
         <th>Local Port</th>
         <th>Remote Node</th>
         <th>Remote Port</th>
+        <th>Protocols</th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="(link, i) in links" :key="i">
-        <td><span class="links-badge" :class="`links-badge--${link.protocol.toLowerCase().replace('-', '')}`">{{ link.protocol }}</span></td>
         <td class="links-mono">{{ link.localPort || '—' }}</td>
         <td>{{ link.remoteNode || '—' }}</td>
         <td class="links-mono">{{ link.remotePort || '—' }}</td>
+        <td class="links-protocols">
+          <span
+            v-for="p in link.protocols"
+            :key="p"
+            class="links-badge"
+            :class="`links-badge--${p.toLowerCase().replace('-', '')}`"
+          >{{ p }}</span>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -30,17 +37,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { FeatherSpinner } from '@featherds/progress'
-import { getNodeEnlinkd, normalizeLinks } from '@/services/enlinkdService'
-import type { NormalizedLink } from '@/services/enlinkdService'
+import { getNodeEnlinkd, normalizeLinks, groupLinks } from '@/services/enlinkdService'
+import type { GroupedLink } from '@/services/enlinkdService'
 
 const props = defineProps<{ nodeId: string }>()
 
 const loading = ref(true)
-const links = ref<NormalizedLink[]>([])
+const links = ref<GroupedLink[]>([])
 
 onMounted(async () => {
   const data = await getNodeEnlinkd(Number(props.nodeId))
-  links.value = data ? normalizeLinks(data) : []
+  links.value = data ? groupLinks(normalizeLinks(data)) : []
   loading.value = false
 })
 </script>
@@ -90,6 +97,12 @@ onMounted(async () => {
 .links-mono {
   font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
   font-size: 0.75rem;
+}
+
+.links-protocols {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .links-badge {

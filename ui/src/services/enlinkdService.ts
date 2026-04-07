@@ -127,6 +127,36 @@ export interface NormalizedLink {
   remotePort: string
 }
 
+export interface GroupedLink {
+  localPort: string
+  remoteNode: string
+  remotePort: string
+  protocols: NormalizedLink['protocol'][]
+}
+
+const PROTOCOL_PRIORITY: NormalizedLink['protocol'][] = ['LLDP', 'CDP', 'OSPF', 'IS-IS', 'Bridge']
+
+export const groupLinks = (links: NormalizedLink[]): GroupedLink[] => {
+  const byPort = new Map<string, NormalizedLink[]>()
+  for (const link of links) {
+    const bucket = byPort.get(link.localPort) ?? []
+    bucket.push(link)
+    byPort.set(link.localPort, bucket)
+  }
+  return Array.from(byPort.values()).map(group => {
+    const sorted = [...group].sort(
+      (a, b) => PROTOCOL_PRIORITY.indexOf(a.protocol) - PROTOCOL_PRIORITY.indexOf(b.protocol)
+    )
+    const best = sorted[0]
+    return {
+      localPort: best.localPort,
+      remoteNode: best.remoteNode,
+      remotePort: best.remotePort,
+      protocols: sorted.map(l => l.protocol)
+    }
+  })
+}
+
 export const normalizeLinks = (data: NodeEnlinkdData): NormalizedLink[] => {
   const out: NormalizedLink[] = []
 

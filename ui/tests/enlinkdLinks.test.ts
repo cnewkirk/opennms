@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
-import { normalizeLinks } from '@/services/enlinkdService'
-import type { NodeEnlinkdData } from '@/services/enlinkdService'
+import { normalizeLinks, groupLinks } from '@/services/enlinkdService'
+import type { NodeEnlinkdData, NormalizedLink } from '@/services/enlinkdService'
 
 describe('normalizeLinks', () => {
   test('returns empty array when no links exist', () => {
@@ -115,5 +115,61 @@ describe('normalizeLinks', () => {
     const result = normalizeLinks(data)
     expect(result).toHaveLength(2)
     expect(result.map(r => r.protocol)).toEqual(['LLDP', 'CDP'])
+  })
+})
+
+describe('groupLinks', () => {
+  test('single protocol link passes through unchanged', () => {
+    const links: NormalizedLink[] = [
+      { protocol: 'LLDP', localPort: 'eth0', remoteNode: 'switch-a', remotePort: 'gi0/1' }
+    ]
+    expect(groupLinks(links)).toEqual([
+      { localPort: 'eth0', remoteNode: 'switch-a', remotePort: 'gi0/1', protocols: ['LLDP'] }
+    ])
+  })
+
+  test('LLDP and CDP on same port collapse to one row with two badges', () => {
+    const links: NormalizedLink[] = [
+      { protocol: 'LLDP', localPort: 'eth0', remoteNode: 'switch-a', remotePort: 'gi0/1' },
+      { protocol: 'CDP',  localPort: 'eth0', remoteNode: 'switch-a', remotePort: 'gi0/1' }
+    ]
+    expect(groupLinks(links)).toEqual([
+      { localPort: 'eth0', remoteNode: 'switch-a', remotePort: 'gi0/1', protocols: ['LLDP', 'CDP'] }
+    ])
+  })
+
+  test('different ports stay as separate rows', () => {
+    const links: NormalizedLink[] = [
+      { protocol: 'LLDP', localPort: 'eth0', remoteNode: 'sw-a', remotePort: 'gi0/1' },
+      { protocol: 'LLDP', localPort: 'eth1', remoteNode: 'sw-b', remotePort: 'gi0/2' }
+    ]
+    const result = groupLinks(links)
+    expect(result).toHaveLength(2)
+    expect(result.map(r => r.localPort)).toEqual(['eth0', 'eth1'])
+  })
+
+  test('LLDP label is preferred over OSPF for same port', () => {
+    const links: NormalizedLink[] = [
+      { protocol: 'OSPF',  localPort: 'eth0', remoteNode: '10.0.0.1', remotePort: 'eth0' },
+      { protocol: 'LLDP',  localPort: 'eth0', remoteNode: 'router-b', remotePort: 'gi1' }
+    ]
+    const result = groupLinks(links)
+    expect(result).toHaveLength(1)
+    expect(result[0].remoteNode).toBe('router-b')
+    expect(result[0].protocols).toContain('LLDP')
+    expect(result[0].protocols).toContain('OSPF')
+  })
+
+  test('protocols appear in priority order: LLDP CDP OSPF IS-IS Bridge', () => {
+    const links: NormalizedLink[] = [
+      { protocol: 'Bridge', localPort: 'eth0', remoteNode: 'x', remotePort: 'y' },
+      { protocol: 'OSPF',   localPort: 'eth0', remoteNode: 'x', remotePort: 'y' },
+      { protocol: 'LLDP',   localPort: 'eth0', remoteNode: 'x', remotePort: 'y' }
+    ]
+    expect(groupLinks(links)[0].protocols).toEqual(['LLDP', 'OSPF', 'Bridge'])
+  })
+
+  test('returns empty array for no links', () => {
+    expect(groupLinks([])).toEqual([])
   })
 })
