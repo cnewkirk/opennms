@@ -83,7 +83,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
     )
 
     const nodeSnmpMap: Record<number, ReturnType<typeof pickBestInterface>> = {}
-    const nodeAllIfacesMap: Record<number, SnmpInterface[]> = {}
+    const nodeIfIndexMap: Record<number, Map<number, SnmpInterface>> = {}
     const nodeIpMap: Record<number, string | undefined> = {}
     const nodeEnlinkdMap: Record<number, NodeEnlinkdData | null> = {}
     const downMap: Record<number, boolean> = {}
@@ -92,14 +92,13 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
       if (result.status !== 'fulfilled') continue
       const { nodeId, ifaces, type, ipIfaces, enlinkd } = result.value
       nodeSnmpMap[nodeId] = pickBestInterface(ifaces)
-      nodeAllIfacesMap[nodeId] = ifaces
+      nodeIfIndexMap[nodeId] = new Map(ifaces.map(i => [i.ifIndex, i]))
       downMap[nodeId] = type !== null && type !== 'A'
-      const primary = ipIfaces.find(ip => ip.snmpPrimary === 'P')
-      nodeIpMap[nodeId] = primary?.ipAddress
+      nodeIpMap[nodeId] = ipIfaces.find(ip => ip.snmpPrimary === 'P')?.ipAddress
       nodeEnlinkdMap[nodeId] = enlinkd
     }
 
-    // Fetch utilization for each edge in parallel (unchanged logic)
+    // Fetch utilization for each edge in parallel
     const edgeResults = await Promise.allSettled(
       edges.map(async (e) => {
         const key = edgeKey(e.source.id, e.target.id)
@@ -130,46 +129,40 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
     }
 
     // Build edgeLabelData — IP + LLDP port correlation per edge
+    const vertexLabelById = new Map(_activeVertices.map(v => [v.id, v.label]))
     const labelMap: Record<string, EdgeLabelData> = {}
     for (const e of edges) {
-      const key = edgeKey(e.source.id, e.target.id)
-      const srcId = e.source.id
-      const tgtId = e.target.id
+      const key    = edgeKey(e.source.id, e.target.id)
+      const srcId  = e.source.id
+      const tgtId  = e.target.id
       const data: EdgeLabelData = {}
 
-      // Primary IPs from IP interface list
       data.localIp  = nodeIpMap[srcId]
       data.remoteIp = nodeIpMap[tgtId]
 
-      // LLDP correlation: find the link on srcId that connects to the target node
-      const enlinkd = nodeEnlinkdMap[srcId]
-      const targetLabel = _activeVertices.find(v => v.id === String(tgtId))?.label
+      const enlinkd     = nodeEnlinkdMap[srcId]
+      const targetLabel = vertexLabelById.get(String(tgtId))
       if (enlinkd && targetLabel) {
         const lldpLink = enlinkd.lldpLinkNodes.find(l =>
           cleanName(l.lldpRemInfo).toLowerCase() === targetLabel.toLowerCase()
         )
         if (lldpLink) {
-          // Extract ifindex from the local port string to find the exact SNMP interface
           const ifIndexMatch = lldpLink.lldpLocalPort.match(/ifindex:(\d+)/i)
           if (ifIndexMatch) {
-            const ifIdx = Number(ifIndexMatch[1])
-            const localIface = nodeAllIfacesMap[srcId]?.find(i => i.ifIndex === ifIdx)
+            const localIface = nodeIfIndexMap[srcId].get(Number(ifIndexMatch[1]))
             if (localIface) {
               data.localIfName = localIface.ifName ?? localIface.ifDescr ?? undefined
               data.localMac    = localIface.physAddr ?? undefined
               data.ifSpeed     = localIface.ifSpeed > 0 ? localIface.ifSpeed : undefined
             }
           } else {
-            // No ifindex embedded in port string — use cleaned name directly
             const cleaned = cleanName(lldpLink.lldpLocalPort)
             data.localIfName = cleaned || undefined
           }
-          const remotePort = cleanName(lldpLink.ldpRemPort)
-          data.remotePortId = remotePort || undefined
+          data.remotePortId = cleanName(lldpLink.ldpRemPort) || undefined
         }
       }
 
-      // Fallback: if LLDP gave us no interface info, use the best SNMP interface for speed/MAC
       if (!data.localIfName) {
         const best = nodeSnmpMap[srcId]
         if (best) {

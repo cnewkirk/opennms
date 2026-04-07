@@ -73,7 +73,7 @@ describe('weathermapStore — edgeLabelData', () => {
     expect(store.edgeLabelData[key].remoteIp).toBe('10.0.0.2')
   })
 
-  it('uses non-primary IP when no primary IP is present', async () => {
+  it('localIp is undefined when no primary IP interface exists', async () => {
     const iface = makeSnmpIface()
     vi.mocked(measurementsService.fetchNodeSnmpIfaces).mockResolvedValue([iface])
     vi.mocked(measurementsService.pickBestInterface).mockReturnValue(iface)
@@ -88,9 +88,7 @@ describe('weathermapStore — edgeLabelData', () => {
     const store = useWeathermapStore()
     await store.start(VERTICES, EDGES)
 
-    const key = edgeKey(10, 20)
-    // No primary IP, so localIp should be undefined
-    expect(store.edgeLabelData[key].localIp).toBeUndefined()
+    expect(store.edgeLabelData[edgeKey(10, 20)].localIp).toBeUndefined()
   })
 
   it('populates localIfName and remotePortId from LLDP correlation', async () => {
@@ -152,10 +150,8 @@ describe('weathermapStore — edgeLabelData', () => {
     await store.start(VERTICES, EDGES)
 
     const key = edgeKey(10, 20)
-    // No LLDP match, so falls back to best SNMP interface
     expect(store.edgeLabelData[key].localIfName).toBe('eth0')
     expect(store.edgeLabelData[key].localMac).toBe('aabbccddeeff')
-    // remotePortId is undefined (no LLDP match)
     expect(store.edgeLabelData[key].remotePortId).toBeUndefined()
   })
 })
