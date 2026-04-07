@@ -218,6 +218,7 @@ const rowClass = (alarm: Alarm) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables' as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@featherds/table/scss/table";
@@ -259,7 +260,7 @@ table {
     font-weight: 500;
     color: var($secondary-text-on-surface);
     background: var($shade-4);
-    border-radius: 10px;
+    border-radius: vars.$border-radius-pill;
     padding: 1px 7px;
     margin-left: 4px;
   }

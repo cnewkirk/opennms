@@ -112,6 +112,7 @@ const onMBeansSelected = (mbeans: MBeanDto[]) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
 
@@ -134,7 +135,7 @@ const onMBeansSelected = (mbeans: MBeanDto[]) => {
 .step-chip {
   @include typo.caption();
   padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
+  border-radius: vars.$border-radius-pill;
   border: 1px solid var($border-on-surface);
   color: var($secondary-text-on-surface);
 

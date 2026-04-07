@@ -76,7 +76,7 @@ const statusClass = computed(() => props.node.type === 'A' ? 'status-badge--up' 
 
 .status-badge {
   padding: 2px 10px;
-  border-radius: 12px;
+  border-radius: vars.$border-radius-pill;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;

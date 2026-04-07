@@ -216,7 +216,7 @@ const onSave = () => {
   align-items: center;
   gap: 0.25rem;
   padding: 0.2rem 0.5rem;
-  border-radius: 16px;
+  border-radius: vars.$border-radius-pill;
   background: var($shade-3);
   color: var($primary-text-on-surface);
   @include caption;

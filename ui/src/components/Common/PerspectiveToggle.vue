@@ -28,6 +28,7 @@ const store = usePerspectiveStore()
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .perspective-toggle-wrap {
@@ -40,7 +41,7 @@ const store = usePerspectiveStore()
 .perspective-toggle {
   display: inline-flex;
   border: 1px solid var($border-on-surface);
-  border-radius: 20px;
+  border-radius: vars.$border-radius-pill;
   overflow: hidden;
 
   &__btn {

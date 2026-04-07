@@ -584,7 +584,7 @@ const isisLinks = computed(() => {
   &__chip {
     display: inline-block;
     padding: 2px 10px;
-    border-radius: 12px;
+    border-radius: vars.$border-radius-pill;
     font-size: 0.78rem;
     font-weight: 600;
     background-color: var($primary);
@@ -594,7 +594,7 @@ const isisLinks = computed(() => {
   &__cat-chip {
     display: inline-block;
     padding: 1px 8px;
-    border-radius: 12px;
+    border-radius: vars.$border-radius-pill;
     font-size: 0.75rem;
     border: 1px solid var($border-on-surface);
     color: var($secondary-text-on-surface);
@@ -626,7 +626,7 @@ const isisLinks = computed(() => {
     &-badge {
       font-size: 0.68rem;
       padding: 1px 6px;
-      border-radius: 10px;
+      border-radius: vars.$border-radius-pill;
       background: var($primary);
       color: #fff;
 

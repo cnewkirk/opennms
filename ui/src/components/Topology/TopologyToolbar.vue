@@ -153,7 +153,7 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
 
   &__chip {
     padding: 4px 14px;
-    border-radius: 16px;
+    border-radius: vars.$border-radius-pill;
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
