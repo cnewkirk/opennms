@@ -1,34 +1,32 @@
 <template>
   <div class="topology-toolbar">
-    <div class="topology-toolbar__layers">
+    <div class="topology-toolbar__layers" ref="layersPanelRef">
       <button
         type="button"
         class="topology-toolbar__chip"
-        :class="{ active: allActive }"
+        :class="{ active: layersPanelOpen }"
         :disabled="store.loading"
-        @click="toggleAll"
-      >All</button>
-      <button
-        v-for="layer in store.protocolLayers"
-        :key="layer.namespace"
-        type="button"
-        class="topology-toolbar__chip"
-        :class="{ active: store.activeLayers.includes(layer.namespace) }"
-        :disabled="store.loading || (store.activeLayers.includes(layer.namespace) && store.activeLayers.length === 1)"
-        @click="store.toggleLayer(layer)"
-      >{{ layer.label }}</button>
-    </div>
-
-    <div v-if="presentProtocols.length" class="topology-toolbar__legend">
-      <div
-        v-for="p in presentProtocols"
-        :key="p"
-        class="topology-toolbar__legend-item"
-      >
-        <svg width="18" height="6" class="topology-toolbar__legend-line">
-          <line x1="0" y1="3" x2="18" y2="3" :stroke="getProtocolColor(p)" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-        <span>{{ p }}</span>
+        @click="layersPanelOpen = !layersPanelOpen"
+      >{{ layersButtonLabel }}</button>
+      <div v-if="layersPanelOpen" class="topology-toolbar__layers-panel">
+        <label class="topology-toolbar__layer-row">
+          <input type="checkbox" :checked="allActive" :disabled="store.loading" @change="toggleAll"> All
+        </label>
+        <hr class="topology-toolbar__layer-divider">
+        <label
+          v-for="layer in store.protocolLayers"
+          :key="layer.namespace"
+          class="topology-toolbar__layer-row"
+        >
+          <input
+            type="checkbox"
+            :checked="store.activeLayers.includes(layer.namespace)"
+            :disabled="store.loading || (store.activeLayers.includes(layer.namespace) && store.activeLayers.length === 1)"
+            @change="store.toggleLayer(layer)"
+          >
+          <span class="topology-toolbar__layer-dot" :style="{ backgroundColor: getProtocolColor(layer.label) }"></span>
+          {{ layer.label }}
+        </label>
       </div>
     </div>
 
@@ -118,10 +116,17 @@ const emit = defineEmits<{
 const store = useTopologyStore()
 const wmStore = useWeathermapStore()
 const elStore = useEdgeLabelStore()
+const now = useNow({ interval: 5000 })
+
+// Layers dropdown
+const layersPanelOpen = ref(false)
+const layersPanelRef = ref<HTMLElement | null>(null)
+onClickOutside(layersPanelRef, () => { layersPanelOpen.value = false })
+
+// Edge Labels dropdown
 const edgeLabelPanelOpen = ref(false)
 const edgeLabelPanelRef = ref<HTMLElement | null>(null)
 onClickOutside(edgeLabelPanelRef, () => { edgeLabelPanelOpen.value = false })
-const now = useNow({ interval: 5000 })
 
 const INTERVAL_OPTIONS = [
   { label: '30s',  value: 30 },
@@ -144,18 +149,16 @@ const intervalModel = computed({
   set: (v: number) => wmStore.setPollInterval(v)
 })
 
-const presentProtocols = computed<string[]>(() => {
-  const seen = new Set<string>()
-  for (const e of store.edges) {
-    for (const p of (e.protocols ?? [])) seen.add(p)
-  }
-  return Array.from(seen).sort()
-})
-
 const allActive = computed(() =>
   store.protocolLayers.length > 0 &&
   store.protocolLayers.every(l => store.activeLayers.includes(l.namespace))
 )
+
+const layersButtonLabel = computed(() => {
+  if (allActive.value) return 'All Layers ▾'
+  const n = store.activeLayers.length
+  return `${n} Layer${n !== 1 ? 's' : ''} ▾`
+})
 
 const toggleAll = () => store.setAllLayers(!allActive.value)
 
@@ -178,11 +181,51 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
   flex-shrink: 0;
 
   &__layers {
+    position: relative;
+    padding-top: 8px;
+  }
+
+  &__layers-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 200;
+    background: var($surface);
+    border: 1px solid var($border-on-surface);
+    border-radius: vars.$border-radius-sm;
+    padding: 8px 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    min-width: 160px;
+  }
+
+  &__layer-row {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding-top: 6px;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var($primary-text-on-surface);
+    padding: 3px 0;
+    cursor: pointer;
+    white-space: nowrap;
+
+    input[type='checkbox'] {
+      cursor: pointer;
+      &:disabled { cursor: not-allowed; opacity: 0.4; }
+    }
+  }
+
+  &__layer-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__layer-divider {
+    border: none;
+    border-top: 1px solid var($border-on-surface);
+    margin: 4px 0;
   }
 
   &__chip {
@@ -212,29 +255,8 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
     }
   }
 
-  &__legend {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding-top: 10px;
-  }
-
-  &__legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    color: var($secondary-text-on-surface);
-    white-space: nowrap;
-  }
-
-  &__legend-line {
-    flex-shrink: 0;
-  }
-
   &__search {
-    width: 260px;
+    width: 220px;
   }
 
   &__layout-actions {
