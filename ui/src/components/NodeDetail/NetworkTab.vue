@@ -304,6 +304,7 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables' as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@featherds/styles/themes/variables";
@@ -416,7 +417,7 @@ onMounted(async () => {
 .svc-chip {
   display: inline-block;
   padding: 2px 8px;
-  border-radius: 3px;
+  border-radius: vars.$border-radius-xs;
   font-size: 0.8rem;
   font-weight: 500;
 

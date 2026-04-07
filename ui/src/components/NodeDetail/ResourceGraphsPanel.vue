@@ -186,7 +186,7 @@ const editSavedChart = (chart: SavedChart) => {
   &__preset {
     padding: 4px 12px;
     border: 1px solid var($border-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     background: var($surface);
     color: var($primary-text-on-surface);
     cursor: pointer;
@@ -197,7 +197,7 @@ const editSavedChart = (chart: SavedChart) => {
 
   &__dt {
     border: 1px solid var($border-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     background: var($surface);
     color: var($primary-text-on-surface);
     padding: 3px 6px;
@@ -209,7 +209,7 @@ const editSavedChart = (chart: SavedChart) => {
   &__apply {
     padding: 4px 10px;
     border: 1px solid var($primary);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     background: var($primary);
     color: #fff;
     cursor: pointer;
@@ -242,7 +242,7 @@ const editSavedChart = (chart: SavedChart) => {
     margin-left: 12px;
     padding: 4px 12px;
     border: 1px solid var($border-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     background: none;
     cursor: pointer;
     font-size: 0.875rem;

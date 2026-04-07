@@ -533,6 +533,7 @@ watch([() => nodeStructureStore.queryFilter], () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
@@ -594,7 +595,7 @@ table {
 
   .btn.btn-icon{
     border: 2px solid var($border-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     padding: 0 0.5rem;
     height: 3rem;
     width: 3rem;

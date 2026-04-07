@@ -247,6 +247,7 @@ const onChangeSearchTerm = debounce(async (value: string) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/table/scss/table';
@@ -304,7 +305,7 @@ const onChangeSearchTerm = debounce(async (value: string) => {
         }
 
         div {
-          border-radius: 5px;
+          border-radius: vars.$border-radius-xs;
           padding: 0px 5px 0px 5px;
         }
 

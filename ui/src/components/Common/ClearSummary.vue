@@ -15,6 +15,7 @@ defineEmits<{ expand: [] }>()
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables' as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@featherds/styles/themes/variables";
@@ -24,7 +25,7 @@ defineEmits<{ expand: [] }>()
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: vars.$border-radius-xs;
   background: utils.alpha(fvars.$success, 0.08);
   border: 1px solid utils.alpha(fvars.$success, 0.25);
   font-size: 0.875rem;

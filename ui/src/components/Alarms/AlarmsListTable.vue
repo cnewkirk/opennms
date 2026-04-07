@@ -709,7 +709,7 @@ onMounted(() => {
     font-family: monospace;
     letter-spacing: 0.02em;
     padding: 1px 5px;
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     border: 1px solid var($border-light-on-surface);
     background: var($shade-4);
     color: var($secondary-text-on-surface);
@@ -752,7 +752,7 @@ onMounted(() => {
     margin: 4px 0 0 0;
     padding: 6px 8px;
     background: var($shade-4);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     color: var($primary-text-on-surface);
     max-height: 160px;
     overflow-y: auto;
@@ -781,7 +781,7 @@ onMounted(() => {
   &__action-btn {
     background: none;
     border: 1px solid var($border-light-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     width: 24px;
     height: 24px;
     padding: 0;
@@ -827,7 +827,7 @@ onMounted(() => {
 .sev-toggle {
   @include body-small;
   border: 1.5px solid transparent;
-  border-radius: 3px;
+  border-radius: vars.$border-radius-xs;
   padding: 2px 8px;
   font-size: 0.7rem;
   font-weight: 700;

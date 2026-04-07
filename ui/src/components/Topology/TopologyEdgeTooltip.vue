@@ -119,7 +119,7 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
   &__util-badge {
     display: inline-block;
     padding: 1px 7px;
-    border-radius: 10px;
+    border-radius: vars.$border-radius-xs;
     font-size: 0.72rem;
     font-weight: 700;
     color: #fff;

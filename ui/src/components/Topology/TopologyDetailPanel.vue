@@ -703,7 +703,7 @@ const isisLinks = computed(() => {
     color: var($secondary-text-on-surface);
     background: var($shade-2);
     padding: 0 4px;
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
   }
 
   &__link-arrow { color: var($secondary-text-on-surface); flex-shrink: 0; }

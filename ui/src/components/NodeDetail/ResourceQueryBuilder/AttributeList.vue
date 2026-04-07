@@ -67,6 +67,7 @@ const addSeries = (attr: string) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .attribute-list {
@@ -120,7 +121,7 @@ const addSeries = (attr: string) => {
   &__add {
     background: none;
     border: 1.5px solid var($primary);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     width: 22px;
     height: 22px;
     cursor: pointer;

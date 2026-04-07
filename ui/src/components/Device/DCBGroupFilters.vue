@@ -78,6 +78,7 @@ const onGroupByOptionClick = (groupBy: string, value: string) => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
 
@@ -87,7 +88,7 @@ const onGroupByOptionClick = (groupBy: string, value: string) => {
   margin-left: 20px;
   margin-top: 63px;
   border: 1px solid var($shade-4);
-  border-radius: 5px;
+  border-radius: vars.$border-radius-xs;
   padding: 15px;
 
   .title {

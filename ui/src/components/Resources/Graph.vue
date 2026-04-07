@@ -299,7 +299,7 @@ onMounted(render)
     width: 24px;
     height: 24px;
     border: none;
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     background: none;
     color: var($secondary-text-on-surface);
     cursor: pointer;

@@ -7,6 +7,7 @@ defineProps<{ severity: string }>()
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables' as fvars;
 @use '@featherds/styles/themes/utils';
 
@@ -16,7 +17,7 @@ $bg: 0.12;
 .severity-badge {
   display: inline-block;
   padding: 1px 8px;
-  border-radius: 3px;
+  border-radius: vars.$border-radius-xs;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;

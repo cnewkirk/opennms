@@ -236,6 +236,7 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
 @import "@featherds/table/scss/table";
@@ -266,7 +267,7 @@ onMounted(async () => {
   .register-success {
     background-color: var($success);
     color: white;
-    border-radius: 5px;
+    border-radius: vars.$border-radius-xs;
     text-align: center;
     font-weight: bold;
   }
@@ -274,7 +275,7 @@ onMounted(async () => {
   .register-failure {
     background-color: var($error);
     color: white;
-    border-radius: 5px;
+    border-radius: vars.$border-radius-xs;
     text-align: center;
     font-weight: bold;
   }

@@ -220,7 +220,7 @@ const doSave = () => {
   &__btn {
     padding: 4px 12px;
     border: 1px solid var($border-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     background: var($surface);
     color: var($primary-text-on-surface);
     cursor: pointer;
@@ -281,7 +281,7 @@ const doSave = () => {
 
   &__agg {
     border: 1px solid var($border-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     background: var($surface);
     color: var($primary-text-on-surface);
     padding: 2px 4px;
@@ -292,7 +292,7 @@ const doSave = () => {
   &__swatch {
     width: 16px;
     height: 16px;
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     cursor: pointer;
     border: 1px solid var($border-on-surface);
     flex-shrink: 0;
@@ -331,7 +331,7 @@ const doSave = () => {
 
   &__dt {
     border: 1px solid var($border-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     background: var($surface);
     color: var($primary-text-on-surface);
     padding: 3px 6px;

@@ -53,6 +53,7 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .links-loading {
@@ -108,7 +109,7 @@ onMounted(async () => {
 .links-badge {
   display: inline-block;
   padding: 1px 6px;
-  border-radius: 3px;
+  border-radius: vars.$border-radius-xs;
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.03em;

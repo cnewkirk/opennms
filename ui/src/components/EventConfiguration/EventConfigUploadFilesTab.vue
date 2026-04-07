@@ -427,13 +427,14 @@ watch(
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @use "@featherds/styles/themes/variables";
 
 .upload-files-tab {
   background: var(variables.$surface);
   width: 100%;
   padding: 25px;
-  border-radius: 5px;
+  border-radius: vars.$border-radius-xs;
   margin-top: 10px;
 
   .upload-section {
@@ -474,7 +475,7 @@ watch(
 
     .selected-files-section {
       border: 1px solid var(variables.$border-on-surface);
-      border-radius: 5px;
+      border-radius: vars.$border-radius-xs;
       padding: 10px;
       width: 500px;
       height: 500px;
