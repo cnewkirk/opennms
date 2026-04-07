@@ -60,3 +60,34 @@ export const parallelOffsets = (n: number): number[] => {
   const spacing = 8
   return Array.from({ length: n }, (_, i) => Math.round((i - (n - 1) / 2) * spacing))
 }
+
+/**
+ * Maps a utilization percentage (0-100) to a traffic-light color.
+ */
+export const utilizationColor = (pct: number): string => {
+  if (pct < 50) return '#48BB78'   // green
+  if (pct < 75) return '#ECC94B'   // yellow
+  if (pct < 90) return '#ED8936'   // orange
+  return '#FC8181'                  // red
+}
+
+/**
+ * Maps total throughput in bits/sec to a Cytoscape edge width in pixels.
+ */
+export const throughputWidth = (bitsPerSec: number): number => {
+  if (bitsPerSec < 1_000_000)       return 2   // < 1 Mbps
+  if (bitsPerSec < 10_000_000)      return 3   // 1–10 Mbps
+  if (bitsPerSec < 100_000_000)     return 4   // 10–100 Mbps
+  if (bitsPerSec < 1_000_000_000)   return 6   // 100 Mbps–1 Gbps
+  return 8                                      // > 1 Gbps
+}
+
+/**
+ * Formats a bits-per-second value as a short string: "230M", "1.5G", "45K", "500"
+ */
+export const formatBitsPerSec = (bps: number): string => {
+  if (bps >= 1_000_000_000) return `${+(bps / 1_000_000_000).toPrecision(3)}G`
+  if (bps >= 1_000_000)     return `${+(bps / 1_000_000).toPrecision(3)}M`
+  if (bps >= 1_000)         return `${+(bps / 1_000).toPrecision(3)}K`
+  return `${Math.round(bps)}`
+}
