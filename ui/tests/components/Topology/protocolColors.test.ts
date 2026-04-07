@@ -108,4 +108,13 @@ describe('formatBitsPerSec', () => {
   it('formats gigabits with G suffix', () => {
     expect(formatBitsPerSec(1_500_000_000)).toBe('1.5G')
   })
+  it('formats exactly 1000 bps as K', () => {
+    expect(formatBitsPerSec(1_000)).toBe('1K')
+  })
+  it('formats exactly 1000000 bps as M', () => {
+    expect(formatBitsPerSec(1_000_000)).toBe('1M')
+  })
+  it('formats exactly 1000000000 bps as G', () => {
+    expect(formatBitsPerSec(1_000_000_000)).toBe('1G')
+  })
 })
