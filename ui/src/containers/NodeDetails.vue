@@ -12,7 +12,7 @@
       <button
         v-if="perspectiveStore.isProblems"
         class="node-detail__graphs-link"
-        @click="perspectiveStore.setPerspective('full')"
+        @click="perspectiveStore.setPerspective('all')"
       >View Graphs →</button>
     </div>
   </div>
@@ -73,8 +73,8 @@
           :nodeId="id"
           :nodeResourceKey="nodeResourceKey"
           :problemsOnly="perspectiveStore.isProblems"
-          @go-graphs="perspectiveStore.setPerspective('full')"
-          @go-activity="perspectiveStore.setPerspective('full')"
+          @go-graphs="perspectiveStore.setPerspective('all')"
+          @go-activity="perspectiveStore.setPerspective('all')"
         />
       </div>
     </div>
@@ -165,6 +165,7 @@ const nodeResourceKey = computed(() => {
     align-items: center;
     justify-content: space-between;
     padding: 8px 0 4px;
+    padding-left: 15px;
     margin-bottom: 4px;
   }
 

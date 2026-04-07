@@ -58,5 +58,5 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 <style scoped lang="scss">
 @import "@featherds/styles/themes/variables";
 .card { background: var($surface); padding: 0; margin-bottom: 16px; border-radius: 4px; }
-.alarms-page__controls { padding: 8px 0 4px; }
+.alarms-page__controls { padding: 8px 15px 8px; }
 </style>
