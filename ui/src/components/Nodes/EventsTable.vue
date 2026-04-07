@@ -84,6 +84,7 @@ const getRowClass = (data: Event) => `row--${data.severity.toLowerCase()}`
   lang="scss"
   scoped
 >
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables' as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@featherds/table/scss/table";
@@ -92,6 +93,7 @@ const getRowClass = (data: Event) => `row--${data.severity.toLowerCase()}`
   @include elevation(2);
   padding: 15px;
   margin-bottom: 15px;
+  border-radius: vars.$border-radius-surface;
 }
 table {
   @include table;

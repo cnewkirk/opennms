@@ -74,12 +74,14 @@ const outages = computed(() => nodeStore.outages)
   lang="scss"
   scoped
 >
+@use '@/styles/vars' as vars;
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
 .card {
   @include elevation(2);
   padding: 15px;
   margin-bottom: 15px;
+  border-radius: vars.$border-radius-surface;
 }
 table {
   @include table;
