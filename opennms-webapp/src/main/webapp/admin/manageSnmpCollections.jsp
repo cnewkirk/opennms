@@ -21,19 +21,5 @@
     License.
 
 --%>
-<%@page language="java"
-	contentType="text/html"
-	session="true"
-%>
-
-<%@ page import="org.opennms.web.utils.Bootstrap" %>
-<% Bootstrap.with(pageContext)
-          .headTitle("Manage SNMP Collections and Data Collection Groups")
-          .breadcrumb("Admin", "admin/index.jsp")
-          .breadcrumb("Manage SNMP Collections and Data Collection Groups")
-          .build(request);
-%>
-<jsp:directive.include file="/includes/bootstrap.jsp" />
-
-<iframe name="mib-compiler-snmp" id="vaadin-content" src="admin/admin-snmp-collections" frameborder="0" class="vaadin-fullscreen"></iframe>
-<jsp:include page="/includes/bootstrap-footer.jsp" flush="true"/>
+<%@page language="java" contentType="text/html" session="true" %>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/snmp-collections-config"); %>

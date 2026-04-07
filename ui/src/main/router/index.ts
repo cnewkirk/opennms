@@ -140,6 +140,22 @@ const router = createRouter({
       }
     },
     {
+      path: '/snmp-collections-config',
+      name: 'SnmpCollectionsConfig',
+      component: () => import('@/containers/SnmpCollectionsConfig.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'No role access to SNMP collections config.' })
+            router.push(from.path)
+          }
+        }
+
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/map',
       name: 'Map',
       component: () => import('@/containers/Map.vue'),

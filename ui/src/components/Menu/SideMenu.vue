@@ -61,8 +61,9 @@ const legacyToVueRoutes: Record<string, string> = {
   'admin/jmxConfigGenerator.jsp':   'ui/index.html#/jmx-config-generator',
   'admin/mibCompiler.jsp':          'ui/index.html#/mib-compiler',
   'admin/wallboardConfig.jsp':         'ui/index.html#/wallboard-config',
-  'admin/surveillanceViewsConfig.jsp': 'ui/index.html#/surveillance-views-config',
-  'vaadin-wallboard':                  'ui/index.html#/wallboard-config'
+  'admin/surveillanceViewsConfig.jsp':    'ui/index.html#/surveillance-views-config',
+  'admin/manageSnmpCollections.jsp':      'ui/index.html#/snmp-collections-config',
+  'vaadin-wallboard':                     'ui/index.html#/wallboard-config'
 }
 
 const getMenuLink = (menuItem: MenuItem) => {
