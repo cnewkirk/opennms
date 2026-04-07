@@ -25,7 +25,7 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import { Ref } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
-import { getProtocolColor, parallelOffsets, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
+import { getProtocolColor, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
 import { useWeathermapStore, EdgeLabelData } from '@/stores/weathermapStore'
 import { useEdgeLabelStore } from '@/stores/edgeLabelStore'
 
@@ -316,8 +316,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy.on('mouseover', 'edge', (evt) => {
       if (!cy) return
       const edgeKey = evt.target.data('edgeKey') as string
-      const parallelEdges = cy.edges(`[edgeKey = "${edgeKey}"]`)
-      const protocols = [...new Set(parallelEdges.map(e => e.data('protocol') as string))]
+      const protocols = (evt.target.data('protocols') as string[]) ?? []
 
       const srcId = String(evt.target.data('source'))
       const tgtId = String(evt.target.data('target'))
@@ -387,45 +386,43 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       }
     }))
 
-    // Expand each store edge into N parallel Cytoscape edges, one per protocol.
-    // All parallel edges for a pair share the same edgeKey for tap/tooltip grouping.
-    const edgeElements: { data: Record<string, unknown> }[] = []
+    // Collapse all protocol edges for a node pair into one Cytoscape edge.
+    // All protocols between a pair are stored as an array on the edge data;
+    // the primary protocol (first in list) drives the default edge color.
+    const edgeMap = new Map<string, { src: string; tgt: string; protocols: string[]; userDefined: boolean }>()
     for (const e of store.edges) {
       const src = e.source.id
       const tgt = e.target.id
       const key = `${Math.min(src, tgt)}-${Math.max(src, tgt)}`
       const protocols = (e.protocols && e.protocols.length > 0) ? e.protocols : ['unknown']
-      const offsets = parallelOffsets(protocols.length)
-
-      protocols.forEach((protocol, i) => {
-        const safeId = protocol.toLowerCase().replace(/[\s/]+/g, '-')
-        edgeElements.push({
-          data: {
-            id: `edge-${key}-${safeId}`,
-            source: String(src),
-            target: String(tgt),
-            edgeKey: key,
-            protocol,
-            color: getProtocolColor(protocol),
-            offset: offsets[i],
-            userDefined: e.userDefined ?? false
-          }
-        })
-      })
+      const existing = edgeMap.get(key)
+      if (!existing) {
+        edgeMap.set(key, { src: String(src), tgt: String(tgt), protocols: [...protocols], userDefined: e.userDefined ?? false })
+      } else {
+        for (const p of protocols) {
+          if (!existing.protocols.includes(p)) existing.protocols.push(p)
+        }
+        if (e.userDefined) existing.userDefined = true
+      }
     }
+
+    const edgeElements = [...edgeMap.entries()].map(([key, { src, tgt, protocols, userDefined }]) => ({
+      data: {
+        id: `edge-${key}`,
+        source: src,
+        target: tgt,
+        edgeKey: key,
+        protocols,
+        color: getProtocolColor(protocols[0]),
+        userDefined
+      }
+    }))
 
     cy.add(nodeElements)
     cy.add(edgeElements)
 
-    // Apply per-edge curve offsets and user-defined dashed style programmatically
     cy.edges().forEach(edge => {
-      const offset = edge.data('offset') as number
-      if (offset === 0) {
-        edge.style('curve-style', 'straight')
-      } else {
-        edge.style('curve-style', 'bezier')
-        edge.style('control-point-distances', offset)
-      }
+      edge.style('curve-style', 'straight')
       if (edge.data('userDefined')) {
         edge.addClass('user-defined')
       }
@@ -471,8 +468,13 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
    * Build the multi-line label string for a single edge from enabled fields.
    * Returns empty string if no fields are enabled or no data available.
    */
-  const composeEdgeLabel = (key: string): string => {
+  const composeEdgeLabel = (key: string, protocols: string[]): string => {
     const parts: string[] = []
+
+    // Protocol list — shown when multiple protocols share this edge
+    if (protocols.length > 1) {
+      parts.push(protocols.join(' · '))
+    }
 
     // Utilization line (from weathermap data)
     const util = wmStore.edgeUtilMap[key]
@@ -515,7 +517,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy.batch(() => {
       cy!.edges().forEach(edge => {
         const key = edge.data('edgeKey') as string
-        const label = composeEdgeLabel(key)
+        const protocols = (edge.data('protocols') as string[]) ?? []
+        const label = composeEdgeLabel(key, protocols)
         if (label) {
           edge.data('wmLabel', label)
           edge.addClass('weathermap')
