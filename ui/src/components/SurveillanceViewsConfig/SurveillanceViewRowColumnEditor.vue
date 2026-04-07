@@ -127,6 +127,7 @@ const availableCategories = (itemIndex: number) =>
 <style lang="scss" scoped>
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
+@import "@/styles/vars";
 
 .rowcol-editor {
   display: flex;
@@ -156,7 +157,7 @@ const availableCategories = (itemIndex: number) =>
   gap: 0.75rem;
   padding: 0.5rem;
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: $border-radius-surface;
 }
 
 .label-input {
@@ -182,7 +183,7 @@ const availableCategories = (itemIndex: number) =>
   @include typo.caption();
   background: var($surface-dark);
   border: 1px solid var($border-on-surface);
-  border-radius: 0.75rem;
+  border-radius: $border-radius-pill;
   padding: 0.1rem 0.5rem;
   display: flex;
   align-items: center;
@@ -206,7 +207,7 @@ const availableCategories = (itemIndex: number) =>
 .category-select {
   @include typo.body-small();
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: $border-radius-surface;
   padding: 0.25rem 0.5rem;
   background: var($surface);
   color: var($primary-text-on-surface);

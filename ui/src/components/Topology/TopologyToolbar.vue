@@ -283,7 +283,7 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
     z-index: 200;
     background: var($surface);
     border: 1px solid var($border-on-surface);
-    border-radius: 6px;
+    border-radius: vars.$border-radius-sm;
     padding: 8px 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     min-width: 150px;

@@ -204,6 +204,7 @@ onMounted(async () => {
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
+@import "@/styles/vars";
 
 .alarm-error {
   background-color: var($error);
@@ -246,7 +247,7 @@ onMounted(async () => {
 
 .notice-status-display {
   font-size: 2em;
-  border-radius: 1.5em;
+  border-radius: $border-radius-pill;
   padding: 0.1em;
 }
 

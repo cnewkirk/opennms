@@ -132,10 +132,11 @@ const emitUpdate = () => emit('update:modelValue', JSON.parse(JSON.stringify(loc
 <style lang="scss" scoped>
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
+@import "@/styles/vars";
 
 .dashlet-row {
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: $border-radius-surface;
   overflow: hidden;
 }
 
@@ -157,7 +158,7 @@ const emitUpdate = () => emit('update:modelValue', JSON.parse(JSON.stringify(loc
   @include typo.caption();
   background: var($primary);
   color: var($primary-text-on-color);
-  border-radius: 0.75rem;
+  border-radius: $border-radius-pill;
   padding: 0.1rem 0.6rem;
   white-space: nowrap;
   flex-shrink: 0;
@@ -200,7 +201,7 @@ const emitUpdate = () => emit('update:modelValue', JSON.parse(JSON.stringify(loc
 .type-select {
   @include typo.body-large();
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: $border-radius-surface;
   padding: 0.4rem 0.75rem;
   background: var($surface);
   color: var($primary-text-on-surface);

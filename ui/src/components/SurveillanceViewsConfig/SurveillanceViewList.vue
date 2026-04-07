@@ -75,6 +75,7 @@ const DeleteIcon = markRaw(Delete)
 <style lang="scss" scoped>
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
+@import "@/styles/vars";
 
 .view-list {
   border-right: 1px solid var($border-on-surface);
@@ -135,7 +136,7 @@ const DeleteIcon = markRaw(Delete)
   @include typo.caption();
   background: var($primary);
   color: var($primary-text-on-color);
-  border-radius: 0.75rem;
+  border-radius: $border-radius-pill;
   padding: 0 0.5rem;
   white-space: nowrap;
 }

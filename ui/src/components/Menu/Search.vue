@@ -264,6 +264,7 @@ const onKeyDown = async (event: KeyboardEvent) => {
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/themes/variables";
+@import "@/styles/vars";
 
 .onms-search-control-wrapper {
   position: relative;
@@ -277,7 +278,7 @@ const onKeyDown = async (event: KeyboardEvent) => {
   width: 100%;
   background: var($surface);
   border: 1px solid var($secondary);
-  border-radius: 4px;
+  border-radius: $border-radius-surface;
   max-height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -318,7 +319,7 @@ const onKeyDown = async (event: KeyboardEvent) => {
   width: 100%;
   background-color: var($surface);
   border: 1px solid var($border-light-on-surface);
-  border-radius: 4px;
+  border-radius: $border-radius-surface;
 
   .search-icon {
     position: absolute;
