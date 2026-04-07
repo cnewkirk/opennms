@@ -163,7 +163,21 @@ export const groupLinks = (links: NormalizedLink[]): GroupedLink[] => {
   })
 }
 
+/** Build a map of ifIndex → interface name from any port string that embeds "(ifindex:N)". */
+const buildIfIndexMap = (data: NodeEnlinkdData): Map<number, string> => {
+  const map = new Map<number, string>()
+  const extract = (port: string) => {
+    const name = cleanName(port)
+    const m = port.match(/ifindex:(\d+)/i)
+    if (m && name && name !== port) map.set(Number(m[1]), name)
+  }
+  data.lldpLinkNodes.forEach(l => extract(l.lldpLocalPort))
+  data.ospfLinkNodes.forEach(l => { if (l.ospfLocalPort) extract(l.ospfLocalPort) })
+  return map
+}
+
 export const normalizeLinks = (data: NodeEnlinkdData): NormalizedLink[] => {
+  const ifIndexMap = buildIfIndexMap(data)
   const out: NormalizedLink[] = []
 
   for (const l of data.lldpLinkNodes)
@@ -176,7 +190,7 @@ export const normalizeLinks = (data: NodeEnlinkdData): NormalizedLink[] => {
     out.push({ protocol: 'OSPF', localPort: cleanName(l.ospfLocalPort ?? '—'), remoteNode: cleanName(l.ospfRemRouterId), remotePort: cleanName(l.ospfRemPort) })
 
   for (const l of data.isisLinkNodes)
-    out.push({ protocol: 'IS-IS', localPort: String(l.isisCircIfIndex), remoteNode: cleanName(l.isisISAdjNeighSysID), remotePort: cleanName(l.isisISAdjNeighPort) })
+    out.push({ protocol: 'IS-IS', localPort: ifIndexMap.get(l.isisCircIfIndex) ?? String(l.isisCircIfIndex), remoteNode: cleanName(l.isisISAdjNeighSysID), remotePort: cleanName(l.isisISAdjNeighPort) })
 
   for (const l of data.bridgeLinkNodes)
     for (const r of l.bridgeLinkRemoteNodes)

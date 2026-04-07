@@ -213,3 +213,47 @@ describe('groupLinks deduplication', () => {
     expect(result[0].protocols).toEqual(['LLDP'])
   })
 })
+
+describe('IS-IS ifindex resolution', () => {
+  test('IS-IS link resolves interface index to name from LLDP data', () => {
+    const data: NodeEnlinkdData = {
+      lldpLinkNodes: [{
+        lldpLocalPort: 'eth1(ifindex:2)(macAddress:9a36b76e31bd)', lldpLocalPortUrl: '',
+        lldpRemChassisId: '', lldpRemChassisIdUrl: '',
+        lldpRemInfo: 'spine-01', ldpRemPort: 'eth1',
+        lldpCreateTime: '', lldpLastPollTime: ''
+      }],
+      isisLinkNodes: [{
+        isisCircIfIndex: 2, isisCircAdminState: 'on',
+        isisISAdjNeighSysID: 'spine-01', isisISAdjNeighSysType: 'l1',
+        isisISAdjNeighSNPAAddress: '', isisISAdjNeighPort: 'eth1',
+        isisISAdjState: 'up', isisISAdjNbrExtendedCircID: 0,
+        isisISAdjUrl: '', isisLinkCreateTime: '', isisLinkLastPollTime: ''
+      }],
+      ospfLinkNodes: [], cdpLinkNodes: [], bridgeLinkNodes: [],
+      lldpElementNode: null, ospfElementNode: null, isisElementNode: null
+    }
+    const grouped = groupLinks(normalizeLinks(data))
+    expect(grouped).toHaveLength(1)
+    expect(grouped[0].localPort).toBe('eth1')
+    expect(grouped[0].protocols).toContain('LLDP')
+    expect(grouped[0].protocols).toContain('IS-IS')
+  })
+
+  test('IS-IS link falls back to index string when no ifindex map entry exists', () => {
+    const data: NodeEnlinkdData = {
+      lldpLinkNodes: [],
+      isisLinkNodes: [{
+        isisCircIfIndex: 5, isisCircAdminState: 'on',
+        isisISAdjNeighSysID: 'router-x', isisISAdjNeighSysType: 'l1',
+        isisISAdjNeighSNPAAddress: '', isisISAdjNeighPort: 'eth0',
+        isisISAdjState: 'up', isisISAdjNbrExtendedCircID: 0,
+        isisISAdjUrl: '', isisLinkCreateTime: '', isisLinkLastPollTime: ''
+      }],
+      ospfLinkNodes: [], cdpLinkNodes: [], bridgeLinkNodes: [],
+      lldpElementNode: null, ospfElementNode: null, isisElementNode: null
+    }
+    const result = normalizeLinks(data)
+    expect(result[0].localPort).toBe('5')
+  })
+})
