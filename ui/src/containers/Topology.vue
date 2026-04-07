@@ -15,14 +15,17 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import TopologyToolbar from '@/components/Topology/TopologyToolbar.vue'
 import TopologyGraph from '@/components/Topology/TopologyGraph.vue'
 import { useTopologyStore } from '@/stores/topologyStore'
+import { useWeathermapStore } from '@/stores/weathermapStore'
 import { useMenuStore } from '@/stores/menuStore'
 import { BreadCrumb } from '@/types'
 
 const store = useTopologyStore()
+const wmStore = useWeathermapStore()
 const menuStore = useMenuStore()
 
 const graphRef = ref<InstanceType<typeof TopologyGraph> | null>(null)
@@ -39,6 +42,17 @@ onMounted(async () => {
     store.loadAlarmSeverities(),
     store.loadUserDefinedLinks()
   ])
+  // Start weathermap after topology has loaded vertices/edges
+  await wmStore.start(store.vertices, store.edges)
+})
+
+// Re-start weathermap when topology layer selection changes
+watch(() => store.edges, async (edges) => {
+  await wmStore.start(store.vertices, edges)
+}, { deep: false })
+
+onBeforeUnmount(() => {
+  wmStore.stop()
 })
 </script>
 
