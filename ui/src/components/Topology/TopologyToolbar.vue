@@ -59,8 +59,7 @@
 
       <select
         class="topology-toolbar__interval"
-        :value="wmStore.pollInterval"
-        @change="(e) => wmStore.setPollInterval(Number((e.target as HTMLSelectElement).value))"
+        v-model.number="intervalModel"
         title="Auto-refresh interval"
       >
         <option v-for="opt in INTERVAL_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
@@ -78,7 +77,7 @@ import { FeatherInput } from '@featherds/input'
 import { FeatherButton } from '@featherds/button'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { useWeathermapStore } from '@/stores/weathermapStore'
-import { useDebounceFn } from '@vueuse/core'
+import { useDebounceFn, useNow } from '@vueuse/core'
 import { getProtocolColor } from './protocolColors'
 
 const emit = defineEmits<{
@@ -86,7 +85,9 @@ const emit = defineEmits<{
   'reset-layout': []
 }>()
 
+const store = useTopologyStore()
 const wmStore = useWeathermapStore()
+const now = useNow({ interval: 5000 })
 
 const INTERVAL_OPTIONS = [
   { label: '30s',  value: 30 },
@@ -98,13 +99,16 @@ const INTERVAL_OPTIONS = [
 const wmStatusText = computed(() => {
   if (wmStore.error) return 'Weathermap unavailable'
   if (!wmStore.lastUpdated) return ''
-  const secs = Math.round((Date.now() - wmStore.lastUpdated.getTime()) / 1000)
+  const secs = Math.round((now.value.getTime() - wmStore.lastUpdated.getTime()) / 1000)
   if (secs < 5) return 'Updated just now'
   if (secs < 120) return `Updated ${secs}s ago`
   return `Updated ${Math.round(secs / 60)}m ago`
 })
 
-const store = useTopologyStore()
+const intervalModel = computed({
+  get: () => wmStore.pollInterval,
+  set: (v: number) => wmStore.setPollInterval(v)
+})
 
 const presentProtocols = computed<string[]>(() => {
   const seen = new Set<string>()
