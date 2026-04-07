@@ -69,6 +69,35 @@
         {{ wmStatusText }}
       </span>
     </div>
+
+    <div class="topology-toolbar__edge-labels" ref="edgeLabelPanelRef">
+      <button
+        type="button"
+        class="topology-toolbar__chip"
+        :class="{ active: edgeLabelPanelOpen }"
+        @click="edgeLabelPanelOpen = !edgeLabelPanelOpen"
+      >Edge Labels ▾</button>
+      <div v-if="edgeLabelPanelOpen" class="topology-toolbar__edge-label-panel">
+        <label class="topology-toolbar__edge-label-row">
+          <input type="checkbox" v-model="elStore.showUtilization"> Utilization
+        </label>
+        <label class="topology-toolbar__edge-label-row">
+          <input type="checkbox" v-model="elStore.showLocalPort"> Local Port
+        </label>
+        <label class="topology-toolbar__edge-label-row">
+          <input type="checkbox" v-model="elStore.showRemotePort"> Remote Port
+        </label>
+        <label class="topology-toolbar__edge-label-row">
+          <input type="checkbox" v-model="elStore.showIp"> IP Addresses
+        </label>
+        <label class="topology-toolbar__edge-label-row">
+          <input type="checkbox" v-model="elStore.showMac"> MAC Address
+        </label>
+        <label class="topology-toolbar__edge-label-row">
+          <input type="checkbox" v-model="elStore.showSpeed"> Speed
+        </label>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -77,8 +106,9 @@ import { FeatherInput } from '@featherds/input'
 import { FeatherButton } from '@featherds/button'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { useWeathermapStore } from '@/stores/weathermapStore'
-import { useDebounceFn, useNow } from '@vueuse/core'
+import { useDebounceFn, useNow, onClickOutside } from '@vueuse/core'
 import { getProtocolColor } from './protocolColors'
+import { useEdgeLabelStore } from '@/stores/edgeLabelStore'
 
 const emit = defineEmits<{
   'save-layout': []
@@ -87,6 +117,10 @@ const emit = defineEmits<{
 
 const store = useTopologyStore()
 const wmStore = useWeathermapStore()
+const elStore = useEdgeLabelStore()
+const edgeLabelPanelOpen = ref(false)
+const edgeLabelPanelRef = ref<HTMLElement | null>(null)
+onClickOutside(edgeLabelPanelRef, () => { edgeLabelPanelOpen.value = false })
 const now = useNow({ interval: 5000 })
 
 const INTERVAL_OPTIONS = [
@@ -235,6 +269,39 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
     white-space: nowrap;
 
     &.error { color: var($error); }
+  }
+
+  &__edge-labels {
+    position: relative;
+    padding-top: 8px;
+  }
+
+  &__edge-label-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 200;
+    background: var($surface);
+    border: 1px solid var($border-on-surface);
+    border-radius: 6px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    min-width: 150px;
+  }
+
+  &__edge-label-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var($primary-text-on-surface);
+    padding: 3px 0;
+    cursor: pointer;
+    white-space: nowrap;
+
+    input[type='checkbox'] {
+      cursor: pointer;
+    }
   }
 }
 </style>
