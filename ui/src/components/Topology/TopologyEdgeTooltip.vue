@@ -48,10 +48,40 @@
         ↑ {{ formatBitsPerSec(tooltip.util.inBps) }}bps &nbsp; ↓ {{ formatBitsPerSec(tooltip.util.outBps) }}bps
       </span>
     </div>
+    <div
+      v-if="tooltip.labelData && (tooltip.labelData.localIfName || tooltip.labelData.remotePortId || tooltip.labelData.localIp || tooltip.labelData.remoteIp || tooltip.labelData.localMac || tooltip.labelData.ifSpeed)"
+      class="edge-tooltip__label-data"
+    >
+      <div
+        v-if="tooltip.labelData.localIfName || tooltip.labelData.remotePortId"
+        class="edge-tooltip__field"
+      >
+        <span class="edge-tooltip__field-name">Port</span>
+        <span>{{ tooltip.labelData.localIfName && tooltip.labelData.remotePortId
+          ? `${tooltip.labelData.localIfName} ↔ ${tooltip.labelData.remotePortId}`
+          : (tooltip.labelData.localIfName ?? tooltip.labelData.remotePortId) }}</span>
+      </div>
+      <div
+        v-if="tooltip.labelData.localIp || tooltip.labelData.remoteIp"
+        class="edge-tooltip__field"
+      >
+        <span class="edge-tooltip__field-name">IP</span>
+        <span>{{ [tooltip.labelData.localIp, tooltip.labelData.remoteIp].filter(Boolean).join(' ↔ ') }}</span>
+      </div>
+      <div v-if="tooltip.labelData.localMac" class="edge-tooltip__field">
+        <span class="edge-tooltip__field-name">MAC</span>
+        <span>{{ tooltip.labelData.localMac }}</span>
+      </div>
+      <div v-if="tooltip.labelData.ifSpeed" class="edge-tooltip__field">
+        <span class="edge-tooltip__field-name">Speed</span>
+        <span>{{ formatBitsPerSec(tooltip.labelData.ifSpeed) }}bps</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { EdgeLabelData } from '@/stores/weathermapStore'
 import { getProtocolColor, utilizationColor, formatBitsPerSec } from './protocolColors'
 
 export interface EdgeTooltipState {
@@ -61,6 +91,7 @@ export interface EdgeTooltipState {
   srcLabel: string
   tgtLabel: string
   util?: { utilPct: number; inBps: number; outBps: number } | null
+  labelData?: EdgeLabelData | null
 }
 
 defineProps<{ tooltip: EdgeTooltipState | null }>()
@@ -130,6 +161,31 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
     font-size: 0.72rem;
     color: var($secondary-text-on-surface);
     white-space: nowrap;
+  }
+
+  &__label-data {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var($border-on-surface);
+  }
+
+  &__field {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.72rem;
+    padding: 1px 0;
+    color: var($secondary-text-on-surface);
+
+    &-name {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var($primary-text-on-surface);
+      min-width: 40px;
+      flex-shrink: 0;
+    }
   }
 }
 </style>
