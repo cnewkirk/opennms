@@ -26,6 +26,11 @@
     </div>
   </div>
   <div class="feather-row">
+    <div class="feather-col-12 outages-page__controls">
+      <PerspectiveToggle />
+    </div>
+  </div>
+  <div class="feather-row">
     <div class="feather-col-12">
       <div class="card">
         <OutagesListTable />
@@ -37,6 +42,7 @@
 <script setup lang="ts">
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import OutagesListTable from '@/components/Outages/OutagesListTable.vue'
+import PerspectiveToggle from '@/components/Common/PerspectiveToggle.vue'
 import { useMenuStore } from '@/stores/menuStore'
 import { type BreadCrumb } from '@/types'
 
@@ -52,4 +58,5 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 <style scoped lang="scss">
 @import "@featherds/styles/themes/variables";
 .card { background: var($surface); padding: 0; margin-bottom: 16px; border-radius: 4px; }
+.outages-page__controls { padding: 8px 0 4px; }
 </style>

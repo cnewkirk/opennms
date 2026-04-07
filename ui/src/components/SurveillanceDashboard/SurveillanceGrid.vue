@@ -42,7 +42,8 @@
             :class="[
               cellClass(grid[ri][ci].worstSeverity),
               { 'cell-empty': grid[ri][ci].nodeCount === 0 },
-              { 'cell-selected': selectedRow === ri && selectedCol === ci }
+              { 'cell-selected': selectedRow === ri && selectedCol === ci },
+              { 'cell-dimmed': props.dimHealthy && grid[ri][ci].worstSeverity === 'NORMAL' && grid[ri][ci].downCount === 0 }
             ]"
             @click="onCellClick(ri, ci)"
           >
@@ -68,6 +69,7 @@ const props = defineProps<{
   grid: CellData[][]
   selectedRow: number | null
   selectedCol: number | null
+  dimHealthy?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -175,5 +177,10 @@ const cellClass = (severity: Severity): string => {
   .sev-minor    { background: #ef6c00; color: #fff; }
   .sev-major    { background: #c62828; color: #fff; }
   .sev-critical { background: #6a1b9a; color: #fff; }
+
+  .cell-dimmed {
+    opacity: 0.35;
+    pointer-events: none;
+  }
 }
 </style>

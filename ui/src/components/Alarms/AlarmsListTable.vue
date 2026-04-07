@@ -104,6 +104,7 @@
     </div>
 
     <template v-else>
+      <div class="alarms-list__table-wrap">
       <table class="alarms-list__table">
         <thead>
           <tr>
@@ -194,6 +195,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- Pagination -->
       <div class="alarms-list__pagination">
@@ -217,8 +219,10 @@ import { getAlarms, modifyAlarm } from '@/services/alarmService'
 import { type Alarm, type QueryParameters, type AlarmQueryParameters } from '@/types'
 import useSnackbar from '@/composables/useSnackbar'
 import { loadAlarmPreferences, saveAlarmPreferences } from '@/services/localStorageService'
+import { usePerspectiveStore } from '@/stores/perspectiveStore'
 
 const router = useRouter()
+const perspectiveStore = usePerspectiveStore()
 const { showSnackBar } = useSnackbar()
 
 const COLUMN_DEFS = [
@@ -290,21 +294,23 @@ const page      = ref(0)
 const sortField = ref('lastEventTime')
 const sortDesc  = ref(true)
 
-// Filters
-const selectedSeverities = ref<string[]>([...DEFAULT_SEVERITIES])
-const ackStatus  = ref<'all' | 'unacked' | 'acked'>('unacked')
+// Filters — initialized based on current perspective
+const selectedSeverities = ref<string[]>(perspectiveStore.isProblems ? [...DEFAULT_SEVERITIES] : [...ALL_SEVERITIES])
+const ackStatus  = ref<'all' | 'unacked' | 'acked'>(perspectiveStore.isProblems ? 'unacked' : 'all')
 const nodeSearch = ref('')
 const timeRange  = ref<'24h' | '7d' | '30d' | 'all'>('all')
 
 let searchDebounce: ReturnType<typeof setTimeout> | null = null
 
-const hasActiveFilters = computed(() =>
-  selectedSeverities.value.length !== DEFAULT_SEVERITIES.length ||
-  DEFAULT_SEVERITIES.some(s => !selectedSeverities.value.includes(s)) ||
-  ackStatus.value !== 'unacked' ||
-  nodeSearch.value.trim() !== '' ||
-  timeRange.value !== 'all'
-)
+const hasActiveFilters = computed(() => {
+  const cleanSeverities = perspectiveStore.isProblems ? DEFAULT_SEVERITIES : ALL_SEVERITIES
+  const cleanAck = perspectiveStore.isProblems ? 'unacked' : 'all'
+  return selectedSeverities.value.length !== cleanSeverities.length ||
+    cleanSeverities.some(s => !selectedSeverities.value.includes(s)) ||
+    ackStatus.value !== cleanAck ||
+    nodeSearch.value.trim() !== '' ||
+    timeRange.value !== 'all'
+})
 
 const buildCriteria = (): string => {
   const parts: string[] = []
@@ -401,6 +407,21 @@ watch(nodeSearch, () => {
     load()
   }, 300)
 })
+
+watch(
+  () => perspectiveStore.perspective,
+  (p) => {
+    if (p === 'problems') {
+      ackStatus.value = 'unacked'
+      selectedSeverities.value = [...DEFAULT_SEVERITIES]
+    } else {
+      ackStatus.value = 'all'
+      selectedSeverities.value = [...ALL_SEVERITIES]
+    }
+    page.value = 0
+    load()
+  }
+)
 
 const closeColumnMenu = () => { showColumnMenu.value = false }
 
@@ -575,8 +596,12 @@ onMounted(() => {
     padding: 0;
   }
 
+  &__table-wrap {
+    overflow-x: auto;
+  }
+
   &__table {
-    width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
 
     th, td {
@@ -669,7 +694,8 @@ onMounted(() => {
     display: flex;
     align-items: baseline;
     gap: 0;
-    width: 280px;
+    min-width: 200px;
+    max-width: 320px;
     overflow: hidden;
     white-space: nowrap;
   }

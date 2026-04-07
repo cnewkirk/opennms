@@ -19,11 +19,15 @@ either express or implied.  See the License for the specific
 language governing permissions and limitations under the
 License.
 -->
-
 <template>
   <div class="feather-row">
     <div class="feather-col-12">
       <BreadCrumbs :items="breadcrumbs" />
+    </div>
+  </div>
+  <div class="feather-row">
+    <div class="feather-col-12 alarms-page__controls">
+      <PerspectiveToggle />
     </div>
   </div>
   <div class="feather-row">
@@ -38,6 +42,7 @@ License.
 <script setup lang="ts">
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import AlarmsListTable from '@/components/Alarms/AlarmsListTable.vue'
+import PerspectiveToggle from '@/components/Common/PerspectiveToggle.vue'
 import { useMenuStore } from '@/stores/menuStore'
 import { type BreadCrumb } from '@/types'
 
@@ -53,4 +58,5 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 <style scoped lang="scss">
 @import "@featherds/styles/themes/variables";
 .card { background: var($surface); padding: 0; margin-bottom: 16px; border-radius: 4px; }
+.alarms-page__controls { padding: 8px 0 4px; }
 </style>

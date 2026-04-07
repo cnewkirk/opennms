@@ -47,12 +47,13 @@ const editCategoriesUrl = computed(
 
 <style lang="scss" scoped>
 @import "@featherds/styles/themes/variables";
+@import "@featherds/styles/mixins/elevation";
 
 .card {
-  background: var(--feather-surface);
+  @include elevation(2);
   padding: 16px;
   margin-bottom: 16px;
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 .category-panel {

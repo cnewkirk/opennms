@@ -64,6 +64,7 @@
     </div>
 
     <template v-else>
+      <div class="outages-list__table-wrap">
       <table class="outages-list__table">
         <thead>
           <tr>
@@ -122,6 +123,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- Pagination -->
       <div class="outages-list__pagination">
@@ -140,8 +142,10 @@ import { useRouter } from 'vue-router'
 import { getOutages } from '@/services/outageService'
 import { type Outage } from '@/types'
 import { SORT } from '@featherds/table'
+import { usePerspectiveStore } from '@/stores/perspectiveStore'
 
 const router = useRouter()
+const perspectiveStore = usePerspectiveStore()
 
 const STATUS_OPTIONS = [
   { label: 'Current', value: 'current' as const },
@@ -159,7 +163,7 @@ const page       = ref(0)
 const sortField  = ref('ifLostService')
 const sortDesc   = ref(true)
 
-const statusFilter = ref<'current' | 'all'>('current')
+const statusFilter = ref<'current' | 'all'>(perspectiveStore.isProblems ? 'current' : 'all')
 const nodeSearch   = ref('')
 
 let searchDebounce: ReturnType<typeof setTimeout> | null = null
@@ -227,6 +231,15 @@ watch(nodeSearch, () => {
     load()
   }, 300)
 })
+
+watch(
+  () => perspectiveStore.perspective,
+  (p) => {
+    statusFilter.value = p === 'problems' ? 'current' : 'all'
+    page.value = 0
+    load()
+  }
+)
 
 onUnmounted(() => {
   if (searchDebounce) clearTimeout(searchDebounce)
@@ -339,8 +352,12 @@ onMounted(() => load())
     color: var($primary-text-on-surface);
   }
 
+  &__table-wrap {
+    overflow-x: auto;
+  }
+
   &__table {
-    width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
 
     th, td {

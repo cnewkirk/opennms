@@ -26,6 +26,7 @@
     <div class="page-header">
       <h1 class="page-title">Surveillance Dashboard</h1>
       <div class="header-actions">
+        <PerspectiveToggle />
         <FeatherSelect
           v-if="allViews.length > 1"
           :options="viewOptions"
@@ -58,6 +59,7 @@
         :grid="data.grid"
         :selectedRow="selectedRow"
         :selectedCol="selectedCol"
+        :dimHealthy="perspectiveStore.isProblems"
         @cellClick="onCellClick"
       />
 
@@ -81,6 +83,8 @@ import { FeatherSelect, ISelectItemType } from '@featherds/select'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import SurveillanceGrid from '@/components/SurveillanceDashboard/SurveillanceGrid.vue'
 import SurveillanceCellDetail from '@/components/SurveillanceDashboard/SurveillanceCellDetail.vue'
+import PerspectiveToggle from '@/components/Common/PerspectiveToggle.vue'
+import { usePerspectiveStore } from '@/stores/perspectiveStore'
 import {
   fetchDashboardData,
   fetchConfig,
@@ -90,6 +94,8 @@ import {
   type SurveillanceOutage
 } from '@/services/surveillanceDashboardService'
 import useSnackbar from '@/composables/useSnackbar'
+
+const perspectiveStore = usePerspectiveStore()
 
 const { showSnackBar } = useSnackbar()
 
