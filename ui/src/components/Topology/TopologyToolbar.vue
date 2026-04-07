@@ -133,6 +133,7 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .topology-toolbar {
@@ -220,7 +221,7 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
 
   &__interval {
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     border: 1px solid var($border-on-surface);
     background: var($surface);
     color: var($primary-text-on-surface);

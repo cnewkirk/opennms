@@ -91,6 +91,7 @@ defineExpose({ refresh: load })
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/typography";
 
@@ -109,7 +110,7 @@ defineExpose({ refresh: load })
   align-items: center;
   justify-content: center;
   padding: 24px 16px;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   border: 1px solid var($border-light-on-surface);
   background: var($surface);
   gap: 8px;

@@ -253,11 +253,12 @@ onMounted(render)
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .graph-card {
   border: 1px solid var($border-light-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   background: var($surface);
   overflow: hidden;
 

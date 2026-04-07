@@ -163,13 +163,14 @@ const onSave = () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/typography";
 
 .snmp-collection-form {
   padding: 1.5rem;
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   background: var($surface);
 }
 

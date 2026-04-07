@@ -333,6 +333,7 @@ async function onRemoveEdge(edgeId: number) {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
 
@@ -427,7 +428,7 @@ async function onRemoveEdge(edgeId: number) {
 .status-chip {
   display: inline-block;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;

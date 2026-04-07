@@ -114,6 +114,7 @@ watch(dialogOpen, (val) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .generate-events-dialog {
@@ -132,7 +133,7 @@ watch(dialogOpen, (val) => {
   font-size: 0.8rem;
   padding: 0.75rem;
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   background: var($surface);
   color: var($primary-text-on-surface);
   resize: vertical;

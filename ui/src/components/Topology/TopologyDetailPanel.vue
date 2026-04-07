@@ -455,6 +455,7 @@ const isisLinks = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@/styles/severities";
 
@@ -493,7 +494,7 @@ const isisLinks = computed(() => {
     font-size: 1rem;
     color: var($secondary-text-on-surface);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     line-height: 1;
 
     &:hover {

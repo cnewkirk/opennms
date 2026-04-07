@@ -23,6 +23,7 @@ defineProps({
 </script>
   
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/themes/variables";
 
@@ -32,7 +33,7 @@ defineProps({
   margin-bottom: 15px;
   background: var($background);
   border: 1px solid var($border-light-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
 
   .link {
     color: var($clickable-normal);

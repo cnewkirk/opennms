@@ -127,6 +127,7 @@ const deselectAll = () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
 
@@ -154,7 +155,7 @@ const deselectAll = () => {
 
 .mbean-list {
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   max-height: 60vh;
   overflow-y: auto;
 }

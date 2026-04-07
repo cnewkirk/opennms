@@ -87,13 +87,14 @@ defineEmits<{
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/typography";
 
 .widget-frame {
   background: var($surface);
   border: 1px solid var($border-light-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -130,7 +131,7 @@ defineEmits<{
   border: none;
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   color: var($secondary-text-on-surface);
   display: flex;
   align-items: center;

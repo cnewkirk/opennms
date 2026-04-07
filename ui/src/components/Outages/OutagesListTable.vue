@@ -249,6 +249,7 @@ onMounted(() => load())
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/typography";
 
@@ -278,7 +279,7 @@ onMounted(() => load())
   &__seg-group {
     display: flex;
     border: 1px solid var($border-light-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     overflow: hidden;
   }
 
@@ -302,7 +303,7 @@ onMounted(() => load())
     @include body-large;
     background: var($surface);
     border: 1px solid var($border-light-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     padding: 4px 10px;
     color: var($primary-text-on-surface);
     width: 100%;
@@ -318,7 +319,7 @@ onMounted(() => load())
 
   &__skeleton-row {
     height: 36px;
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     background: var($shade-4);
     animation: shimmer 1.4s infinite;
   }
@@ -336,7 +337,7 @@ onMounted(() => load())
     @include body-small;
     background: none;
     border: 1px solid var($primary);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     padding: 4px 10px;
     cursor: pointer;
     color: var($primary);
@@ -416,7 +417,7 @@ onMounted(() => load())
       @include body-small;
       background: none;
       border: 1px solid var($border-light-on-surface);
-      border-radius: 4px;
+      border-radius: vars.$border-radius-surface;
       padding: 4px 12px;
       cursor: pointer;
       color: var($primary-text-on-surface);

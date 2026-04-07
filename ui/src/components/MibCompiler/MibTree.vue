@@ -140,6 +140,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
 
@@ -188,7 +189,7 @@ onUnmounted(() => {
   padding: 0.25rem 0.5rem;
   cursor: pointer;
   user-select: none;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
 
   &:hover {
     background: var($shade-4);
@@ -207,7 +208,7 @@ onUnmounted(() => {
   z-index: 10000;
   background: var($surface);
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   min-width: 180px;
   padding: 0.25rem 0;

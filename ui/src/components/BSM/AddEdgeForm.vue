@@ -234,12 +234,13 @@ function submit() {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
 
 .add-edge-form {
   border: 1px solid var($border-on-surface);
-  border-radius: 8px;
+  border-radius: vars.$border-radius-surface;
   padding: 1rem;
   margin-top: 1rem;
   display: flex;
@@ -255,7 +256,7 @@ function submit() {
 
 .picker-results {
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   max-height: 160px;
   overflow-y: auto;
   background: var($surface);

@@ -139,6 +139,7 @@ watch(() => nodeStructureStore.columns, (newColumns) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
@@ -172,7 +173,7 @@ watch(() => nodeStructureStore.columns, (newColumns) => {
   padding-left: 10px;
   padding-top: 3px;
   padding-bottom: 3px;
-  border-radius: 5px;
+  border-radius: vars.$border-radius-surface;
 }
 
 .column-header {

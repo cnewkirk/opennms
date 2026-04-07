@@ -18,12 +18,13 @@ watch(() => props.collapsed, (v) => { isOpen.value = !v })
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/elevation";
 
 .collapsible-section {
   @include elevation(2);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   padding: 0;
   margin-bottom: 16px;
   overflow: hidden;

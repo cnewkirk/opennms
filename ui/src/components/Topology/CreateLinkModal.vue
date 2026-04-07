@@ -174,6 +174,7 @@ const submit = () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .create-link-overlay {
@@ -214,7 +215,7 @@ const submit = () => {
     font-size: 1.4rem;
     color: var($secondary-text-on-surface);
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     line-height: 1;
 
     &:hover {
@@ -255,7 +256,7 @@ const submit = () => {
   &__select {
     appearance: auto;
     padding: 8px 12px;
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     border: 1px solid var($border-on-surface);
     background: var($background);
     color: var($primary-text-on-surface);

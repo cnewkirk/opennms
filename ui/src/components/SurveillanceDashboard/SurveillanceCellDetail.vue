@@ -96,13 +96,14 @@ const nodeClass = (nodeId: number): string => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/typography";
 
 .cell-detail {
   margin-top: 1.5rem;
   border: 1px solid var($border-light-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   background: var($surface);
   padding: 1rem 1.25rem;
 }
@@ -150,7 +151,7 @@ const nodeClass = (nodeId: number): string => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.375rem 0.5rem;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   background: var($surface);
 
   &--down     { background: rgba(198,40,40,0.08); }

@@ -430,11 +430,12 @@ div.user-notification-badge-wrapper {
 </style>
 
 <style lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/open-mixins";
 @import "@featherds/styles/themes/variables";
 
 body .feather-menu .feather-menu-dropdown {
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
 
   .feather-dropdown {
     border: 1px solid rgba(0, 0, 0, .35);

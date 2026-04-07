@@ -468,6 +468,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables' as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@featherds/styles/themes/variables";
@@ -506,7 +507,7 @@ onMounted(() => {
   &__seg-group {
     display: flex;
     border: 1px solid var($border-light-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     overflow: hidden;
   }
 
@@ -530,7 +531,7 @@ onMounted(() => {
     @include body-large;
     background: var($surface);
     border: 1px solid var($border-light-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     padding: 4px 10px;
     color: var($primary-text-on-surface);
     width: 100%;
@@ -546,7 +547,7 @@ onMounted(() => {
 
   &__skeleton-row {
     height: 36px;
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     background: var($shade-4);
     animation: shimmer 1.4s infinite;
   }
@@ -564,7 +565,7 @@ onMounted(() => {
     @include body-small;
     background: none;
     border: 1px solid var($primary);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     padding: 4px 10px;
     cursor: pointer;
     color: var($primary);
@@ -647,7 +648,7 @@ onMounted(() => {
     @include body-small;
     background: none;
     border: 1px solid var($border-light-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     padding: 4px 10px;
     cursor: pointer;
     color: var($primary-text-on-surface);
@@ -662,7 +663,7 @@ onMounted(() => {
     z-index: 1000;
     background: var($surface);
     border: 1px solid var($border-light-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     padding: 8px 0;
     min-width: 160px;
@@ -813,7 +814,7 @@ onMounted(() => {
       @include body-small;
       background: none;
       border: 1px solid var($border-light-on-surface);
-      border-radius: 4px;
+      border-radius: vars.$border-radius-surface;
       padding: 4px 12px;
       cursor: pointer;
       color: var($primary-text-on-surface);

@@ -206,6 +206,7 @@ function highlightTableText() {
   scoped
   lang="scss"
 >
+@use '@/styles/vars' as vars;
 @import "@featherds/table/scss/table";
 #wrap {
   height: calc(100% - 29px);
@@ -241,7 +242,7 @@ function highlightTableText() {
     background: var(--feather-shade-4);
     color: var(--feather-primary-text-on-surface);
     border: 1px solid var(--feather-border-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     padding: 4px 10px;
     font-size: 0.75rem;
     font-weight: 500;
