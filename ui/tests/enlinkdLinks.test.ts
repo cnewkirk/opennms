@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { normalizeLinks, groupLinks } from '@/services/enlinkdService'
+import { normalizeLinks, groupLinks, cleanName } from '@/services/enlinkdService'
 import type { NodeEnlinkdData, NormalizedLink } from '@/services/enlinkdService'
 
 describe('normalizeLinks', () => {
@@ -171,5 +171,45 @@ describe('groupLinks', () => {
 
   test('returns empty array for no links', () => {
     expect(groupLinks([])).toEqual([])
+  })
+})
+
+describe('cleanName', () => {
+  test('strips ifindex and macAddress suffixes', () => {
+    expect(cleanName('eth0(ifindex:4)(macAddress:72dd31972111)')).toBe('eth0')
+  })
+
+  test('strips router id suffix', () => {
+    expect(cleanName('spine-02(router id:10.255.0.12)')).toBe('spine-02')
+  })
+
+  test('strips IS-IS SysID suffix', () => {
+    expect(cleanName('spine-01(ISSysID:00010aff000b)')).toBe('spine-01')
+  })
+
+  test('strips OSPF interface metadata', () => {
+    expect(cleanName('eth1()(ifindex:2)(10.101.1.2)')).toBe('eth1')
+  })
+
+  test('leaves plain names unchanged', () => {
+    expect(cleanName('eth0')).toBe('eth0')
+    expect(cleanName('leaf-03')).toBe('leaf-03')
+  })
+
+  test('returns original if entirely parenthesized (e.g. IS-IS index)', () => {
+    expect(cleanName('2')).toBe('2')
+  })
+})
+
+describe('groupLinks deduplication', () => {
+  test('multiple records for same port and protocol collapse to one badge', () => {
+    const links: NormalizedLink[] = [
+      { protocol: 'LLDP', localPort: 'eth0', remoteNode: 'leaf-03', remotePort: 'eth0' },
+      { protocol: 'LLDP', localPort: 'eth0', remoteNode: 'leaf-03', remotePort: 'eth0' },
+      { protocol: 'LLDP', localPort: 'eth0', remoteNode: 'leaf-03', remotePort: 'eth0' },
+    ]
+    const result = groupLinks(links)
+    expect(result).toHaveLength(1)
+    expect(result[0].protocols).toEqual(['LLDP'])
   })
 })

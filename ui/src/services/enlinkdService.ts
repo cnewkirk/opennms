@@ -134,6 +134,12 @@ export interface GroupedLink {
   protocols: NormalizedLink['protocol'][]
 }
 
+/** Strip "(ifindex:N)(macAddress:...)" and similar metadata, keeping just the base name. */
+export const cleanName = (s: string): string => {
+  const base = s.split('(')[0].trim()
+  return base.length > 0 ? base : s
+}
+
 const PROTOCOL_PRIORITY: NormalizedLink['protocol'][] = ['LLDP', 'CDP', 'OSPF', 'IS-IS', 'Bridge']
 
 export const groupLinks = (links: NormalizedLink[]): GroupedLink[] => {
@@ -152,7 +158,7 @@ export const groupLinks = (links: NormalizedLink[]): GroupedLink[] => {
       localPort: best.localPort,
       remoteNode: best.remoteNode,
       remotePort: best.remotePort,
-      protocols: sorted.map(l => l.protocol)
+      protocols: [...new Set(sorted.map(l => l.protocol))]
     }
   })
 }
@@ -161,20 +167,20 @@ export const normalizeLinks = (data: NodeEnlinkdData): NormalizedLink[] => {
   const out: NormalizedLink[] = []
 
   for (const l of data.lldpLinkNodes)
-    out.push({ protocol: 'LLDP', localPort: l.lldpLocalPort, remoteNode: l.lldpRemInfo, remotePort: l.ldpRemPort })
+    out.push({ protocol: 'LLDP', localPort: cleanName(l.lldpLocalPort), remoteNode: cleanName(l.lldpRemInfo), remotePort: cleanName(l.ldpRemPort) })
 
   for (const l of data.cdpLinkNodes)
-    out.push({ protocol: 'CDP', localPort: l.cdpLocalPort, remoteNode: l.cdpCacheDevice, remotePort: l.cdpCacheDevicePort })
+    out.push({ protocol: 'CDP', localPort: cleanName(l.cdpLocalPort), remoteNode: cleanName(l.cdpCacheDevice), remotePort: cleanName(l.cdpCacheDevicePort) })
 
   for (const l of data.ospfLinkNodes)
-    out.push({ protocol: 'OSPF', localPort: l.ospfLocalPort ?? '—', remoteNode: l.ospfRemRouterId, remotePort: l.ospfRemPort })
+    out.push({ protocol: 'OSPF', localPort: cleanName(l.ospfLocalPort ?? '—'), remoteNode: cleanName(l.ospfRemRouterId), remotePort: cleanName(l.ospfRemPort) })
 
   for (const l of data.isisLinkNodes)
-    out.push({ protocol: 'IS-IS', localPort: String(l.isisCircIfIndex), remoteNode: l.isisISAdjNeighSysID, remotePort: l.isisISAdjNeighPort })
+    out.push({ protocol: 'IS-IS', localPort: String(l.isisCircIfIndex), remoteNode: cleanName(l.isisISAdjNeighSysID), remotePort: cleanName(l.isisISAdjNeighPort) })
 
   for (const l of data.bridgeLinkNodes)
     for (const r of l.bridgeLinkRemoteNodes)
-      out.push({ protocol: 'Bridge', localPort: l.bridgeLocalPort, remoteNode: r.bridgeRemote, remotePort: r.bridgeRemotePort })
+      out.push({ protocol: 'Bridge', localPort: cleanName(l.bridgeLocalPort), remoteNode: cleanName(r.bridgeRemote), remotePort: cleanName(r.bridgeRemotePort) })
 
   return out
 }
