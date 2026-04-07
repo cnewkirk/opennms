@@ -52,6 +52,7 @@ const filteredGroups = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .resource-accordion {
@@ -60,7 +61,7 @@ const filteredGroups = computed(() => {
     box-sizing: border-box;
     padding: 8px 12px;
     border: 1px solid var($border-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     background: var($surface);
     color: var($primary-text-on-surface);
     font-size: 0.875rem;

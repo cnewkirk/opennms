@@ -116,6 +116,7 @@ defineExpose({ loadChart })
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .query-builder {
@@ -124,7 +125,7 @@ defineExpose({ loadChart })
     grid-template-columns: 200px 200px 1fr;
     min-height: 480px;
     border: 1px solid var($border-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     overflow: hidden;
   }
 
@@ -145,7 +146,7 @@ defineExpose({ loadChart })
     padding: 10px;
     background: none;
     border: 1.5px dashed var($border-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     color: var($clickable-normal);
     cursor: pointer;
     font-size: 0.875rem;

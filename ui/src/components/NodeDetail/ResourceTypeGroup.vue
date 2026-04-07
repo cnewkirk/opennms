@@ -74,11 +74,12 @@ const toggleResource = (resourceId: string) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .type-group {
   border: 1px solid var($border-light-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   overflow: hidden;
 
   & + & { margin-top: 8px; }

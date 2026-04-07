@@ -190,6 +190,7 @@ onUnmounted(() => chartInstance?.destroy())
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables' as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@featherds/styles/themes/variables";
@@ -206,7 +207,7 @@ onUnmounted(() => chartInstance?.destroy())
   &__chart-wrap { height: 200px; margin-top: 12px; }
 }
 .avail-card {
-  border-radius: 8px;
+  border-radius: vars.$border-radius-surface;
   padding: 10px 16px;
   min-width: 120px;
   text-align: center;

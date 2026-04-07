@@ -176,12 +176,13 @@ const doSave = () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/elevation";
 
 .custom-chart {
   @include elevation(1);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   overflow: hidden;
   margin-bottom: 16px;
 

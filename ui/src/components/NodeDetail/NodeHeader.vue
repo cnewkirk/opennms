@@ -46,13 +46,14 @@ const statusClass = computed(() => props.node.type === 'A' ? 'status-badge--up' 
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .node-header {
   padding: 12px 16px;
   background: var($surface);
   margin-bottom: 16px;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
 
   &__title {
     display: flex;

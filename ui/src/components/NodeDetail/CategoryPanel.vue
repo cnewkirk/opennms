@@ -46,6 +46,7 @@ const editCategoriesUrl = computed(
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/elevation";
 
@@ -53,7 +54,7 @@ const editCategoriesUrl = computed(
   @include elevation(2);
   padding: 16px;
   margin-bottom: 16px;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
 }
 
 .category-panel {
