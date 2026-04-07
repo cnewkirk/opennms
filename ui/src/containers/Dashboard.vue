@@ -117,6 +117,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/typography";
 
@@ -156,7 +157,7 @@ onMounted(() => {
   right: 0;
   background: var($surface);
   border: 1px solid var($border-light-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 100;
   min-width: 160px;

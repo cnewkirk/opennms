@@ -160,6 +160,7 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/mixins/elevation";
@@ -168,7 +169,7 @@ onMounted(async () => {
   @include elevation(2);
   padding: 16px;
   margin-bottom: 16px;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
 
   &__section-title { margin-bottom: 12px; }
 }

@@ -582,6 +582,7 @@ const deleteMemo = async (type: 'sticky' | 'journal') => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/utils';
 @use '@featherds/styles/themes/variables' as fvars;
 @import "@featherds/styles/themes/variables";
@@ -593,7 +594,7 @@ const deleteMemo = async (type: 'sticky' | 'journal') => {
   @include elevation(2);
   padding: 16px;
   margin-bottom: 16px;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
 
   &__section-title {
     margin-bottom: 12px;
@@ -690,7 +691,7 @@ const deleteMemo = async (type: 'sticky' | 'journal') => {
     box-sizing: border-box;
     padding: 8px;
     border: 1px solid var($border-on-surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     background: var($surface);
     color: var($primary-text-on-surface);
     font-family: inherit;

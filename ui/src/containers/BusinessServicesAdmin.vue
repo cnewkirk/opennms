@@ -235,6 +235,7 @@ async function doReload() {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
 
@@ -272,7 +273,7 @@ async function doReload() {
   padding: 2rem;
   text-align: center;
   border: 1px dashed var($border-on-surface);
-  border-radius: 8px;
+  border-radius: vars.$border-radius-surface;
 }
 
 .services-table {
@@ -310,7 +311,7 @@ async function doReload() {
 .status-chip {
   display: inline-block;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;

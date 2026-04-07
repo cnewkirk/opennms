@@ -256,6 +256,7 @@ const pollUntilDone = async (
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
 
@@ -276,7 +277,7 @@ const pollUntilDone = async (
   flex: 1;
   min-height: 0;
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   overflow: hidden;
 }
 

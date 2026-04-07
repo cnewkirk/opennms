@@ -150,6 +150,7 @@ onMounted(loadData)
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
 @import "@featherds/styles/themes/variables";
 
@@ -177,7 +178,7 @@ onMounted(loadData)
   display: flex;
   flex: 1;
   border: 1px solid var($border-on-surface);
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
   overflow: hidden;
   min-height: 0;
 }

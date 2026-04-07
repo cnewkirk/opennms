@@ -157,6 +157,7 @@ const nodeResourceKey = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
 .node-detail {
@@ -191,7 +192,7 @@ const nodeResourceKey = computed(() => {
 
   &__card {
     background: var($surface);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     margin-bottom: 16px;
     padding: 16px;
   }
