@@ -1,17 +1,28 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { TopologyVertex, TopologyEdge } from '@/types/topology'
+import { SnmpInterface } from '@/types'
 import {
   fetchNodeSnmpIfaces, fetchNodeType,
-  fetchInterfaceUtilization, pickBestInterface,
+  fetchInterfaceUtilization, pickBestInterface, fetchNodeIpInterfaces,
   InterfaceUtil
 } from '@/services/measurementsService'
+import { getNodeEnlinkd, cleanName, NodeEnlinkdData } from '@/services/enlinkdService'
 
 export interface EdgeUtil {
   inBps: number
   outBps: number
   utilPct: number
   ifSpeed: number
+}
+
+export interface EdgeLabelData {
+  localIfName?: string    // ifName/ifDescr of local connecting interface
+  remotePortId?: string   // remote port from LLDP (ldpRemPort after cleanName)
+  localIp?: string        // primary IP of source node (snmpPrimary === 'P')
+  remoteIp?: string       // primary IP of target node
+  localMac?: string       // physAddr of local interface
+  ifSpeed?: number        // link speed in bits/sec
 }
 
 /** Stable canonical key for an edge between two nodes. */
@@ -31,6 +42,7 @@ export const computeUtilPct = (inBps: number, outBps: number, ifSpeed: number): 
 export const useWeathermapStore = defineStore('weathermapStore', () => {
   const edgeUtilMap  = ref<Record<string, EdgeUtil>>({})
   const nodeDownMap  = ref<Record<number, boolean>>({})
+  const edgeLabelData = ref<Record<string, EdgeLabelData>>({})
   const loading      = ref(false)
   const error        = ref<string | null>(null)
   const pollInterval = ref(60)   // seconds; 0 = disabled
@@ -57,29 +69,37 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
       nodeIds.add(e.target.id)
     }
 
-    // Fetch SNMP interfaces and node type for each node in parallel
+    // Fetch SNMP interfaces, node type, IP interfaces, and LLDP enlinkd data for each node
     const nodeResults = await Promise.allSettled(
       Array.from(nodeIds).map(async (nodeId) => {
-        const [ifaces, type] = await Promise.all([
+        const [ifaces, type, ipIfaces, enlinkd] = await Promise.all([
           fetchNodeSnmpIfaces(nodeId),
-          fetchNodeType(nodeId)
+          fetchNodeType(nodeId),
+          fetchNodeIpInterfaces(nodeId),
+          getNodeEnlinkd(nodeId)
         ])
-        return { nodeId, ifaces, type }
+        return { nodeId, ifaces, type, ipIfaces, enlinkd }
       })
     )
 
-    // Build nodeSnmpMap and nodeDownMap from results
     const nodeSnmpMap: Record<number, ReturnType<typeof pickBestInterface>> = {}
+    const nodeAllIfacesMap: Record<number, SnmpInterface[]> = {}
+    const nodeIpMap: Record<number, string | undefined> = {}
+    const nodeEnlinkdMap: Record<number, NodeEnlinkdData | null> = {}
     const downMap: Record<number, boolean> = {}
 
     for (const result of nodeResults) {
       if (result.status !== 'fulfilled') continue
-      const { nodeId, ifaces, type } = result.value
+      const { nodeId, ifaces, type, ipIfaces, enlinkd } = result.value
       nodeSnmpMap[nodeId] = pickBestInterface(ifaces)
+      nodeAllIfacesMap[nodeId] = ifaces
       downMap[nodeId] = type !== null && type !== 'A'
+      const primary = ipIfaces.find(ip => ip.snmpPrimary === 'P')
+      nodeIpMap[nodeId] = primary?.ipAddress
+      nodeEnlinkdMap[nodeId] = enlinkd
     }
 
-    // Fetch utilization for each edge in parallel
+    // Fetch utilization for each edge in parallel (unchanged logic)
     const edgeResults = await Promise.allSettled(
       edges.map(async (e) => {
         const key = edgeKey(e.source.id, e.target.id)
@@ -96,7 +116,6 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
       })
     )
 
-    // Build new edgeUtilMap
     const utilMap: Record<string, EdgeUtil> = {}
     for (const result of edgeResults) {
       if (result.status !== 'fulfilled') continue
@@ -110,9 +129,63 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
       }
     }
 
-    edgeUtilMap.value = utilMap
-    nodeDownMap.value = downMap
-    lastUpdated.value = new Date()
+    // Build edgeLabelData — IP + LLDP port correlation per edge
+    const labelMap: Record<string, EdgeLabelData> = {}
+    for (const e of edges) {
+      const key = edgeKey(e.source.id, e.target.id)
+      const srcId = e.source.id
+      const tgtId = e.target.id
+      const data: EdgeLabelData = {}
+
+      // Primary IPs from IP interface list
+      data.localIp  = nodeIpMap[srcId]
+      data.remoteIp = nodeIpMap[tgtId]
+
+      // LLDP correlation: find the link on srcId that connects to the target node
+      const enlinkd = nodeEnlinkdMap[srcId]
+      const targetLabel = _activeVertices.find(v => v.id === String(tgtId))?.label
+      if (enlinkd && targetLabel) {
+        const lldpLink = enlinkd.lldpLinkNodes.find(l =>
+          cleanName(l.lldpRemInfo).toLowerCase() === targetLabel.toLowerCase()
+        )
+        if (lldpLink) {
+          // Extract ifindex from the local port string to find the exact SNMP interface
+          const ifIndexMatch = lldpLink.lldpLocalPort.match(/ifindex:(\d+)/i)
+          if (ifIndexMatch) {
+            const ifIdx = Number(ifIndexMatch[1])
+            const localIface = nodeAllIfacesMap[srcId]?.find(i => i.ifIndex === ifIdx)
+            if (localIface) {
+              data.localIfName = localIface.ifName ?? localIface.ifDescr ?? undefined
+              data.localMac    = localIface.physAddr ?? undefined
+              data.ifSpeed     = localIface.ifSpeed > 0 ? localIface.ifSpeed : undefined
+            }
+          } else {
+            // No ifindex embedded in port string — use cleaned name directly
+            const cleaned = cleanName(lldpLink.lldpLocalPort)
+            data.localIfName = cleaned || undefined
+          }
+          const remotePort = cleanName(lldpLink.ldpRemPort)
+          data.remotePortId = remotePort || undefined
+        }
+      }
+
+      // Fallback: if LLDP gave us no interface info, use the best SNMP interface for speed/MAC
+      if (!data.localIfName) {
+        const best = nodeSnmpMap[srcId]
+        if (best) {
+          data.localIfName = best.ifName ?? best.ifDescr ?? undefined
+          data.localMac    = best.physAddr ?? undefined
+          data.ifSpeed     = best.ifSpeed > 0 ? best.ifSpeed : undefined
+        }
+      }
+
+      labelMap[key] = data
+    }
+
+    edgeUtilMap.value   = utilMap
+    nodeDownMap.value   = downMap
+    edgeLabelData.value = labelMap
+    lastUpdated.value   = new Date()
   }
 
   const refresh = async () => {
@@ -147,7 +220,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
   }
 
   return {
-    edgeUtilMap, nodeDownMap, loading, error, pollInterval, lastUpdated,
+    edgeUtilMap, nodeDownMap, edgeLabelData, loading, error, pollInterval, lastUpdated,
     start, stop, refresh, setPollInterval
   }
 })
