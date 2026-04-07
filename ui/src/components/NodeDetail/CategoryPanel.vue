@@ -83,8 +83,10 @@ const editCategoriesUrl = computed(
 
 .chip {
   background: var(--feather-shade-4);
+  border: 1px solid var(--feather-border-on-surface);
   border-radius: 16px;
   padding: 2px 12px;
   font-size: 0.85rem;
+  color: var(--feather-primary-text-on-surface);
 }
 </style>

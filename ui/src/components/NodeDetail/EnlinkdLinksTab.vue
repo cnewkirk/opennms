@@ -121,4 +121,12 @@ onMounted(async () => {
   &--isis    { background: #fce7f3; color: #9d174d; }
   &--bridge  { background: #ede9fe; color: #5b21b6; }
 }
+
+:global(html.open-dark) {
+  .links-badge--lldp   { background: rgba(59,  130, 246, 0.2); color: #93c5fd; }
+  .links-badge--cdp    { background: rgba(234, 179,   8, 0.2); color: #fde047; }
+  .links-badge--ospf   { background: rgba(16,  185, 129, 0.2); color: #6ee7b7; }
+  .links-badge--isis   { background: rgba(236,  72, 153, 0.2); color: #f9a8d4; }
+  .links-badge--bridge { background: rgba(139,  92, 246, 0.2); color: #c4b5fd; }
+}
 </style>
