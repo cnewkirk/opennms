@@ -45,8 +45,8 @@
             label="Type"
             :options="reduceFnOptions"
             textProp="name"
-            :modelValue="selectedReduceFn"
-            @update:modelValue="onReduceFnChange"
+            :modelValue="(selectedReduceFn as any)"
+            @update:modelValue="(v: any) => onReduceFnChange(v)"
           />
           <FeatherInput
             v-if="form['reduce-function'].type === 'Threshold'"
@@ -60,7 +60,7 @@
             label="Threshold Status"
             :options="STATUS_OPTIONS"
             textProp="label"
-            :modelValue="selectedThresholdStatus"
+            :modelValue="(selectedThresholdStatus as any)"
             @update:modelValue="(v: any) => { form['reduce-function'].properties['threshold'] = v?.value; selectedThresholdStatus = v }"
           />
           <FeatherInput
@@ -158,7 +158,7 @@ import { FeatherInput } from '@featherds/input'
 import { FeatherSelect } from '@featherds/select'
 import { FeatherSpinner } from '@featherds/progress'
 import { FeatherIcon } from '@featherds/icon'
-import Close from '@featherds/icon/navigation/Close'
+import Close from '@featherds/icon/navigation/Cancel'
 import Add from '@featherds/icon/action/Add'
 import Delete from '@featherds/icon/action/Delete'
 import AddEdgeForm from './AddEdgeForm.vue'

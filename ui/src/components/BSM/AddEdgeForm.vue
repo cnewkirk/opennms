@@ -28,8 +28,8 @@
       label="Edge Type"
       :options="EDGE_TYPE_OPTIONS"
       textProp="label"
-      :modelValue="selectedTypeOption"
-      @update:modelValue="onTypeChange"
+      :modelValue="(selectedTypeOption as any)"
+      @update:modelValue="(v: any) => onTypeChange(v)"
     />
 
     <!-- IP Service fields -->
@@ -65,9 +65,9 @@
     <template v-else-if="form.type === 'child'">
       <FeatherSelect
         label="Child Business Service"
-        :options="childOptions"
+        :options="(childOptions as any)"
         textProp="name"
-        :modelValue="selectedChildOption"
+        :modelValue="(selectedChildOption as any)"
         @update:modelValue="(v: any) => { form.childId = v?.id ?? undefined; selectedChildOption = v }"
       />
     </template>
@@ -78,7 +78,7 @@
         label="Application"
         :options="appOptions"
         textProp="applicationName"
-        :modelValue="selectedAppOption"
+        :modelValue="(selectedAppOption as any)"
         @update:modelValue="(v: any) => { form.applicationId = v?.id ?? undefined; selectedAppOption = v }"
       />
     </template>
@@ -88,8 +88,8 @@
       label="Map Function"
       :options="mapFnOptions"
       textProp="name"
-      :modelValue="selectedMapFn"
-      @update:modelValue="onMapFnChange"
+      :modelValue="(selectedMapFn as any)"
+      @update:modelValue="(v: any) => onMapFnChange(v)"
     />
 
     <!-- SetTo status parameter -->
@@ -98,7 +98,7 @@
       label="Set To Status"
       :options="STATUS_OPTIONS"
       textProp="label"
-      :modelValue="selectedSetToStatus"
+      :modelValue="(selectedSetToStatus as any)"
       @update:modelValue="(v: any) => { form.mapFunction.properties['status'] = v?.value; selectedSetToStatus = v }"
     />
 
