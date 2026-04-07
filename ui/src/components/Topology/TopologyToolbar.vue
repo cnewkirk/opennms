@@ -47,6 +47,29 @@
         Reset Layout
       </FeatherButton>
     </div>
+
+    <div class="topology-toolbar__weathermap">
+      <button
+        type="button"
+        class="topology-toolbar__chip"
+        :disabled="wmStore.loading"
+        title="Refresh weathermap data"
+        @click="wmStore.refresh()"
+      >{{ wmStore.loading ? '…' : '↺' }} Weathermap</button>
+
+      <select
+        class="topology-toolbar__interval"
+        :value="wmStore.pollInterval"
+        @change="(e) => wmStore.setPollInterval(Number((e.target as HTMLSelectElement).value))"
+        title="Auto-refresh interval"
+      >
+        <option v-for="opt in INTERVAL_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+      </select>
+
+      <span v-if="wmStatusText" class="topology-toolbar__wm-status" :class="{ error: !!wmStore.error }">
+        {{ wmStatusText }}
+      </span>
+    </div>
   </div>
 </template>
 
@@ -54,6 +77,7 @@
 import { FeatherInput } from '@featherds/input'
 import { FeatherButton } from '@featherds/button'
 import { useTopologyStore } from '@/stores/topologyStore'
+import { useWeathermapStore } from '@/stores/weathermapStore'
 import { useDebounceFn } from '@vueuse/core'
 import { getProtocolColor } from './protocolColors'
 
@@ -61,6 +85,24 @@ const emit = defineEmits<{
   'save-layout': []
   'reset-layout': []
 }>()
+
+const wmStore = useWeathermapStore()
+
+const INTERVAL_OPTIONS = [
+  { label: '30s',  value: 30 },
+  { label: '1m',   value: 60 },
+  { label: '5m',   value: 300 },
+  { label: 'Off',  value: 0 },
+]
+
+const wmStatusText = computed(() => {
+  if (wmStore.error) return 'Weathermap unavailable'
+  if (!wmStore.lastUpdated) return ''
+  const secs = Math.round((Date.now() - wmStore.lastUpdated.getTime()) / 1000)
+  if (secs < 5) return 'Updated just now'
+  if (secs < 120) return `Updated ${secs}s ago`
+  return `Updated ${Math.round(secs / 60)}m ago`
+})
 
 const store = useTopologyStore()
 
@@ -162,6 +204,32 @@ const onSearch = useDebounceFn((val: string | number | undefined) => {
     gap: 4px;
     margin-left: auto;
     padding-top: 8px;
+  }
+
+  &__weathermap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 8px;
+    margin-left: 8px;
+  }
+
+  &__interval {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var($border-on-surface);
+    background: var($surface);
+    color: var($primary-text-on-surface);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  &__wm-status {
+    font-size: 0.72rem;
+    color: var($secondary-text-on-surface);
+    white-space: nowrap;
+
+    &.error { color: var($error); }
   }
 }
 </style>
