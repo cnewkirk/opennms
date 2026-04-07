@@ -117,7 +117,6 @@ const panelSpec = computed(() => ({
     queries: props.queries.map(q => ({ kind: OpenNMSPlugin.kind, spec: q })),
     yAxis: props.yAxisLabel ? { label: props.yAxisLabel } : undefined,
     visual: props.seriesOverrides ? { seriesOverrides: props.seriesOverrides } : undefined,
-    legend: { position: 'bottom' as const, mode: 'list' as const }
   }
 }))
 

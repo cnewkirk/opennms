@@ -81,13 +81,72 @@ export interface IsisElem {
   isisLastPollTime: string
 }
 
+export interface CdpLink {
+  cdpLocalPort: string
+  cdpLocalPortUrl: string
+  cdpCacheDevice: string
+  cdpCacheDeviceUrl: string
+  cdpCacheDevicePort: string
+  cdpCacheDevicePortUrl: string
+  cdpCachePlatform: string
+  cdpCreateTime: string
+  cdpLastPollTime: string
+}
+
+export interface BridgeRemote {
+  bridgeRemote: string
+  bridgeRemoteUrl: string
+  bridgeRemotePort: string
+  bridgeRemotePortUrl: string
+}
+
+export interface BridgeLink {
+  bridgeLocalPort: string
+  bridgeLocalPortUrl: string
+  bridgeLinkRemoteNodes: BridgeRemote[]
+  bridgeInfo: string
+  bridgeLinkCreateTime: string
+  bridgeLinkLastPollTime: string
+}
+
 export interface NodeEnlinkdData {
   lldpLinkNodes: LldpLink[]
   ospfLinkNodes: OspfLink[]
   isisLinkNodes: IsisLink[]
+  cdpLinkNodes: CdpLink[]
+  bridgeLinkNodes: BridgeLink[]
   lldpElementNode: LldpElem | null
   ospfElementNode: OspfElem | null
   isisElementNode: IsisElem | null
+}
+
+export interface NormalizedLink {
+  protocol: 'LLDP' | 'OSPF' | 'IS-IS' | 'CDP' | 'Bridge'
+  localPort: string
+  remoteNode: string
+  remotePort: string
+}
+
+export const normalizeLinks = (data: NodeEnlinkdData): NormalizedLink[] => {
+  const out: NormalizedLink[] = []
+
+  for (const l of data.lldpLinkNodes)
+    out.push({ protocol: 'LLDP', localPort: l.lldpLocalPort, remoteNode: l.lldpRemInfo, remotePort: l.ldpRemPort })
+
+  for (const l of data.cdpLinkNodes)
+    out.push({ protocol: 'CDP', localPort: l.cdpLocalPort, remoteNode: l.cdpCacheDevice, remotePort: l.cdpCacheDevicePort })
+
+  for (const l of data.ospfLinkNodes)
+    out.push({ protocol: 'OSPF', localPort: l.ospfLocalPort ?? '—', remoteNode: l.ospfRemRouterId, remotePort: l.ospfRemPort })
+
+  for (const l of data.isisLinkNodes)
+    out.push({ protocol: 'IS-IS', localPort: String(l.isisCircIfIndex), remoteNode: l.isisISAdjNeighSysID, remotePort: l.isisISAdjNeighPort })
+
+  for (const l of data.bridgeLinkNodes)
+    for (const r of l.bridgeLinkRemoteNodes)
+      out.push({ protocol: 'Bridge', localPort: l.bridgeLocalPort, remoteNode: r.bridgeRemote, remotePort: r.bridgeRemotePort })
+
+  return out
 }
 
 export const getNodeEnlinkd = async (nodeId: number): Promise<NodeEnlinkdData | null> => {
@@ -99,6 +158,8 @@ export const getNodeEnlinkd = async (nodeId: number): Promise<NodeEnlinkdData | 
       lldpLinkNodes: d.lldpLinkNodes ?? [],
       ospfLinkNodes: d.ospfLinkNodes ?? [],
       isisLinkNodes: d.isisLinkNodes ?? [],
+      cdpLinkNodes: d.cdpLinkNodes ?? [],
+      bridgeLinkNodes: d.bridgeLinkNodes ?? [],
       lldpElementNode: d.lldpElementNode ?? null,
       ospfElementNode: d.ospfElementNode ?? null,
       isisElementNode: d.isisElementNode ?? null
