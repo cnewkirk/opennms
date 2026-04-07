@@ -32,6 +32,7 @@ export const pickBestInterface = (ifaces: SnmpInterface[]): SnmpInterface | null
  */
 export const fetchNodeSnmpIfaces = async (nodeId: number): Promise<SnmpInterface[]> => {
   try {
+    // limit=100 is intentional: weathermap needs all interfaces up-front, not paginated
     const resp = await v2.get(`/nodes/${nodeId}/snmpinterfaces?limit=100`)
     if (resp.status === 204) return []
     const data: SnmpInterfaceApiResponse = resp.data
