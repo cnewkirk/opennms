@@ -63,7 +63,9 @@ const legacyToVueRoutes: Record<string, string> = {
   'admin/wallboardConfig.jsp':         'ui/index.html#/wallboard-config',
   'admin/surveillanceViewsConfig.jsp':    'ui/index.html#/surveillance-views-config',
   'admin/manageSnmpCollections.jsp':      'ui/index.html#/snmp-collections-config',
-  'vaadin-wallboard':                     'ui/index.html#/wallboard-config'
+  'vaadin-wallboard':                     'ui/index.html#/wallboard-config',
+  'admin/bsm/adminpage.jsp':             'ui/index.html#/bsm-admin',
+  'admin/manageEvents.jsp':              'ui/index.html#/event-config'
 }
 
 const getMenuLink = (menuItem: MenuItem) => {

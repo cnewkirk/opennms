@@ -156,6 +156,22 @@ const router = createRouter({
       }
     },
     {
+      path: '/bsm-admin',
+      name: 'BusinessServicesAdmin',
+      component: () => import('@/containers/BusinessServicesAdmin.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'No role access to BSM admin.' })
+            router.push(from.path)
+          }
+        }
+
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/map',
       name: 'Map',
       component: () => import('@/containers/Map.vue'),
