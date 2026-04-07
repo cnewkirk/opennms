@@ -124,7 +124,7 @@ public class DataCollectionGroupsResource {
 
     @PUT
     @Path("{filename: [^/]+}")
-    @Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Save a data collection group file", operationId = "saveDataCollectionGroupFile")
     public Response saveGroupFile(@PathParam("filename") String filename,
@@ -238,7 +238,9 @@ public class DataCollectionGroupsResource {
 
     /** Visible for testing. */
     public static boolean isValidFilename(String filename) {
-        return filename != null && filename.matches("[a-zA-Z0-9._-]+");
+        // Must start with alphanumeric, contain only safe chars, and end in .xml.
+        // Rejects leading dots (e.g. "..xml") and any path traversal attempt.
+        return filename != null && filename.matches("[a-zA-Z0-9][a-zA-Z0-9._-]*\\.xml");
     }
 
     static File getDatacollectionDir() {

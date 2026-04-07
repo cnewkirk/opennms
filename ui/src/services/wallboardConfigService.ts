@@ -53,6 +53,10 @@ const BASE = 'wallboard-config'
 // JAXB serializes collection element names from @XmlElement(name="...") so the
 // JSON keys differ from the Java getter names. Normalize here so Vue components
 // can use natural property names.
+//
+// parameters: StringMapAdapter serializes Map<String,String> as
+//   { "entry": [ { "key": "k", "value": "v" } ] }  (JaxbMap shape)
+// ParametersTable expects Record<string,string>, so we convert both ways.
 const normalizeConfig = (raw: any): WallboardsConfig => ({
   wallboards: (raw.wallboard ?? []).map((wb: any) => ({
     title: wb.title ?? '',
@@ -64,7 +68,9 @@ const normalizeConfig = (raw: any): WallboardsConfig => ({
       priority: d.priority ?? 5,
       boostDuration: d.boostDuration ?? 0,
       boostPriority: d.boostPriority ?? 0,
-      parameters: d.parameters ?? {}
+      parameters: Object.fromEntries(
+        (d.parameters?.entry ?? []).map((e: any) => [e.key ?? '', e.value ?? ''])
+      ) as Record<string, string>
     }))
   }))
 })
@@ -80,7 +86,10 @@ const denormalizeConfig = (config: WallboardsConfig): any => ({
       priority: d.priority,
       boostDuration: d.boostDuration,
       boostPriority: d.boostPriority,
-      parameters: d.parameters
+      // Re-wrap as JaxbMap so Jackson/JAXB can unmarshal back to Map<String,String>
+      parameters: {
+        entry: Object.entries(d.parameters).map(([key, value]) => ({ key, value }))
+      }
     }))
   }))
 })
