@@ -289,6 +289,11 @@ onMounted(async () => {
   endpoints.value = results
   loading.value = false
 
+  // Auto-expand problem rows; green rows stay collapsed by default
+  for (const ep of results) {
+    if (ep.isDown) expanded[ep.key] = true
+  }
+
   // Lazy-load services for each IP endpoint
   for (const ep of results) {
     if (ep.ipAddress) {
