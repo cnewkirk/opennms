@@ -425,6 +425,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     })
 
     applySeverityClasses()
+    applyWeathermapStyles()
+    applyNodeDownStyles()
     runLayout()
   }
 
@@ -448,6 +450,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         if (!util) {
           // revert to protocol color if data disappears
           edge.removeClass('weathermap')
+          edge.data('wmLabel', '')
           edge.style('line-color', edge.data('color'))
           edge.style('width', 3)
           return
@@ -485,8 +488,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
   watch(() => store.alarmSeverity, applySeverityClasses, { deep: true })
 
-  watch(() => wmStore.edgeUtilMap, applyWeathermapStyles, { deep: true })
-  watch(() => wmStore.nodeDownMap, applyNodeDownStyles, { deep: true })
+  watch(() => wmStore.edgeUtilMap, applyWeathermapStyles)
+  watch(() => wmStore.nodeDownMap, applyNodeDownStyles)
 
   watch(() => store.focusTarget, (nodeID) => {
     if (!cy || !nodeID) return
