@@ -93,27 +93,29 @@ public class DataCollectionGroupsResource {
     // ── Get raw XML ───────────────────────────────────────────────────────────
 
     @GET
-    @Path("{filename}")
-    @Produces(MediaType.TEXT_XML)
-    @Operation(summary = "Get raw XML content of a data collection group file", operationId = "getDataCollectionGroupFile")
+    @Path("{filename: [^/]+}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get XML content of a data collection group file", operationId = "getDataCollectionGroupFile")
     public Response getGroupFile(@PathParam("filename") String filename,
                                   @Context SecurityContext secCtx) {
         if (!secCtx.isUserInRole(Authentication.ROLE_ADMIN)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        if (!isValidFilename(filename)) {
+        // CXF strips .xml extension for content-negotiation; re-append it
+        String resolvedName = filename.endsWith(".xml") ? filename : filename + ".xml";
+        if (!isValidFilename(resolvedName)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("error", "Invalid filename")).build();
         }
-        File f = new File(getDatacollectionDir(), filename);
+        File f = new File(getDatacollectionDir(), resolvedName);
         if (!f.exists()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         try {
             String xml = Files.readString(f.toPath(), StandardCharsets.UTF_8);
-            return Response.ok(xml, MediaType.TEXT_XML).build();
+            return Response.ok(Map.of("filename", resolvedName, "content", xml)).build();
         } catch (IOException e) {
-            LOG.error("Failed to read group file {}", filename, e);
+            LOG.error("Failed to read group file {}", resolvedName, e);
             return Response.serverError().entity(Map.of("error", e.getMessage())).build();
         }
     }
@@ -121,8 +123,8 @@ public class DataCollectionGroupsResource {
     // ── Save (create or overwrite) ────────────────────────────────────────────
 
     @PUT
-    @Path("{filename}")
-    @Consumes(MediaType.TEXT_XML)
+    @Path("{filename: [^/]+}")
+    @Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Save a data collection group file", operationId = "saveDataCollectionGroupFile")
     public Response saveGroupFile(@PathParam("filename") String filename,
@@ -131,7 +133,8 @@ public class DataCollectionGroupsResource {
         if (!secCtx.isUserInRole(Authentication.ROLE_ADMIN)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        if (!isValidFilename(filename)) {
+        String resolvedName = filename.endsWith(".xml") ? filename : filename + ".xml";
+        if (!isValidFilename(resolvedName)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("error", "Invalid filename: only [a-zA-Z0-9._-] characters allowed")).build();
         }
@@ -142,13 +145,13 @@ public class DataCollectionGroupsResource {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("error", "Invalid XML: " + e.getMessage())).build();
         }
-        File dest = new File(getDatacollectionDir(), filename);
+        File dest = new File(getDatacollectionDir(), resolvedName);
         try {
             Files.writeString(dest.toPath(), xmlContent, StandardCharsets.UTF_8);
             LOG.info("Saved data collection group file {}", dest);
             return Response.ok(Map.of("savedPath", dest.getAbsolutePath())).build();
         } catch (IOException e) {
-            LOG.error("Failed to write group file {}", filename, e);
+            LOG.error("Failed to write group file {}", resolvedName, e);
             return Response.serverError().entity(Map.of("error", e.getMessage())).build();
         }
     }
@@ -156,7 +159,7 @@ public class DataCollectionGroupsResource {
     // ── Delete ────────────────────────────────────────────────────────────────
 
     @DELETE
-    @Path("{filename}")
+    @Path("{filename: [^/]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Delete a data collection group file", operationId = "deleteDataCollectionGroupFile")
     public Response deleteGroupFile(@PathParam("filename") String filename,
@@ -164,11 +167,12 @@ public class DataCollectionGroupsResource {
         if (!secCtx.isUserInRole(Authentication.ROLE_ADMIN)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        if (!isValidFilename(filename)) {
+        String resolvedName = filename.endsWith(".xml") ? filename : filename + ".xml";
+        if (!isValidFilename(resolvedName)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("error", "Invalid filename")).build();
         }
-        File f = new File(getDatacollectionDir(), filename);
+        File f = new File(getDatacollectionDir(), resolvedName);
         if (!f.exists()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -177,9 +181,9 @@ public class DataCollectionGroupsResource {
 
         try {
             Files.delete(f.toPath());
-            LOG.info("Deleted data collection group file {}", filename);
+            LOG.info("Deleted data collection group file {}", resolvedName);
         } catch (IOException e) {
-            LOG.error("Failed to delete group file {}", filename, e);
+            LOG.error("Failed to delete group file {}", resolvedName, e);
             return Response.serverError().entity(Map.of("error", e.getMessage())).build();
         }
 

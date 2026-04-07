@@ -47,22 +47,23 @@ export const listGroupFiles = async (): Promise<GroupFileMeta[]> => {
   return resp.data
 }
 
+// CXF strips .xml extensions for content-type negotiation, so we omit .xml in the URL path.
+// The server re-appends .xml when resolving the file.
+const stripXml = (filename: string) => filename.endsWith('.xml') ? filename.slice(0, -4) : filename
+
 export const getGroupFileXml = async (filename: string): Promise<string> => {
-  const resp = await v2.get<string>(`${BASE_GROUPS}/${encodeURIComponent(filename)}`, {
-    headers: { Accept: 'text/xml' },
-    responseType: 'text'
-  })
-  return resp.data
+  const resp = await v2.get<{ filename: string; content: string }>(`${BASE_GROUPS}/${encodeURIComponent(stripXml(filename))}`)
+  return resp.data.content
 }
 
 export const saveGroupFileXml = async (filename: string, xml: string): Promise<void> => {
-  await v2.put(`${BASE_GROUPS}/${encodeURIComponent(filename)}`, xml, {
-    headers: { 'Content-Type': 'text/xml' }
+  await v2.put(`${BASE_GROUPS}/${encodeURIComponent(stripXml(filename))}`, xml, {
+    headers: { 'Content-Type': 'text/plain' }
   })
 }
 
 export const deleteGroupFile = async (filename: string): Promise<void> => {
-  await v2.delete(`${BASE_GROUPS}/${encodeURIComponent(filename)}`)
+  await v2.delete(`${BASE_GROUPS}/${encodeURIComponent(stripXml(filename))}`)
 }
 
 export const getSnmpCollections = async (): Promise<SnmpCollectionsConfig> => {

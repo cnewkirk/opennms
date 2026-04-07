@@ -50,13 +50,48 @@ export type DashletType = typeof DASHLET_TYPES[number]
 
 const BASE = 'wallboard-config'
 
+// JAXB serializes collection element names from @XmlElement(name="...") so the
+// JSON keys differ from the Java getter names. Normalize here so Vue components
+// can use natural property names.
+const normalizeConfig = (raw: any): WallboardsConfig => ({
+  wallboards: (raw.wallboard ?? []).map((wb: any) => ({
+    title: wb.title ?? '',
+    default: wb.default ?? false,
+    dashlets: (wb.dashlet ?? []).map((d: any) => ({
+      dashletName: d.dashlet ?? 'Undefined',
+      title: d.title ?? '',
+      duration: d.duration ?? 15,
+      priority: d.priority ?? 5,
+      boostDuration: d.boostDuration ?? 0,
+      boostPriority: d.boostPriority ?? 0,
+      parameters: d.parameters ?? {}
+    }))
+  }))
+})
+
+const denormalizeConfig = (config: WallboardsConfig): any => ({
+  wallboard: config.wallboards.map(wb => ({
+    title: wb.title,
+    default: wb.default,
+    dashlet: wb.dashlets.map(d => ({
+      dashlet: d.dashletName,
+      title: d.title,
+      duration: d.duration,
+      priority: d.priority,
+      boostDuration: d.boostDuration,
+      boostPriority: d.boostPriority,
+      parameters: d.parameters
+    }))
+  }))
+})
+
 export const getConfig = async (): Promise<WallboardsConfig> => {
-  const resp = await v2.get<WallboardsConfig>(BASE)
-  return resp.data
+  const resp = await v2.get<any>(BASE)
+  return normalizeConfig(resp.data)
 }
 
 export const saveConfig = async (config: WallboardsConfig): Promise<void> => {
-  await v2.put(BASE, config)
+  await v2.put(BASE, denormalizeConfig(config))
 }
 
 export const makeDefaultDashlet = (): DashletEntry => ({

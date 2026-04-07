@@ -145,11 +145,28 @@ mkdir -p "${OVERLAY_DIR}/element"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/element/node.jsp" \
    "${OVERLAY_DIR}/element/node.jsp"
 
+# event/detail.jsp — redirect to Vue SPA at /#/event/:id
+mkdir -p "${OVERLAY_DIR}/event"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/WEB-INF/jsp/event/detail.jsp" \
+   "${OVERLAY_DIR}/event/detail.jsp"
+
+# manageSnmpCollections.jsp — redirect to Vue SPA at /#/snmp-collections-config
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/manageSnmpCollections.jsp" \
+   "${OVERLAY_DIR}/admin/manageSnmpCollections.jsp"
+
 
 # opennms-webapp-rest jar — rename to match base image version so COPY replaces it
+# DashboardRestService references OnmsDashboard (not in 35.0.4 base model jar), and the
+# 35.0.5-SNAPSHOT model jar requires core packages at version 36.x (not available in the
+# 35.0.4 Karaf feature repo).  Strip DashboardRestService from the jar to avoid the entire
+# cascade — we don't need it for JMX Config Generator or MIB Compiler testing.
 WEBAPP_REST_BASENAME="opennms-webapp-rest-35.0.4.jar"
 mkdir -p "${OVERLAY_DIR}/webapp-rest-lib"
 cp "${WEBAPP_REST_JAR}" "${OVERLAY_DIR}/webapp-rest-lib/${WEBAPP_REST_BASENAME}"
+zip -d "${OVERLAY_DIR}/webapp-rest-lib/${WEBAPP_REST_BASENAME}" \
+  'org/opennms/web/rest/v2/DashboardRestService.class' \
+  'org/opennms/web/rest/v2/DashboardRestService$*.class' 2>/dev/null || true
+echo "    opennms-webapp-rest.jar: OK (DashboardRestService stripped)"
 
 # Spring context XML — base image doesn't have jmxconfig in component-scan
 mkdir -p "${OVERLAY_DIR}/spring-context"
@@ -275,6 +292,12 @@ COPY --chown=10001:10001 admin/mibCompiler.jsp /opt/opennms/jetty-webapps/opennm
 
 # node.jsp — redirect to Vue SPA at /#/node/:id
 COPY --chown=10001:10001 element/node.jsp /opt/opennms/jetty-webapps/opennms/element/node.jsp
+
+# event/detail.jsp — redirect to Vue SPA at /#/event/:id
+COPY --chown=10001:10001 event/detail.jsp /opt/opennms/jetty-webapps/opennms/WEB-INF/jsp/event/detail.jsp
+
+# manageSnmpCollections.jsp — redirect to Vue SPA at /#/snmp-collections-config
+COPY --chown=10001:10001 admin/manageSnmpCollections.jsp /opt/opennms/jetty-webapps/opennms/admin/manageSnmpCollections.jsp
 
 # Patch welcome-file to index.jsp (Vue dashboard redirect) — single-line sed because
 # full web.xml overlay breaks CXF servlet mappings (source version != base image version)
