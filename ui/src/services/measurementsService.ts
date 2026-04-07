@@ -1,5 +1,5 @@
 import { rest, v2 } from './axiosInstances'
-import { SnmpInterface, SnmpInterfaceApiResponse } from '@/types'
+import { SnmpInterface, SnmpInterfaceApiResponse, IpInterface } from '@/types'
 
 export interface InterfaceUtil {
   inBps: number   // bits/sec inbound
@@ -107,5 +107,19 @@ export const fetchInterfaceUtilization = async (
     }
   } catch {
     return null
+  }
+}
+
+/**
+ * Fetch all IP interfaces for a node.
+ * Used to find the primary management IP (snmpPrimary === 'P') for edge label display.
+ */
+export const fetchNodeIpInterfaces = async (nodeId: number): Promise<IpInterface[]> => {
+  try {
+    const resp = await v2.get(`/nodes/${nodeId}/ipinterfaces?limit=100`)
+    if (resp.status === 204) return []
+    return resp.data?.ipInterface ?? []
+  } catch {
+    return []
   }
 }
