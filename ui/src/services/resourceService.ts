@@ -53,4 +53,15 @@ const getResourceForNode = async (name: string): Promise<Resource | null> => {
   }
 }
 
-export { getResources, getResourceForNode }
+const getResourceById = async (id: string): Promise<Resource | null> => {
+  try {
+    const encodedId = encodeURIComponent(id)
+    const resp = await rest.get(`${endpoint}/${encodedId}`)
+    if (resp.status === 204) return null
+    return resp.data
+  } catch {
+    return null
+  }
+}
+
+export { getResources, getResourceForNode, getResourceById }
