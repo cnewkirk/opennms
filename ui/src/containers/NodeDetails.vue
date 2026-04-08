@@ -49,7 +49,7 @@
                 :loading="availLoading"
                 :error="availError"
                 :problemsOnly="perspectiveStore.isProblems"
-                :nodeId="id"
+                :nodeId="nodeResourceKey"
                 @go-graphs="goToTab('graphs')"
               />
             </FeatherTabPanel>

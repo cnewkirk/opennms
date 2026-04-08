@@ -46,16 +46,32 @@
           >
             <div class="availability-panel__iface-header subtitle2">{{ iface.address }}</div>
             <div class="availability-panel__iface-cards">
-              <div
-                v-for="svc in iface.services"
-                :key="svc.id"
-                class="avail-card"
-                :class="[severityClass(svc.availability), { 'avail-card--clickable': isClickable }]"
-                @click="isClickable && emit('go-graphs')"
-              >
-                <div class="avail-card__name subtitle2">{{ svc.name }}</div>
-                <div class="avail-card__pct headline3">{{ formatPct(svc.availability) }}%</div>
-              </div>
+              <template v-for="svc in iface.services" :key="svc.id">
+                <ServiceGraphTooltip
+                  v-if="nodeId"
+                  :nodeId="nodeId"
+                  :ip="iface.address"
+                  :serviceName="svc.name"
+                >
+                  <div
+                    class="avail-card"
+                    :class="[severityClass(svc.availability), { 'avail-card--clickable': isClickable }]"
+                    @click="isClickable && emit('go-graphs')"
+                  >
+                    <div class="avail-card__name subtitle2">{{ svc.name }}</div>
+                    <div class="avail-card__pct headline3">{{ formatPct(svc.availability) }}%</div>
+                  </div>
+                </ServiceGraphTooltip>
+                <div
+                  v-else
+                  class="avail-card"
+                  :class="[severityClass(svc.availability), { 'avail-card--clickable': isClickable }]"
+                  @click="isClickable && emit('go-graphs')"
+                >
+                  <div class="avail-card__name subtitle2">{{ svc.name }}</div>
+                  <div class="avail-card__pct headline3">{{ formatPct(svc.availability) }}%</div>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -79,6 +95,7 @@ import { format } from 'date-fns'
 import { NodeAvailability } from '@/types'
 import { AvailabilityChartData, DownSegmentMeta } from '@/composables/useNodeAvailability'
 import ClearSummary from '@/components/Common/ClearSummary.vue'
+import ServiceGraphTooltip from './ServiceGraphTooltip.vue'
 
 Chart.register(...registerables)
 
