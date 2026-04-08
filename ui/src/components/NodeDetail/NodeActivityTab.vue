@@ -44,14 +44,22 @@ import { usePerspectiveStore } from '@/stores/perspectiveStore'
 
 const TAB_NAMES = ['alarms', 'events', 'outages', 'links'] as const
 
-const props = defineProps<{ nodeId: string; nodeLabel: string; defaultTab?: string }>()
+const props = defineProps<{ nodeId: string; nodeLabel: string; defaultSubTab?: string }>()
 
 const perspectiveStore = usePerspectiveStore()
+const route = useRoute()
+const router = useRouter()
 
-const initialTab = props.defaultTab ? Math.max(0, TAB_NAMES.indexOf(props.defaultTab as typeof TAB_NAMES[number])) : 0
+const initialTab = props.defaultSubTab
+  ? Math.max(0, TAB_NAMES.indexOf(props.defaultSubTab as typeof TAB_NAMES[number]))
+  : 0
 const activeSubTab = ref(initialTab)
 
 const visited = reactive([false, false, false, false])
 visited[initialTab] = true
-watch(activeSubTab, (idx) => { visited[idx] = true })
+
+watch(activeSubTab, (idx) => {
+  visited[idx] = true
+  router.replace({ query: { ...route.query, subtab: TAB_NAMES[idx] } })
+})
 </script>
