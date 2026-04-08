@@ -50,7 +50,8 @@
                 v-for="svc in iface.services"
                 :key="svc.id"
                 class="avail-card"
-                :class="severityClass(svc.availability)"
+                :class="[severityClass(svc.availability), { 'avail-card--clickable': isClickable }]"
+                @click="isClickable && emit('go-graphs')"
               >
                 <div class="avail-card__name subtitle2">{{ svc.name }}</div>
                 <div class="avail-card__pct headline3">{{ formatPct(svc.availability) }}%</div>
@@ -81,6 +82,8 @@ import ClearSummary from '@/components/Common/ClearSummary.vue'
 
 Chart.register(...registerables)
 
+const emit = defineEmits<{ 'go-graphs': [] }>()
+
 const props = defineProps<{
   availability: NodeAvailability | null
   chartData: AvailabilityChartData | null
@@ -88,7 +91,13 @@ const props = defineProps<{
   loading: boolean
   error: string | null
   problemsOnly?: boolean
+  /** Node ID — passed through to ServiceGraphTooltip for resource lookup */
+  nodeId?: string
+  /** Whether cards are clickable (navigate to Graphs tab). Default: true */
+  clickable?: boolean
 }>()
+
+const isClickable = computed(() => props.clickable !== false)
 
 const showAll = ref(false)
 
@@ -216,5 +225,13 @@ onUnmounted(() => chartInstance?.destroy())
   &--normal   { background: utils.alpha(fvars.$success, 0.12); border: 1px solid utils.alpha(fvars.$success, 0.4); }
   &--warning  { background: utils.alpha(fvars.$warning, 0.12); border: 1px solid utils.alpha(fvars.$warning, 0.4); }
   &--critical { background: utils.alpha(fvars.$error, 0.12);   border: 1px solid utils.alpha(fvars.$error, 0.4); }
+  &--clickable {
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, filter 0.15s ease;
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+      filter: brightness(1.04);
+    }
+  }
 }
 </style>
