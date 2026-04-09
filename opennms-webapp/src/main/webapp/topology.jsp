@@ -21,11 +21,5 @@
     License.
 
 --%>
-<%@page language="java"
-	contentType="text/html"
-	session="true"
-%>
-<%
-  // Redirect to Vue SPA MIB Compiler
-  response.sendRedirect(request.getContextPath() + "/ui/index.html#/mib-compiler");
-%>
+<%@page language="java" contentType="text/html" session="true" %>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/topology"); %>
