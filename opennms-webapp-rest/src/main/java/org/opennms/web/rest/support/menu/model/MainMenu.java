@@ -37,6 +37,8 @@ public class MainMenu {
     public Boolean zenithConnectEnabled;
     public String zenithConnectBaseUrl;
     public String zenithConnectRelativeUrl;
+    /** Default perspective for the Vue UI: "problems" (default) or "all". Configurable via opennms.ui.defaultPerspective. */
+    public String defaultPerspective;
     public Boolean displayAddNodeButton;
     public Boolean sideMenuInitialExpand;
     public String copyrightDates;

@@ -28,6 +28,13 @@
       "roles": null,
       "items": [
         {
+          "id": "vueDashboard",
+          "name": "Dashboard",
+          "url": "ui/index.html#/dashboard",
+          "locationMatch": "dashboard",
+          "roles": null
+        },
+        {
           "id": "surveillanceDashboard",
           "name": "Surveillance Dashboard",
           "url": "dashboard.jsp",
@@ -195,7 +202,7 @@
     {
       "id": "topologiesMenu",
       "name": "Topology Map",
-      "url": "topology",
+      "url": "ui/index.html#/topology",
       "action": "link",
       "locationMatch": "topology",
       "icon": "network/Instances",
@@ -511,7 +518,7 @@
         {
           "id": "jmxMetricConfigurationGenerator",
           "name": "JMX Metric Configuration Generator",
-          "url": "admin/jmxConfigGenerator.jsp",
+          "url": "ui/index.html#/jmx-config-generator",
           "locationMatch": "",
           "roles": null
         },
