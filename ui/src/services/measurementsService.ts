@@ -1,6 +1,23 @@
 import { rest, v2 } from './axiosInstances'
 import { SnmpInterface, SnmpInterfaceApiResponse, IpInterface, IpInterfaceApiResponse } from '@/types'
 
+// ---------------------------------------------------------------------------
+// Module-level response cache (TTL = one collection step)
+// ---------------------------------------------------------------------------
+const _cache = new Map<string, { value: unknown; expires: number }>()
+
+/** Align t down to the nearest step boundary so keys are stable within a window. */
+const _floor = (t: number, step: number) => Math.floor(t / step) * step
+
+async function _cached<T>(key: string, ttl: number, fn: () => Promise<T>): Promise<T> {
+  const now = Date.now()
+  const hit = _cache.get(key)
+  if (hit && hit.expires > now) return hit.value as T
+  const value = await fn()
+  _cache.set(key, { value, expires: now + ttl })
+  return value
+}
+
 export interface InterfaceUtil {
   inBps: number   // bits/sec inbound
   outBps: number  // bits/sec outbound
@@ -64,52 +81,43 @@ export const fetchNodeType = async (nodeId: number): Promise<string | null> => {
 export const fetchInterfaceUtilization = async (
   nodeId: number,
   iface: SnmpInterface,
-  atTime?: Date          // if provided, query 5-minute window ending at atTime
+  atTime?: Date          // if provided, query window ending at atTime
 ): Promise<InterfaceUtil | null> => {
+  const STEP = 30_000
   const resourceId = buildSnmpResourceId(nodeId, iface)
-  const end   = atTime ? atTime.getTime() : Date.now()
-  const start = end - 90_000   // 3 × 30s samples — enough for a valid rate with 30s collectd
-  const payload = {
-    start,
-    end,
-    step: 30_000,
-    source: [
-      { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
-      { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }
-    ]
-  }
+  const rawEnd  = atTime ? atTime.getTime() : Date.now()
+  const end     = _floor(rawEnd, STEP)
+  const start   = end - 90_000   // 3 × 30s samples
 
-  try {
-    const resp = await rest.post('/measurements', payload)
-    const labels: string[] = resp.data.labels ?? []
-    const columns: { values: number[] }[] = resp.data.columns ?? []
-
-    const inIdx  = labels.indexOf('inOctets')
-    const outIdx = labels.indexOf('outOctets')
-    if (inIdx < 0 || outIdx < 0) return null
-
-    const inValues  = columns[inIdx]?.values  ?? []
-    const outValues = columns[outIdx]?.values ?? []
-
-    // Take the last non-NaN value from each series
-    const lastValid = (vals: number[]) => {
-      for (let i = vals.length - 1; i >= 0; i--) {
-        if (!isNaN(vals[i]) && vals[i] >= 0) return vals[i]
+  return _cached(`util:${resourceId}:${end}`, STEP, async () => {
+    const payload = {
+      start, end, step: STEP,
+      source: [
+        { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
+        { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }
+      ]
+    }
+    try {
+      const resp = await rest.post('/measurements', payload)
+      const labels: string[]                = resp.data.labels  ?? []
+      const columns: { values: number[] }[] = resp.data.columns ?? []
+      const inIdx  = labels.indexOf('inOctets')
+      const outIdx = labels.indexOf('outOctets')
+      if (inIdx < 0 || outIdx < 0) return null
+      const lastValid = (vals: number[]) => {
+        for (let i = vals.length - 1; i >= 0; i--)
+          if (!isNaN(vals[i]) && vals[i] >= 0) return vals[i]
+        return 0
       }
-      return 0
+      return {
+        inBps:   lastValid(columns[inIdx]?.values  ?? []) * 8,
+        outBps:  lastValid(columns[outIdx]?.values ?? []) * 8,
+        ifSpeed: iface.ifSpeed
+      }
+    } catch {
+      return null
     }
-
-    const inBytesPerSec  = lastValid(inValues)
-    const outBytesPerSec = lastValid(outValues)
-
-    return {
-      inBps:   inBytesPerSec  * 8,
-      outBps:  outBytesPerSec * 8,
-      ifSpeed: iface.ifSpeed
-    }
-  } catch {
-    return null
-  }
+  })
 }
 
 /**
@@ -122,34 +130,37 @@ export const fetchInterfaceTimeSeries = async (
   iface: SnmpInterface,
   start: Date,
   end: Date,
-  step = 60_000,
+  step = 30_000,
   signal?: AbortSignal
 ): Promise<{ timestamps: number[]; inBps: number[]; outBps: number[] }> => {
-  const resourceId = buildSnmpResourceId(nodeId, iface)
-  const payload = {
-    start: start.getTime(),
-    end:   end.getTime(),
-    step,
-    source: [
-      { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
-      { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }
-    ]
-  }
-  try {
-    const resp  = await rest.post('/measurements', payload, { signal })
-    const labels: string[]                = resp.data.labels  ?? []
-    const columns: { values: number[] }[] = resp.data.columns ?? []
-    const inIdx  = labels.indexOf('inOctets')
-    const outIdx = labels.indexOf('outOctets')
-    const n      = columns[inIdx]?.values.length ?? 0
-    const toFinite = (v: number) => (isFinite(v) && v >= 0) ? v : 0
-    const timestamps = Array.from({ length: n }, (_, i) => start.getTime() + i * step)
-    const inBps  = (columns[inIdx]?.values  ?? []).map(v => toFinite(v) * 8)
-    const outBps = (columns[outIdx]?.values ?? []).map(v => toFinite(v) * 8)
-    return { timestamps, inBps, outBps }
-  } catch {
-    return { timestamps: [], inBps: [], outBps: [] }
-  }
+  const resourceId  = buildSnmpResourceId(nodeId, iface)
+  const roundedEnd  = _floor(end.getTime(),   step)
+  const roundedStart = _floor(start.getTime(), step)
+
+  return _cached(`ts:${resourceId}:${roundedStart}:${roundedEnd}:${step}`, step, async () => {
+    const payload = {
+      start: roundedStart, end: roundedEnd, step,
+      source: [
+        { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
+        { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }
+      ]
+    }
+    try {
+      const resp  = await rest.post('/measurements', payload, { signal })
+      const labels: string[]                = resp.data.labels  ?? []
+      const columns: { values: number[] }[] = resp.data.columns ?? []
+      const inIdx  = labels.indexOf('inOctets')
+      const outIdx = labels.indexOf('outOctets')
+      const n      = columns[inIdx]?.values.length ?? 0
+      const toFinite = (v: number) => (isFinite(v) && v >= 0) ? v : 0
+      const timestamps = Array.from({ length: n }, (_, i) => roundedStart + i * step)
+      const inBps  = (columns[inIdx]?.values  ?? []).map(v => toFinite(v) * 8)
+      const outBps = (columns[outIdx]?.values ?? []).map(v => toFinite(v) * 8)
+      return { timestamps, inBps, outBps }
+    } catch {
+      return { timestamps: [], inBps: [], outBps: [] }
+    }
+  })
 }
 
 /**
@@ -162,7 +173,7 @@ export const fetchInterfaceErrorsDiscards = async (
   iface: SnmpInterface,
   start: Date,
   end: Date,
-  step = 60_000,
+  step = 30_000,
   signal?: AbortSignal
 ): Promise<{
   ifInErrors:    number[] | null
@@ -170,38 +181,41 @@ export const fetchInterfaceErrorsDiscards = async (
   ifInDiscards:  number[] | null
   ifOutDiscards: number[] | null
 }> => {
-  const resourceId = buildSnmpResourceId(nodeId, iface)
-  const payload = {
-    start: start.getTime(),
-    end:   end.getTime(),
-    step,
-    source: [
-      { attribute: 'ifInErrors',    label: 'ifInErrors',    resourceId, transient: false },
-      { attribute: 'ifOutErrors',   label: 'ifOutErrors',   resourceId, transient: false },
-      { attribute: 'ifInDiscards',  label: 'ifInDiscards',  resourceId, transient: false },
-      { attribute: 'ifOutDiscards', label: 'ifOutDiscards', resourceId, transient: false }
-    ]
-  }
-  try {
-    const resp    = await rest.post('/measurements', payload, { signal })
-    const labels: string[]                = resp.data.labels  ?? []
-    const columns: { values: number[] }[] = resp.data.columns ?? []
-    const toFinite = (v: number) => (isFinite(v) && v >= 0) ? v : 0
-    const getOrNull = (label: string): number[] | null => {
-      const idx  = labels.indexOf(label)
-      if (idx < 0) return null
-      const vals = (columns[idx]?.values ?? []).map(toFinite)
-      return vals.some(v => v > 0) ? vals : null
+  const resourceId   = buildSnmpResourceId(nodeId, iface)
+  const roundedEnd   = _floor(end.getTime(),   step)
+  const roundedStart = _floor(start.getTime(), step)
+
+  return _cached(`err:${resourceId}:${roundedStart}:${roundedEnd}:${step}`, step, async () => {
+    const payload = {
+      start: roundedStart, end: roundedEnd, step,
+      source: [
+        { attribute: 'ifInErrors',    label: 'ifInErrors',    resourceId, transient: false },
+        { attribute: 'ifOutErrors',   label: 'ifOutErrors',   resourceId, transient: false },
+        { attribute: 'ifInDiscards',  label: 'ifInDiscards',  resourceId, transient: false },
+        { attribute: 'ifOutDiscards', label: 'ifOutDiscards', resourceId, transient: false }
+      ]
     }
-    return {
-      ifInErrors:    getOrNull('ifInErrors'),
-      ifOutErrors:   getOrNull('ifOutErrors'),
-      ifInDiscards:  getOrNull('ifInDiscards'),
-      ifOutDiscards: getOrNull('ifOutDiscards')
+    try {
+      const resp    = await rest.post('/measurements', payload, { signal })
+      const labels: string[]                = resp.data.labels  ?? []
+      const columns: { values: number[] }[] = resp.data.columns ?? []
+      const toFinite = (v: number) => (isFinite(v) && v >= 0) ? v : 0
+      const getOrNull = (label: string): number[] | null => {
+        const idx  = labels.indexOf(label)
+        if (idx < 0) return null
+        const vals = (columns[idx]?.values ?? []).map(toFinite)
+        return vals.some(v => v > 0) ? vals : null
+      }
+      return {
+        ifInErrors:    getOrNull('ifInErrors'),
+        ifOutErrors:   getOrNull('ifOutErrors'),
+        ifInDiscards:  getOrNull('ifInDiscards'),
+        ifOutDiscards: getOrNull('ifOutDiscards')
+      }
+    } catch {
+      return { ifInErrors: null, ifOutErrors: null, ifInDiscards: null, ifOutDiscards: null }
     }
-  } catch {
-    return { ifInErrors: null, ifOutErrors: null, ifInDiscards: null, ifOutDiscards: null }
-  }
+  })
 }
 
 /**
