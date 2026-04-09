@@ -21,7 +21,7 @@
 ///
 
 import { v2 } from './axiosInstances'
-import { QueryParameters, EventApiResponse } from '@/types'
+import { QueryParameters, EventApiResponse, Event } from '@/types'
 import { queryParametersHandler } from './serviceHelpers'
 
 const endpoint = '/events'
@@ -47,4 +47,13 @@ const getEvents = async (queryParameters?: QueryParameters): Promise<EventApiRes
   }
 }
 
-export { getEvents }
+const getEventById = async (id: string | number): Promise<Event | false> => {
+  try {
+    const resp = await v2.get(`${endpoint}/${id}`)
+    return resp.data
+  } catch (err) {
+    return false
+  }
+}
+
+export { getEvents, getEventById }
