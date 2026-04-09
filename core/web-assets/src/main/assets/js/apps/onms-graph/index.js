@@ -36,6 +36,17 @@ const holder = require('vendor/holder-js');
 
 let cssLoaded = false;
 
+const isDarkMode = () => document.body.classList.contains('open-dark');
+const DARK_TEXT = '#c8d4e8';
+const LIGHT_TEXT = '#333333';
+
+// Patch drawHook so the graph title uses theme-aware color instead of default black
+const origDrawHook = Backshift.Graph.Flot.prototype.drawHook;
+Backshift.Graph.Flot.prototype.drawHook = function(plot, canvascontext) {
+  canvascontext.fillStyle = isDarkMode() ? DARK_TEXT : LIGHT_TEXT;
+  origDrawHook.call(this, plot, canvascontext);
+};
+
 const getGraphingEngine = () => {
   let graphingEngine = 'png';
   if (window.onmsGraphContainers !== undefined

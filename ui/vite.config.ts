@@ -22,6 +22,7 @@
 
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
+import react from '@vitejs/plugin-react'
 import svgLoader from 'vite-svg-loader'
 import AutoImport from 'unplugin-auto-import/vite'
 
@@ -54,6 +55,7 @@ export default defineConfig({
         }
       }
     }),
+    react(),
     svgLoader(),
 
     // https://github.com/antfu/unplugin-auto-import
@@ -72,6 +74,7 @@ export default defineConfig({
     dir: './tests',
     globals: true,
     environment: 'happy-dom',
+    setupFiles: [new URL('./tests/setup.ts', import.meta.url).pathname],
     css: {
       include: /.+/
     },
@@ -86,6 +89,10 @@ export default defineConfig({
     }
   },
   root: './src/main',
+  // DO NOT REMOVE: base: './' is required alongside --base=/opennms/ui/ in the build
+  // script. Without it, vite ignores the CLI --base flag and emits /assets/... paths
+  // (server root) instead of /opennms/ui/assets/... — breaking the entire UI.
+  base: './',
   // make sure we get environment variables from .env files in the main ui directory
   // path is relative to 'root' defined just above
   envDir: '../..',
@@ -94,11 +101,15 @@ export default defineConfig({
     outDir: './dist',
     target: 'esnext',
     copyPublicDir: false,
+    // lightningcss incorrectly strips var() from CSS custom property name strings
+    // (e.g. var(--feather-surface) → --feather-surface). Use esbuild instead.
+    cssMinify: 'esbuild',
     rollupOptions: {
+      external: ['@hookform/resolvers/zod', 'react-router-dom'],
       output: {
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]'
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     }
   }
