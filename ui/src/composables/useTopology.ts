@@ -255,6 +255,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         avoidOverlap: true,
         nodeDimensionsIncludeLabels: false
       } as cytoscape.LayoutOptions).run()
+      cy.fit(undefined, 40)
       return
     }
 
@@ -269,6 +270,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       gravity: 80,
       padding: 30
     } as cytoscape.LayoutOptions).run()
+    cy.fit(undefined, 30)
   }
 
   const pendingLinkSource = ref<TopologyVertex | null>(null)
