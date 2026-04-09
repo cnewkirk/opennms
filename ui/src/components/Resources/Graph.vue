@@ -1,336 +1,420 @@
+///
+/// Licensed to The OpenNMS Group, Inc (TOG) under one or more
+/// contributor license agreements.  See the LICENSE.md file
+/// distributed with this work for additional information
+/// regarding copyright ownership.
+///
+/// TOG licenses this file to You under the GNU Affero General
+/// Public License Version 3 (the "License") or (at your option)
+/// any later version.  You may not use this file except in
+/// compliance with the License.  You may obtain a copy of the
+/// License at:
+///
+///      https://www.gnu.org/licenses/agpl-3.0.txt
+///
+/// Unless required by applicable law or agreed to in writing,
+/// software distributed under the License is distributed on an
+/// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+/// either express or implied.  See the License for the specific
+/// language governing permissions and limitations under the
+/// License.
+///
 <template>
-  <div class="feather-row">
-    <div class="feather-col-12 container">
-      <router-link
-        v-if="!isSingleGraph"
-        :to="`/resource-graphs/graphs/${label}/${definition}/${resourceId}`"
-        target="_blank"
-      >
-        <FeatherButton secondary class="single-graph-btn">Open</FeatherButton>
-      </router-link>
-      <FeatherTabContainer class="graph-data-tabs">
-        <template v-slot:tabs>
-          <FeatherTab>Graph</FeatherTab>
-          <FeatherTab>Data</FeatherTab>
-        </template>
-        <FeatherTabPanel>
-          <div class="canvas-wrapper">
-            <canvas :id="`${label}-${definition}`"></canvas>
-            <div ref="legendRef" class="lc" :id="`${label}-${definition}-lc`"></div>
-          </div>
-        </FeatherTabPanel>
-        <FeatherTabPanel>
-          <div class="canvas-wrapper" v-if="graphData">
-            <GraphDataTable
-              :id="`${label}-${definition}`"
-              :convertedGraphData="convertedGraphDataRef"
-              :graphData="graphData"
-            />
-          </div>
-        </FeatherTabPanel>
-      </FeatherTabContainer>
+  <div class="graph-card">
+    <!-- Title bar -->
+    <div class="graph-card__title-bar">
+      <span class="graph-card__title">{{ persesSpec?.title ?? definition }}</span>
+      <div class="graph-card__title-actions">
+        <button
+          v-if="pinnable"
+          class="graph-card__pin-btn"
+          :class="{ 'graph-card__pin-btn--active': pinned }"
+          :title="pinned ? 'Unpin graph' : 'Pin to top'"
+          @click="emit('toggle-pin')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 17v5" />
+            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+          </svg>
+        </button>
+        <router-link
+          v-if="!isSingleGraph"
+          :to="`/resource-graphs/graphs/${label}/${definition}/${resourceId}`"
+          target="_blank"
+          class="graph-card__open-link"
+        >Open ↗</router-link>
+      </div>
     </div>
+
+    <!-- Chart -->
+    <div class="graph-card__chart">
+      <PersesPanel
+        v-if="persesSpec"
+        :title="persesSpec.title"
+        :queries="[persesSpec.query]"
+        :time-range="absoluteTimeRange"
+        :y-axis-label="persesSpec.yAxisLabel"
+        :palette="persesSpec.palette"
+        :visual-mode="persesSpec.visualMode"
+      />
+      <div v-else class="graph-card__no-data">No graph data available</div>
+    </div>
+
+    <!-- Legend -->
+    <table v-if="legendRows.length" class="graph-card__legend">
+      <thead>
+        <tr>
+          <th class="graph-card__legend-color"></th>
+          <th class="graph-card__legend-name">Series</th>
+          <th class="graph-card__legend-val">Last</th>
+          <th class="graph-card__legend-val">Min</th>
+          <th class="graph-card__legend-val">Max</th>
+          <th class="graph-card__legend-val">Avg</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="row in legendRows" :key="row.name">
+          <td class="graph-card__legend-color">
+            <span class="graph-card__swatch" :style="{ backgroundColor: row.color }"></span>
+          </td>
+          <td class="graph-card__legend-name" :title="row.name">{{ row.name }}</td>
+          <td class="graph-card__legend-val">{{ row.last }}</td>
+          <td class="graph-card__legend-val">{{ row.min }}</td>
+          <td class="graph-card__legend-val">{{ row.max }}</td>
+          <td class="graph-card__legend-val">{{ row.avg }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Data table — only on single-graph (full) page -->
+    <template v-if="isSingleGraph">
+      <div class="graph-card__data-divider"></div>
+      <div class="graph-card__data-section">
+        <div class="graph-card__data-heading">Raw Data</div>
+        <GraphDataTable
+          v-if="rawGraphData"
+          :id="`${label}-${definition}`"
+          :convertedGraphData="legacyModel"
+          :graphData="rawGraphData"
+        />
+        <div v-else-if="dataError" class="graph-card__no-data">{{ dataError }}</div>
+        <div v-else class="graph-card__no-data">Loading data...</div>
+      </div>
+    </template>
   </div>
 </template>
-  
-<script setup lang="ts">
-import RrdGraphConverter from './utils/RrdGraphConverter.class'
-import { formatTimestamps, getFormattedLegendStatements } from './utils/LegendFormatter'
-import GraphDataTable from './GraphDataTable.vue'
-import { ConvertedGraphData, GraphMetricsPayload, GraphMetricsResponse, Metric, PreFabGraph, StartEndTime } from '@/types'
-import { useGraphStore } from '@/stores/graphStore'
-import { useElementSize } from '@vueuse/core'
-import { ChartOptions, TitleOptions, ChartData } from 'chart.js'
-import { Chart, registerables } from 'chart.js'
-import zoomPlugin from 'chartjs-plugin-zoom'
-import HtmlLegendPlugin from './plugins/HtmlLegendPlugin'
-import { format } from 'd3'
-import { FeatherButton } from '@featherds/button'
-import {
-  FeatherTab,
-  FeatherTabContainer,
-  FeatherTabPanel
-} from '@featherds/tabs'
-import { PropType } from 'vue'
-Chart.register(...registerables)
-Chart.register(zoomPlugin)
 
-const emit = defineEmits(['addGraphDefinition'])
+<script setup lang="ts">
+import type { PropType } from 'vue'
+import RrdGraphConverter from './utils/RrdGraphConverter.class'
+import GraphDataTable from './GraphDataTable.vue'
+import PersesPanel from '@/components/Perses/PersesPanel.vue'
+import { formatTimestamps, getFormattedLegendStatements } from './utils/LegendFormatter'
+import { useGraphStore } from '@/stores/graphStore'
+import { format as d3Format } from 'd3'
+import type { ConvertedGraphData, GraphMetricsPayload, GraphMetricsResponse, Metric, PersesGraphSpec, PreFabGraph, StartEndTime } from '@/types'
+import type { AbsoluteTimeRange } from '@perses-dev/core'
+
+const emit = defineEmits(['addGraphDefinition', 'toggle-pin'])
 
 const props = defineProps({
-  definition: {
-    required: true,
-    type: String
-  },
-  resourceId: {
-    required: true,
-    type: String
-  },
-  time: {
-    required: true,
-    type: Object as PropType<StartEndTime>
-  },
-  label: {
-    required: true,
-    type: String
-  },
-  isSingleGraph: {
-    required: true,
-    type: Boolean
-  }
+  definition:    { required: true, type: String },
+  resourceId:    { required: true, type: String },
+  time:          { required: true, type: Object as PropType<StartEndTime> },
+  label:         { required: true, type: String },
+  isSingleGraph: { required: true, type: Boolean },
+  pinnable:      { type: Boolean, default: false },
+  pinned:        { type: Boolean, default: false }
 })
 
 const graphStore = useGraphStore()
-const graphData = ref<GraphMetricsResponse | null>(null)
-const convertedGraphDataRef = ref<ConvertedGraphData>({
-  title: '',
-  verticalLabel: '',
-  series: [],
-  values: [],
-  metrics: [],
-  printStatements: [],
-  properties: {}
-})
-let chart: any = {}
-const legendRef = ref()
-const { height } = useElementSize(legendRef)
-const yAxisFormatter = format('.3s')
+const persesSpec   = ref<PersesGraphSpec | null>(null)
+const rawGraphData = ref<GraphMetricsResponse | null>(null)
+const dataError    = ref<string | null>(null)
 
-const legendHeight = computed(() => height.value + 'px')
-
-const options = computed<ChartOptions>(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    htmlLegend: {
-      // ID of the container to put the legend in
-      containerID: `${props.label}-${props.definition}-lc`
-    },
-    legend: {
-      display: false
-    },
-    title: {
-      display: true,
-      text: convertedGraphDataRef.value.title
-    } as TitleOptions,
-    zoom: {
-      zoom: {
-        wheel: {
-          enabled: true
-        },
-        mode: 'x'
-      },
-      pan: {
-        enabled: true,
-        mode: 'x'
-      }
-    }
-  },
-  scales: {
-    y: {
-      title: {
-        display: true,
-        text: convertedGraphDataRef.value.verticalLabel
-      } as TitleOptions,
-      ticks: {
-        callback: (value) => yAxisFormatter(value as number),
-        maxTicksLimit: 8
-      },
-      stacked: false
-    },
-    x: {
-      ticks: {
-        maxTicksLimit: 12
-      }
-    }
-  }
+const absoluteTimeRange = computed<AbsoluteTimeRange>(() => ({
+  start: new Date((props.time.startTime as number) * 1000),
+  end:   new Date((props.time.endTime as number) * 1000)
 }))
-
-const getDatasetsForColumn = (index: number, columnValues: number[], datasetLabels: { name: string, statement: string }[]) => {
-  const label = graphData.value?.labels[index] || ''
-  const datasetLabelObj = datasetLabels.filter((datasetLabel) => datasetLabel.name === label)[0]
-  const seriesObjs = []
-  const datasets = []
-
-  for (const item of convertedGraphDataRef.value.series) {
-    if (item.metric === label) {
-      seriesObjs.push(item)
-    }
-  }
-
-  let areaOrStack = false
-  let areaOrStackColor = ''
-  for (const obj of seriesObjs) {
-    if (obj.type === 'area' || obj.type === 'stack') {
-      areaOrStack = true
-      areaOrStackColor = obj.color
-
-      if (obj.type === 'stack') {
-        (options.value.scales as any).y.stacked = true
-      }
-
-      break
-    }
-  }
-
-  for (const obj of seriesObjs) {
-    if (obj.name !== undefined) {
-      const index = convertedGraphDataRef.value.series.findIndex((series) => series.name === obj.name)
-      datasets.push({
-        hidden: Boolean(obj.type === 'hidden'),
-        fill: areaOrStack ? {
-          target: 'origin',
-          above: areaOrStackColor
-        } : false,
-        label: datasetLabelObj.statement,
-        data: columnValues,
-        borderColor: obj.color,
-        backgroundColor: obj.color,
-        radius: 0,
-        hitRadius: 5,
-        hoverRadius: 6,
-        order: convertedGraphDataRef.value.series.length - index
-      })
-    }
-  }
-
-  return datasets
-}
-
-const dataSets = computed(() => {
-  let sets: any = []
-
-  for (const [index, column] of graphData.value?.columns.entries() || []) {
-    const datasets = getDatasetsForColumn(index, column.values, graphData.value?.formattedLabels || [])
-    sets = [...sets, ...datasets]
-  }
-
-  return sets
+const legacyModel  = ref<ConvertedGraphData>({
+  title: '', verticalLabel: '', series: [], values: [],
+  metrics: [], printStatements: [], properties: {}
 })
 
-const chartData = computed<ChartData<any>>(() => {
-  return {
-    labels: graphData.value?.formattedTimestamps,
-    datasets: dataSets.value
+const siFormat = d3Format('.3s')
+const fmtVal = (v: number) => isNaN(v) ? 'N/A' : siFormat(v)
+
+const legendRows = computed(() => {
+  const data = rawGraphData.value
+  const spec = persesSpec.value
+  if (!data || !spec) return []
+
+  // Build metric→display name map from series overrides
+  const displayNameMap = new Map<string, string>()
+  for (const s of spec.seriesOverrides) {
+    if (s.name) displayNameMap.set(s.metric, s.name)
   }
+
+  // Use the same palette as the chart (categorical mode cycles by index)
+  const palette = spec.palette
+  const fallbackColors = ['#56B4E9', '#009E73', '#0072B2', '#CC79A7', '#F0E442', '#E69F00', '#D55E00']
+
+  const rows: { name: string; color: string; last: string; min: string; max: string; avg: string }[] = []
+  let visibleIndex = 0
+
+  for (let i = 0; i < data.labels.length; i++) {
+    const label = data.labels[i]
+    const values = data.columns[i]?.values
+    if (!values || !label) continue
+
+    // Skip transient metrics (internal expressions not meant for display)
+    const metric = legacyModel.value.metrics.find(m => m.name === label)
+    if (metric?.transient) continue
+
+    const colors = palette.length ? palette : fallbackColors
+    const color = colors[visibleIndex % colors.length]
+    const displayName = displayNameMap.get(label) || label
+
+    const nums = values.filter(v => !isNaN(v) && v !== null && v !== undefined)
+    if (nums.length === 0) {
+      rows.push({ name: displayName, color, last: 'N/A', min: 'N/A', max: 'N/A', avg: 'N/A' })
+    } else {
+      const last = nums[nums.length - 1]!
+      const min = Math.min(...nums)
+      const max = Math.max(...nums)
+      const avg = nums.reduce((a, b) => a + b, 0) / nums.length
+      rows.push({ name: displayName, color, last: fmtVal(last), min: fmtVal(min), max: fmtVal(max), avg: fmtVal(avg) })
+    }
+    visibleIndex++
+  }
+  return rows
 })
 
-const getGraphMetricsPayload = (source: Metric[]): GraphMetricsPayload => {
-  const start = props.time.startTime as number * 1000
-  const end = props.time.endTime as number * 1000
-  const step = Math.floor((end - start) / 1000)
-  const expression = []
-
-  const metricsWithExpressions = source.filter((metric) => Boolean(metric.expression))
-  const metricsWithoutExpressions = source.filter((metric) => Boolean(!metric.expression))
-
-  for (const metric of metricsWithExpressions) {
-    expression.push({
-      value: metric.expression as string,
-      label: metric.label as string,
-      transient: metric.transient as boolean
-    })
-  }
-
-  const payload: GraphMetricsPayload = {
-    start,
-    end,
-    step,
-    source: metricsWithoutExpressions
-  }
-
-  if (metricsWithExpressions.length) {
-    payload.expression = expression
-  }
-
-  return payload
-}
-
-const render = async (update?: boolean) => {
+const render = async () => {
   const definitionData: PreFabGraph | null = await graphStore.getDefinitionData(props.definition)
 
+  if (!definitionData) {
+    emit('addGraphDefinition')
+    return
+  }
+
   try {
-    const rrdGraphConverter = new RrdGraphConverter({
+    const converter = new RrdGraphConverter({
       graphDef: definitionData,
       resourceId: props.resourceId
     })
 
-    const rrdGraphConverterModel = rrdGraphConverter.model
-    convertedGraphDataRef.value = rrdGraphConverterModel
+    persesSpec.value  = converter.toPersesGraphSpec()
+    legacyModel.value = converter.model
 
-    const metrics: Metric[] = rrdGraphConverterModel.metrics.map((metric: Metric): Metric => ({
-      aggregation: metric.aggregation,
-      attribute: metric.attribute,
-      label: metric.name,
-      resourceId: metric.resourceId,
-      transient: metric.transient,
-      expression: metric.expression
+    // Fetch raw measurements for legend stats (and Data tab on single-graph page)
+    const metrics: Metric[] = converter.model.metrics.map((m: Metric): Metric => ({
+      aggregation: m.aggregation,
+      attribute: m.attribute,
+      label: m.name,
+      resourceId: m.resourceId,
+      transient: m.transient,
+      expression: m.expression
     }))
 
-    const payload = getGraphMetricsPayload(metrics)
-    const graphMetrics = await graphStore.getGraphMetrics(payload)
+    const start = (props.time.startTime as number) * 1000
+    const end   = (props.time.endTime as number) * 1000
+    const step  = Math.floor((end - start) / 1000)
 
-    if (graphMetrics === null) {
-      graphData.value = null
-      return
+    const metricsWithExpressions    = metrics.filter(m => Boolean(m.expression))
+    const metricsWithoutExpressions = metrics.filter(m => !m.expression)
+
+    const payload: GraphMetricsPayload = { start, end, step, source: metricsWithoutExpressions }
+    if (metricsWithExpressions.length) {
+      payload.expression = metricsWithExpressions.map(m => ({
+        value: m.expression as string,
+        label: m.label as string,
+        transient: m.transient as boolean
+      }))
     }
 
-    let formattedGraphData = formatTimestamps(graphMetrics, props.time.format)
-    formattedGraphData = getFormattedLegendStatements(graphMetrics, rrdGraphConverterModel)
-    graphData.value = formattedGraphData
-
-    if (update) {
-      chart.data = chartData.value
-      chart.update()
+    const graphMetrics = await graphStore.getGraphMetrics(payload)
+    if (graphMetrics) {
+      let formatted = formatTimestamps(graphMetrics, props.time.format)
+      formatted = getFormattedLegendStatements(formatted, converter.model)
+      rawGraphData.value = formatted
     } else {
-      const ctx: any = document.getElementById(`${props.label}-${props.definition}`)
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: chartData.value,
-        options: options.value,
-        plugins: [HtmlLegendPlugin]
-      })
+      dataError.value = 'No data returned from measurements API'
     }
   } catch (error) {
-    console.log(error)
-    console.log('Could not render graph for ', props.definition)
-    emit('addGraphDefinition') // adds another to infinite scroll
+    dataError.value = `Failed to load data: ${error}`
+    console.error('Could not render graph for', props.definition, error)
+    emit('addGraphDefinition')
   }
 }
 
-watch(props.time, () => render(true))
-
-onMounted(() => render())
+watch(() => props.time, render)
+onMounted(render)
 </script>
-  
-<style scoped lang="scss">
-@import "@featherds/styles/mixins/typography";
-.container {
-  position: relative;
-}
-.canvas-wrapper {
-  display: block;
-  height: 370px;
-}
-.graph-data-tabs {
-  margin-top: 50px;
-  margin-bottom: v-bind(legendHeight);
-}
-.single-graph-btn {
-  position: absolute;
-  top: 12px;
-  right: 70px;
-  z-index: 1;
-}
-.lc {
-  @include body-small;
-}
-</style>
 
-<style lang="scss">
-.graph-data-tabs {
-  ul {
-    margin-left: 37px !important;
+<style scoped lang="scss">
+@use '@/styles/vars' as vars;
+@import "@featherds/styles/themes/variables";
+
+.graph-card {
+  border: 1px solid var($border-light-on-surface);
+  border-radius: vars.$border-radius-surface;
+  background: var($surface);
+  overflow: hidden;
+
+  &__title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 6px;
+  }
+
+  &__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var($secondary-text-on-surface);
+    letter-spacing: 0.01em;
+  }
+
+  &__open-link {
+    font-size: 0.75rem;
+    color: var($clickable-normal);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    &:hover { text-decoration: underline; }
+  }
+
+  &__title-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  &__pin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: vars.$border-radius-xs;
+    background: none;
+    color: var($secondary-text-on-surface);
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s, color 0.15s;
+    &:hover { opacity: 1; }
+    &--active {
+      opacity: 1;
+      color: var($primary);
+      svg { fill: currentColor; }
+    }
+  }
+
+  &__chart {
+    height: 280px;
+    padding: 0 8px;
+  }
+
+  &__no-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    color: var($disabled-text-on-surface);
+    font-size: 0.8125rem;
+  }
+
+  /* ── Legend ── */
+  &__legend {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+    font-family: var(--feather-font-family);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var($primary-text-on-surface);
+    margin-top: 2px;
+  }
+
+  &__legend th {
+    font-weight: 500;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+    padding: 4px 10px 4px 0;
+    border: none;
+    border-top: 1px solid var($border-light-on-surface);
+    border-bottom: 1px solid var($border-light-on-surface);
+    color: var($secondary-text-on-surface);
+    white-space: nowrap;
+    background: var($surface);
+  }
+
+  &__legend td {
+    padding: 3px 10px 3px 0;
+    border: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__legend tbody tr + tr td {
+    border-top: 1px solid var($border-light-on-surface);
+  }
+
+  &__legend tbody tr:hover td {
+    background: var($border-light-on-surface);
+  }
+
+  &__legend-color {
+    width: 20px;
+    padding-left: 10px !important;
+    padding-right: 6px !important;
+  }
+
+  &__swatch {
+    display: inline-block;
+    width: 4px;
+    height: 14px;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+
+  &__legend-name {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__legend-val {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+    font-size: 0.6875rem;
+    color: var($secondary-text-on-surface);
+    width: 60px;
+    padding-right: 10px !important;
+  }
+
+  /* ── Data section (single-graph page only) ── */
+  &__data-divider {
+    border-top: 1px solid var($border-light-on-surface);
+    margin: 12px 14px 0;
+  }
+
+  &__data-section {
+    padding: 14px;
+  }
+
+  &__data-heading {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var($secondary-text-on-surface);
+    margin-bottom: 10px;
   }
 }
 </style>
