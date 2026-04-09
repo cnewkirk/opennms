@@ -1,0 +1,2338 @@
+/**
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
+
+// Dark mode overrides for the legacy Bootstrap 4 content area.
+// Activated when the Feather design system applies the "open-dark" class to <body>.
+// Uses the same color palette as Feather's open-dark theme for consistency.
+
+// Blue-tinted dark palette — subtle warmth, not pure black
+$dark-bg:              #131620;  // deep blue-black
+$dark-surface:         #1a1e2e;  // cards, inputs
+$dark-surface-raised:  #222639;  // elevated cards, headers
+$dark-surface-overlay: #2a3045;  // dropdowns, modals, popovers
+$dark-border:          rgba(140, 160, 200, 0.18);
+$dark-border-light:    rgba(140, 160, 200, 0.10);
+$dark-text:            #e8e8e8;  // high contrast primary text
+$dark-text-secondary:  #b0b0b0;  // clear secondary text
+$dark-text-muted:      #777777;  // muted but still readable
+$dark-link:            #6ea8fe;  // bright blue accent link
+$dark-link-hover:      #9ec5fe;
+
+// Severity accent colors — stronger contrast on dark backgrounds
+$dark-severity-critical-bg:       rgba(239, 68, 68, 0.30);
+$dark-severity-critical-border:   #ef4444;
+$dark-severity-major-bg:          rgba(249, 115, 22, 0.28);
+$dark-severity-major-border:      #f97316;
+$dark-severity-minor-bg:          rgba(245, 158, 11, 0.26);
+$dark-severity-minor-border:      #f59e0b;
+$dark-severity-warning-bg:        rgba(234, 179, 8, 0.26);
+$dark-severity-warning-border:    #eab308;
+$dark-severity-normal-bg:         rgba(34, 197, 94, 0.26);
+$dark-severity-normal-border:     #22c55e;
+$dark-severity-indeterminate-bg:  rgba(59, 130, 246, 0.26);
+$dark-severity-indeterminate-border: #3b82f6;
+$dark-severity-cleared-bg:        rgba(156, 163, 175, 0.22);
+$dark-severity-cleared-border:    #6b7280;
+
+// Early paint: html gets the theme class before body exists
+html.open-dark {
+  background-color: $dark-bg;
+  color-scheme: dark;
+}
+
+// Use both body.open-dark and html.open-dark so that Vaadin iframe pages
+// (where the GWT engine may overwrite body classes) still get dark mode
+// via the <html> class which Vaadin never touches.
+body.open-dark, html.open-dark {
+  background-color: $dark-bg;
+  color: $dark-text;
+
+  // ===== Core Bootstrap overrides =====
+
+  // Links
+  a {
+    color: $dark-link;
+    &:hover, &:focus {
+      color: $dark-link-hover;
+    }
+  }
+
+  // Headings
+  h1, h2, h3, h4, h5, h6,
+  .h1, .h2, .h3, .h4, .h5, .h6 {
+    color: $dark-text;
+  }
+
+  // Text utilities
+  .text-dark { color: $dark-text !important; }
+  .text-muted { color: $dark-text-muted !important; }
+  .text-body { color: $dark-text !important; }
+
+  // Background utilities
+  .bg-white { background-color: $dark-surface !important; }
+  .bg-light { background-color: $dark-surface-raised !important; }
+
+  // ===== Cards =====
+  // !important needed to beat Bootstrap's .card { background-color: #fff } and
+  // modern-ui's .card { background: #ffffff } which may otherwise win in some
+  // cascade orderings when vendor CSS reloads after dark-mode.css.
+  .card {
+    background-color: $dark-surface-raised !important;
+    border-color: $dark-border;
+    color: $dark-text;
+  }
+
+  .card-header {
+    background-color: $dark-surface-overlay !important;
+    border-bottom-color: $dark-border;
+    color: $dark-text;
+  }
+
+  .card-footer {
+    background-color: $dark-surface-overlay !important;
+    border-top-color: $dark-border;
+    color: $dark-text-secondary;
+  }
+
+  // ===== Tables =====
+  .table {
+    color: $dark-text;
+
+    th, td {
+      border-top-color: $dark-border;
+    }
+
+    thead th {
+      background-color: $dark-surface-raised;
+      border-bottom-color: $dark-border;
+      color: $dark-text-secondary;
+    }
+  }
+
+  .table-bordered {
+    border-color: $dark-border;
+
+    th, td {
+      border-color: $dark-border;
+    }
+  }
+
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: $dark-text;
+  }
+
+  // ===== Forms =====
+  .form-control {
+    background-color: $dark-surface;
+    border-color: $dark-border;
+    color: $dark-text;
+
+    &:focus {
+      background-color: $dark-surface;
+      border-color: $dark-link;
+      color: $dark-text;
+      box-shadow: 0 0 0 0.2rem rgba(125, 146, 255, 0.25);
+    }
+
+    &::placeholder {
+      color: $dark-text-muted;
+    }
+
+    &:disabled, &[readonly] {
+      background-color: $dark-surface-raised;
+      color: $dark-text-muted;
+    }
+  }
+
+  .form-control-plaintext {
+    color: $dark-text;
+  }
+
+  select.form-control,
+  .custom-select {
+    background-color: $dark-surface;
+    border-color: $dark-border;
+    color: $dark-text;
+  }
+
+  .input-group-text {
+    background-color: $dark-surface-overlay;
+    border-color: $dark-border;
+    color: $dark-text-secondary;
+  }
+
+  // ===== Buttons =====
+  .btn-default,
+  .btn-light {
+    background-color: $dark-surface-overlay;
+    border-color: $dark-border;
+    color: $dark-text;
+
+    &:hover {
+      background-color: $dark-surface-overlay;
+      border-color: rgba(255, 255, 255, 0.24);
+      color: $dark-text;
+    }
+  }
+
+  .btn-outline-secondary {
+    color: $dark-text-secondary;
+    border-color: $dark-border;
+
+    &:hover {
+      background-color: $dark-surface-overlay;
+      color: $dark-text;
+    }
+  }
+
+  .btn-link {
+    color: $dark-link;
+
+    &:hover {
+      color: $dark-link-hover;
+    }
+  }
+
+  // ===== Dropdowns =====
+  .dropdown-menu {
+    background-color: $dark-surface-overlay;
+    border-color: $dark-border;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .dropdown-item {
+    color: $dark-text;
+
+    &:hover, &:focus {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: $dark-text;
+    }
+
+    &.active, &:active {
+      background-color: rgba(125, 146, 255, 0.15);
+      color: $dark-link;
+    }
+  }
+
+  .dropdown-divider {
+    border-top-color: $dark-border;
+  }
+
+  .dropdown-header {
+    color: $dark-text-muted;
+  }
+
+  // ===== Modals =====
+  .modal-content {
+    background-color: $dark-surface-raised;
+    border-color: $dark-border;
+    color: $dark-text;
+  }
+
+  .modal-header {
+    border-bottom-color: $dark-border;
+  }
+
+  .modal-footer {
+    border-top-color: $dark-border;
+  }
+
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  // ===== Nav / Tabs =====
+  .nav-tabs {
+    border-bottom-color: $dark-border;
+
+    .nav-link {
+      color: $dark-text-muted;
+
+      &:hover, &:focus {
+        border-color: transparent transparent $dark-border;
+        color: $dark-text;
+      }
+
+      &.active {
+        background-color: transparent;
+        border-color: transparent transparent $dark-link;
+        color: $dark-text;
+      }
+    }
+  }
+
+  .nav-pills .nav-link.active {
+    background-color: rgba(110, 168, 254, 0.15);
+    color: $dark-link;
+  }
+
+  .tab-content {
+    color: $dark-text;
+  }
+
+  // ===== Breadcrumbs =====
+  .breadcrumb {
+    background-color: $dark-surface-raised;
+    border-color: $dark-border;
+
+    .breadcrumb-item {
+      color: $dark-text-secondary;
+
+      a {
+        color: $dark-link;
+      }
+
+      &.active {
+        color: $dark-text;
+      }
+
+      + .breadcrumb-item::before {
+        color: $dark-text-muted;
+      }
+    }
+  }
+
+  // ===== List Groups =====
+  .list-group-item {
+    background-color: $dark-surface-raised;
+    border-color: $dark-border;
+    color: $dark-text;
+
+    &.active {
+      background-color: rgba(110, 168, 254, 0.12);
+      border-color: $dark-link;
+      color: $dark-text;
+    }
+  }
+
+  .list-group-item-action {
+    &:hover, &:focus {
+      background-color: rgba(255, 255, 255, 0.06);
+      color: $dark-text;
+    }
+  }
+
+  // ===== Alerts =====
+  .alert {
+    border-left-width: 4px;
+    border-left-style: solid;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .alert-info {
+    background-color: rgba($dark-severity-indeterminate-border, 0.08);
+    border-left-color: $dark-severity-indeterminate-border;
+    color: $dark-text;
+  }
+
+  .alert-warning {
+    background-color: rgba($dark-severity-warning-border, 0.08);
+    border-left-color: $dark-severity-warning-border;
+    color: $dark-text;
+  }
+
+  .alert-danger {
+    background-color: rgba($dark-severity-critical-border, 0.08);
+    border-left-color: $dark-severity-critical-border;
+    color: $dark-text;
+  }
+
+  .alert-success {
+    background-color: rgba($dark-severity-normal-border, 0.08);
+    border-left-color: $dark-severity-normal-border;
+    color: $dark-text;
+  }
+
+  // ===== Badges =====
+  .badge-light {
+    background-color: $dark-surface-overlay;
+    color: $dark-text;
+  }
+
+  .badge-secondary {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: $dark-text;
+  }
+
+  // ===== Pagination =====
+  .page-item {
+    .page-link {
+      background-color: $dark-surface-raised;
+      border-color: $dark-border;
+      color: $dark-link;
+
+      &:hover {
+        background-color: $dark-surface-overlay;
+        border-color: $dark-border;
+        color: $dark-link-hover;
+      }
+    }
+
+    &.active .page-link {
+      background-color: rgba(110, 168, 254, 0.15);
+      border-color: $dark-link;
+      color: $dark-text;
+    }
+
+    &.disabled .page-link {
+      background-color: $dark-surface;
+      border-color: $dark-border;
+      color: $dark-text-muted;
+    }
+  }
+
+  // ===== Popovers & Tooltips =====
+  .popover {
+    background-color: $dark-surface-overlay;
+    border-color: $dark-border;
+
+    .popover-header {
+      background-color: $dark-surface-raised;
+      border-bottom-color: $dark-border;
+      color: $dark-text;
+    }
+
+    .popover-body {
+      color: $dark-text;
+    }
+  }
+
+  .tooltip-inner {
+    background-color: $dark-surface-overlay;
+    color: $dark-text;
+  }
+
+  // ===== Progress bars =====
+  .progress {
+    background-color: $dark-surface;
+  }
+
+  // ===== Jumbotron =====
+  .jumbotron {
+    background-color: $dark-surface-raised;
+    color: $dark-text;
+  }
+
+  // ===== Footer =====
+  #footer.card-footer {
+    background-color: $dark-surface;
+    border-color: $dark-border;
+    color: $dark-text-muted;
+
+    a {
+      color: $dark-link;
+    }
+  }
+
+  // ===== Content container =====
+  #content {
+    background-color: $dark-bg;
+  }
+
+  // ===== Top nav search bar =====
+
+  .onms-search-input-wrapper {
+    background-color: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+
+    .search-input {
+      color: $dark-text !important;
+
+      &::placeholder {
+        color: $dark-text-muted !important;
+      }
+    }
+  }
+
+  // ===== OpenNMS-specific components =====
+
+  // btn-secondary (modern UI overrides make it white, needs dark treatment)
+  .btn-secondary {
+    background-color: $dark-surface-overlay;
+    border-color: $dark-border;
+    color: $dark-text;
+    &:hover, &:focus {
+      background-color: $dark-surface-overlay;
+      border-color: rgba(255, 255, 255, 0.24);
+      color: $dark-text;
+    }
+  }
+
+  // Labels
+  label, .col-form-label {
+    color: $dark-text-secondary;
+  }
+
+  // Content boxes
+  .box {
+    background: $dark-surface-raised;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    h2.module-title {
+      background-color: $dark-surface-overlay;
+      background-image: none;
+      border-bottom-color: $dark-border;
+      color: $dark-text;
+    }
+  }
+
+  // Dashboard severity blocks — replace hardcoded gradients with flat dark-mode colors
+  .CLEARED {
+    background-color: $dark-severity-cleared-border !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: #fff !important;
+  }
+  .NORMAL {
+    background-color: $dark-severity-normal-border !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: #fff !important;
+  }
+  .INDETERMINATE {
+    background-color: $dark-severity-indeterminate-border !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: #fff !important;
+  }
+  .WARNING {
+    background-color: $dark-severity-warning-border !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: #111 !important;
+  }
+  .MINOR {
+    background-color: $dark-severity-minor-border !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: #111 !important;
+  }
+  .MAJOR {
+    background-color: $dark-severity-major-border !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: #fff !important;
+  }
+  .CRITICAL {
+    background-color: $dark-severity-critical-border !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: #fff !important;
+  }
+
+  // Node header
+  .nodeHeader {
+    background-color: $dark-surface-raised;
+    color: $dark-text;
+  }
+
+  // Resource graph sidebar
+  .resource-graphs-sidebar .nav > li > a {
+    color: $dark-text-muted;
+  }
+
+  .resource-graphs-sidebar .nav > li > a.active,
+  .resource-graphs-sidebar .nav > li > a:hover,
+  .resource-graphs-sidebar .nav > li > a:focus {
+    color: $dark-link;
+    border-left-color: $dark-link;
+  }
+
+  // Dashboard severity classes (keep severity colors readable on dark bg)
+  .dashboard .box {
+    border-bottom-color: $dark-border;
+
+    .alarm, .outage {
+      border-color: $dark-border;
+    }
+  }
+
+  // Severity table row overrides for dark mode
+  // Need !important to beat the severity mixin's hardcoded color: black
+  .severity {
+    .severity-critical, .severity-Critical {
+      background-color: $dark-severity-critical-bg !important;
+      border-left: 3px solid $dark-severity-critical-border;
+      color: $dark-text !important;
+      background-image: none !important;
+      a { color: $dark-link !important; }
+    }
+    .severity-major, .severity-Major {
+      background-color: $dark-severity-major-bg !important;
+      border-left: 3px solid $dark-severity-major-border;
+      color: $dark-text !important;
+      background-image: none !important;
+      a { color: $dark-link !important; }
+    }
+    .severity-minor, .severity-Minor {
+      background-color: $dark-severity-minor-bg !important;
+      border-left: 3px solid $dark-severity-minor-border;
+      color: $dark-text !important;
+      background-image: none !important;
+      a { color: $dark-link !important; }
+    }
+    .severity-warning, .severity-Warning {
+      background-color: $dark-severity-warning-bg !important;
+      border-left: 3px solid $dark-severity-warning-border;
+      color: $dark-text !important;
+      background-image: none !important;
+      a { color: $dark-link !important; }
+    }
+    .severity-indeterminate, .severity-Indeterminate {
+      background-color: $dark-severity-indeterminate-bg !important;
+      border-left: 3px solid $dark-severity-indeterminate-border;
+      color: $dark-text !important;
+      background-image: none !important;
+      a { color: $dark-link !important; }
+    }
+    .severity-normal, .severity-Normal {
+      background-color: $dark-severity-normal-bg !important;
+      border-left: 3px solid $dark-severity-normal-border;
+      color: $dark-text !important;
+      background-image: none !important;
+      a { color: $dark-link !important; }
+    }
+    .severity-cleared, .severity-Cleared {
+      background-color: $dark-severity-cleared-bg !important;
+      border-left: 3px solid $dark-severity-cleared-border;
+      color: $dark-text !important;
+      background-image: none !important;
+      a { color: $dark-link !important; }
+    }
+
+    // Also override thead.dark in severity tables
+    thead.dark th {
+      background-color: $dark-surface-overlay !important;
+      color: $dark-text-secondary !important;
+    }
+  }
+
+  // Availability box
+  #availability-box {
+    color: $dark-text;
+
+    a { color: $dark-link !important; }
+
+    .percent {
+      color: $dark-text !important;
+    }
+
+    // Timeline header/bar PNGs are server-rendered with black text.
+    // Invert them so black text becomes white on dark backgrounds.
+    .interface.header img,
+    .service.timeline img,
+    .service.timeline span img {
+      filter: invert(1) hue-rotate(180deg);
+    }
+
+    // Timeline HTML fragments (loaded via data-src) also need inverted text
+    .service.timeline span {
+      filter: invert(1) hue-rotate(180deg);
+    }
+  }
+
+  // ── C3.js charts (Status Overview donut charts) ────────────────────
+  .c3 text {
+    fill: $dark-text !important;
+  }
+
+  .c3-tooltip {
+    background-color: $dark-surface-overlay !important;
+    color: $dark-text !important;
+    border-color: $dark-border !important;
+
+    th {
+      background-color: $dark-surface-raised !important;
+      color: $dark-text !important;
+    }
+
+    td {
+      background-color: $dark-surface-overlay !important;
+      color: $dark-text !important;
+      border-color: $dark-border !important;
+    }
+  }
+
+  .c3-legend-background {
+    fill: $dark-surface-raised !important;
+    stroke: $dark-border !important;
+  }
+
+  // ── Backshift / Flot graph containers ──────────────────────────────
+  .graph-container,
+  .graph-aux-controls {
+    color: $dark-text;
+  }
+
+  #graph-results .card {
+    border-color: $dark-border !important;
+    box-shadow: none;
+  }
+
+  .graph-aux-controls {
+    background-color: $dark-surface-raised !important;
+    border-color: $dark-border !important;
+  }
+
+  #graph-results .form-group.form-row {
+    background: $dark-surface-raised !important;
+    border-color: $dark-border !important;
+    color: $dark-text;
+  }
+
+  // Flot renders tick labels as absolutely-positioned DOM divs — CSS works here.
+  .flot-tick-label,
+  .flot-x-axis .flot-tick-label,
+  .flot-y-axis .flot-tick-label {
+    color: $dark-text-secondary !important;
+  }
+
+  // Flot legend: the outer table has a hardcoded white bgcolor via inline style
+  .legend > div {
+    background-color: $dark-surface-raised !important;
+    border-color: $dark-border !important;
+  }
+  .legend table {
+    color: $dark-text !important;
+  }
+  .legendLabel {
+    color: $dark-text !important;
+  }
+
+  // flot-datatable "Data" panel — the plugin hard-codes background:white as an
+  // inline style, so !important is required to win specificity.
+  .flot-datatable-data {
+    background: $dark-surface !important;
+    color: $dark-text !important;
+    border: 1px solid $dark-border !important;
+
+    table {
+      color: $dark-text !important;
+
+      th {
+        background: $dark-surface-raised !important;
+        color: $dark-text !important;
+        border-color: $dark-border !important;
+      }
+
+      td {
+        color: $dark-text !important;
+        border-color: $dark-border !important;
+      }
+
+      tr:hover td {
+        background: $dark-surface-raised !important;
+      }
+    }
+
+    input[type="checkbox"] {
+      accent-color: $dark-link;
+    }
+  }
+
+  // flot-datatable tab strip (Graph / Data)
+  .flot-datatable-tabs {
+    background: $dark-surface-raised !important;
+    border-bottom: 1px solid $dark-border !important;
+  }
+  .flot-datatable-tab {
+    color: $dark-text-secondary !important;
+    background: $dark-surface-raised !important;
+    border-color: $dark-border !important;
+
+    &:hover {
+      color: $dark-text !important;
+      background: $dark-surface-overlay !important;
+    }
+  }
+
+  // Vaadin iframe pages
+  iframe.vaadin-fullscreen {
+    border-color: $dark-border;
+  }
+
+  // Close buttons
+  .close {
+    color: $dark-text;
+    text-shadow: none;
+    opacity: 0.7;
+
+    &:hover {
+      color: $dark-text;
+      opacity: 1;
+    }
+  }
+
+  // HR
+  hr {
+    border-top-color: $dark-border;
+  }
+
+  // Code blocks
+  code {
+    background: rgba(110, 168, 254, 0.10);
+    color: $dark-link;
+  }
+
+  pre {
+    background-color: $dark-bg;
+    border-color: $dark-border;
+    color: $dark-text-secondary;
+
+    code {
+      background: transparent;
+      color: inherit;
+    }
+  }
+
+  kbd {
+    background-color: $dark-surface-overlay;
+    color: $dark-text;
+  }
+
+  // Icon color override
+  .icon-black {
+    color: $dark-text;
+  }
+
+  // Bootbox modal overrides
+  .bootbox .modal-header h4 {
+    color: $dark-text;
+  }
+
+  // Scrollbar styling (Webkit browsers)
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: $dark-surface;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  // Firefox scrollbar styling
+  scrollbar-color: rgba(255, 255, 255, 0.2) $dark-surface;
+
+  // ── Geo Map / Leaflet ──────────────────────────────────────────────
+  .leaflet-container {
+    background: $dark-surface;
+  }
+
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip {
+    background: $dark-surface-raised;
+    color: $dark-text;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border: 1px solid $dark-border;
+  }
+
+  .leaflet-control-zoom a,
+  .leaflet-control-layers,
+  .leaflet-bar a {
+    background-color: $dark-surface-raised !important;
+    color: $dark-text !important;
+    border-color: $dark-border !important;
+  }
+
+  .leaflet-control-zoom a:hover,
+  .leaflet-bar a:hover {
+    background-color: $dark-surface-overlay !important;
+  }
+
+  .leaflet-control-attribution {
+    background: rgba(26, 26, 26, 0.8) !important;
+    color: $dark-text-muted !important;
+
+    a {
+      color: $dark-link !important;
+    }
+  }
+
+  .geomap .leaflet-container .leaflet-control .selected {
+    background-color: $dark-surface-overlay !important;
+  }
+
+  .geomap table.node-marker-list {
+    color: $dark-text;
+
+    td, th {
+      border-color: $dark-border;
+    }
+  }
+
+  // Geomap severity popups — ensure white text is readable on dark popup bg
+  .geomap .severity {
+    border-radius: 3px;
+  }
+
+  .geomap .severity a {
+    color: #fff !important;
+  }
+
+  .geomap .marker-cluster div {
+    color: #fff !important;
+  }
+
+  // Invert map tiles for dark mode (keeps colors recognizable, darkens whites).
+  // Only the base tile layer is inverted — marker/overlay panes get a counter-filter
+  // to undo the inversion and preserve severity color semantics (red=critical, green=normal).
+  .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+  }
+
+  // Counter-invert marker, overlay, and popup panes so severity colors are NOT corrupted.
+  // Red stays red (critical), green stays green (normal), etc.
+  .leaflet-overlay-pane,
+  .leaflet-marker-pane,
+  .leaflet-shadow-pane,
+  .leaflet-popup-pane,
+  .leaflet-tooltip-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(1.11) contrast(1.11);
+  }
+
+  // ── AngularJS interface status row backgrounds ─────────────────────
+  .onms-interface-status-up {
+    background: rgba(76, 157, 69, 0.15) !important;
+    color: $dark-text;
+  }
+  .onms-interface-status-down {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: $dark-text;
+  }
+  .onms-interface-status-unknown {
+    background: rgba(110, 168, 254, 0.15) !important;
+    color: $dark-text;
+  }
+  .onms-interface-status-indeterminate {
+    background: rgba(246, 206, 205, 0.15) !important;
+    color: $dark-text;
+  }
+
+  // ── AngularJS UI Bootstrap tabs (uib-tabset) ──────────────────────
+  .nav-tabs > li > a,
+  [uib-tabset] .nav-tabs > li > a {
+    color: $dark-text-muted !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+
+    &:hover, &:focus {
+      color: $dark-text !important;
+      border-color: transparent transparent $dark-border !important;
+      background-color: transparent !important;
+    }
+  }
+
+  .nav-tabs > li.active > a,
+  .nav-tabs > li > a.active,
+  [uib-tabset] .nav-tabs > li.active > a {
+    color: $dark-text !important;
+    background-color: transparent !important;
+    border-color: transparent transparent $dark-link !important;
+  }
+
+  // ── Pagination ─────────────────────────────────────────────────────
+  .pagination .page-link,
+  .page-link {
+    background-color: $dark-surface;
+    border-color: $dark-border;
+    color: $dark-link;
+  }
+
+  .pagination .page-item.active .page-link,
+  .page-item.active .page-link {
+    background-color: rgba(110, 168, 254, 0.2);
+    border-color: $dark-link;
+    color: $dark-link;
+  }
+
+  .pagination .page-item.disabled .page-link,
+  .page-item.disabled .page-link {
+    background-color: $dark-surface-raised;
+    border-color: $dark-border;
+    color: $dark-text-muted;
+  }
+
+  // ── Catch-all: force any remaining bare white backgrounds ─────────
+  .container-fluid,
+  .container,
+  .row,
+  .col, [class*="col-"] {
+    background-color: transparent;
+  }
+
+  .table-responsive {
+    background-color: transparent;
+  }
+
+  // List groups
+  .list-group-item {
+    background-color: $dark-surface-raised;
+    border-color: $dark-border;
+    color: $dark-text;
+
+    &.active {
+      background-color: rgba(110, 168, 254, 0.15);
+      border-color: $dark-link;
+      color: $dark-link;
+    }
+  }
+
+  // Popovers
+  .popover {
+    background-color: $dark-surface-overlay;
+    border-color: $dark-border;
+    color: $dark-text;
+
+    .popover-header {
+      background-color: $dark-surface-raised;
+      border-bottom-color: $dark-border;
+      color: $dark-text;
+    }
+
+    .popover-body {
+      color: $dark-text;
+    }
+
+    .arrow::before {
+      border-color: $dark-border;
+    }
+    .arrow::after {
+      border-color: $dark-surface-overlay;
+    }
+  }
+
+  // Tooltip
+  .tooltip-inner {
+    background-color: $dark-surface-overlay;
+    color: $dark-text;
+  }
+
+  // Badge overrides
+  .badge-secondary {
+    background-color: $dark-surface-overlay;
+    color: $dark-text;
+  }
+
+  .badge-light {
+    background-color: $dark-surface-raised;
+    color: $dark-text;
+  }
+
+  // ===================================================================
+  // Vaadin 8 Dark Mode Overrides
+  // ===================================================================
+  // Vaadin pages (Surveillance Views, Topology, Dashboard, BSM Admin,
+  // JMX Config Generator) use the Reindeer/Runo legacy theme with
+  // hardcoded light colors. These overrides make them honor dark mode.
+
+  // ── NUCLEAR REINDEER RESET ───────────────────────────────────────
+  // The Reindeer legacy-styles.css sets white/light backgrounds, gradient
+  // images, and text-shadows on nearly every widget. This broad reset
+  // kills them in one shot so individual overrides below can set dark values
+  // cleanly without fighting specificity.
+  [class*="v-"] {
+    text-shadow: none !important;
+  }
+
+  .v-ui,
+  .v-app,
+  .v-verticallayout,
+  .v-horizontallayout,
+  .v-orderedlayout,
+  .v-gridlayout,
+  .v-csslayout,
+  .v-customlayout,
+  .v-customcomponent,
+  .v-absolutelayout,
+  .v-absolutelayout-wrapper,
+  .v-formlayout,
+  .v-formlayout-row,
+  .v-formlayout-contentcell,
+  .v-formlayout-captioncell,
+  .v-formlayout-errorcell,
+  .v-slot,
+  .v-expand,
+  .v-spacing,
+  .v-margin-top,
+  .v-margin-bottom,
+  .v-margin-left,
+  .v-margin-right {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: $dark-text !important;
+  }
+
+  // ── Core Vaadin UI background ──────────────────────────────────────
+  .v-ui {
+    background: $dark-bg !important;
+    color: $dark-text !important;
+  }
+
+  .v-app {
+    background: $dark-bg !important;
+    color: $dark-text !important;
+  }
+
+  // Generated body (standalone Vaadin pages)
+  &.v-generated-body {
+    background: $dark-bg !important;
+  }
+
+  // ── Vaadin Panels ──────────────────────────────────────────────────
+  .v-panel {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-panel-content {
+    background: $dark-surface !important;
+    color: $dark-text !important;
+  }
+
+  .v-panel-caption,
+  .v-panel-caption-light,
+  .v-panel-caption-novscroll {
+    background: $dark-surface-raised !important;
+    color: $dark-text !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-panel-deco {
+    background: transparent !important;
+  }
+
+  // ── Vaadin Tables ──────────────────────────────────────────────────
+  .v-table {
+    background: $dark-surface !important;
+    color: $dark-text !important;
+  }
+
+  .v-table-header-wrap,
+  .v-table-header {
+    background: $dark-surface-raised !important;
+    color: $dark-text-secondary !important;
+  }
+
+  .v-table-header-cell {
+    border-color: $dark-border !important;
+    background: $dark-surface-raised !important;
+    color: $dark-text-secondary !important;
+  }
+
+  .v-table-caption-container {
+    color: $dark-text-secondary !important;
+  }
+
+  .v-table-body {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-table-row,
+  .v-table-row-odd {
+    background: $dark-surface !important;
+    color: $dark-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04) !important;
+    }
+  }
+
+  .v-table-row-odd {
+    background: rgba(255, 255, 255, 0.02) !important;
+  }
+
+  .v-table-cell-content {
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-table-cell-wrapper {
+    color: $dark-text !important;
+  }
+
+  .v-table-resizer {
+    border-color: $dark-border !important;
+  }
+
+  .v-table-focus {
+    outline-color: $dark-link !important;
+  }
+
+  .v-table-column-selector {
+    background: $dark-surface-overlay !important;
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin Table Alarm Severity Rows (dark mode) ───────────────────
+  .v-table-row-alarm-critical,
+  .v-table-row-alarm-critical-noack {
+    background-color: $dark-severity-critical-bg !important;
+    border-top-color: $dark-severity-critical-border !important;
+    color: $dark-text !important;
+  }
+  .v-table-row-alarm-critical.v-table-row-odd,
+  .v-table-row-alarm-critical-noack.v-table-row-odd {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+  }
+
+  .v-table-row-alarm-major,
+  .v-table-row-alarm-major-noack {
+    background-color: $dark-severity-major-bg !important;
+    border-top-color: $dark-severity-major-border !important;
+    color: $dark-text !important;
+  }
+  .v-table-row-alarm-major.v-table-row-odd,
+  .v-table-row-alarm-major-noack.v-table-row-odd {
+    background-color: rgba(249, 115, 22, 0.15) !important;
+  }
+
+  .v-table-row-alarm-minor,
+  .v-table-row-alarm-minor-noack {
+    background-color: $dark-severity-minor-bg !important;
+    border-top-color: $dark-severity-minor-border !important;
+    color: $dark-text !important;
+  }
+  .v-table-row-alarm-minor.v-table-row-odd,
+  .v-table-row-alarm-minor-noack.v-table-row-odd {
+    background-color: rgba(245, 158, 11, 0.14) !important;
+  }
+
+  .v-table-row-alarm-warning,
+  .v-table-row-alarm-warning-noack {
+    background-color: $dark-severity-warning-bg !important;
+    border-top-color: $dark-severity-warning-border !important;
+    color: $dark-text !important;
+  }
+  .v-table-row-alarm-warning.v-table-row-odd,
+  .v-table-row-alarm-warning-noack.v-table-row-odd {
+    background-color: rgba(234, 179, 8, 0.14) !important;
+  }
+
+  .v-table-row-alarm-indeterminate,
+  .v-table-row-alarm-indeterminate-noack {
+    background-color: $dark-severity-indeterminate-bg !important;
+    border-top-color: $dark-severity-indeterminate-border !important;
+    color: $dark-text !important;
+  }
+  .v-table-row-alarm-indeterminate.v-table-row-odd,
+  .v-table-row-alarm-indeterminate-noack.v-table-row-odd {
+    background-color: rgba(59, 130, 246, 0.14) !important;
+  }
+
+  .v-table-row-alarm-normal,
+  .v-table-row-alarm-normal-noack {
+    background-color: $dark-severity-normal-bg !important;
+    border-top-color: $dark-severity-normal-border !important;
+    color: $dark-text !important;
+  }
+  .v-table-row-alarm-normal.v-table-row-odd,
+  .v-table-row-alarm-normal-noack.v-table-row-odd {
+    background-color: rgba(34, 197, 94, 0.14) !important;
+  }
+
+  .v-table-row-alarm-cleared,
+  .v-table-row-alarm-cleared-noack {
+    background-color: $dark-severity-cleared-bg !important;
+    border-top-color: $dark-severity-cleared-border !important;
+    color: $dark-text !important;
+  }
+  .v-table-row-alarm-cleared.v-table-row-odd,
+  .v-table-row-alarm-cleared-noack.v-table-row-odd {
+    background-color: rgba(156, 163, 175, 0.10) !important;
+  }
+
+  // Kill the severity background images in dark mode
+  .v-table-cell-content-bright {
+    background-image: none !important;
+  }
+
+  // ── Vaadin Buttons ─────────────────────────────────────────────────
+  .v-button {
+    background: $dark-surface-overlay !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+
+    &:hover,
+    &:focus {
+      background: rgba(255, 255, 255, 0.10) !important;
+    }
+  }
+
+  .v-button-wrap {
+    background: transparent !important;
+    background-image: none !important;
+    color: $dark-text !important;
+  }
+
+  .v-button-caption {
+    color: $dark-text !important;
+  }
+
+  .v-button-caption-bold {
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin Links ───────────────────────────────────────────────────
+  .v-link a span,
+  .v-link a:link span,
+  .v-link a:visited span {
+    color: $dark-link !important;
+  }
+
+  .v-link a:hover span {
+    color: $dark-link-hover !important;
+  }
+
+  // ── Vaadin Forms ───────────────────────────────────────────────────
+  .v-textfield,
+  .v-textarea,
+  .v-richtextarea {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+
+    &:focus {
+      border-color: $dark-link !important;
+    }
+  }
+
+  .v-select-select,
+  .v-filterselect-input {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-filterselect-button {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-filterselect-suggestpopup {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-checkbox > label,
+  .v-radiobutton > label {
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin Labels ──────────────────────────────────────────────────
+  .v-label {
+    color: $dark-text !important;
+  }
+
+  .v-caption {
+    color: $dark-text-secondary !important;
+  }
+
+  // ── Vaadin MenuBar ─────────────────────────────────────────────────
+  .v-menubar {
+    background: $dark-surface-raised !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-menubar-menuitem {
+    color: $dark-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+  }
+
+  .v-menubar-menuitem-selected {
+    background: rgba(110, 168, 254, 0.15) !important;
+    color: $dark-link !important;
+  }
+
+  .v-menubar-submenu {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .v-menubar-submenu .v-menubar-menuitem {
+    color: $dark-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+  }
+
+  // ── Vaadin TabSheet ────────────────────────────────────────────────
+  .v-tabsheet-tabcontainer {
+    background: $dark-surface-raised !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-tabsheet-tabitem .v-caption {
+    color: $dark-text-muted !important;
+    background: transparent !important;
+  }
+
+  .v-tabsheet-tabitem-selected .v-caption {
+    color: $dark-link !important;
+    border-bottom-color: $dark-link !important;
+  }
+
+  .v-tabsheet-content {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-tabsheet-deco {
+    background: $dark-border !important;
+  }
+
+  // ── Vaadin Windows / Dialogs ───────────────────────────────────────
+  .v-window {
+    background: $dark-surface-raised !important;
+    border-color: $dark-border !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .v-window-header {
+    color: $dark-text !important;
+  }
+
+  .v-window-contents {
+    background: $dark-surface !important;
+    color: $dark-text !important;
+  }
+
+  .v-window-outerheader,
+  .v-window-header {
+    background: $dark-surface-overlay !important;
+    color: $dark-text !important;
+  }
+
+  .v-window-footer {
+    background: $dark-surface-overlay !important;
+    border-top-color: $dark-border !important;
+  }
+
+  // ── Vaadin Accordion ───────────────────────────────────────────────
+  .v-accordion-item-caption {
+    background: $dark-surface-raised !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-accordion-item-content {
+    background: $dark-surface !important;
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin Notifications ───────────────────────────────────────────
+  .v-Notification {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+
+    h1, .v-Notification-caption {
+      color: $dark-text !important;
+    }
+
+    p, .v-Notification-description {
+      color: $dark-text-secondary !important;
+    }
+  }
+
+  // ── Vaadin Tree ────────────────────────────────────────────────────
+  .v-tree-node {
+    color: $dark-text !important;
+  }
+
+  .v-tree-node-caption {
+    color: $dark-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04) !important;
+    }
+  }
+
+  .v-tree-node-selected {
+    background: rgba(110, 168, 254, 0.15) !important;
+    color: $dark-link !important;
+  }
+
+  // ── Vaadin Scrollbar / Layout ──────────────────────────────────────
+  .v-scrollable {
+    background: $dark-surface !important;
+  }
+
+  .v-absolutelayout-wrapper {
+    color: $dark-text !important;
+  }
+
+  .v-csslayout {
+    color: $dark-text !important;
+  }
+
+  .v-verticallayout,
+  .v-horizontallayout,
+  .v-gridlayout {
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin Loading Indicator ───────────────────────────────────────
+  .v-loading-indicator {
+    background-color: $dark-link !important;
+  }
+
+  // ── Surveillance View (dark mode) ──────────────────────────────────
+  .surveillance-view .v-table-cell-content {
+    background-color: $dark-surface !important;
+    color: $dark-text !important;
+  }
+
+  .surveillance-view .white,
+  .surveillance-view .v-table-cell-content-white {
+    color: $dark-text !important;
+    background-color: $dark-surface !important;
+    border-top-color: $dark-border !important;
+  }
+
+  .surveillance-view .critical,
+  .surveillance-view .v-table-cell-content-critical,
+  .surveillance-view .v-table-cell-content-critical-image {
+    color: $dark-text !important;
+    background-color: $dark-severity-critical-bg !important;
+    border-top-color: $dark-severity-critical-border !important;
+    background-image: none !important;
+  }
+
+  .surveillance-view .major,
+  .surveillance-view .v-table-cell-content-major,
+  .surveillance-view .v-table-cell-content-major-image {
+    color: $dark-text !important;
+    background-color: $dark-severity-major-bg !important;
+    border-top-color: $dark-severity-major-border !important;
+    background-image: none !important;
+  }
+
+  .surveillance-view .minor,
+  .surveillance-view .v-table-cell-content-minor,
+  .surveillance-view .v-table-cell-content-minor-image {
+    color: $dark-text !important;
+    background-color: $dark-severity-minor-bg !important;
+    border-top-color: $dark-severity-minor-border !important;
+    background-image: none !important;
+  }
+
+  .surveillance-view .warning,
+  .surveillance-view .v-table-cell-content-warning,
+  .surveillance-view .v-table-cell-content-warning-image {
+    color: $dark-text !important;
+    background-color: $dark-severity-warning-bg !important;
+    border-top-color: $dark-severity-warning-border !important;
+    background-image: none !important;
+  }
+
+  .surveillance-view .indeterminate,
+  .surveillance-view .v-table-cell-content-indeterminate,
+  .surveillance-view .v-table-cell-content-indeterminate-image {
+    color: $dark-text !important;
+    background-color: $dark-severity-indeterminate-bg !important;
+    border-top-color: $dark-severity-indeterminate-border !important;
+    background-image: none !important;
+  }
+
+  .surveillance-view .normal,
+  .surveillance-view .v-table-cell-content-normal,
+  .surveillance-view .v-table-cell-content-normal-image,
+  .surveillance-view .v-table-cell-content-rtc-normal {
+    color: $dark-text !important;
+    background-color: $dark-severity-normal-bg !important;
+    border-top-color: $dark-severity-normal-border !important;
+    background-image: none !important;
+  }
+
+  .surveillance-view .cleared,
+  .surveillance-view .v-table-cell-content-cleared,
+  .surveillance-view .v-table-cell-content-cleared-image {
+    color: $dark-text !important;
+    background-color: $dark-severity-cleared-bg !important;
+    border-top-color: $dark-severity-cleared-border !important;
+    background-image: none !important;
+  }
+
+  .surveillance-view .v-table-cell-content-rtc-critical {
+    color: $dark-text !important;
+    background-color: $dark-severity-critical-bg !important;
+    border-top-color: $dark-severity-critical-border !important;
+    background-image: none !important;
+  }
+
+  .v-caption-surveillance-view {
+    background-color: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .surveillance-view .link {
+    color: $dark-link !important;
+  }
+
+  // ── Dashboard / Ops Board (dark mode) ──────────────────────────────
+  .dashboard.v-app {
+    background: $dark-bg !important;
+    background-image: none !important;
+  }
+
+  .dashboard .v-portlet-slot {
+    background: $dark-surface !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .dashboard .v-portlet-header {
+    background: $dark-surface-overlay !important;
+    background-image: none !important;
+    color: $dark-text !important;
+    text-shadow: none !important;
+  }
+
+  .dashboard .v-portlet-content-wrapper {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+  }
+
+  .dashboard .header {
+    background-color: $dark-surface-raised !important;
+    border-color: $dark-border !important;
+  }
+
+  .dashboard .wallboard-board {
+    color: $dark-link !important;
+    background: $dark-surface !important;
+  }
+
+  .dashboard .wallboard-board .progress-paused {
+    background: rgba(249, 115, 22, 0.2) !important;
+    border-color: $dark-severity-major-border !important;
+    color: $dark-text !important;
+  }
+
+  .dashboard .v-panel-caption,
+  .dashboard .v-panel-caption-light {
+    color: $dark-text !important;
+    background: $dark-surface-raised !important;
+    background-image: none !important;
+  }
+
+  // Dashboard config UI
+  .configuration-title,
+  .help-title {
+    color: $dark-text !important;
+  }
+
+  .help-content {
+    color: $dark-text-secondary !important;
+  }
+
+  .help-table {
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .help-table-cell {
+    background: $dark-surface !important;
+    color: $dark-text !important;
+  }
+
+  // Panel captions in dashboard context
+  .novscroll,
+  .v-panel-content-novscroll {
+    background: $dark-surface !important;
+  }
+
+  // Dashboard severity classes
+  .severity {
+    color: $dark-text !important;
+    background-image: none !important;
+
+    &.Critical {
+      background-color: $dark-severity-critical-bg !important;
+      border-top-color: $dark-severity-critical-border !important;
+      background-image: none !important;
+    }
+    &.Major {
+      background-color: $dark-severity-major-bg !important;
+      border-top-color: $dark-severity-major-border !important;
+      background-image: none !important;
+    }
+    &.Minor {
+      background-color: $dark-severity-minor-bg !important;
+      border-top-color: $dark-severity-minor-border !important;
+      background-image: none !important;
+    }
+    &.Warning {
+      background-color: $dark-severity-warning-bg !important;
+      border-top-color: $dark-severity-warning-border !important;
+      background-image: none !important;
+    }
+    &.Indeterminate {
+      background-color: $dark-severity-indeterminate-bg !important;
+      border-top-color: $dark-severity-indeterminate-border !important;
+      background-image: none !important;
+    }
+    &.Normal {
+      background-color: $dark-severity-normal-bg !important;
+      border-top-color: $dark-severity-normal-border !important;
+      background-image: none !important;
+    }
+    &.Cleared {
+      background-color: $dark-severity-cleared-bg !important;
+      border-top-color: $dark-severity-cleared-border !important;
+      background-image: none !important;
+    }
+  }
+
+  // Alert details dashlet
+  .alert-details-dashlet.onms-table {
+    color: $dark-text !important;
+  }
+
+  .alert-details-dashlet .onms-header-cell {
+    background-color: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .alert-details-dashlet .onms-cell {
+    background-color: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .alert-details-dashlet .Critical {
+    background-color: $dark-severity-critical-bg !important;
+    background-image: none !important;
+  }
+  .alert-details-dashlet .Major {
+    background-color: $dark-severity-major-bg !important;
+    background-image: none !important;
+  }
+  .alert-details-dashlet .Minor {
+    background-color: $dark-severity-minor-bg !important;
+    background-image: none !important;
+  }
+  .alert-details-dashlet .Warning {
+    background-color: $dark-severity-warning-bg !important;
+    background-image: none !important;
+  }
+  .alert-details-dashlet .Indeterminate {
+    background-color: $dark-severity-indeterminate-bg !important;
+    background-image: none !important;
+  }
+  .alert-details-dashlet .Normal {
+    background-color: $dark-severity-normal-bg !important;
+    background-image: none !important;
+  }
+  .alert-details-dashlet .Cleared {
+    background-color: $dark-severity-cleared-bg !important;
+    background-image: none !important;
+  }
+
+  // ── Topology Map (dark mode) ───────────────────────────────────────
+  .v-app.topo_default {
+    background: $dark-bg !important;
+    color: $dark-text !important;
+  }
+
+  .map-content {
+    background-color: $dark-bg !important;
+    border-left-color: $dark-border !important;
+  }
+
+  .info-panel-component {
+    background-color: $dark-surface !important;
+    color: $dark-text !important;
+  }
+
+  .info-panel-area {
+    background-color: $dark-surface !important;
+  }
+
+  .info-panel-item-label {
+    color: $dark-text !important;
+  }
+
+  .toolbar {
+    background-color: $dark-surface !important;
+    border-left-color: $dark-border !important;
+  }
+
+  .toolbar .toolbar-component-group {
+    background-color: $dark-surface-raised !important;
+    color: $dark-text-secondary !important;
+  }
+
+  .toolbar .toolbar-group-item {
+    background-image: none !important;
+    color: $dark-text-secondary !important;
+
+    &:hover {
+      color: $dark-link !important;
+    }
+
+    &.selected,
+    &.selected:hover {
+      background-color: rgba(110, 168, 254, 0.2) !important;
+      color: $dark-link !important;
+    }
+  }
+
+  .toolbar .layout.selected {
+    background-color: rgba(110, 168, 254, 0.2) !important;
+    color: $dark-link !important;
+  }
+
+  .toggle-button {
+    background-color: $dark-surface-overlay !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+    filter: invert(1) !important;
+  }
+
+  // Topology HUD display
+  .topoHudDisplay {
+    border-color: $dark-border !important;
+  }
+
+  .topoHudDisplay td,
+  .topoHudDisplay th {
+    background-color: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  // Topology SVG labels and elements
+  .vertex-label {
+    fill: $dark-text !important;
+  }
+
+  .vertex .navigate-to {
+    fill: $dark-text !important;
+  }
+
+  .vertex .navigate-to .text {
+    fill: $dark-text-secondary !important;
+    stroke: $dark-surface !important;
+  }
+
+  .edge {
+    stroke: $dark-border !important;
+  }
+
+  // GWT SuggestBox (topology search)
+  .gwt-SuggestBoxPopup {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .gwt-SuggestBoxPopup .suggestPopupContent {
+    background: $dark-surface-overlay !important;
+  }
+
+  .gwt-SuggestBoxPopup .item {
+    color: $dark-text !important;
+  }
+
+  .gwt-SuggestBoxPopup .item-selected {
+    background: rgba(110, 168, 254, 0.15) !important;
+    color: $dark-link !important;
+  }
+
+  // Search token styling
+  .search-token-field {
+    color: $dark-text !important;
+    background-color: $dark-surface-raised !important;
+  }
+
+  // Topology threshold dialog
+  .threshold .v-table-cell-content-selected {
+    background-color: rgba(110, 168, 254, 0.2) !important;
+  }
+
+  // Icon selection dialog
+  .icon-selection-component {
+    background-color: $dark-surface !important;
+  }
+
+  .svgIconOverlay.selected {
+    stroke: $dark-link !important;
+  }
+
+  // ── BSM Admin greyed rows ──────────────────────────────────────────
+  .v-table-cell-content-grey {
+    opacity: 0.4 !important;
+  }
+
+  // ── Vaadin Select / NativeSelect ───────────────────────────────────
+  .v-select {
+    .v-select-select {
+      background: $dark-surface !important;
+      border-color: $dark-border !important;
+      color: $dark-text !important;
+    }
+  }
+
+  // ── Vaadin Toolbar / Layout backgrounds ────────────────────────────
+  .v-slot,
+  .v-expand {
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin SplitPanel (dark mode) ─────────────────────────────────
+  .v-splitpanel-horizontal,
+  .v-splitpanel-vertical {
+    background: $dark-surface !important;
+  }
+
+  .v-splitpanel-hsplitter,
+  .v-splitpanel-vsplitter {
+    background: $dark-border !important;
+    background-image: none !important;
+
+    div {
+      background: transparent !important;
+      background-image: none !important;
+    }
+  }
+
+  // ── Vaadin PopupView (dark mode) ──────────────────────────────────
+  .v-popupview-popup {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  // ── Vaadin DateField (dark mode) ──────────────────────────────────
+  .v-datefield [class*="textfield"] {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-datefield [class*="button"] {
+    background: $dark-surface-overlay !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-datefield-calendarpanel {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-datefield-calendarpanel-day {
+    color: $dark-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+  }
+
+  .v-datefield-calendarpanel-day-selected {
+    background: $dark-link !important;
+    color: #fff !important;
+  }
+
+  .v-datefield-calendarpanel-day-offmonth {
+    color: $dark-text-muted !important;
+  }
+
+  // ── Vaadin Tooltip (dark mode) ────────────────────────────────────
+  .v-tooltip {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-tooltip .v-tooltip-text {
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin ContextMenu (dark mode) ────────────────────────────────
+  .v-contextmenu {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .v-contextmenu .v-contextmenu-menuitem {
+    color: $dark-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+  }
+
+  // ── Vaadin Overlay / Backdrop (dark mode) ─────────────────────────
+  .v-window-modalitycurtain {
+    background: rgba(0, 0, 0, 0.6) !important;
+  }
+
+  // ── Nuclear Reindeer gradient + text-shadow kill (dark mode) ──────
+  // Ensure ALL Vaadin elements with Reindeer gradients are neutralized
+  .v-panel-caption,
+  .v-panel-caption-light,
+  .v-table-header-cell,
+  .v-table-column-selector,
+  .v-button,
+  .v-button-wrap,
+  .v-nativebutton,
+  .v-menubar,
+  .v-menubar-menuitem,
+  .v-tabsheet-tabitem .v-caption,
+  .v-tabsheet-tabcontainer,
+  .v-accordion-item-caption,
+  .v-window-outerheader,
+  .v-window-header,
+  .v-window-footer,
+  .v-filterselect-button,
+  .v-datefield [class*="button"],
+  .v-splitpanel-hsplitter div,
+  .v-splitpanel-vsplitter div,
+  .v-Notification {
+    background-image: none !important;
+    text-shadow: none !important;
+  }
+
+  // ── Topology Map (dark mode extended) ─────────────────────────────
+  .v-app.topo_default .v-csslayout,
+  .v-app.topo_default .v-verticallayout,
+  .v-app.topo_default .v-horizontallayout {
+    background: transparent !important;
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin NativeButton (dark mode) ───────────────────────────────
+  .v-nativebutton {
+    background: $dark-surface-overlay !important;
+    background-image: none !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.10) !important;
+    }
+  }
+
+  // ── Vaadin ProgressBar (dark mode) ────────────────────────────────
+  .v-progressbar-wrapper {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-progressbar-indicator {
+    background: $dark-link !important;
+    background-image: none !important;
+  }
+
+  // ── Vaadin Slider (dark mode) ─────────────────────────────────────
+  .v-slider-base {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+  }
+
+  .v-slider-handle {
+    background: $dark-link !important;
+    background-image: none !important;
+    border-color: $dark-link !important;
+  }
+
+  // ── Generated body backgrounds (dark mode) ────────────────────────
+  .v-verticallayout,
+  .v-horizontallayout,
+  .v-gridlayout,
+  .v-csslayout,
+  .v-absolutelayout-wrapper,
+  .v-formlayout,
+  .v-formlayout-row,
+  .v-formlayout-contentcell,
+  .v-formlayout-captioncell,
+  .v-formlayout-errorcell {
+    background: transparent !important;
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin Scrollable (dark mode) ─────────────────────────────────
+  .v-scrollable::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .v-scrollable::-webkit-scrollbar-track {
+    background: $dark-surface !important;
+  }
+
+  .v-scrollable::-webkit-scrollbar-thumb {
+    background: $dark-border !important;
+    border-radius: 4px;
+  }
+
+  // ── Vaadin ComboBox / FilterSelect popup (dark mode) ──────────────
+  .v-filterselect-suggestmenu {
+    background: $dark-surface-overlay !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .v-filterselect-suggestmenu .gwt-MenuItem {
+    color: $dark-text !important;
+
+    &:hover,
+    &.gwt-MenuItem-selected {
+      background: rgba(110, 168, 254, 0.15) !important;
+      color: $dark-link !important;
+    }
+  }
+
+  .v-filterselect-status {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text-muted !important;
+  }
+
+  // ── Vaadin NativeSelect (dark mode) ───────────────────────────────
+  .v-nativeselect select {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin Upload (dark mode) ─────────────────────────────────────
+  .v-upload {
+    .v-button {
+      background: $dark-surface-overlay !important;
+      color: $dark-text !important;
+    }
+  }
+
+  // ── Vaadin Embedded / Image ───────────────────────────────────────
+  .v-image,
+  .v-embedded {
+    border-color: $dark-border !important;
+  }
+
+  // ── Reindeer-specific component backgrounds ───────────────────────
+  // The Reindeer theme sets explicit white/light backgrounds on these
+  // elements via legacy-styles.css. Override them all.
+  .v-panel-content-light,
+  .v-panel-light {
+    background: $dark-surface !important;
+    color: $dark-text !important;
+  }
+
+  .v-tabsheet-tabsheetpanel {
+    background: $dark-surface !important;
+  }
+
+  .v-tabsheet-tabs td {
+    background: transparent !important;
+  }
+
+  .v-tabsheet-scroller {
+    background: $dark-surface-raised !important;
+
+    button {
+      color: $dark-text !important;
+      filter: invert(1);
+    }
+  }
+
+  // ── Vaadin Error/Required indicators ──────────────────────────────
+  .v-errorindicator {
+    color: $dark-severity-critical-border !important;
+  }
+
+  .v-required-field-indicator {
+    color: $dark-severity-critical-border !important;
+  }
+
+  // ── Vaadin Info Panel (Topology sidebar) ──────────────────────────
+  .v-panel-info-panel,
+  .info-panel {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  .info-panel .v-label {
+    color: $dark-text !important;
+  }
+
+  // ── Vaadin Toolbar (Topology) ─────────────────────────────────────
+  .toolbar {
+    background: $dark-surface-raised !important;
+    border-color: $dark-border !important;
+  }
+
+  .toolbar .v-button {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: $dark-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+  }
+
+  // ── Vaadin Search Box / breadcrumb (Topology) ─────────────────────
+  .search-combobox {
+    .v-filterselect-input {
+      background: $dark-surface !important;
+      border-color: $dark-border !important;
+      color: $dark-text !important;
+    }
+  }
+
+  .v-breadcrumb {
+    background: transparent !important;
+    color: $dark-text-secondary !important;
+  }
+
+  // ── Confirmation/Alert dialogs ────────────────────────────────────
+  .v-window-modal-window,
+  .v-window-confirm-dialog {
+    background: $dark-surface-raised !important;
+
+    .v-window-contents {
+      background: $dark-surface !important;
+    }
+  }
+
+  // ── Table column sort indicator ───────────────────────────────────
+  .v-table-sort-indicator {
+    filter: invert(1) !important;
+  }
+
+  .v-table-header-cell-asc .v-table-sort-indicator,
+  .v-table-header-cell-desc .v-table-sort-indicator {
+    filter: invert(1) !important;
+  }
+
+  // ── Vaadin marked cell (surveillance view selection) ──────────────
+  td.v-table-cell-content.v-table-cell-content-marked {
+    background: rgba(255, 255, 255, 0.15) !important;
+    opacity: 0.7 !important;
+  }
+
+  // ── MIB Compiler / SNMP specific ──────────────────────────────────
+  .v-tree-node-invalid {
+    color: #ff6b6b !important;
+  }
+
+  // MIB console: inline <font color> tags need brighter variants for dark bg.
+  // Note: inline style="" attributes can't be overridden without !important and
+  // overly broad [style*="color:X"] selectors cause regressions — leave those alone.
+  font[color="green"] {
+    color: #6ee7b7 !important;  // brighter green
+  }
+
+  font[color="gray"] {
+    color: #9ca3af !important;  // lighter gray
+  }
+
+  font[color="orange"] {
+    color: #fbbf24 !important;  // brighter amber
+  }
+
+  font[color="red"] {
+    color: #f87171 !important;  // softer red
+  }
+
+  // MIB compiler Vaadin context menu (right-click tree)
+  .v-contextmenu {
+    background: $dark-surface-raised !important;
+    border: 1px solid $dark-border !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+
+    .v-contextmenu-item {
+      color: $dark-text !important;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+      }
+    }
+
+    .v-contextmenu-item-selected {
+      background: rgba(110, 168, 254, 0.15) !important;
+      color: $dark-link !important;
+    }
+  }
+
+  // ── JMX Config Generator steps ────────────────────────────────────
+  .v-panel-well {
+    background: $dark-surface !important;
+    border-color: $dark-border !important;
+    color: $dark-text !important;
+  }
+
+  // ── Catch-all for any remaining white backgrounds on .v-panel ─────
+  [class*="v-panel"] {
+    border-color: $dark-border !important;
+  }
+
+  // ── Wallboard preview / config ────────────────────────────────────
+  .wallboard-board {
+    background: $dark-surface !important;
+    color: $dark-link !important;
+  }
+
+  .wallboard-board .v-label {
+    color: $dark-text !important;
+  }
+}
