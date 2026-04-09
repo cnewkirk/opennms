@@ -161,16 +161,16 @@ const fetchData = async () => {
   try {
     const [srcTs, tgtTs, srcErr, tgtErr] = await Promise.allSettled([
       hasSrcIface.value
-        ? fetchInterfaceTimeSeries(props.labelData.srcNodeId!, props.labelData.srcIface!, start, end, 60_000, signal)
+        ? fetchInterfaceTimeSeries(props.labelData.srcNodeId!, props.labelData.srcIface!, start, end, 30_000, signal)
         : Promise.resolve(null),
       hasTgtIface.value
-        ? fetchInterfaceTimeSeries(props.labelData.tgtNodeId!, props.labelData.tgtIface!, start, end, 60_000, signal)
+        ? fetchInterfaceTimeSeries(props.labelData.tgtNodeId!, props.labelData.tgtIface!, start, end, 30_000, signal)
         : Promise.resolve(null),
       hasSrcIface.value
-        ? fetchInterfaceErrorsDiscards(props.labelData.srcNodeId!, props.labelData.srcIface!, start, end, 60_000, signal)
+        ? fetchInterfaceErrorsDiscards(props.labelData.srcNodeId!, props.labelData.srcIface!, start, end, 30_000, signal)
         : Promise.resolve(null),
       hasTgtIface.value
-        ? fetchInterfaceErrorsDiscards(props.labelData.tgtNodeId!, props.labelData.tgtIface!, start, end, 60_000, signal)
+        ? fetchInterfaceErrorsDiscards(props.labelData.tgtNodeId!, props.labelData.tgtIface!, start, end, 30_000, signal)
         : Promise.resolve(null)
     ])
 

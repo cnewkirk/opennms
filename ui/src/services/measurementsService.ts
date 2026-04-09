@@ -68,11 +68,11 @@ export const fetchInterfaceUtilization = async (
 ): Promise<InterfaceUtil | null> => {
   const resourceId = buildSnmpResourceId(nodeId, iface)
   const end   = atTime ? atTime.getTime() : Date.now()
-  const start = end - 300_000
+  const start = end - 90_000   // 3 × 30s samples — enough for a valid rate with 30s collectd
   const payload = {
     start,
     end,
-    step: 300_000,
+    step: 30_000,
     source: [
       { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
       { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }

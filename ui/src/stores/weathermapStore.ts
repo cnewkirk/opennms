@@ -59,7 +59,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
   const edgeLabelData = ref<Record<string, EdgeLabelData>>({})
   const loading      = ref(false)
   const error        = ref<string | null>(null)
-  const pollInterval = ref(60)   // seconds; 0 = disabled
+  const pollInterval = ref(30)   // seconds; 0 = disabled
   const lastUpdated  = ref<Date | null>(null)
   const selectedTime = ref<Date | null>(null)  // null = live
 
