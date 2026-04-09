@@ -70,6 +70,7 @@ const updatePageSize = (v: number) => {
 
 <style scoped lang="scss">
 @import "@featherds/styles/mixins/typography";
+@import "@featherds/styles/themes/variables";
 .pagination {
   @include body-small;
   background: var($surface);

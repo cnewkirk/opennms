@@ -139,6 +139,7 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
 
@@ -171,7 +172,7 @@ onMounted(async () => {
 
   .config-details-box {
     border: 1px solid var($primary);
-    border-radius: 4px;
+    border-radius: vars.$border-radius-surface;
     padding: 20px;
     background: white;
     margin-bottom: 30px;

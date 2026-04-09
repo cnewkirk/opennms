@@ -22,13 +22,26 @@ const mainMenu = computed<MainMenu>(() => menuStore.mainMenu)
 </script>
 
 <style lang="scss" scoped>
+@import "@featherds/styles/themes/variables";
+
 .footer {
   display: block;
   text-align: center;
   margin-left: -15px;
   margin-right: -15px;
   padding: 0.25rem 0.42rem;
-  background-color: #e9ecef;
-  border-top: 1px solid rgba(0, 0, 0, .125);
+  background-color: var($surface);
+  border-top: 1px solid var($border-light-on-surface);
+  color: var($secondary-text-on-surface);
+  font-size: 0.8rem;
+
+  a {
+    color: var($secondary-text-on-surface);
+    text-decoration: none;
+    &:hover {
+      color: var($primary-text-on-surface);
+      text-decoration: underline;
+    }
+  }
 }
 </style>

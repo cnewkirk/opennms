@@ -209,6 +209,7 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/table/scss/table';
@@ -261,7 +262,7 @@ onMounted(async () => {
         border-bottom: 1px solid var(variables.$border-on-surface);
 
         div {
-          border-radius: 5px;
+          border-radius: vars.$border-radius-xs;
           padding: 0px 5px 0px 5px;
         }
 

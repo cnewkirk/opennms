@@ -63,9 +63,7 @@
               <td>{{ event.uei }}</td>
               <td>{{ event.eventLabel }}</td>
               <td>
-                <FeatherChip :class="`${event.severity.toLowerCase()}-color severity`">
-                  {{ event.severity }}
-                </FeatherChip>
+                <SeverityBadge :severity="event.severity" />
               </td>
               <td>{{ event.enabled ? 'Enabled' : 'Disabled' }}</td>
               <td>
@@ -172,7 +170,6 @@ import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { CreateEditMode } from '@/types'
 import { EventConfigEvent } from '@/types/eventConfig'
 import { FeatherButton } from '@featherds/button'
-import { FeatherChip } from '@featherds/chips'
 import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
 import { FeatherIcon } from '@featherds/icon'
 import Edit from '@featherds/icon/action/Edit'
@@ -185,6 +182,7 @@ import { FeatherInput } from '@featherds/input'
 import { FeatherPagination } from '@featherds/pagination'
 import { FeatherSortHeader, SORT } from '@featherds/table'
 import { debounce } from 'lodash'
+import SeverityBadge from '../Common/SeverityBadge.vue'
 import EmptyList from '../Common/EmptyList.vue'
 import TableCard from '../Common/TableCard.vue'
 import ChangeEventConfigEventStatusDialog from './Dialog/ChangeEventConfigEventStatusDialog.vue'
@@ -252,6 +250,7 @@ const onChangeSearchTerm = debounce(async (value: string) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/table/scss/table';
@@ -309,7 +308,7 @@ const onChangeSearchTerm = debounce(async (value: string) => {
         }
 
         div {
-          border-radius: 5px;
+          border-radius: vars.$border-radius-xs;
           padding: 0px 5px 0px 5px;
         }
 

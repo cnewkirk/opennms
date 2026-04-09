@@ -91,12 +91,12 @@
       <tbody>
         <tr v-for="node in nodes" :key="node.id" @dblclick="doubleClickHandler(node)">
           <td class="first-td" :class="nodeLabelAlarmSeverityMap[node.label]">
-            <a href="#" @click.prevent="onNodeIdClick(node.id)">{{ node.id }}</a>
+            <router-link :to="`/node/${node.id}`">{{ node.id }}</router-link>
           </td>
           <td>{{ node.foreignSource }}</td>
           <td>{{ node.foreignId }}</td>
           <td>
-            <a href="#" @click.prevent="onNodeLabelClick(node.label)">{{ node.label }}</a>
+            <router-link :to="`/node/${node.id}`">{{ node.label }}</router-link>
           </td>
           <td>{{ node.labelSource }}</td>
           <td v-date>{{ node.lastCapabilitiesScan }}</td>
@@ -147,15 +147,6 @@ const sortChanged = (sortObj: FeatherSortObject) => {
 
   sortStates[`${sortObj.property}`] = sortObj.value
   mapStore.setNodeSortObject(sortObj)
-}
-
-const onNodeIdClick = (nodeId: string) => {
-  const searchTerm = `nodeid == ${nodeId}`
-  mapStore.setNodeSearchTerm(searchTerm)
-}
-
-const onNodeLabelClick = (label: string) => {
-  mapStore.setNodeSearchTerm(label)
 }
 
 onMounted(() => {
