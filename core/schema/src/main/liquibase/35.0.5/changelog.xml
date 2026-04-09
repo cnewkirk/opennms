@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="35.0.5-create-topology-views" author="cnewkirk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="topology_views"/></not>
+        </preConditions>
+        <createTable tableName="topology_views">
+            <column name="id" type="varchar(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1024)"/>
+            <column name="scope" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state_json" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="topology_views" indexName="idx_topology_views_scope">
+            <column name="scope"/>
+        </createIndex>
+        <createIndex tableName="topology_views" indexName="idx_topology_views_owner">
+            <column name="owner"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
