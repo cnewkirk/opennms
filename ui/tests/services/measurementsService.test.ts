@@ -1,8 +1,14 @@
-import { describe, it, expect } from 'vitest'
-import { buildSnmpResourceId, pickBestInterface } from '@/services/measurementsService'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { buildSnmpResourceId, pickBestInterface, fetchInterfaceUtilization } from '@/services/measurementsService'
 import { SnmpInterface } from '@/types'
+import { rest } from '@/services/axiosInstances'
 
-const makeIface = (overrides: Partial<SnmpInterface>): SnmpInterface => ({
+vi.mock('@/services/axiosInstances', () => ({
+  rest: { post: vi.fn() },
+  v2:   { get:  vi.fn() }
+}))
+
+const makeIface = (overrides: Partial<SnmpInterface> = {}): SnmpInterface => ({
   collect: true, collectFlag: 'C', collectionUserSpecified: false,
   hasEgressFlows: false, hasFlows: false, hasIngressFlows: false,
   id: 1, ifAdminStatus: 1, ifAlias: null, ifDescr: 'eth0', ifIndex: 1,
@@ -50,5 +56,33 @@ describe('pickBestInterface', () => {
     const loopback = makeIface({ ifType: 24 })
     const down = makeIface({ ifOperStatus: 2 })
     expect(pickBestInterface([loopback, down])).toBeNull()
+  })
+})
+
+describe('fetchInterfaceUtilization', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('uses 5-minute window ending at atTime when provided', async () => {
+    vi.mocked(rest.post).mockResolvedValue({
+      data: { labels: ['inOctets', 'outOctets'], columns: [{ values: [125_000] }, { values: [62_500] }] }
+    })
+    const atTime = new Date(1_000_000_000_000)
+    await fetchInterfaceUtilization(42, makeIface(), atTime)
+    const payload = vi.mocked(rest.post).mock.calls[0][1] as any
+    expect(payload.end).toBe(atTime.getTime())
+    expect(payload.start).toBe(atTime.getTime() - 300_000)
+  })
+
+  it('uses current time as window end when atTime is omitted', async () => {
+    vi.mocked(rest.post).mockResolvedValue({
+      data: { labels: ['inOctets', 'outOctets'], columns: [{ values: [125_000] }, { values: [62_500] }] }
+    })
+    const before = Date.now()
+    await fetchInterfaceUtilization(42, makeIface())
+    const after = Date.now()
+    const payload = vi.mocked(rest.post).mock.calls[0][1] as any
+    expect(payload.end).toBeGreaterThanOrEqual(before)
+    expect(payload.end).toBeLessThanOrEqual(after)
+    expect(payload.end - payload.start).toBe(300_000)
   })
 })

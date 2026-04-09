@@ -63,13 +63,15 @@ export const fetchNodeType = async (nodeId: number): Promise<string | null> => {
  */
 export const fetchInterfaceUtilization = async (
   nodeId: number,
-  iface: SnmpInterface
+  iface: SnmpInterface,
+  atTime?: Date          // if provided, query 5-minute window ending at atTime
 ): Promise<InterfaceUtil | null> => {
   const resourceId = buildSnmpResourceId(nodeId, iface)
-  const now = Date.now()
+  const end   = atTime ? atTime.getTime() : Date.now()
+  const start = end - 300_000
   const payload = {
-    start: now - 300_000,  // 5 minutes ago
-    end: now,
+    start,
+    end,
     step: 300_000,
     source: [
       { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
