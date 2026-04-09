@@ -16,20 +16,26 @@
     <template v-else>
       <div v-if="hasSrcIface" class="edge-graphs__chart-block">
         <div class="edge-graphs__chart-label">{{ srcIfaceLabel }}</div>
-        <canvas ref="srcUtilCanvas" class="edge-graphs__canvas"></canvas>
-        <div class="edge-graphs__chart-legend">
-          <span class="edge-graphs__legend-in">RX {{ latestInBps(srcData) }}</span>
-          <span class="edge-graphs__legend-out">TX {{ latestOutBps(srcData) }}</span>
-        </div>
+        <div v-if="!hasData(srcData)" class="edge-graphs__no-data">awaiting data…</div>
+        <template v-else>
+          <canvas ref="srcUtilCanvas" class="edge-graphs__canvas"></canvas>
+          <div class="edge-graphs__chart-legend">
+            <span class="edge-graphs__legend-in">RX {{ latestInBps(srcData) }}</span>
+            <span class="edge-graphs__legend-out">TX {{ latestOutBps(srcData) }}</span>
+          </div>
+        </template>
       </div>
 
       <div v-if="hasTgtIface" class="edge-graphs__chart-block">
         <div class="edge-graphs__chart-label">{{ tgtIfaceLabel }}</div>
-        <canvas ref="tgtUtilCanvas" class="edge-graphs__canvas"></canvas>
-        <div class="edge-graphs__chart-legend">
-          <span class="edge-graphs__legend-in">RX {{ latestInBps(tgtData) }}</span>
-          <span class="edge-graphs__legend-out">TX {{ latestOutBps(tgtData) }}</span>
-        </div>
+        <div v-if="!hasData(tgtData)" class="edge-graphs__no-data">awaiting data…</div>
+        <template v-else>
+          <canvas ref="tgtUtilCanvas" class="edge-graphs__canvas"></canvas>
+          <div class="edge-graphs__chart-legend">
+            <span class="edge-graphs__legend-in">RX {{ latestInBps(tgtData) }}</span>
+            <span class="edge-graphs__legend-out">TX {{ latestOutBps(tgtData) }}</span>
+          </div>
+        </template>
       </div>
 
       <div v-if="errorsData" class="edge-graphs__chart-block">
@@ -93,6 +99,8 @@ const tgtIfaceLabel = computed(() => {
 
 const LOOKBACK_MS = 2 * 60 * 60 * 1_000  // 2 hours
 
+const hasData      = (d: { inBps: number[]; outBps: number[] } | null) =>
+  !!(d && d.inBps.length > 0)
 const latestInBps  = (d: { inBps: number[]; outBps: number[] } | null) =>
   d ? `${formatBitsPerSec(d.inBps[d.inBps.length - 1] ?? 0)}bps` : ''
 const latestOutBps = (d: { inBps: number[]; outBps: number[] } | null) =>
@@ -208,16 +216,16 @@ watch(loading, async (isLoading) => {
   const n = srcData.value?.inBps.length ?? tgtData.value?.inBps.length ?? 0
   const labels = Array.from({ length: n }, (_, i) => String(i))
 
-  if (srcData.value && srcUtilCanvas.value) {
+  if (hasData(srcData.value) && srcUtilCanvas.value) {
     charts.push(buildSparkline(srcUtilCanvas.value, [
-      { label: '↑ in',  data: srcData.value.inBps,  borderColor: '#48BB78' },
-      { label: '↓ out', data: srcData.value.outBps, borderColor: '#4C9BE8' }
+      { label: 'RX', data: srcData.value!.inBps,  borderColor: '#48BB78' },
+      { label: 'TX', data: srcData.value!.outBps, borderColor: '#4C9BE8' }
     ], labels))
   }
-  if (tgtData.value && tgtUtilCanvas.value) {
+  if (hasData(tgtData.value) && tgtUtilCanvas.value) {
     charts.push(buildSparkline(tgtUtilCanvas.value, [
-      { label: '↑ in',  data: tgtData.value.inBps,  borderColor: '#48BB78' },
-      { label: '↓ out', data: tgtData.value.outBps, borderColor: '#4C9BE8' }
+      { label: 'RX', data: tgtData.value!.inBps,  borderColor: '#48BB78' },
+      { label: 'TX', data: tgtData.value!.outBps, borderColor: '#4C9BE8' }
     ], labels))
   }
   if (errorsData.value && errCanvas.value) {
@@ -273,6 +281,14 @@ onUnmounted(() => {
     font-size: 0.72rem;
     color: var($secondary-text-on-surface);
     padding: 4px 0;
+  }
+
+  &__no-data {
+    font-size: 0.68rem;
+    color: var($secondary-text-on-surface);
+    opacity: 0.6;
+    padding: 4px 0;
+    font-style: italic;
   }
 
   &__chart-block {
