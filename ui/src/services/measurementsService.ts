@@ -113,6 +113,98 @@ export const fetchInterfaceUtilization = async (
 }
 
 /**
+ * Fetch a time-series of inbound/outbound bit rates for a specific interface.
+ * Returns arrays parallel to `timestamps` (ms epoch). NaN/negative API values → 0.
+ * step is in MILLISECONDS (e.g. 60_000 = 1-minute resolution).
+ */
+export const fetchInterfaceTimeSeries = async (
+  nodeId: number,
+  iface: SnmpInterface,
+  start: Date,
+  end: Date,
+  step = 60_000,
+  signal?: AbortSignal
+): Promise<{ timestamps: number[]; inBps: number[]; outBps: number[] }> => {
+  const resourceId = buildSnmpResourceId(nodeId, iface)
+  const payload = {
+    start: start.getTime(),
+    end:   end.getTime(),
+    step,
+    source: [
+      { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
+      { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }
+    ]
+  }
+  try {
+    const resp  = await rest.post('/measurements', payload, { signal })
+    const labels: string[]                = resp.data.labels  ?? []
+    const columns: { values: number[] }[] = resp.data.columns ?? []
+    const inIdx  = labels.indexOf('inOctets')
+    const outIdx = labels.indexOf('outOctets')
+    const n      = columns[inIdx]?.values.length ?? 0
+    const toFinite = (v: number) => (isFinite(v) && v >= 0) ? v : 0
+    const timestamps = Array.from({ length: n }, (_, i) => start.getTime() + i * step)
+    const inBps  = (columns[inIdx]?.values  ?? []).map(v => toFinite(v) * 8)
+    const outBps = (columns[outIdx]?.values ?? []).map(v => toFinite(v) * 8)
+    return { timestamps, inBps, outBps }
+  } catch {
+    return { timestamps: [], inBps: [], outBps: [] }
+  }
+}
+
+/**
+ * Fetch error and discard counts for a specific interface over a time window.
+ * Returns null for any series that is entirely zero (not worth rendering).
+ * step is in MILLISECONDS.
+ */
+export const fetchInterfaceErrorsDiscards = async (
+  nodeId: number,
+  iface: SnmpInterface,
+  start: Date,
+  end: Date,
+  step = 60_000,
+  signal?: AbortSignal
+): Promise<{
+  ifInErrors:    number[] | null
+  ifOutErrors:   number[] | null
+  ifInDiscards:  number[] | null
+  ifOutDiscards: number[] | null
+}> => {
+  const resourceId = buildSnmpResourceId(nodeId, iface)
+  const payload = {
+    start: start.getTime(),
+    end:   end.getTime(),
+    step,
+    source: [
+      { attribute: 'ifInErrors',    label: 'ifInErrors',    resourceId, transient: false },
+      { attribute: 'ifOutErrors',   label: 'ifOutErrors',   resourceId, transient: false },
+      { attribute: 'ifInDiscards',  label: 'ifInDiscards',  resourceId, transient: false },
+      { attribute: 'ifOutDiscards', label: 'ifOutDiscards', resourceId, transient: false }
+    ]
+  }
+  try {
+    const resp    = await rest.post('/measurements', payload, { signal })
+    const labels: string[]                = resp.data.labels  ?? []
+    const columns: { values: number[] }[] = resp.data.columns ?? []
+    const toFinite = (v: number) => (isFinite(v) && v >= 0) ? v : 0
+    const getOrNull = (label: string): number[] | null => {
+      const idx  = labels.indexOf(label)
+      if (idx < 0) return null
+      const vals = (columns[idx]?.values ?? []).map(toFinite)
+      return vals.some(v => v > 0) ? vals : null
+    }
+    return {
+      ifInErrors:    getOrNull('ifInErrors'),
+      ifOutErrors:   getOrNull('ifOutErrors'),
+      ifInDiscards:  getOrNull('ifInDiscards'),
+      ifOutDiscards: getOrNull('ifOutDiscards')
+    }
+  } catch {
+    return { ifInErrors: null, ifOutErrors: null, ifInDiscards: null, ifOutDiscards: null }
+  }
+}
+
+/**
  * Fetch all IP interfaces for a node.
  * Used to find the primary management IP (snmpPrimary === 'P') for edge label display.
  */

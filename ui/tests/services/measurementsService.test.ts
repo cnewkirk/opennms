@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { buildSnmpResourceId, pickBestInterface, fetchInterfaceUtilization } from '@/services/measurementsService'
+import { buildSnmpResourceId, pickBestInterface, fetchInterfaceUtilization,
+         fetchInterfaceTimeSeries, fetchInterfaceErrorsDiscards } from '@/services/measurementsService'
 import { SnmpInterface } from '@/types'
 import { rest } from '@/services/axiosInstances'
 
@@ -84,5 +85,77 @@ describe('fetchInterfaceUtilization', () => {
     expect(payload.end).toBeGreaterThanOrEqual(before)
     expect(payload.end).toBeLessThanOrEqual(after)
     expect(payload.end - payload.start).toBe(300_000)
+  })
+})
+
+describe('fetchInterfaceTimeSeries', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns timestamps computed from start + i * step', async () => {
+    vi.mocked(rest.post).mockResolvedValue({
+      data: {
+        labels: ['inOctets', 'outOctets'],
+        columns: [{ values: [100, 200, 300] }, { values: [50, 100, 150] }]
+      }
+    })
+    const start = new Date(0)
+    const end   = new Date(180_000) // 3 minutes
+    const result = await fetchInterfaceTimeSeries(1, makeIface(), start, end, 60_000)
+    expect(result.timestamps).toEqual([0, 60_000, 120_000])
+  })
+
+  it('converts bytes/sec to bits/sec (× 8)', async () => {
+    vi.mocked(rest.post).mockResolvedValue({
+      data: {
+        labels: ['inOctets', 'outOctets'],
+        columns: [{ values: [125_000] }, { values: [62_500] }]
+      }
+    })
+    const result = await fetchInterfaceTimeSeries(1, makeIface(), new Date(0), new Date(60_000))
+    expect(result.inBps[0]).toBe(1_000_000)   // 125 000 * 8
+    expect(result.outBps[0]).toBe(500_000)    // 62 500 * 8
+  })
+
+  it('replaces NaN and negative values with 0', async () => {
+    vi.mocked(rest.post).mockResolvedValue({
+      data: {
+        labels: ['inOctets', 'outOctets'],
+        columns: [{ values: [NaN, -1, 100] }, { values: [0, NaN, 50] }]
+      }
+    })
+    const result = await fetchInterfaceTimeSeries(1, makeIface(), new Date(0), new Date(180_000))
+    expect(result.inBps).toEqual([0, 0, 800])
+    expect(result.outBps).toEqual([0, 0, 400])
+  })
+})
+
+describe('fetchInterfaceErrorsDiscards', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns null for a series that is all-zero', async () => {
+    vi.mocked(rest.post).mockResolvedValue({
+      data: {
+        labels: ['ifInErrors', 'ifOutErrors', 'ifInDiscards', 'ifOutDiscards'],
+        columns: [{ values: [0, 0] }, { values: [0, 1] }, { values: [0, 0] }, { values: [0, 0] }]
+      }
+    })
+    const result = await fetchInterfaceErrorsDiscards(1, makeIface(), new Date(0), new Date(120_000))
+    expect(result.ifInErrors).toBeNull()          // all zero
+    expect(result.ifOutErrors).toEqual([0, 1])    // has non-zero value
+    expect(result.ifInDiscards).toBeNull()
+    expect(result.ifOutDiscards).toBeNull()
+  })
+
+  it('passes AbortSignal through to the HTTP request', async () => {
+    vi.mocked(rest.post).mockResolvedValue({
+      data: {
+        labels: ['ifInErrors', 'ifOutErrors', 'ifInDiscards', 'ifOutDiscards'],
+        columns: [{ values: [1] }, { values: [0] }, { values: [0] }, { values: [0] }]
+      }
+    })
+    const controller = new AbortController()
+    await fetchInterfaceErrorsDiscards(1, makeIface(), new Date(0), new Date(60_000), 60_000, controller.signal)
+    const callArgs = vi.mocked(rest.post).mock.calls[0]
+    expect((callArgs[2] as any)?.signal).toBe(controller.signal)
   })
 })
