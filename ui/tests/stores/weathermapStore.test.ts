@@ -1,5 +1,20 @@
-import { describe, it, expect } from 'vitest'
-import { computeUtilPct, edgeKey } from '@/stores/weathermapStore'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { computeUtilPct, edgeKey, useWeathermapStore } from '@/stores/weathermapStore'
+import * as measurementsService from '@/services/measurementsService'
+import * as enlinkdService from '@/services/enlinkdService'
+
+vi.mock('@/services/measurementsService', () => ({
+  fetchNodeSnmpIfaces: vi.fn().mockResolvedValue([]),
+  fetchNodeType: vi.fn().mockResolvedValue('A'),
+  fetchNodeIpInterfaces: vi.fn().mockResolvedValue([]),
+  fetchInterfaceUtilization: vi.fn().mockResolvedValue(null),
+  pickBestInterface: vi.fn().mockReturnValue(null)
+}))
+vi.mock('@/services/enlinkdService', () => ({
+  getNodeEnlinkd: vi.fn().mockResolvedValue({ lldpLinkNodes: [], ospfLinkNodes: [], isisLinkNodes: [], cdpLinkNodes: [], bridgeLinkNodes: [], lldpElementNode: null, ospfElementNode: null, isisElementNode: null }),
+  cleanName: (s: string) => s
+}))
 
 describe('computeUtilPct', () => {
   it('returns 0 when ifSpeed is 0', () => {
@@ -25,5 +40,34 @@ describe('edgeKey', () => {
   })
   it('formats as min-max', () => {
     expect(edgeKey(10, 20)).toBe('10-20')
+  })
+})
+
+describe('weathermapStore — selectedTime + setTime', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+  })
+
+  it('selectedTime is null initially', () => {
+    const store = useWeathermapStore()
+    expect(store.selectedTime).toBeNull()
+  })
+
+  it('setTime(date) sets selectedTime and sets loading', async () => {
+    const store = useWeathermapStore()
+    const t = new Date(1_000_000_000_000)
+    await store.setTime(t)
+    expect(store.selectedTime).toBe(t)
+    expect(store.loading).toBe(false) // settled after fetch
+  })
+
+  it('setTime(null) resets selectedTime to null', async () => {
+    const store = useWeathermapStore()
+    // Put store in historical mode first using the public API
+    await store.setTime(new Date(1_000_000_000_000))
+    expect(store.selectedTime).not.toBeNull()
+    await store.setTime(null)
+    expect(store.selectedTime).toBeNull()
   })
 })

@@ -52,6 +52,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
   const error        = ref<string | null>(null)
   const pollInterval = ref(60)   // seconds; 0 = disabled
   const lastUpdated  = ref<Date | null>(null)
+  const selectedTime = ref<Date | null>(null)  // null = live
 
   let _timer: ReturnType<typeof setTimeout> | null = null
   let _activeVertices: TopologyVertex[] = []
@@ -115,7 +116,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
         if (!iface) return { key, util: null }
 
         const nodeId = srcIface ? e.source.id : e.target.id
-        const util: InterfaceUtil | null = await fetchInterfaceUtilization(nodeId, iface)
+        const util: InterfaceUtil | null = await fetchInterfaceUtilization(nodeId, iface, selectedTime.value ?? undefined)
         return { key, util }
       })
     )
@@ -253,8 +254,30 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
     if (seconds > 0) _scheduleNext()
   }
 
+  const setTime = async (t: Date | null) => {
+    selectedTime.value = t
+    if (t === null) {
+      // Resume auto-refresh via normal path (refresh() calls _scheduleNext in finally)
+      await refresh()
+    } else {
+      // Historical mode: cancel timer, fetch snapshot without rescheduling
+      if (_timer) { clearTimeout(_timer); _timer = null }
+      loading.value = true
+      error.value   = null
+      try {
+        await _fetchAll()
+      } catch {
+        error.value = 'Weathermap unavailable'
+      } finally {
+        loading.value = false
+        // Do NOT call _scheduleNext() — historical mode has no auto-refresh
+      }
+    }
+  }
+
   return {
     edgeUtilMap, nodeDownMap, edgeLabelData, loading, error, pollInterval, lastUpdated,
-    start, stop, refresh, setPollInterval
+    selectedTime,
+    start, stop, refresh, setPollInterval, setTime
   }
 })
