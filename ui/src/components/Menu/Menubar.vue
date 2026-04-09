@@ -38,8 +38,8 @@
         />
       </template>
 
-      <!-- <FeatherIcon :icon="LightDarkMode" title="Toggle Light/Dark Mode" class="pointer light-dark"
-        @click="toggleDarkLightMode(null)" /> -->
+      <FeatherIcon :icon="LightDarkMode" title="Toggle Light/Dark Mode" class="pointer light-dark"
+        @click="toggleDarkLightMode(null)" />
     </template>
   </FeatherAppBar>
 </template>
@@ -48,6 +48,8 @@
 import { useOutsideClick } from '@featherds/composables/events/OutsideClick'
 import { FeatherAppBar, FeatherAppBarLink } from '@featherds/app-bar'
 import { FeatherButton } from '@featherds/button'
+import { FeatherIcon } from '@featherds/icon'
+import LightDarkMode from '@featherds/icon/action/LightDarkMode'
 
 // see vite.config.ts, resolve.alias for the actual logo file that is imported
 import IconLogo from './src/assets/ProductLogo.vue'
@@ -99,11 +101,16 @@ const onAddNode = () => {
 
 const toggleDarkLightMode = (savedTheme: string | null) => {
   const el = document.body
+  const htmlEl = document.documentElement
   const newTheme = theme.value === light ? dark : light
 
   if (savedTheme && (savedTheme === light || savedTheme === dark)) {
     theme.value = savedTheme
     el.classList.add(savedTheme)
+    // Keep <html> in sync — the early-paint script sets the class there to
+    // avoid FOUC, but only toggleDarkLightMode manages it afterward.
+    htmlEl.classList.remove(light, dark)
+    htmlEl.classList.add(savedTheme)
     return
   }
 
@@ -114,6 +121,11 @@ const toggleDarkLightMode = (savedTheme: string | null) => {
   if (theme.value) {
     el.classList.remove(theme.value)
   }
+
+  // keep <html> in sync so dark-mode.scss html.open-dark selectors don't
+  // outlive the toggle when switching back to light mode
+  htmlEl.classList.remove(light, dark)
+  htmlEl.classList.add(newTheme)
 
   // save the new theme in data and localStorage
   theme.value = newTheme
@@ -179,8 +191,6 @@ const shiftCheck = (e: KeyboardEvent) => {
 
 onMounted(async () => {
   const savedTheme = localStorage.getItem('theme')
-  console.log('Got theme: ', savedTheme)
-
   toggleDarkLightMode(savedTheme)
   window.addEventListener('keyup', shiftCheck)
 })
@@ -192,6 +202,7 @@ onMounted(async () => {
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
+@import "@/styles/vars";
 
 .alarm-error {
   background-color: var($error);
@@ -234,7 +245,7 @@ onMounted(async () => {
 
 .notice-status-display {
   font-size: 2em;
-  border-radius: 1.5em;
+  border-radius: $border-radius-pill;
   padding: 0.1em;
 }
 
@@ -268,6 +279,14 @@ body {
 
 .open-light {
   @include open-light;
+
+  .header-wrapper.feather-app-bar-wrapper .header {
+    background-color: #0081ad;
+  }
+
+  .header-wrapper.feather-app-bar-wrapper .header-content {
+    color: #fff;
+  }
 }
 
 .open-dark {
@@ -295,9 +314,10 @@ body {
   }
 }
 
-// remove elevation from menubar
+// remove elevation and border from menubar (both themes)
 .header-wrapper.feather-app-bar-wrapper .header {
   box-shadow: none;
+  border-bottom: none;
 }
 
 .header-wrapper.feather-app-bar-wrapper a.skip {
@@ -318,5 +338,10 @@ body {
   .top-menu-search {
     margin-right:5px;
   }
+}
+
+// App bar nav links must never change color based on visit history.
+.feather-app-bar-wrapper a:visited {
+  color: inherit !important;
 }
 </style>

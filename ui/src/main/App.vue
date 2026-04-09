@@ -68,14 +68,31 @@ onMounted(() => {
 html {
   overflow-x: hidden;
 }
+
+// Soften the light theme — pure white is too harsh
+html:not(.open-dark) {
+  --feather-surface: #f8f9fa;
+  --feather-background: #eef1f6;
+}
 .main-content {
   table {
     width: 100%;
   }
 }
+
+// Feather grid has horizontal gutters but no vertical gap.
+// Add breathing room between stacked rows on every page.
+.feather-row + .feather-row {
+  margin-top: 12px;
+}
 a {
   text-decoration: none;
   color: var($clickable-normal);
+  // Override Feather's a:visited { color: --feather-clickable-visited } which is pink in dark mode.
+  // !important needed because Feather's base styles load after App.vue styles in the CSS bundle.
+  &:visited {
+    color: var($clickable-normal) !important;
+  }
 }
 .pointer {
   cursor: pointer !important;

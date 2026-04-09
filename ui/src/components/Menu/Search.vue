@@ -264,6 +264,7 @@ const onKeyDown = async (event: KeyboardEvent) => {
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/themes/variables";
+@import "@/styles/vars";
 
 .onms-search-control-wrapper {
   position: relative;
@@ -277,7 +278,7 @@ const onKeyDown = async (event: KeyboardEvent) => {
   width: 100%;
   background: var($surface);
   border: 1px solid var($secondary);
-  border-radius: 4px;
+  border-radius: $border-radius-surface;
   max-height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -285,23 +286,24 @@ const onKeyDown = async (event: KeyboardEvent) => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   .search-category {
-    background-color: #f8f9fa;
+    background-color: var($shade-4);
     padding: 0.5em 0.75em;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var($border-light-on-surface);
     font-weight: 500;
+    color: var($secondary-text-on-surface);
   }
 
   .search-result-item {
-    border-bottom: 1px solid #f1f3f4;
+    border-bottom: 1px solid var($border-light-on-surface);
     transition: background-color 0.15s ease;
     padding-left: 0.5em;
 
     &:hover {
-      background-color: #f8f9fa;
+      background-color: var($shade-4);
     }
 
     &.keyboard-selected {
-      background-color: #e9ecef;
+      background-color: var($shade-3);
     }
 
     &:last-child {
@@ -315,18 +317,18 @@ const onKeyDown = async (event: KeyboardEvent) => {
   position: relative;
   align-items: center;
   width: 100%;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  
+  background-color: var($surface);
+  border: 1px solid var($border-light-on-surface);
+  border-radius: $border-radius-surface;
+
   .search-icon {
     position: absolute;
     left: 8px;
     z-index: 1;
-    color: #6c757d;
+    color: var($secondary-text-on-surface);
     pointer-events: none;
   }
-  
+
   .search-input {
     width: 100%;
     padding: 8px 12px 8px 36px;
@@ -334,14 +336,14 @@ const onKeyDown = async (event: KeyboardEvent) => {
     background: transparent;
     outline: none;
     font-size: 14px;
-    color: black;
+    color: var($primary-text-on-surface);
 
     &::placeholder {
-      color: #0c0d0e;
+      color: var($secondary-text-on-surface);
     }
-    
+
     &:focus {
-      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+      box-shadow: 0 0 0 2px var($primary-variant);
     }
   }
 }

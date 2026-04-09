@@ -31,6 +31,7 @@ export interface MainMenu {
   zenithConnectEnabled: boolean
   zenithConnectBaseUrl: string
   zenithConnectRelativeUrl: string
+  defaultPerspective?: 'problems' | 'all'
   displayAddNodeButton?: boolean
   sideMenuInitialExpand?: boolean
   

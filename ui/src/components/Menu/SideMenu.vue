@@ -73,10 +73,10 @@ const topPanels = computed<MenuListEntry[]>(() => {
 
   #opennms-sidebar-control {
     --feather-dock-header-offset: 3.75rem;
-  
+
     // tighten spacing between toggle button and top of menu items
     --feather-dock-content-padding-top: 3em;
-    --feather-dock-toggle-top: 2em;
+    --feather-dock-toggle-top: 3em;
   }
 
   // fix Sidenav toggle button placement
@@ -128,5 +128,19 @@ const topPanels = computed<MenuListEntry[]>(() => {
       }
     }
   }
+}
+
+.open-light {
+  #opennms-sidebar-control {
+    --feather-dock-background-color: #0081ad;
+    --feather-dock-color: #fff;
+  }
+}
+
+// Sidebar nav links must never change color based on visit history.
+// The global a:visited rule sets --feather-clickable-normal which is wrong
+// for nav context; inherit keeps the dock's own color.
+#opennms-sidebar-control a:visited {
+  color: inherit !important;
 }
 </style>
