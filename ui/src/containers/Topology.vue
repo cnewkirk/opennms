@@ -15,6 +15,7 @@
       @save-view-requested="handleSaveViewRequested"
       @restore-view="handleRestoreView"
     />
+    <TopologyTimeControl v-model="selectedTimeModel" />
     <TopologyGraph ref="graphRef" />
   </div>
 </template>
@@ -24,6 +25,7 @@ import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import TopologyToolbar from '@/components/Topology/TopologyToolbar.vue'
 import TopologyGraph from '@/components/Topology/TopologyGraph.vue'
+import TopologyTimeControl from '@/components/Topology/TopologyTimeControl.vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { useWeathermapStore } from '@/stores/weathermapStore'
 import { useMenuStore } from '@/stores/menuStore'
@@ -38,6 +40,11 @@ const wmStore = useWeathermapStore()
 const menuStore = useMenuStore()
 const viewStore = useTopologyViewStore()
 const authStore = useAuthStore()
+
+const selectedTimeModel = computed({
+  get: () => wmStore.selectedTime,
+  set: (t: Date | null) => wmStore.setTime(t)
+})
 
 const graphRef = ref<InstanceType<typeof TopologyGraph> | null>(null)
 const toolbarRef = ref<InstanceType<typeof TopologyToolbar> | null>(null)
@@ -143,7 +150,7 @@ onBeforeUnmount(() => {
 .topology-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 160px);
   overflow: hidden;
 }
 </style>
