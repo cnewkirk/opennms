@@ -25,6 +25,12 @@
         ? { backgroundSize: `${viewStore.gridSnap.size}px ${viewStore.gridSnap.size}px` }
         : {}"
     />
+    <div
+      v-if="wmStore.selectedTime !== null"
+      class="topology-graph__watermark"
+    >
+      ⏱ Historical: {{ formatWatermarkTime(wmStore.selectedTime) }}
+    </div>
     <TopologyDetailPanel />
     <TopologyEdgeTooltip :tooltip="edgeTooltip" />
 
@@ -45,6 +51,7 @@ import useTopology from '@/composables/useTopology'
 import useSnackbar from '@/composables/useSnackbar'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { useTopologyViewStore } from '@/stores/topologyViewStore'
+import { useWeathermapStore } from '@/stores/weathermapStore'
 import { TopologyVertex } from '@/types/topology'
 import TopologyDetailPanel from './TopologyDetailPanel.vue'
 import TopologyEdgeTooltip from './TopologyEdgeTooltip.vue'
@@ -52,6 +59,12 @@ import CreateLinkModal from './CreateLinkModal.vue'
 
 const store = useTopologyStore()
 const viewStore = useTopologyViewStore()
+const wmStore = useWeathermapStore()
+
+const formatWatermarkTime = (d: Date | null): string => {
+  if (!d) return ''
+  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
 const { showSnackBar } = useSnackbar()
 const graphContainer = ref<HTMLElement | null>(null)
 
@@ -176,6 +189,21 @@ defineExpose({ capturePositions, restorePositions, alignToGrid, saveLayout, rese
     border-radius: vars.$border-radius-sm;
     font-size: 0.9rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  &__watermark {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    pointer-events: none;
+    z-index: 10;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var($primary-text-on-surface);
+    background: rgba(0, 0, 0, 0.45);
+    padding: 3px 10px;
+    border-radius: vars.$border-radius-pill;
+    letter-spacing: 0.02em;
   }
 }
 </style>
