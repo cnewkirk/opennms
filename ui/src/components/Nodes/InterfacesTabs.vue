@@ -25,11 +25,13 @@ import IpInterfacesTable from './IpInterfacesTable.vue'
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/mixins/elevation";
 .card {
   @include elevation(2);
   padding: 15px;
   margin-bottom: 15px;
+  border-radius: vars.$border-radius-surface;
   .title {
     margin-bottom: 15px;
   }

@@ -48,11 +48,14 @@ import { useNodeStore } from '@/stores/nodeStore'
 import useQueryParameters from '@/composables/useQueryParams'
 import { QueryParameters } from '@/types'
 
+const props = defineProps<{ nodeId: string; filterFiql?: string }>()
+
 const nodeStore = useNodeStore()
-const route = useRoute()
 
 const getNodeOutages = async (payload: QueryParameters) => {
-  nodeStore.getNodeOutages({ id: route.params.id as string, queryParameters: payload })
+  const params: QueryParameters = { ...payload }
+  if (props.filterFiql) params._s = props.filterFiql
+  nodeStore.getNodeOutages({ id: props.nodeId, queryParameters: params })
 }
 
 const getOutagesTotalCount = () => {
@@ -71,12 +74,14 @@ const outages = computed(() => nodeStore.outages)
   lang="scss"
   scoped
 >
+@use '@/styles/vars' as vars;
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
 .card {
   @include elevation(2);
   padding: 15px;
   margin-bottom: 15px;
+  border-radius: vars.$border-radius-surface;
 }
 table {
   @include table;

@@ -240,7 +240,6 @@ export const useNodeQuery = () => {
 
     filter.selectedFlows = parseFlows(queryObject)
 
-    // TODO: Implement ipaddress or iplike filtering
     const ip = parseIplike(queryObject)
 
     if (ip) {
@@ -298,7 +297,6 @@ const buildNodeStructureQuery = (filter: NodeQueryFilter) => {
   const snmpQuery = buildSnmpQuery(filter.extendedSearch.snmpParams)
   const sysQuery = buildSysQuery(filter.extendedSearch.sysParams)
 
-  // TODO: May need more search term sanitizing and/or restrict characters in the FeatherInput above
   const querySeparator = getFiqlSetOperator(SetOperator.Intersection)
   const query = [searchQuery, ipAddressQuery, foreignSourceQuery, snmpQuery, sysQuery, categoryQuery, flowsQuery, locationQuery].filter(s => s.length > 0).join(querySeparator)
 
