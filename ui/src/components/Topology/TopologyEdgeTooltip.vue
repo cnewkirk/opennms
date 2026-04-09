@@ -77,6 +77,10 @@
         <span>{{ formatBitsPerSec(tooltip.labelData.ifSpeed) }}bps</span>
       </div>
     </div>
+    <TopologyEdgeGraphs
+      v-if="tooltip.labelData"
+      :labelData="tooltip.labelData"
+    />
   </div>
 </template>
 
@@ -84,6 +88,7 @@
 import { EdgeLabelData } from '@/stores/weathermapStore'
 import { getProtocolColor, utilizationColor, formatBitsPerSec, prettifyProtocol } from './protocolColors'
 import { humanize } from '@/components/Topology/fieldLabels'
+import TopologyEdgeGraphs from './TopologyEdgeGraphs.vue'
 
 export interface EdgeTooltipState {
   x: number
