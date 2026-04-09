@@ -24,6 +24,10 @@ export interface EdgeLabelData {
   localMac?: string       // physAddr of local interface
   remoteMac?: string      // lldpRemChassisId from LLDP link (remote chassis MAC)
   ifSpeed?: number        // link speed in bits/sec
+  srcNodeId?: number      // source node ID
+  srcIface?: SnmpInterface // resolved local interface (from LLDP or SNMP fallback)
+  tgtNodeId?: number      // target node ID
+  tgtIface?: SnmpInterface // resolved remote interface (from reverse LLDP)
 }
 
 /** Stable canonical key for an edge between two nodes. */
@@ -138,6 +142,9 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
       const tgtId  = e.target.id
       const data: EdgeLabelData = {}
 
+      data.srcNodeId = srcId
+      data.tgtNodeId = tgtId
+
       data.localIp  = nodeIpMap[srcId]
       data.remoteIp = nodeIpMap[tgtId]
 
@@ -155,6 +162,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
               data.localIfName = localIface.ifName ?? localIface.ifDescr ?? undefined
               data.localMac    = localIface.physAddr ?? undefined
               data.ifSpeed     = localIface.ifSpeed > 0 ? localIface.ifSpeed : undefined
+              data.srcIface    = localIface
             }
           } else {
             const cleaned = cleanName(lldpLink.lldpLocalPort)
@@ -181,6 +189,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
               if (remoteIface) {
                 data.remotePortId = remoteIface.ifName ?? remoteIface.ifDescr ?? undefined
                 data.remoteMac    = data.remoteMac ?? remoteIface.physAddr ?? undefined
+                data.tgtIface     = remoteIface
               }
             } else {
               data.remotePortId = cleanName(reverseLldp.lldpLocalPort) || undefined
@@ -200,6 +209,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
           data.localIfName = best.ifName ?? best.ifDescr ?? undefined
           data.localMac    = best.physAddr ?? undefined
           data.ifSpeed     = best.ifSpeed > 0 ? best.ifSpeed : undefined
+          data.srcIface    = best
         }
       }
 

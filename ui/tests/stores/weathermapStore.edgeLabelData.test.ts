@@ -125,6 +125,53 @@ describe('weathermapStore — edgeLabelData', () => {
     expect(store.edgeLabelData[key].ifSpeed).toBe(1_000_000_000)
   })
 
+  it('populates srcNodeId, tgtNodeId, and srcIface via forward LLDP ifIndex', async () => {
+    const iface = makeSnmpIface({ ifIndex: 1, ifName: 'eth0', physAddr: '001122334455' })
+    vi.mocked(measurementsService.fetchNodeSnmpIfaces).mockResolvedValue([iface])
+    vi.mocked(measurementsService.pickBestInterface).mockReturnValue(iface)
+    vi.mocked(measurementsService.fetchNodeType).mockResolvedValue('A')
+    vi.mocked(measurementsService.fetchNodeIpInterfaces).mockResolvedValue([])
+    vi.mocked(measurementsService.fetchInterfaceUtilization).mockResolvedValue(null)
+    vi.mocked(enlinkdService.getNodeEnlinkd).mockImplementation(async (nodeId: number) => {
+      if (nodeId !== 10) return EMPTY_ENLINKD
+      return {
+        ...EMPTY_ENLINKD,
+        lldpLinkNodes: [{
+          lldpLocalPort: 'eth0 (ifindex:1)(macAddress:001122334455)',
+          lldpLocalPortUrl: '', lldpRemChassisId: '', lldpRemChassisIdUrl: '',
+          lldpRemInfo: 'node-b', ldpRemPort: 'GigEth0/1',
+          lldpCreateTime: '', lldpLastPollTime: ''
+        }]
+      }
+    })
+
+    const store = useWeathermapStore()
+    await store.start(VERTICES, EDGES)
+
+    const key = edgeKey(10, 20)
+    expect(store.edgeLabelData[key].srcNodeId).toBe(10)
+    expect(store.edgeLabelData[key].tgtNodeId).toBe(20)
+    expect(store.edgeLabelData[key].srcIface?.ifName).toBe('eth0')
+    expect(store.edgeLabelData[key].tgtIface).toBeUndefined() // no reverse LLDP in this scenario
+  })
+
+  it('sets srcIface from SNMP fallback when no LLDP match', async () => {
+    const iface = makeSnmpIface({ ifName: 'eth0', physAddr: null })
+    vi.mocked(measurementsService.fetchNodeSnmpIfaces).mockResolvedValue([iface])
+    vi.mocked(measurementsService.pickBestInterface).mockReturnValue(iface)
+    vi.mocked(measurementsService.fetchNodeType).mockResolvedValue('A')
+    vi.mocked(measurementsService.fetchNodeIpInterfaces).mockResolvedValue([])
+    vi.mocked(measurementsService.fetchInterfaceUtilization).mockResolvedValue(null)
+    vi.mocked(enlinkdService.getNodeEnlinkd).mockResolvedValue(EMPTY_ENLINKD)
+
+    const store = useWeathermapStore()
+    await store.start(VERTICES, EDGES)
+
+    const key = edgeKey(10, 20)
+    expect(store.edgeLabelData[key].srcNodeId).toBe(10)
+    expect(store.edgeLabelData[key].srcIface?.ifName).toBe('eth0')
+  })
+
   it('falls back to best interface when no LLDP match for the target node', async () => {
     const iface = makeSnmpIface({ ifIndex: 1, ifName: 'eth0', physAddr: 'aabbccddeeff' })
     vi.mocked(measurementsService.fetchNodeSnmpIfaces).mockResolvedValue([iface])
@@ -153,5 +200,33 @@ describe('weathermapStore — edgeLabelData', () => {
     expect(store.edgeLabelData[key].localIfName).toBe('eth0')
     expect(store.edgeLabelData[key].localMac).toBe('aabbccddeeff')
     expect(store.edgeLabelData[key].remotePortId).toBeUndefined()
+  })
+
+  it('populates tgtIface via reverse LLDP ifIndex', async () => {
+    const iface = makeSnmpIface({ ifIndex: 2, ifName: 'eth0', physAddr: 'aabbccddeeff' })
+    vi.mocked(measurementsService.fetchNodeSnmpIfaces).mockResolvedValue([iface])
+    vi.mocked(measurementsService.pickBestInterface).mockReturnValue(iface)
+    vi.mocked(measurementsService.fetchNodeType).mockResolvedValue('A')
+    vi.mocked(measurementsService.fetchNodeIpInterfaces).mockResolvedValue([])
+    vi.mocked(measurementsService.fetchInterfaceUtilization).mockResolvedValue(null)
+    vi.mocked(enlinkdService.getNodeEnlinkd).mockImplementation(async (nodeId: number) => {
+      if (nodeId !== 20) return EMPTY_ENLINKD
+      return {
+        ...EMPTY_ENLINKD,
+        lldpLinkNodes: [{
+          lldpLocalPort: 'eth0 (ifindex:2)(macAddress:aabbccddeeff)',
+          lldpLocalPortUrl: '', lldpRemChassisId: '', lldpRemChassisIdUrl: '',
+          lldpRemInfo: 'node-a', ldpRemPort: 'GigEth0/0',
+          lldpCreateTime: '', lldpLastPollTime: ''
+        }]
+      }
+    })
+
+    const store = useWeathermapStore()
+    await store.start(VERTICES, EDGES)
+
+    const key = edgeKey(10, 20)
+    expect(store.edgeLabelData[key].tgtNodeId).toBe(20)
+    expect(store.edgeLabelData[key].tgtIface?.ifName).toBe('eth0')
   })
 })
