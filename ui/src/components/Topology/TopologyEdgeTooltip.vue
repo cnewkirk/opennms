@@ -39,15 +39,34 @@
       ></span>
       {{ prettifyProtocol(p) }}
     </div>
-    <div v-if="tooltip.util" class="edge-tooltip__util">
-      <span
-        class="edge-tooltip__util-badge"
-        :style="{ backgroundColor: utilizationColor(tooltip.util.utilPct) }"
-      >{{ Math.round(tooltip.util.utilPct) }}%</span>
-      <span class="edge-tooltip__util-rates">
-        ↑ {{ formatBitsPerSec(tooltip.util.inBps) }}bps &nbsp; ↓ {{ formatBitsPerSec(tooltip.util.outBps) }}bps
-      </span>
-    </div>
+    <template v-if="tooltip.util">
+      <div
+        v-if="tooltip.util.src"
+        class="edge-tooltip__util"
+      >
+        <span class="edge-tooltip__util-node">{{ tooltip.srcLabel }}</span>
+        <span
+          class="edge-tooltip__util-badge"
+          :style="{ backgroundColor: utilizationColor(tooltip.util.src.utilPct) }"
+        >{{ Math.round(tooltip.util.src.utilPct) }}%</span>
+        <span class="edge-tooltip__util-rates">
+          ↑ {{ formatBitsPerSec(tooltip.util.src.inBps) }}bps &nbsp; ↓ {{ formatBitsPerSec(tooltip.util.src.outBps) }}bps
+        </span>
+      </div>
+      <div
+        v-if="tooltip.util.tgt"
+        class="edge-tooltip__util"
+      >
+        <span class="edge-tooltip__util-node">{{ tooltip.tgtLabel }}</span>
+        <span
+          class="edge-tooltip__util-badge"
+          :style="{ backgroundColor: utilizationColor(tooltip.util.tgt.utilPct) }"
+        >{{ Math.round(tooltip.util.tgt.utilPct) }}%</span>
+        <span class="edge-tooltip__util-rates">
+          ↑ {{ formatBitsPerSec(tooltip.util.tgt.inBps) }}bps &nbsp; ↓ {{ formatBitsPerSec(tooltip.util.tgt.outBps) }}bps
+        </span>
+      </div>
+    </template>
     <div
       v-if="tooltip.labelData && (tooltip.labelData.localIfName || tooltip.labelData.remotePortId || tooltip.labelData.localIp || tooltip.labelData.remoteIp || tooltip.labelData.localMac || tooltip.labelData.ifSpeed)"
       class="edge-tooltip__label-data"
@@ -68,24 +87,27 @@
         <span class="edge-tooltip__field-name">{{ humanize('localIp') }}</span>
         <span>{{ [tooltip.labelData.localIp, tooltip.labelData.remoteIp].filter(Boolean).join(' ↔ ') }}</span>
       </div>
-      <div v-if="tooltip.labelData.localMac" class="edge-tooltip__field">
+      <div v-if="tooltip.labelData.localMac || tooltip.labelData.remoteMac" class="edge-tooltip__field">
         <span class="edge-tooltip__field-name">{{ humanize('localMac') }}</span>
-        <span>{{ tooltip.labelData.localMac }}</span>
+        <span>{{ [tooltip.labelData.localMac, tooltip.labelData.remoteMac].filter(Boolean).join(' ↔ ') }}</span>
       </div>
-      <div v-if="tooltip.labelData.ifSpeed != null && tooltip.labelData.ifSpeed > 0" class="edge-tooltip__field">
+      <div v-if="resolvedSpeed > 0" class="edge-tooltip__field">
         <span class="edge-tooltip__field-name">{{ humanize('ifSpeed') }}</span>
-        <span>{{ formatBitsPerSec(tooltip.labelData.ifSpeed) }}bps</span>
+        <span>{{ formatBitsPerSec(resolvedSpeed) }}bps</span>
       </div>
     </div>
     <TopologyEdgeGraphs
       v-if="tooltip.labelData"
       :labelData="tooltip.labelData"
+      :srcLabel="tooltip.srcLabel"
+      :tgtLabel="tooltip.tgtLabel"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { EdgeLabelData } from '@/stores/weathermapStore'
+import { computed } from 'vue'
+import { EdgeLabelData, EdgeUtil } from '@/stores/weathermapStore'
 import { getProtocolColor, utilizationColor, formatBitsPerSec, prettifyProtocol } from './protocolColors'
 import { humanize } from '@/components/Topology/fieldLabels'
 import TopologyEdgeGraphs from './TopologyEdgeGraphs.vue'
@@ -96,11 +118,18 @@ export interface EdgeTooltipState {
   protocols: string[]
   srcLabel: string
   tgtLabel: string
-  util?: { utilPct: number; inBps: number; outBps: number } | null
+  util?: EdgeUtil | null
   labelData?: EdgeLabelData | null
 }
 
-defineProps<{ tooltip: EdgeTooltipState | null }>()
+const props = defineProps<{ tooltip: EdgeTooltipState | null }>()
+
+// Use source ifSpeed; fall back to target ifSpeed if source is absent
+const resolvedSpeed = computed(() => {
+  const ld = props.tooltip?.labelData
+  if (!ld) return 0
+  return (ld.ifSpeed ?? 0) > 0 ? ld.ifSpeed! : (ld.tgtIface?.ifSpeed ?? 0)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -151,6 +180,23 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
     margin-top: 6px;
     padding-top: 6px;
     border-top: 1px solid var($border-on-surface);
+
+    & + & {
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: none;
+    }
+  }
+
+  &__util-node {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var($primary-text-on-surface);
+    min-width: 52px;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__util-badge {

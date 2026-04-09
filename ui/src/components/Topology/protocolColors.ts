@@ -108,10 +108,11 @@ export const parallelOffsets = (n: number): number[] => {
  * Maps a utilization percentage (0-100) to a traffic-light color.
  */
 export const utilizationColor = (pct: number): string => {
-  if (pct < 50) return '#48BB78'   // green
-  if (pct < 75) return '#ECC94B'   // yellow
-  if (pct < 90) return '#ED8936'   // orange
-  return '#FC8181'                  // red
+  if (pct === 0)  return '#4FD1C5'  // teal  — up, no load
+  if (pct < 50)   return '#48BB78'  // green — low utilization
+  if (pct < 75)   return '#ECC94B'  // yellow
+  if (pct < 90)   return '#ED8936'  // orange
+  return '#FC8181'                   // red   — near/over capacity
 }
 
 /**

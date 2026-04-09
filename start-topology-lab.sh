@@ -62,8 +62,15 @@ teardown() {
   podman network disconnect "${MGMT_NET}" test-opennms 2>/dev/null && \
     echo "    disconnected test-opennms from ${MGMT_NET}" || true
 
-  # Remove staged FRR configs
-  rm -rf "${SCRIPT_DIR}/.topology-lab" 2>/dev/null && echo "    removed staged configs" || true
+  # Stop load generator
+  if [[ -f "${SCRIPT_DIR}/.topology-lab/load-gen.pid" ]]; then
+    LGPID=$(cat "${SCRIPT_DIR}/.topology-lab/load-gen.pid")
+    kill "${LGPID}" 2>/dev/null && echo "    stopped load-gen (PID ${LGPID})" || true
+    rm -f "${SCRIPT_DIR}/.topology-lab/load-gen.pid"
+  fi
+
+  # Remove staged FRR configs only — preserve load-gen.py and other lab scripts
+  rm -rf "${SCRIPT_DIR}/.topology-lab/configs" 2>/dev/null && echo "    removed staged configs" || true
 
   # Remove networks
   podman network rm -f "${MGMT_NET}" 2>/dev/null && echo "    removed network: ${MGMT_NET}" || true
@@ -103,6 +110,14 @@ agentXPerms 0666 0755
 rocommunity public
 syslocation "OpenNMS Topology Lab"
 syscontact "admin@localhost"
+
+# Override reported speed for data-plane interfaces.
+# Podman/virtio-net always reports 10 Gbps; set to 100 Mbps so the
+# load-gen's --max-mbps 100 exercises all five weathermap utilization bands.
+# Type 6 = ethernetCsmacd (IANAifType).  Speed in bits/sec.
+interface eth1 6 100000000
+interface eth2 6 100000000
+interface eth3 6 100000000
 SNMPD
 
   # ---- entrypoint.sh ----
@@ -131,9 +146,10 @@ if [[ "${ROLE}" == "leaf" ]]; then
   ip link set dummy0 up
 fi
 
-# Start lldpd as AgentX subagent (-x = AgentX)
+# Start lldpd as AgentX subagent (-x = AgentX), 1-second TX for fast lab discovery
 lldpd -x &
 sleep 1
+lldpcli configure lldp tx-interval 1
 
 # Start FRR (zebra + ospfd + isisd via watchfrr, same as docker-start)
 source /usr/lib/frr/frrcommon.sh
@@ -150,7 +166,8 @@ RUN apk update && apk add --no-cache \
     lldpd \
     net-snmp \
     net-snmp-tools \
-    iproute2
+    iproute2 \
+    iperf3
 RUN mkdir -p /var/agentx /var/run/frr /var/log/frr /etc/frr && \
     addgroup -S frr 2>/dev/null || true && \
     adduser -S -G frr frr 2>/dev/null || true && \
@@ -238,7 +255,7 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
-zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+zebra_options="  -A 127.0.0.1 -s 90000000"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
@@ -255,6 +272,7 @@ interface lo
  ip router isis FABRIC
 !
 interface eth1
+ bandwidth 100000
  description link-to-leaf-01
  ip address 10.101.1.1/30
  ip ospf area 0.0.0.0
@@ -264,6 +282,7 @@ interface eth1
  isis network point-to-point
 !
 interface eth2
+ bandwidth 100000
  description link-to-leaf-02
  ip address 10.101.2.1/30
  ip ospf area 0.0.0.0
@@ -273,6 +292,7 @@ interface eth2
  isis network point-to-point
 !
 interface eth3
+ bandwidth 100000
  description link-to-leaf-03
  ip address 10.101.3.1/30
  ip ospf area 0.0.0.0
@@ -303,7 +323,7 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
-zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+zebra_options="  -A 127.0.0.1 -s 90000000"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
@@ -320,6 +340,7 @@ interface lo
  ip router isis FABRIC
 !
 interface eth1
+ bandwidth 100000
  description link-to-leaf-01
  ip address 10.101.4.1/30
  ip ospf area 0.0.0.0
@@ -329,6 +350,7 @@ interface eth1
  isis network point-to-point
 !
 interface eth2
+ bandwidth 100000
  description link-to-leaf-02
  ip address 10.101.5.1/30
  ip ospf area 0.0.0.0
@@ -338,6 +360,7 @@ interface eth2
  isis network point-to-point
 !
 interface eth3
+ bandwidth 100000
  description link-to-leaf-03
  ip address 10.101.6.1/30
  ip ospf area 0.0.0.0
@@ -368,7 +391,7 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
-zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+zebra_options="  -A 127.0.0.1 -s 90000000"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
@@ -385,6 +408,7 @@ interface lo
  ip router isis FABRIC
 !
 interface eth1
+ bandwidth 100000
  description uplink-to-spine-01
  ip address 10.101.1.2/30
  ip ospf area 0.0.0.0
@@ -394,6 +418,7 @@ interface eth1
  isis network point-to-point
 !
 interface eth2
+ bandwidth 100000
  description uplink-to-spine-02
  ip address 10.101.4.2/30
  ip ospf area 0.0.0.0
@@ -424,7 +449,7 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
-zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+zebra_options="  -A 127.0.0.1 -s 90000000"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
@@ -441,6 +466,7 @@ interface lo
  ip router isis FABRIC
 !
 interface eth1
+ bandwidth 100000
  description uplink-to-spine-01
  ip address 10.101.2.2/30
  ip ospf area 0.0.0.0
@@ -450,6 +476,7 @@ interface eth1
  isis network point-to-point
 !
 interface eth2
+ bandwidth 100000
  description uplink-to-spine-02
  ip address 10.101.5.2/30
  ip ospf area 0.0.0.0
@@ -480,7 +507,7 @@ ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
-zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
+zebra_options="  -A 127.0.0.1 -s 90000000"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
@@ -497,6 +524,7 @@ interface lo
  ip router isis FABRIC
 !
 interface eth1
+ bandwidth 100000
  description uplink-to-spine-01
  ip address 10.101.3.2/30
  ip ospf area 0.0.0.0
@@ -506,6 +534,7 @@ interface eth1
  isis network point-to-point
 !
 interface eth2
+ bandwidth 100000
  description uplink-to-spine-02
  ip address 10.101.6.2/30
  ip ospf area 0.0.0.0
@@ -566,6 +595,30 @@ for node_def in "${NODES[@]}"; do
 
   echo "    started: ${name} (mgmt: ${mgmt_ip}, role: ${role})"
 done
+
+# ---------------------------------------------------------------------------
+# Phase 4b: Re-apply bridge LLDP forwarding AFTER containers are started
+# ---------------------------------------------------------------------------
+# Linux resets group_fwd_mask to 0x0 whenever a new port is added to a bridge.
+# Containers were just started above, so we must re-apply here.
+echo ""
+echo "==> [4b] Re-applying bridge LLDP forwarding after container start..."
+
+BRIDGE_CMDS2=""
+for net in "${ALL_NETS[@]}"; do
+  br=$(podman network inspect "$net" 2>/dev/null \
+       | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['network_interface'])" 2>/dev/null || true)
+  if [[ -n "$br" ]]; then
+    BRIDGE_CMDS2+="echo 0 > /sys/class/net/${br}/bridge/multicast_snooping 2>/dev/null;"
+    BRIDGE_CMDS2+="echo 0x4000 > /sys/class/net/${br}/bridge/group_fwd_mask 2>/dev/null;"
+    echo "    re-applied: ${net} -> ${br}"
+  fi
+done
+
+if [[ -n "$BRIDGE_CMDS2" ]]; then
+  podman machine ssh -- "bash -c '${BRIDGE_CMDS2}exit 0'" 2>/dev/null || \
+    echo "    WARNING: could not re-apply bridge multicast settings"
+fi
 
 # ---------------------------------------------------------------------------
 # Phase 5: Attach test-opennms to management network
@@ -682,6 +735,23 @@ if [[ "${CONVERGED}" == "false" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Phase 8: Start traffic generator
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [+] Starting traffic generator..."
+
+LOADGEN="${SCRIPT_DIR}/.topology-lab/load-gen.py"
+if [[ -f "${LOADGEN}" ]]; then
+  nohup python3 -u "${LOADGEN}" --max-mbps 100 --interval 30 \
+    > "${SCRIPT_DIR}/.topology-lab/load-gen.log" 2>&1 &
+  echo $! > "${SCRIPT_DIR}/.topology-lab/load-gen.pid"
+  echo "    load-gen started (PID $(cat "${SCRIPT_DIR}/.topology-lab/load-gen.pid"))"
+  echo "    log: .topology-lab/load-gen.log"
+else
+  echo "    WARNING: load-gen.py not found at ${LOADGEN} — skipping traffic generation"
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo ""
@@ -705,4 +775,5 @@ echo " Wait ~30-60s for EnLinkd to collect, then open:"
 echo "   http://localhost:8980/opennms/  → navigate to /#/topology"
 echo ""
 echo " Teardown:  ./start-topology-lab.sh --teardown"
+echo " Load gen:  tail -f .topology-lab/load-gen.log"
 echo "============================================================"

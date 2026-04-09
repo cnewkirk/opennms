@@ -33,6 +33,7 @@
     </div>
     <TopologyDetailPanel />
     <TopologyEdgeTooltip :tooltip="edgeTooltip" />
+    <TopologyLegend />
 
     <CreateLinkModal
       :visible="showLinkModal"
@@ -55,6 +56,7 @@ import { useWeathermapStore } from '@/stores/weathermapStore'
 import { TopologyVertex } from '@/types/topology'
 import TopologyDetailPanel from './TopologyDetailPanel.vue'
 import TopologyEdgeTooltip from './TopologyEdgeTooltip.vue'
+import TopologyLegend from './TopologyLegend.vue'
 import CreateLinkModal from './CreateLinkModal.vue'
 
 const store = useTopologyStore()

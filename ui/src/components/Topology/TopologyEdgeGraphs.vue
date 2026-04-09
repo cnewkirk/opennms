@@ -15,20 +15,20 @@
     <!-- Charts -->
     <template v-else>
       <div v-if="hasSrcIface" class="edge-graphs__chart-block">
-        <div class="edge-graphs__chart-label">{{ srcIfaceLabel }} (source)</div>
+        <div class="edge-graphs__chart-label">{{ srcIfaceLabel }}</div>
         <canvas ref="srcUtilCanvas" class="edge-graphs__canvas"></canvas>
         <div class="edge-graphs__chart-legend">
-          <span class="edge-graphs__legend-in">↑ {{ latestInBps(srcData) }}</span>
-          <span class="edge-graphs__legend-out">↓ {{ latestOutBps(srcData) }}</span>
+          <span class="edge-graphs__legend-in">RX {{ latestInBps(srcData) }}</span>
+          <span class="edge-graphs__legend-out">TX {{ latestOutBps(srcData) }}</span>
         </div>
       </div>
 
       <div v-if="hasTgtIface" class="edge-graphs__chart-block">
-        <div class="edge-graphs__chart-label">{{ tgtIfaceLabel }} (target)</div>
+        <div class="edge-graphs__chart-label">{{ tgtIfaceLabel }}</div>
         <canvas ref="tgtUtilCanvas" class="edge-graphs__canvas"></canvas>
         <div class="edge-graphs__chart-legend">
-          <span class="edge-graphs__legend-in">↑ {{ latestInBps(tgtData) }}</span>
-          <span class="edge-graphs__legend-out">↓ {{ latestOutBps(tgtData) }}</span>
+          <span class="edge-graphs__legend-in">RX {{ latestInBps(tgtData) }}</span>
+          <span class="edge-graphs__legend-out">TX {{ latestOutBps(tgtData) }}</span>
         </div>
       </div>
 
@@ -60,7 +60,7 @@ import { formatBitsPerSec } from './protocolColors'
 
 Chart.register(LineElement, PointElement, LineController, CategoryScale, LinearScale, Filler)
 
-const props = defineProps<{ labelData: EdgeLabelData }>()
+const props = defineProps<{ labelData: EdgeLabelData; srcLabel?: string; tgtLabel?: string }>()
 
 const wmStore = useWeathermapStore()
 
@@ -73,13 +73,23 @@ const discardsData = ref<{ src: number[] | null; tgt: number[] | null } | null>(
 const hasSrcIface = computed(() => !!props.labelData.srcIface && props.labelData.srcNodeId != null)
 const hasTgtIface = computed(() => !!props.labelData.tgtIface && props.labelData.tgtNodeId != null)
 
-const srcIfaceLabel = computed(() =>
-  props.labelData.srcIface?.ifName ?? props.labelData.srcIface?.ifDescr ?? 'eth?'
+const srcIfaceName = computed(() =>
+  props.labelData.srcIface?.ifName ?? props.labelData.srcIface?.ifDescr ?? null
 )
-const tgtIfaceLabel = computed(() =>
+const tgtIfaceName = computed(() =>
   props.labelData.tgtIface?.ifName ?? props.labelData.tgtIface?.ifDescr
-  ?? props.labelData.remotePortId ?? 'eth?'
+  ?? props.labelData.remotePortId ?? null
 )
+const srcIfaceLabel = computed(() => {
+  const node  = props.srcLabel ?? 'source'
+  const iface = srcIfaceName.value
+  return iface ? `${node} — ${iface}` : node
+})
+const tgtIfaceLabel = computed(() => {
+  const node  = props.tgtLabel ?? 'target'
+  const iface = tgtIfaceName.value
+  return iface ? `${node} — ${iface}` : node
+})
 
 const LOOKBACK_MS = 2 * 60 * 60 * 1_000  // 2 hours
 

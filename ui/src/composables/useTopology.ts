@@ -26,7 +26,7 @@ import { Ref } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
 import { getProtocolColor, prettifyProtocol, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
-import { useWeathermapStore, EdgeLabelData } from '@/stores/weathermapStore'
+import { useWeathermapStore, EdgeLabelData, EdgeUtil } from '@/stores/weathermapStore'
 import { useTopologyViewStore } from '@/stores/topologyViewStore'
 
 cytoscape.use(cxtmenu)
@@ -185,7 +185,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     protocols: string[]
     srcLabel: string
     tgtLabel: string
-    util?: { utilPct: number; inBps: number; outBps: number } | null
+    util?: EdgeUtil | null
     labelData?: EdgeLabelData | null
   }
   const edgeTooltip = ref<EdgeTooltipState | null>(null)
@@ -487,7 +487,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
           return
         }
         edge.style('line-color', utilizationColor(util.utilPct))
-        edge.style('width', throughputWidth(util.inBps + util.outBps))
+        edge.style('width', throughputWidth(util.totalBps))
       })
     })
   }
@@ -507,7 +507,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     // Utilization line (from weathermap data)
     const util = wmStore.edgeUtilMap[key]
     if (viewStore.edgeLabels.showUtilization && util) {
-      parts.push(`${Math.round(util.utilPct)}% · ↑${formatBitsPerSec(util.inBps)} ↓${formatBitsPerSec(util.outBps)}`)
+      const src = util.src
+      parts.push(`${Math.round(util.utilPct)}% · ↑${formatBitsPerSec(src?.inBps ?? 0)} ↓${formatBitsPerSec(src?.outBps ?? 0)}`)
     }
 
     // MAC / speed lines (from edgeLabelData); port and IP now go to endpoint labels

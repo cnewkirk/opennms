@@ -9,11 +9,20 @@ import {
 } from '@/services/measurementsService'
 import { getNodeEnlinkd, cleanName, NodeEnlinkdData } from '@/services/enlinkdService'
 
-export interface EdgeUtil {
+export interface EdgeEndpointUtil {
   inBps: number
   outBps: number
   utilPct: number
   ifSpeed: number
+}
+
+export interface EdgeUtil {
+  src: EdgeEndpointUtil | null
+  tgt: EdgeEndpointUtil | null
+  /** max(src.utilPct, tgt.utilPct) — drives edge color on canvas */
+  utilPct: number
+  /** combined bps across both endpoints — drives edge width on canvas */
+  totalBps: number
 }
 
 export interface EdgeLabelData {
@@ -54,6 +63,18 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
   const lastUpdated  = ref<Date | null>(null)
   const selectedTime = ref<Date | null>(null)  // null = live
 
+  // When set, overrides ifSpeed as the utilization denominator.
+  // Useful for assessing utilization against a committed/contracted rate
+  // rather than physical line speed (e.g., in a lab with virtual 10 Gbps NICs).
+  const _REFBPS_KEY = 'opennms-topology-reference-bps'
+  const referenceBps = ref<number | null>(
+    (() => { const v = localStorage.getItem(_REFBPS_KEY); return v ? Number(v) : null })()
+  )
+  watch(referenceBps, v => {
+    if (v === null) localStorage.removeItem(_REFBPS_KEY)
+    else localStorage.setItem(_REFBPS_KEY, String(v))
+  })
+
   let _timer: ReturnType<typeof setTimeout> | null = null
   let _activeVertices: TopologyVertex[] = []
   let _activeEdges: TopologyEdge[] = []
@@ -68,14 +89,14 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
     const edges = _activeEdges   // snapshot to prevent mid-flight mutation on rapid start() calls
     if (edges.length === 0) return
 
-    // Collect unique node IDs from all edges
+    // Step 1 — Collect unique node IDs from all edges
     const nodeIds = new Set<number>()
     for (const e of edges) {
       nodeIds.add(e.source.id)
       nodeIds.add(e.target.id)
     }
 
-    // Fetch SNMP interfaces, node type, IP interfaces, and LLDP enlinkd data for each node
+    // Step 2 — Fetch SNMP interfaces, node type, IP interfaces, and LLDP enlinkd data for each node
     const nodeResults = await Promise.allSettled(
       Array.from(nodeIds).map(async (nodeId) => {
         const [ifaces, type, ipIfaces, enlinkd] = await Promise.all([
@@ -104,51 +125,23 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
       nodeEnlinkdMap[nodeId] = enlinkd
     }
 
-    // Fetch utilization for each edge in parallel
-    const edgeResults = await Promise.allSettled(
-      edges.map(async (e) => {
-        const key = edgeKey(e.source.id, e.target.id)
-        const srcIface = nodeSnmpMap[e.source.id]
-        const tgtIface = nodeSnmpMap[e.target.id]
-
-        // Use the source endpoint's interface (prefer src; fall back to tgt)
-        const iface = srcIface ?? tgtIface
-        if (!iface) return { key, util: null }
-
-        const nodeId = srcIface ? e.source.id : e.target.id
-        const util: InterfaceUtil | null = await fetchInterfaceUtilization(nodeId, iface, selectedTime.value ?? undefined)
-        return { key, util }
-      })
-    )
-
-    const utilMap: Record<string, EdgeUtil> = {}
-    for (const result of edgeResults) {
-      if (result.status !== 'fulfilled') continue
-      const { key, util } = result.value
-      if (!util) continue
-      utilMap[key] = {
-        inBps:   util.inBps,
-        outBps:  util.outBps,
-        ifSpeed: util.ifSpeed,
-        utilPct: computeUtilPct(util.inBps, util.outBps, util.ifSpeed)
-      }
-    }
-
-    // Build edgeLabelData — IP + LLDP port correlation per edge
+    // Step 3 — Build edgeLabelData via LLDP correlation BEFORE the utilization fetch so that
+    // srcIface/tgtIface (the specific connecting interfaces identified via LLDP) are available
+    // for the per-endpoint utilization queries in Step 4.
     const vertexLabelById = new Map(_activeVertices.map(v => [v.id, v.label]))
     const labelMap: Record<string, EdgeLabelData> = {}
     for (const e of edges) {
-      const key    = edgeKey(e.source.id, e.target.id)
-      const srcId  = e.source.id
-      const tgtId  = e.target.id
+      const key   = edgeKey(e.source.id, e.target.id)
+      const srcId = e.source.id
+      const tgtId = e.target.id
       const data: EdgeLabelData = {}
 
       data.srcNodeId = srcId
       data.tgtNodeId = tgtId
+      data.localIp   = nodeIpMap[srcId]
+      data.remoteIp  = nodeIpMap[tgtId]
 
-      data.localIp  = nodeIpMap[srcId]
-      data.remoteIp = nodeIpMap[tgtId]
-
+      // Forward LLDP — source node's view of the link
       const enlinkd     = nodeEnlinkdMap[srcId]
       const targetLabel = vertexLabelById.get(String(tgtId))
       if (enlinkd && targetLabel) {
@@ -166,15 +159,14 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
               data.srcIface    = localIface
             }
           } else {
-            const cleaned = cleanName(lldpLink.lldpLocalPort)
-            data.localIfName = cleaned || undefined
+            data.localIfName = cleanName(lldpLink.lldpLocalPort) || undefined
           }
           data.remotePortId = cleanName(lldpLink.ldpRemPort) || undefined
           data.remoteMac    = lldpLink.lldpRemChassisId || undefined
         }
       }
 
-      // Reverse LLDP lookup — try from target's perspective to fill in missing fields
+      // Reverse LLDP — target node's view of the link; identifies tgtIface and fills gaps
       const tgtEnlinkd = nodeEnlinkdMap[tgtId]
       const srcLabel   = vertexLabelById.get(String(srcId))
       if (tgtEnlinkd && srcLabel) {
@@ -182,39 +174,85 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
           cleanName(l.lldpRemInfo).toLowerCase() === srcLabel.toLowerCase()
         )
         if (reverseLldp) {
-          // target's local port → remotePortId (target's interface)
-          if (!data.remotePortId) {
-            const ifIndexMatch = reverseLldp.lldpLocalPort.match(/ifindex:(\d+)/i)
-            if (ifIndexMatch) {
-              const remoteIface = nodeIfIndexMap[tgtId]?.get(Number(ifIndexMatch[1]))
-              if (remoteIface) {
+          const ifIndexMatch = reverseLldp.lldpLocalPort.match(/ifindex:(\d+)/i)
+          if (ifIndexMatch) {
+            const remoteIface = nodeIfIndexMap[tgtId]?.get(Number(ifIndexMatch[1]))
+            if (remoteIface) {
+              // Always capture tgtIface when reverse LLDP identifies the interface
+              data.tgtIface  = remoteIface
+              data.remoteMac = data.remoteMac ?? remoteIface.physAddr ?? undefined
+              if (!data.remotePortId) {
                 data.remotePortId = remoteIface.ifName ?? remoteIface.ifDescr ?? undefined
-                data.remoteMac    = data.remoteMac ?? remoteIface.physAddr ?? undefined
-                data.tgtIface     = remoteIface
               }
-            } else {
-              data.remotePortId = cleanName(reverseLldp.lldpLocalPort) || undefined
             }
+          } else if (!data.remotePortId) {
+            data.remotePortId = cleanName(reverseLldp.lldpLocalPort) || undefined
           }
-          // target's view of src's port → localIfName fallback
           if (!data.localIfName) {
             data.localIfName = cleanName(reverseLldp.ldpRemPort) || undefined
           }
         }
       }
 
-      // Final fallback: SNMP best interface for source node
-      if (!data.localIfName) {
+      // Fallbacks — use best SNMP interface when LLDP didn't identify the connecting interface
+      if (!data.srcIface) {
         const best = nodeSnmpMap[srcId]
         if (best) {
-          data.localIfName = best.ifName ?? best.ifDescr ?? undefined
-          data.localMac    = best.physAddr ?? undefined
-          data.ifSpeed     = best.ifSpeed > 0 ? best.ifSpeed : undefined
+          data.localIfName = data.localIfName ?? best.ifName ?? best.ifDescr ?? undefined
+          data.localMac    = data.localMac    ?? best.physAddr ?? undefined
+          data.ifSpeed     = data.ifSpeed     ?? (best.ifSpeed > 0 ? best.ifSpeed : undefined)
           data.srcIface    = best
         }
       }
+      if (!data.tgtIface) {
+        const best = nodeSnmpMap[tgtId]
+        if (best) data.tgtIface = best
+      }
 
       labelMap[key] = data
+    }
+
+    // Step 4 — Fetch utilization from BOTH endpoints in parallel using LLDP-correlated interfaces
+    const toEndpointUtil = (u: InterfaceUtil | null): EdgeEndpointUtil | null => {
+      if (!u) return null
+      const effectiveSpeed = referenceBps.value ?? u.ifSpeed
+      return {
+        inBps:   u.inBps,
+        outBps:  u.outBps,
+        ifSpeed: u.ifSpeed,
+        utilPct: computeUtilPct(u.inBps, u.outBps, effectiveSpeed)
+      }
+    }
+
+    const edgeResults = await Promise.allSettled(
+      edges.map(async (e) => {
+        const key  = edgeKey(e.source.id, e.target.id)
+        const data = labelMap[key]
+        const [srcUtil, tgtUtil] = await Promise.all([
+          data?.srcIface
+            ? fetchInterfaceUtilization(e.source.id, data.srcIface, selectedTime.value ?? undefined)
+            : Promise.resolve(null),
+          data?.tgtIface
+            ? fetchInterfaceUtilization(e.target.id, data.tgtIface, selectedTime.value ?? undefined)
+            : Promise.resolve(null)
+        ])
+        return { key, srcUtil, tgtUtil }
+      })
+    )
+
+    const utilMap: Record<string, EdgeUtil> = {}
+    for (const result of edgeResults) {
+      if (result.status !== 'fulfilled') continue
+      const { key, srcUtil, tgtUtil } = result.value
+      const src = toEndpointUtil(srcUtil)
+      const tgt = toEndpointUtil(tgtUtil)
+      if (!src && !tgt) continue
+      utilMap[key] = {
+        src,
+        tgt,
+        utilPct:  Math.max(src?.utilPct ?? 0, tgt?.utilPct ?? 0),
+        totalBps: (src ? src.inBps + src.outBps : 0) + (tgt ? tgt.inBps + tgt.outBps : 0)
+      }
     }
 
     edgeUtilMap.value   = utilMap
@@ -275,9 +313,11 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
     }
   }
 
+  const setReferenceBps = (bps: number | null) => { referenceBps.value = bps }
+
   return {
     edgeUtilMap, nodeDownMap, edgeLabelData, loading, error, pollInterval, lastUpdated,
-    selectedTime,
-    start, stop, refresh, setPollInterval, setTime
+    selectedTime, referenceBps,
+    start, stop, refresh, setPollInterval, setTime, setReferenceBps
   }
 })
