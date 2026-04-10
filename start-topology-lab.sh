@@ -111,9 +111,12 @@ rocommunity public
 syslocation "OpenNMS Topology Lab"
 syscontact "admin@localhost"
 
-# Override reported speed for data-plane interfaces.
-# Podman/virtio-net reports 10 Gbps; set to 1 Gbps to match load-gen target.
+# Override reported speed for ALL virtual ethernet interfaces.
+# Podman/virtio-net reports 10 Gbps for every interface; cap everything at
+# 1 Gbps so the weathermap's pickBestInterface (highest-speed wins) doesn't
+# select eth0 (management) as the utilization interface.
 # Type 6 = ethernetCsmacd (IANAifType).  Speed in bits/sec.
+interface eth0 6 1000000000
 interface eth1 6 1000000000
 interface eth2 6 1000000000
 interface eth3 6 1000000000
@@ -669,6 +672,20 @@ curl -s -u admin:notdefault \
   >/dev/null
 echo "    collectd reload triggered"
 
+# Purge stale topology nodes from any prior foreign-source name variants
+# (e.g. lowercase 'topology-lab' vs 'Topology-Lab') to prevent duplicates
+# appearing in the topology view.
+STALE_IDS=$(PGPASSWORD=notdefault psql -h localhost -p 5432 -U opennms opennms -tAq \
+  -c "SELECT nodeid FROM node WHERE foreignsource NOT IN ('Topology-Lab','selfmonitor')
+      AND (nodelabel ILIKE 'spine-%' OR nodelabel ILIKE 'leaf-%');" 2>/dev/null || true)
+if [[ -n "$STALE_IDS" ]]; then
+  for id in $STALE_IDS; do
+    curl -s -o /dev/null -u admin:notdefault -X DELETE \
+      "http://localhost:8980/opennms/rest/nodes/$id"
+  done
+  echo "    removed stale topology nodes: $STALE_IDS"
+fi
+
 # ---------------------------------------------------------------------------
 # Phase 6: Drop requisition and trigger import
 # ---------------------------------------------------------------------------
@@ -733,6 +750,19 @@ if [[ "${HTTP_CODE}" == "202" ]]; then
 else
   echo "    WARNING: import REST call returned HTTP ${HTTP_CODE} (may still work if file was copied)"
 fi
+
+# Provisiond scans interfaces immediately at startup before the snmpd interface-speed
+# override is stable, so it records 10 Gbps (virtio-net kernel default) instead of
+# 1 Gbps. Wait briefly for the initial scan to complete, then patch the DB directly.
+echo "    Waiting for initial SNMP scan to complete..."
+sleep 30
+PGPASSWORD=notdefault psql -h localhost -p 5432 -U opennms opennms -q \
+  -c "UPDATE snmpinterface SET snmpifspeed = 1000000000
+      FROM node WHERE node.nodeid = snmpinterface.nodeid
+        AND node.foreignsource = 'Topology-Lab'
+        AND snmpinterface.snmpifname IN ('eth0','eth1','eth2','eth3')
+        AND snmpinterface.snmpifspeed > 1000000000;" 2>/dev/null || true
+echo "    patched snmpifspeed to 1 Gbps for all topology interfaces"
 
 # ---------------------------------------------------------------------------
 # Phase 7: Wait for OSPF convergence
