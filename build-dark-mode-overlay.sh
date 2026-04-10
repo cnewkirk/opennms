@@ -154,6 +154,14 @@ cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/WEB-INF/jsp/event/detail.jsp" \
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/manageSnmpCollections.jsp" \
    "${OVERLAY_DIR}/admin/manageSnmpCollections.jsp"
 
+# dashboard.jsp — redirect to Vue SPA at /#/surveillance-dashboard
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/dashboard.jsp" \
+   "${OVERLAY_DIR}/dashboard.jsp"
+
+# surveillance-view.jsp — redirect to Vue SPA at /#/surveillance-dashboard
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/surveillance-view.jsp" \
+   "${OVERLAY_DIR}/surveillance-view.jsp"
+
 
 # opennms-webapp-rest jar — rename to match base image version so COPY replaces it
 # DashboardRestService references OnmsDashboard (not in 35.0.4 base model jar), and the
@@ -298,6 +306,12 @@ COPY --chown=10001:10001 event/detail.jsp /opt/opennms/jetty-webapps/opennms/WEB
 
 # manageSnmpCollections.jsp — redirect to Vue SPA at /#/snmp-collections-config
 COPY --chown=10001:10001 admin/manageSnmpCollections.jsp /opt/opennms/jetty-webapps/opennms/admin/manageSnmpCollections.jsp
+
+# dashboard.jsp — redirect to Vue SPA at /#/surveillance-dashboard
+COPY --chown=10001:10001 dashboard.jsp /opt/opennms/jetty-webapps/opennms/dashboard.jsp
+
+# surveillance-view.jsp — redirect to Vue SPA at /#/surveillance-dashboard
+COPY --chown=10001:10001 surveillance-view.jsp /opt/opennms/jetty-webapps/opennms/surveillance-view.jsp
 
 # Patch welcome-file to index.jsp (Vue dashboard redirect) — single-line sed because
 # full web.xml overlay breaks CXF servlet mappings (source version != base image version)

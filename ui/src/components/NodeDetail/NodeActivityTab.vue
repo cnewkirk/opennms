@@ -4,7 +4,6 @@
       <FeatherTab>Alarms</FeatherTab>
       <FeatherTab>Events</FeatherTab>
       <FeatherTab>Outages</FeatherTab>
-      <FeatherTab>Links</FeatherTab>
     </template>
 
     <FeatherTabPanel>
@@ -27,10 +26,6 @@
         :filterFiql="perspectiveStore.isProblems ? 'ifRegainedService==null' : undefined"
       />
     </FeatherTabPanel>
-
-    <FeatherTabPanel>
-      <EnlinkdLinksTab v-if="visited[3]" :nodeId="nodeId" />
-    </FeatherTabPanel>
   </FeatherTabContainer>
 </template>
 
@@ -39,10 +34,9 @@ import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tab
 import AlarmsTable from '@/components/Nodes/AlarmsTable.vue'
 import EventsTable from '@/components/Nodes/EventsTable.vue'
 import OutagesTable from '@/components/Nodes/OutagesTable.vue'
-import EnlinkdLinksTab from '@/components/NodeDetail/EnlinkdLinksTab.vue'
 import { usePerspectiveStore } from '@/stores/perspectiveStore'
 
-const TAB_NAMES = ['alarms', 'events', 'outages', 'links'] as const
+const TAB_NAMES = ['alarms', 'events', 'outages'] as const
 
 const props = defineProps<{ nodeId: string; nodeLabel: string; defaultSubTab?: string }>()
 
@@ -55,7 +49,7 @@ const initialTab = props.defaultSubTab
   : 0
 const activeSubTab = ref(initialTab)
 
-const visited = reactive([false, false, false, false])
+const visited = reactive([false, false, false])
 visited[initialTab] = true
 
 watch(activeSubTab, (idx) => {

@@ -71,13 +71,15 @@
 
             <!-- Network -->
             <FeatherTabPanel>
-              <NetworkTab
-                v-if="tabVisited[3]"
-                :nodeId="id"
-                :nodeResourceKey="nodeResourceKey"
-                @go-graphs="goToTab('graphs')"
-                @go-activity="goToTab('activity')"
-              />
+              <template v-if="tabVisited[3]">
+                <NetworkTab
+                  :nodeId="id"
+                  :nodeResourceKey="nodeResourceKey"
+                  @go-graphs="goToTab('graphs')"
+                  @go-activity="goToTab('activity')"
+                />
+                <EnlinkdLinksTab :nodeId="node.id" />
+              </template>
             </FeatherTabPanel>
           </FeatherTabContainer>
 
@@ -99,6 +101,7 @@ import NodeInfoPanel from '@/components/NodeDetail/NodeInfoPanel.vue'
 import CategoryPanel from '@/components/NodeDetail/CategoryPanel.vue'
 import AvailabilityPanel from '@/components/NodeDetail/AvailabilityPanel.vue'
 import NetworkTab from '@/components/NodeDetail/NetworkTab.vue'
+import EnlinkdLinksTab from '@/components/NodeDetail/EnlinkdLinksTab.vue'
 import NodeActivityTab from '@/components/NodeDetail/NodeActivityTab.vue'
 import ResourceGraphsPanel from '@/components/NodeDetail/ResourceGraphsPanel.vue'
 import PerspectiveToggle from '@/components/Common/PerspectiveToggle.vue'
@@ -127,7 +130,7 @@ const { adminRole } = useRole()
 
 const TAB_KEYS = ['overview', 'activity', 'graphs', 'network'] as const
 type TopTabKey = typeof TAB_KEYS[number]
-const ACTIVITY_SUB_KEYS = ['alarms', 'events', 'outages', 'links'] as const
+const ACTIVITY_SUB_KEYS = ['alarms', 'events', 'outages'] as const
 
 const activeTab = ref(0)
 const tabVisited = reactive([true, false, false, false])
@@ -141,7 +144,13 @@ const goToTab = (key: TopTabKey) => {
 onMounted(() => {
   const tabParam = route.query.tab as string
 
-  // Backwards compat: old ?tab=alarms links navigate to Activity with that sub-tab
+  // Backwards compat: old ?tab=links navigates to Network tab
+  if (tabParam === 'links') {
+    activeTab.value = 3
+    router.replace({ query: { tab: 'network' } })
+    return
+  }
+  // Backwards compat: old ?tab=alarms|events|outages navigate to Activity with that sub-tab
   if (ACTIVITY_SUB_KEYS.includes(tabParam as any)) {
     activeTab.value = 1
     router.replace({ query: { tab: 'activity', subtab: tabParam } })
