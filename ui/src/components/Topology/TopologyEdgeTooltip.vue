@@ -77,10 +77,31 @@
         <span>{{ formatBitsPerSec(tooltip.labelData.ifSpeed) }}bps</span>
       </div>
     </div>
+
+    <!--
+      Bandwidth time-series chart — shows in + out bits/sec for the local interface
+      of this link over the last 2 hours.  Only rendered when we can build a
+      measurements resource ID from srcNodeId + labelData.localIfName + localMac.
+
+      Batch query: two transient DEF sources (ifHCInOctets/OutOctets, stored as
+      bytes/sec rates) + two CDEF expressions (* 8 → bits/sec).  Backend-agnostic:
+      the CDEF multiplication is evaluated by the OpenNMS measurements API, not
+      the TSS storage layer.
+    -->
+    <div v-if="bwQuery" class="edge-tooltip__chart">
+      <PersesPanel
+        title="Bandwidth · last 2h"
+        :queries="[bwQuery]"
+        :time-range="timeRange"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { AbsoluteTimeRange } from '@perses-dev/core'
+import type { OpenNMSBatchQuerySpec } from '@/datasource/opennms/types'
+import PersesPanel from '@/components/Perses/PersesPanel.vue'
 import { EdgeLabelData } from '@/stores/weathermapStore'
 import { getProtocolColor, utilizationColor, formatBitsPerSec } from './protocolColors'
 
@@ -90,11 +111,45 @@ export interface EdgeTooltipState {
   protocols: string[]
   srcLabel: string
   tgtLabel: string
+  /** Numeric OpenNMS node ID of the source vertex — used to build measurements resource ID. */
+  srcNodeId: string | null
   util?: { utilPct: number; inBps: number; outBps: number } | null
   labelData?: EdgeLabelData | null
 }
 
-defineProps<{ tooltip: EdgeTooltipState | null }>()
+const props = defineProps<{ tooltip: EdgeTooltipState | null }>()
+
+// Build the SNMP interface resource ID for the local (source) side of this link.
+// Format: node[{srcNodeId}].interfaceSnmp[{ifName}-{physAddr}]
+// physAddr (MAC) may be empty for some interfaces; measurements API still works.
+const localResourceId = computed<string | null>(() => {
+  const t = props.tooltip
+  if (!t?.srcNodeId || !t.labelData?.localIfName) return null
+  const mac = t.labelData.localMac ?? ''
+  return `node[${t.srcNodeId}].interfaceSnmp[${t.labelData.localIfName}-${mac}]`
+})
+
+const bwQuery = computed<OpenNMSBatchQuerySpec | null>(() => {
+  const rid = localResourceId.value
+  if (!rid) return null
+  return {
+    batch: true,
+    sources: [
+      { resourceId: rid, attribute: 'ifHCInOctets',  aggregation: 'AVERAGE', label: 'inOctets',  transient: true },
+      { resourceId: rid, attribute: 'ifHCOutOctets', aggregation: 'AVERAGE', label: 'outOctets', transient: true }
+    ],
+    expressions: [
+      { value: 'inOctets * 8',  label: 'In (bps)'  },
+      { value: 'outOctets * 8', label: 'Out (bps)' }
+    ]
+  }
+})
+
+// Captured at render time; refreshes each time the tooltip appears on a new edge.
+const timeRange = computed<AbsoluteTimeRange>(() => ({
+  start: new Date(Date.now() - 2 * 60 * 60 * 1000),
+  end: new Date()
+}))
 </script>
 
 <style lang="scss" scoped>
@@ -108,9 +163,9 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
   background: var($surface);
   border: 1px solid var($border-on-surface);
   border-radius: vars.$border-radius-sm;
-  padding: 8px 12px;
+  padding: 8px 12px 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  min-width: 160px;
+  width: 320px;
   transform: translate(12px, -50%);
 
   &__endpoints {
@@ -119,6 +174,8 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
     color: var($primary-text-on-surface);
     margin-bottom: 6px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__protocol {
@@ -186,6 +243,14 @@ defineProps<{ tooltip: EdgeTooltipState | null }>()
       min-width: 40px;
       flex-shrink: 0;
     }
+  }
+
+  &__chart {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var($border-on-surface);
+    width: 296px;
+    height: 160px;
   }
 }
 </style>
