@@ -57,7 +57,7 @@ const SPINE_TIER_SELECTOR =
 const buildStylesheet = (): any[] => {
   const defaultNodeColor = cssVar('--feather-primary')
   const selectedColor    = cssVar('--feather-primary-dark')
-  const labelBg          = cssVar('--feather-surface') || '#0d1117'
+  const labelBg          = cssVar('--feather-surface')
 
   return [
     {
@@ -65,17 +65,15 @@ const buildStylesheet = (): any[] => {
       css: {
         'background-color': defaultNodeColor || '#1f78c1',
         'label': 'data(label)',
-        'color': '#ffffff',
+        'color': cssVar('--feather-primary-text-on-surface') || '#e8eaed',
         'font-size': 11,
-        'font-weight': 600,
+        'font-weight': 500,
         'text-valign': 'bottom',
         'text-halign': 'center',
         'text-margin-y': 6,
-        'text-outline-width': 0,
-        'text-background-color': labelBg || '#0d1117',
-        'text-background-opacity': 0.75,
-        'text-background-padding': '3px',
-        'text-background-shape': 'roundrectangle',
+        'text-outline-width': 2,
+        'text-outline-color': labelBg || '#0d1117',
+        'text-outline-opacity': 0.8,
         'width': 36,
         'height': 36,
         'border-width': 2,
@@ -173,6 +171,16 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     labelData?: EdgeLabelData | null
   }
   const edgeTooltip = ref<EdgeTooltipState | null>(null)
+
+  interface NodeTooltipState {
+    x: number
+    y: number
+    label: string
+    nodeId: string
+    ip: string | null
+  }
+  const nodeTooltip = ref<NodeTooltipState | null>(null)
+  let nodeHoverTimer: ReturnType<typeof setTimeout> | null = null
 
   // --- Layout persistence (localStorage) ---
 
@@ -313,6 +321,27 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       }
     })
 
+    cy.on('mouseover', 'node', (evt) => {
+      if (store.linkMode) return
+      const data = evt.target.data()
+      const pos = evt.renderedPosition ?? { x: 0, y: 0 }
+      if (nodeHoverTimer) clearTimeout(nodeHoverTimer)
+      nodeHoverTimer = setTimeout(() => {
+        nodeTooltip.value = {
+          x: pos.x,
+          y: pos.y,
+          label: data.label as string ?? data.id,
+          nodeId: String(data.id),
+          ip: (data.ipAddress as string) || null
+        }
+      }, 350)
+    })
+
+    cy.on('mouseout', 'node', () => {
+      if (nodeHoverTimer) { clearTimeout(nodeHoverTimer); nodeHoverTimer = null }
+      nodeTooltip.value = null
+    })
+
     cy.on('mouseover', 'edge', (evt) => {
       if (!cy) return
       const edgeKey = evt.target.data('edgeKey') as string
@@ -335,6 +364,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
     cy.on('viewport', () => {
       edgeTooltip.value = null
+      if (nodeHoverTimer) { clearTimeout(nodeHoverTimer); nodeHoverTimer = null }
+      nodeTooltip.value = null
     })
 
     // Auto-save whenever the user finishes dragging a node
@@ -623,7 +654,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy = null
   })
 
-  return { getCy: () => cy, saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget, edgeTooltip }
+  return { getCy: () => cy, saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget, edgeTooltip, nodeTooltip }
 }
 
 export default useTopology
