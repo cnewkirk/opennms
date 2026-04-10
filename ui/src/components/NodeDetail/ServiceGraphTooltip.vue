@@ -56,7 +56,7 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null
 
 const query = computed<OpenNMSQuerySpec>(() => ({
   resourceId: resourceId.value,
-  attribute: props.serviceName.toLowerCase(),
+  attribute: 'response-time',
   aggregation: 'AVERAGE',
   label: 'Response Time (ms)'
 }))
