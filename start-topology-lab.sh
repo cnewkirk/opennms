@@ -112,12 +112,11 @@ syslocation "OpenNMS Topology Lab"
 syscontact "admin@localhost"
 
 # Override reported speed for data-plane interfaces.
-# Podman/virtio-net always reports 10 Gbps; set to 100 Mbps so the
-# load-gen's --max-mbps 100 exercises all five weathermap utilization bands.
+# Podman/virtio-net reports 10 Gbps; set to 1 Gbps to match load-gen target.
 # Type 6 = ethernetCsmacd (IANAifType).  Speed in bits/sec.
-interface eth1 6 100000000
-interface eth2 6 100000000
-interface eth3 6 100000000
+interface eth1 6 1000000000
+interface eth2 6 1000000000
+interface eth3 6 1000000000
 SNMPD
 
   # ---- entrypoint.sh ----
@@ -775,7 +774,7 @@ echo "==> [+] Starting traffic generator..."
 
 LOADGEN="${SCRIPT_DIR}/.topology-lab/load-gen.py"
 if [[ -f "${LOADGEN}" ]]; then
-  nohup python3 -u "${LOADGEN}" --max-mbps 100 --interval 30 \
+  nohup python3 -u "${LOADGEN}" --max-mbps 1000 --interval 30 \
     > "${SCRIPT_DIR}/.topology-lab/load-gen.log" 2>&1 &
   echo $! > "${SCRIPT_DIR}/.topology-lab/load-gen.pid"
   echo "    load-gen started (PID $(cat "${SCRIPT_DIR}/.topology-lab/load-gen.pid"))"
