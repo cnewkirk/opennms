@@ -103,6 +103,13 @@ agentXPerms 0666 0755
 rocommunity public
 syslocation "OpenNMS Topology Lab"
 syscontact "admin@localhost"
+
+# Override reported speed for data-plane interfaces.
+# Podman/virtio-net reports 10 Gbps; set to 1 Gbps to match load-gen target.
+# Type 6 = ethernetCsmacd (IANAifType).  Speed in bits/sec.
+interface eth1 6 1000000000
+interface eth2 6 1000000000
+interface eth3 6 1000000000
 SNMPD
 
   # ---- entrypoint.sh ----
@@ -712,6 +719,23 @@ if [[ "${CONVERGED}" == "false" ]]; then
   echo "--- spine-01 lldp neighbors ---" >&2
   podman exec topo-spine-01 lldpcli show neighbors >&2 || true
   exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Phase 8: Start traffic generator
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [+] Starting traffic generator..."
+
+LOADGEN="${SCRIPT_DIR}/.topology-lab/load-gen.py"
+if [[ -f "${LOADGEN}" ]]; then
+  nohup python3 -u "${LOADGEN}" --max-mbps 1000 --interval 30 \
+    > "${SCRIPT_DIR}/.topology-lab/load-gen.log" 2>&1 &
+  echo $! > "${SCRIPT_DIR}/.topology-lab/load-gen.pid"
+  echo "    load-gen started (PID $(cat "${SCRIPT_DIR}/.topology-lab/load-gen.pid"))"
+  echo "    log: .topology-lab/load-gen.log"
+else
+  echo "    WARNING: load-gen.py not found at ${LOADGEN} — skipping traffic generation"
 fi
 
 # ---------------------------------------------------------------------------
