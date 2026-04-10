@@ -40,9 +40,19 @@ const props = defineProps<{
   serviceName: string
 }>()
 
-// ── Resource existence cache ─────────────────────────────────────────────────
-// null = unknown, true = exists, false = no response-time resource for this IP
+// ── Resource existence + attribute cache ─────────────────────────────────────
+// OpenNMS names response-time measurements after the service monitor that collected
+// them (e.g. 'icmp', 'http', 'dns', 'ssh').  The exact attribute name varies per
+// resource and TSS backend, so we read it from the resource's rrdGraphAttributes
+// map (misleadingly named — it's a REST API field that works across all backends).
+//
+// 'response-time' is NOT a valid attribute for the measurements API — always read
+// the first key from rrdGraphAttributes on the resource to get the actual name.
+//
+// resource ID: node[foreignSource:foreignId].responseTime[ip]
+// (nodeId prop is already in foreignSource:foreignId form from NodeDetails.vue)
 const resourceExists = ref<boolean | null>(null)
+const rrdAttribute = ref<string>('icmp')  // populated from resource metadata on first hover
 
 const resourceId = computed(
   () => `node[${props.nodeId}].responseTime[${props.ip}]`
@@ -56,7 +66,7 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null
 
 const query = computed<OpenNMSQuerySpec>(() => ({
   resourceId: resourceId.value,
-  attribute: 'response-time',
+  attribute: rrdAttribute.value,
   aggregation: 'AVERAGE',
   label: 'Response Time (ms)'
 }))
@@ -74,9 +84,15 @@ const onEnter = (e: MouseEvent) => {
   const triggerEl = e.currentTarget as HTMLElement  // capture before async gap
 
   showTimer = setTimeout(async () => {
-    // Check resource existence (cached after first lookup)
+    // Check resource existence and discover the RRD attribute name (cached after first lookup).
+    // rrdGraphAttributes keys are the valid measurement attribute names (e.g. 'icmp', 'http', 'dns').
+    // The measurements API does NOT accept 'response-time' — it needs the actual RRD file basename.
     if (resourceExists.value === null) {
       const result = await API.getResourceById(resourceId.value)
+      if (result) {
+        const attrs = Object.keys((result as any).rrdGraphAttributes ?? {})
+        if (attrs.length > 0) rrdAttribute.value = attrs[0]
+      }
       resourceExists.value = result !== null
     }
     if (!resourceExists.value) return

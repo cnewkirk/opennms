@@ -18,18 +18,44 @@
           </div>
 
           <template v-else>
-            <!-- Alarms -->
-            <template v-if="nodeAlarms.length">
+
+            <!-- Status badge -->
+            <div class="topo-panel__status-row">
+              <span
+                class="topo-panel__status-badge"
+                :class="isNodeDown ? 'topo-panel__status-badge--down' : 'topo-panel__status-badge--up'"
+              >
+                {{ isNodeDown ? '▼ DOWN' : '● UP' }}
+              </span>
+            </div>
+
+            <!-- Top-5 alarms sorted worst-first -->
+            <template v-if="sortedAlarms.length">
               <div class="topo-panel__section">Alarms</div>
-              <div v-for="alarm in nodeAlarms" :key="alarm.id" class="topo-panel__alarm">
+              <div v-for="alarm in sortedAlarms" :key="alarm.id" class="topo-panel__alarm">
                 <SeverityBadge :severity="alarm.severity" />
                 <span class="topo-panel__alarm-msg">{{ alarm.logMessage }}</span>
+              </div>
+              <div v-if="nodeAlarms.length > 5" class="topo-panel__alarm-overflow">
+                +{{ nodeAlarms.length - 5 }} more alarms
               </div>
             </template>
             <div v-else-if="severityBadge" class="topo-panel__row">
               <span class="topo-panel__key">Alarm Severity</span>
               <SeverityBadge :severity="severityBadge" />
             </div>
+
+            <!-- Bandwidth chart (primary interface, last 6h) -->
+            <template v-if="bwQuery">
+              <div class="topo-panel__section">Bandwidth · last 6h</div>
+              <div class="topo-panel__bw-chart">
+                <PersesPanel
+                  :title="''"
+                  :queries="[bwQuery]"
+                  :time-range="bwTimeRange"
+                />
+              </div>
+            </template>
 
             <!-- System info -->
             <div class="topo-panel__section">System</div>
@@ -233,13 +259,19 @@
 import { FeatherButton } from '@featherds/button'
 import { FeatherSpinner } from '@featherds/progress'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
+import PersesPanel from '@/components/Perses/PersesPanel.vue'
 import { useTopologyStore } from '@/stores/topologyStore'
+import { useWeathermapStore } from '@/stores/weathermapStore'
 import { isVertex } from '@/types/topology'
 import { extractNodeId } from '@/services/enlinkdService'
+import { buildSnmpResourceId } from '@/services/measurementsService'
+import type { AbsoluteTimeRange } from '@perses-dev/core'
+import type { OpenNMSBatchQuerySpec } from '@/datasource/opennms/types'
 
 import useSnackbar from '@/composables/useSnackbar'
 
 const store = useTopologyStore()
+const wmStore = useWeathermapStore()
 const router = useRouter()
 const { showSnackBar } = useSnackbar()
 
@@ -324,6 +356,62 @@ const sortedInterfaces = computed(() => {
     return (a.ipAddress ?? '').localeCompare(b.ipAddress ?? '')
   })
 })
+
+// ── Up/down status ─────────────────────────────────────────────────────────────
+// Derived from wmStore.nodeDownMap which is polled by the weathermap.
+// node.type !== 'A' means the node is down (type 'A' = active).
+const isNodeDown = computed(() =>
+  nodeId.value !== null ? wmStore.nodeDownMap[nodeId.value] === true : false
+)
+
+// ── Top-5 alarms by severity ──────────────────────────────────────────────────
+// Sorted worst-first so the most critical alarms appear at the top.
+// Sliced to 5 to keep the panel scannable during a demo.
+const SEVERITY_ORDER: Record<string, number> = {
+  CRITICAL: 7, MAJOR: 6, MINOR: 5, WARNING: 4, NORMAL: 3, INDETERMINATE: 2, CLEARED: 1
+}
+const sortedAlarms = computed(() =>
+  [...nodeAlarms.value]
+    .sort((a, b) => (SEVERITY_ORDER[b.severity] ?? 0) - (SEVERITY_ORDER[a.severity] ?? 0))
+    .slice(0, 5)
+)
+
+// ── Bandwidth chart for the node panel ───────────────────────────────────────
+// Uses the primary SNMP interface (snmpPrimary === 'P') from the already-loaded
+// nodeDetail to build a batch query for in+out bits/sec over 6 hours.
+//
+// Resource ID: node[{numericId}].interfaceSnmp[{ifName}-{physAddr}]
+// The IpInterface.snmpInterface provides the data needed by buildSnmpResourceId().
+//
+// Two transient DEF sources (raw bytes/sec from SNMP collection) + CDEF * 8 → bps.
+// This goes through the OpenNMS measurements API which abstracts the TSS backend
+// (RRDtool, Newts, Cortex, etc.) — no storage-layer assumptions here.
+const primarySnmpResourceId = computed(() => {
+  const primaryIface = sortedInterfaces.value.find(i => i.snmpPrimary === 'P')
+  if (!primaryIface?.snmpInterface || !nodeId.value) return null
+  return buildSnmpResourceId(nodeId.value, primaryIface.snmpInterface)
+})
+
+const bwQuery = computed<OpenNMSBatchQuerySpec | null>(() => {
+  if (!primarySnmpResourceId.value) return null
+  const rid = primarySnmpResourceId.value
+  return {
+    batch: true,
+    sources: [
+      { resourceId: rid, attribute: 'ifHCInOctets',  aggregation: 'AVERAGE', label: 'inOctets',  transient: true },
+      { resourceId: rid, attribute: 'ifHCOutOctets', aggregation: 'AVERAGE', label: 'outOctets', transient: true }
+    ],
+    expressions: [
+      { value: 'inOctets * 8',  label: 'In (bps)'  },
+      { value: 'outOctets * 8', label: 'Out (bps)' }
+    ]
+  }
+})
+
+const bwTimeRange = computed<AbsoluteTimeRange>(() => ({
+  start: new Date(Date.now() - 6 * 60 * 60 * 1000),
+  end: new Date()
+}))
 
 const truncate = (s: string, n: number) => s.length > n ? s.slice(0, n) + '…' : s
 const stripQuotes = (s: string) => s.replace(/^"|"$/g, '').trim()
@@ -456,6 +544,8 @@ const isisLinks = computed(() => {
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
+@use '@featherds/styles/themes/variables' as fvars;
+@use '@featherds/styles/themes/utils';
 @import "@featherds/styles/themes/variables";
 @import "@/styles/severities";
 
@@ -561,6 +651,33 @@ const isisLinks = computed(() => {
     }
   }
 
+  &__status-row {
+    margin-bottom: 12px;
+  }
+
+  &__status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: vars.$border-radius-pill;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border: 1.5px solid transparent;
+
+    // Uses the same Feather DS utils.alpha() pattern as SeverityBadge — dark/light safe.
+    &--up {
+      color: var(--feather-success);
+      border-color: var(--feather-success);
+      background: utils.alpha(fvars.$success, 0.12);
+    }
+
+    &--down {
+      color: var(--feather-error);
+      border-color: var(--feather-error);
+      background: utils.alpha(fvars.$error, 0.12);
+    }
+  }
+
   &__alarm {
     display: flex;
     align-items: flex-start;
@@ -572,6 +689,20 @@ const isisLinks = computed(() => {
     font-size: 0.82rem;
     line-height: 1.4;
     flex: 1;
+  }
+
+  &__alarm-overflow {
+    font-size: 0.75rem;
+    color: var($secondary-text-on-surface);
+    margin-top: -4px;
+    margin-bottom: 8px;
+    padding-left: 2px;
+  }
+
+  &__bw-chart {
+    width: 100%;
+    height: 180px;
+    margin-bottom: 8px;
   }
 
   &__chips {

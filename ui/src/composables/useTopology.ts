@@ -57,7 +57,6 @@ const SPINE_TIER_SELECTOR =
 const buildStylesheet = (): any[] => {
   const defaultNodeColor = cssVar('--feather-primary')
   const selectedColor    = cssVar('--feather-primary-dark')
-  const labelBg          = cssVar('--feather-surface')
 
   return [
     {
@@ -71,9 +70,9 @@ const buildStylesheet = (): any[] => {
         'text-valign': 'bottom',
         'text-halign': 'center',
         'text-margin-y': 6,
-        'text-outline-width': 2,
-        'text-outline-color': labelBg || '#0d1117',
-        'text-outline-opacity': 0.8,
+        'text-outline-width': 0,
+        'text-background-opacity': 0,
+        'text-border-opacity': 0,
         'width': 36,
         'height': 36,
         'border-width': 2,
