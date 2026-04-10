@@ -638,6 +638,39 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Phase 5b: Configure 30-second data collection step (lab-only override)
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [5b] Configuring 30s SNMP collection step in OpenNMS..."
+
+# Patch collectd-configuration.xml: 300s → 30s SNMP service interval
+podman exec test-opennms sed -i \
+  's/service name="SNMP" interval="[0-9]*"/service name="SNMP" interval="30000"/g' \
+  /opt/opennms/etc/collectd-configuration.xml
+echo "    collectd-configuration.xml: SNMP interval -> 30000ms"
+
+# Patch datacollection-config.xml: 300s → 30s RRD step so newly created
+# RRD files have 30s resolution rather than the default 300s.
+podman exec test-opennms sed -i \
+  's/<rrd step="300">/<rrd step="30">/g' \
+  /opt/opennms/etc/datacollection-config.xml
+echo "    datacollection-config.xml: rrd step -> 30s"
+
+# Purge any stale Topology-Lab RRD data from a prior run so files are
+# (re)created from scratch with the new 30s step on this run's first poll.
+podman exec test-opennms rm -rf \
+  /opt/opennms/share/rrd/snmp/fs/Topology-Lab 2>/dev/null || true
+echo "    purged stale Topology-Lab RRD data"
+
+# Reload collectd to pick up both config changes
+curl -s -u admin:notdefault \
+  -H "Content-Type: application/xml" \
+  -X POST "http://localhost:8980/opennms/rest/events" \
+  -d '<event><uei>uei.opennms.org/internal/reloadDaemonConfig</uei><parms><parm><parmName>daemonName</parmName><value>Collectd</value></parm></parms></event>' \
+  >/dev/null
+echo "    collectd reload triggered"
+
+# ---------------------------------------------------------------------------
 # Phase 6: Drop requisition and trigger import
 # ---------------------------------------------------------------------------
 echo ""
