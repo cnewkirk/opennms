@@ -32,6 +32,7 @@
               <FeatherTab>Activity</FeatherTab>
               <FeatherTab>Resource Graphs</FeatherTab>
               <FeatherTab>Network</FeatherTab>
+              <FeatherTab>Metadata</FeatherTab>
             </template>
 
             <!-- Overview -->
@@ -79,6 +80,11 @@
                 @go-activity="goToTab('activity')"
               />
             </FeatherTabPanel>
+
+            <!-- Metadata -->
+            <FeatherTabPanel>
+              <NodeMetadataPanel v-if="tabVisited[4]" :nodeId="id" />
+            </FeatherTabPanel>
           </FeatherTabContainer>
 
           <div class="node-detail__perspective-wrap">
@@ -101,6 +107,7 @@ import AvailabilityPanel from '@/components/NodeDetail/AvailabilityPanel.vue'
 import NetworkTab from '@/components/NodeDetail/NetworkTab.vue'
 import NodeActivityTab from '@/components/NodeDetail/NodeActivityTab.vue'
 import ResourceGraphsPanel from '@/components/NodeDetail/ResourceGraphsPanel.vue'
+import NodeMetadataPanel from '@/components/NodeDetail/NodeMetadataPanel.vue'
 import PerspectiveToggle from '@/components/Common/PerspectiveToggle.vue'
 import CollapsibleSection from '@/components/Common/CollapsibleSection.vue'
 import useNodeDetail from '@/composables/useNodeDetail'
@@ -125,12 +132,12 @@ const { adminRole } = useRole()
 
 // ── Tab routing ──────────────────────────────────────────────────────────────
 
-const TAB_KEYS = ['overview', 'activity', 'graphs', 'network'] as const
+const TAB_KEYS = ['overview', 'activity', 'graphs', 'network', 'metadata'] as const
 type TopTabKey = typeof TAB_KEYS[number]
 const ACTIVITY_SUB_KEYS = ['alarms', 'events', 'outages', 'links'] as const
 
 const activeTab = ref(0)
-const tabVisited = reactive([true, false, false, false])
+const tabVisited = reactive([true, false, false, false, false])
 
 const goToTab = (key: TopTabKey) => {
   const idx = TAB_KEYS.indexOf(key)
