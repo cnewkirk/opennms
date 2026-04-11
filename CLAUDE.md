@@ -24,7 +24,9 @@ And read MEMORY.md. Every session starts blind — these three steps give you co
 
 **NEVER make sweeping "cleanup" commits** touching multiple unrelated files without understanding each one. The commit `c223dcdae54 ui redesign cleanup` (2026-04-10) wiped multiple prior fixes because the session didn't read context first. If something looks wrong, check `git log --oneline -5 -- <file>` before changing it.
 
-**NEVER use `git reset --hard`** without first running `git stash` or verifying there are no uncommitted fixes. The April 10 incident lost 15 commits + light-mode menu fixes that were re-broken 4 times over 24 hours as a result.
+**`git reset --hard` is COMPLETELY BANNED. No exceptions. No "just this once". No "but there's nothing uncommitted".** There is no scenario where this command is acceptable. Use `git revert` to undo a commit. Use `git stash` to set aside work. If you think you need `git reset --hard`, you are wrong — ask the user instead. The April 10 incident lost 15 commits and caused menu regressions that took 4 sessions to fully fix because resets wiped uncommitted changes that were invisible to every subsequent session.
+
+**Never reset to a remote branch** (`git reset --hard fork/feat/ui-refactor` or similar). If local and remote have diverged, that divergence is intentional. Never "sync" by overwriting local.
 
 ### Git Hygiene
 
