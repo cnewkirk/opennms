@@ -216,6 +216,11 @@ const router = createRouter({
       component: () => import('@/containers/InterfaceDetail.vue')
     },
     {
+      path: '/snmpinterface/:nodeId/:ifIndex',
+      name: 'SNMP Interface Detail',
+      component: () => import('@/containers/SnmpInterfaceDetail.vue')
+    },
+    {
       path: '/event/:id',
       name: 'Event Detail',
       component: () => import('@/containers/EventDetail.vue')
