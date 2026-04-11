@@ -801,3 +801,34 @@ export interface SchedOutage {
 export interface SchedOutagesApiResponse {
   outage: SchedOutage[]
 }
+
+export interface OnmsUser {
+  'user-id': string
+  'full-name': string
+  'user-comments': string
+  email: string
+  password?: string
+  passwordSalt?: boolean
+  'duty-schedule': string[]
+  role: string[]
+}
+
+export interface OnmsUsersApiResponse {
+  offset: number
+  count: number
+  totalCount: number
+  user: OnmsUser[]
+}
+
+export interface OnmsGroup {
+  name: string
+  comments: string
+  user: string[]
+}
+
+export interface OnmsGroupsApiResponse {
+  offset: number
+  count: number
+  totalCount: number
+  group: OnmsGroup[]
+}

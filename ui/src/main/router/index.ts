@@ -469,6 +469,21 @@ const router = createRouter({
       }
     },
     {
+      path: '/users-groups',
+      name: 'Users and Groups',
+      component: () => import('@/containers/UsersGroups.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access Users and Groups.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }

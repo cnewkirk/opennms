@@ -50,7 +50,7 @@ const adminCards = computed(() => {
   type AdminLink = { label: string; href?: string; to?: string; external?: boolean }
   const openNMSSystemLinks: AdminLink[] = [
     { label: 'System Configuration', to: '/system-config' },
-    { label: 'Configure Users, Groups and On-Call Roles', href: baseHref.value + 'admin/userGroupView/index.jsp' },
+    { label: 'Configure Users, Groups and On-Call Roles', to: '/users-groups' },
   ]
   if (zenithEnabled.value) {
     openNMSSystemLinks.push({ label: 'Connect to Zenith', to: '/zenith-connect' })
