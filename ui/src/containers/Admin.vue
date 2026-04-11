@@ -27,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import AdminCard from '@/components/Admin/AdminCard.vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import { useMenuStore } from '@/stores/menuStore'
@@ -46,12 +47,13 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 ])
 
 const adminCards = computed(() => {
-  const openNMSSystemLinks = [
+  type AdminLink = { label: string; href?: string; to?: string; external?: boolean }
+  const openNMSSystemLinks: AdminLink[] = [
     { label: 'System Configuration', href: baseHref.value + 'admin/sysconfig.jsp' },
     { label: 'Configure Users, Groups and On-Call Roles', href: baseHref.value + 'admin/userGroupView/index.jsp' },
   ]
   if (zenithEnabled.value) {
-    openNMSSystemLinks.push({ label: 'Connect to Zenith', to: '/zenith-connect' } as any)
+    openNMSSystemLinks.push({ label: 'Connect to Zenith', to: '/zenith-connect' })
   }
 
   return [
