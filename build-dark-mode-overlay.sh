@@ -248,6 +248,23 @@ cat > "${OVERLAY_DIR}/etc/enlinkd-configuration.xml" <<'ENLINKD'
                      />
 ENLINKD
 
+cat > "${OVERLAY_DIR}/etc/collectd-configuration.xml" <<'COLLECTD'
+<?xml version="1.0"?>
+<collectd-configuration xmlns="http://xmlns.opennms.org/xsd/config/collectd"
+    threads="50">
+  <package name="example1" remote="false">
+    <filter>IPADDR != '0.0.0.0'</filter>
+    <include-range begin="1.1.1.1" end="254.254.254.254"/>
+    <include-range begin="::1" end="ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"/>
+    <service name="SNMP" interval="30000" user-defined="false" status="on">
+      <parameter key="collection" value="${requisition:collection|detector:collection|default}"/>
+      <parameter key="thresholding-enabled" value="true"/>
+    </service>
+  </package>
+  <collector service="SNMP" class-name="org.opennms.netmgt.collectd.SnmpCollector"/>
+</collectd-configuration>
+COLLECTD
+
 cat > "${OVERLAY_DIR}/etc/imports/Self.xml" <<'REQUISITION'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model-import xmlns="http://xmlns.opennms.org/xsd/config/model-import"
@@ -264,7 +281,7 @@ cat > "${OVERLAY_DIR}/etc/imports/Self.xml" <<'REQUISITION'
 </model-import>
 REQUISITION
 
-echo "    snmpd.conf + entrypoint-wrapper.sh + snmp-config.xml + enlinkd-configuration.xml + imports/Self.xml: staged"
+echo "    snmpd.conf + entrypoint-wrapper.sh + snmp-config.xml + enlinkd-configuration.xml + collectd-configuration.xml + imports/Self.xml: staged"
 
 # ---------------------------------------------------------------------------
 # 4. Write Dockerfile
@@ -350,6 +367,7 @@ RUN chmod +x /entrypoint-wrapper.sh
 # OpenNMS SNMP client config + self-provisioning requisition
 COPY --chown=10001:10001 etc/snmp-config.xml /opt/opennms/etc/snmp-config.xml
 COPY --chown=10001:10001 etc/enlinkd-configuration.xml /opt/opennms/etc/enlinkd-configuration.xml
+COPY --chown=10001:10001 etc/collectd-configuration.xml /opt/opennms/etc/collectd-configuration.xml
 COPY --chown=10001:10001 etc/imports/Self.xml /opt/opennms/etc/imports/Self.xml
 
 ENTRYPOINT ["/entrypoint-wrapper.sh"]
