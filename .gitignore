@@ -1,5 +1,6 @@
 .gitignore
 !/.gitignore
+opennms-webapp-rest-*.jar
 \#*#
 *~
 .swp
