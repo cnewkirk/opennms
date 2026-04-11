@@ -238,12 +238,12 @@ async function reloadNotifd() {
   border-radius: 3px;
 
   &--on {
-    background: var(--feather-success-subtle);
+    background: rgba(var(--feather-success), 0.08);
     color: var(--feather-success);
   }
 
   &--off {
-    background: var(--feather-error-subtle);
+    background: rgba(var(--feather-error), 0.08);
     color: var(--feather-error);
   }
 }
