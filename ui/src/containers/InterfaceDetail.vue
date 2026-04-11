@@ -47,7 +47,7 @@
 
           <!-- Events -->
           <FeatherTabPanel>
-            <EventsTable v-if="tabVisited[1]" :nodeId="nodeId" />
+            <EventsTable v-if="tabVisited[1]" :nodeId="nodeId" :filterFiql="`ipAddress==${ipAddress}`" />
           </FeatherTabPanel>
 
           <!-- Outages -->

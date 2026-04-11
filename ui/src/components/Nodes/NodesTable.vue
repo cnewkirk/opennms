@@ -470,7 +470,7 @@ const computeNodeLink = (nodeId: number | string) => {
 }
 
 const computeNodeIpInterfaceLink = (nodeId: number | string, ipAddress: string) => {
-  return `${mainMenu.value.baseHref}element/interface.jsp?node=${nodeId}&intf=${ipAddress}`
+  return `/opennms/ui/interface/${nodeId}/${encodeURIComponent(ipAddress)}`
 }
 
 

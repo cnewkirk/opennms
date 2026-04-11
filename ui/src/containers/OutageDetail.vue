@@ -66,10 +66,10 @@
 
             <dt>Interface</dt>
             <dd>
-              <a
+              <router-link
                 v-if="outage.ipAddress && outage.nodeId"
-                :href="`/opennms/element/interface.jsp?node=${outage.nodeId}&intf=${outage.ipAddress}`"
-              >{{ outage.ipAddress }}</a>
+                :to="`/interface/${outage.nodeId}/${outage.ipAddress}`"
+              >{{ outage.ipAddress }}</router-link>
               <span v-else-if="outage.ipAddress">{{ outage.ipAddress }}</span>
               <span v-else>—</span>
             </dd>

@@ -211,7 +211,7 @@ const router = createRouter({
       component: () => import('@/containers/NodeDetails.vue')
     },
     {
-      path: '/node/:nodeId/interface/:ipAddress',
+      path: '/interface/:nodeId/:ipAddress',
       name: 'Interface Detail',
       component: () => import('@/containers/InterfaceDetail.vue')
     },

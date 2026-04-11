@@ -58,12 +58,15 @@ import { useEventStore } from '@/stores/eventStore'
 import useQueryParameters from '@/composables/useQueryParams'
 import { Event, QueryParameters } from '@/types'
 
-const props = defineProps<{ nodeId: string }>()
+const props = defineProps<{ nodeId: string; filterFiql?: string }>()
 
 const eventStore = useEventStore()
 
 const getEvents = async (payload: QueryParameters) => {
-  eventStore.getEvents(payload)
+  const params: QueryParameters = { ...payload }
+  if (props.filterFiql) params._s = props.filterFiql
+  else params._s = `node.id==${props.nodeId}`
+  eventStore.getEvents(params)
 }
 
 const getEventsTotalCount = () => {
@@ -72,8 +75,7 @@ const getEventsTotalCount = () => {
 
 const { queryParameters, updateQueryParameters } = useQueryParameters({
   limit: 5,
-  offset: 0,
-  _s: `node.id==${props.nodeId}`
+  offset: 0
 }, getEvents)
 
 const events = computed(() => eventStore.events)

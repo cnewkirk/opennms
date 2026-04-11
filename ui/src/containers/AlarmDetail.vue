@@ -68,10 +68,10 @@
 
             <dt>Interface</dt>
             <dd>
-              <a
+              <router-link
                 v-if="alarm.ipAddress && alarm.nodeId"
-                :href="`/opennms/element/interface.jsp?node=${alarm.nodeId}&intf=${alarm.ipAddress}`"
-              >{{ alarm.ipAddress }}</a>
+                :to="`/interface/${alarm.nodeId}/${alarm.ipAddress}`"
+              >{{ alarm.ipAddress }}</router-link>
               <span v-else-if="alarm.ipAddress">{{ alarm.ipAddress }}</span>
               <span v-else>&mdash;</span>
             </dd>

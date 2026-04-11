@@ -69,11 +69,10 @@
             <template v-if="event.ipAddress">
               <dt>Interface</dt>
               <dd>
-                <!-- TODO: link to Vue interface detail once available -->
-                <a
+                <router-link
                   v-if="event.nodeId"
-                  :href="`/opennms/element/interface.jsp?node=${event.nodeId}&intf=${event.ipAddress}`"
-                >{{ event.ipAddress }}</a>
+                  :to="`/interface/${event.nodeId}/${event.ipAddress}`"
+                >{{ event.ipAddress }}</router-link>
                 <span v-else>{{ event.ipAddress }}</span>
               </dd>
             </template>
