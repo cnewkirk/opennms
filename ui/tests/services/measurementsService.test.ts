@@ -78,16 +78,17 @@ describe('pickBestInterface', () => {
 describe('fetchInterfaceUtilization', () => {
   beforeEach(() => { vi.clearAllMocks(); _resetForTesting() })
 
-  it('floors current time to STEP boundary and uses 3-STEP window', async () => {
+  it('floors current time to RRD step boundary and uses 3-bucket window', async () => {
     vi.mocked(rest.post).mockResolvedValue({
       data: { labels: ['inOctets', 'outOctets'], columns: [{ values: [125_000] }, { values: [62_500] }] }
     })
     const before = Date.now()
     await fetchInterfaceUtilization(42, makeIface())
     const payload = vi.mocked(rest.post).mock.calls[0][1] as any
-    // _floor rounds down, so end ≤ before
+    // _floor rounds down to RRD_STEP_MS (300s) boundary, so end ≤ before
     expect(payload.end).toBeLessThanOrEqual(before)
-    expect(before - payload.end).toBeLessThan(30_000) // at most one STEP behind
-    expect(payload.end - payload.start).toBe(90_000) // STEP(30_000) * 3
+    expect(before - payload.end).toBeLessThan(300_000) // at most one RRD bucket behind
+    expect(payload.end - payload.start).toBe(900_000)  // RRD_STEP_MS(300_000) * 3
+    expect(payload.step).toBe(300_000)                  // must match RRD resolution
   })
 })

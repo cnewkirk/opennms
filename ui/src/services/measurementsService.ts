@@ -81,14 +81,15 @@ export const fetchInterfaceUtilization = async (
   iface: SnmpInterface
 ): Promise<InterfaceUtil | null> => {
   const intervals = await getIntervals()
-  const STEP = intervals.collection.SNMP
+  const CACHE_TTL   = intervals.collection.SNMP   // ms — how often to re-fetch
+  const RRD_STEP_MS = intervals.rrdStep * 1000    // ms — RRD resolution (e.g. 300 * 1000 = 300000)
   const resourceId = buildSnmpResourceId(nodeId, iface)
-  const end   = _floor(Date.now(), STEP)
-  const start = end - (STEP * 3)   // 3 collection samples
+  const end   = _floor(Date.now(), RRD_STEP_MS)
+  const start = end - (RRD_STEP_MS * 3)           // 3 RRD buckets
 
-  return cached(`util:${resourceId}:${end}`, STEP, async () => {
+  return cached(`util:${resourceId}:${end}`, CACHE_TTL, async () => {
     const payload = {
-      start, end, step: STEP,
+      start, end, step: RRD_STEP_MS,
       source: [
         { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
         { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }
