@@ -22,10 +22,6 @@
   -->
 
   <dependencies>
-    <dependency>
-      <groupId>org.opennms.features.vaadin-components</groupId>
-      <artifactId>extender-service</artifactId>
-    </dependency>
   </dependencies>
 
 </project>

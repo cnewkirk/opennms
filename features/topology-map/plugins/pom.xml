@@ -18,7 +18,6 @@
   <modules>
     <module>org.opennms.features.topology.plugins.browsers</module>
     <module>org.opennms.features.topology.plugins.layout</module>
-    <module>org.opennms.features.topology.plugins.netutils</module>
     <module>org.opennms.features.topology.plugins.topo.application</module>
     <module>org.opennms.features.topology.plugins.topo.asset</module>
     <module>org.opennms.features.topology.plugins.topo.bsm</module>

@@ -37,9 +37,8 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.opennms.features</groupId>
-      <artifactId>vaadin</artifactId>
-      <type>pom</type>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-compatibility-server</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>

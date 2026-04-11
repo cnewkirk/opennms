@@ -41,9 +41,19 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.opennms.features</groupId>
-      <artifactId>vaadin</artifactId>
-      <type>pom</type>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-compatibility-server</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.osgi</groupId>
+      <artifactId>opennms-osgi-core</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-server</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
