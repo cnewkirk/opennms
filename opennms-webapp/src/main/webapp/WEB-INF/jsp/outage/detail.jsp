@@ -2,8 +2,8 @@
 <%
   String outageId = request.getParameter("id");
   if (outageId == null || outageId.isEmpty()) {
-    response.sendRedirect(request.getContextPath() + "/ui/index.html#/outages");
+    response.sendRedirect(request.getContextPath() + "/ui/outages");
   } else {
-    response.sendRedirect(request.getContextPath() + "/ui/index.html#/outage/" + outageId);
+    response.sendRedirect(request.getContextPath() + "/ui/outage/" + outageId);
   }
 %>

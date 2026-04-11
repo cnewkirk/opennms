@@ -22,4 +22,4 @@
 
 --%>
 <%@page language="java" contentType="text/html" session="true" %>
-<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/outages"); %>
+<% response.sendRedirect(request.getContextPath() + "/ui/outages"); %>

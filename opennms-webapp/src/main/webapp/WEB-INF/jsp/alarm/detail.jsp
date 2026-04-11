@@ -2,8 +2,8 @@
 <%
   String alarmId = request.getParameter("id");
   if (alarmId == null || alarmId.isEmpty()) {
-    response.sendRedirect(request.getContextPath() + "/ui/index.html#/alarms");
+    response.sendRedirect(request.getContextPath() + "/ui/alarms");
   } else {
-    response.sendRedirect(request.getContextPath() + "/ui/index.html#/alarm/" + alarmId);
+    response.sendRedirect(request.getContextPath() + "/ui/alarm/" + alarmId);
   }
 %>

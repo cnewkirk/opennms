@@ -68,7 +68,7 @@ public class StructuredNodeListIT extends OpenNMSSeleniumIT {
         savedNodeId = node.getId();
 
         // Navigate to the Structured Node List page
-        getDriver().get(getBaseUrlInternal() + "opennms/ui/index.html#/nodes");
+        getDriver().get(getBaseUrlInternal() + "opennms/ui/nodes");
     }
 
     @After

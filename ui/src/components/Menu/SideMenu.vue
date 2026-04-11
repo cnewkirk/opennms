@@ -51,21 +51,21 @@ const isExpanded = ref<boolean>(menuStore.sideMenuExpanded() ?? false)
 // Map legacy JSP/HTM URLs to Vue SPA routes.
 // Add an entry here whenever a Vaadin/JSP page is replaced by a Vue route.
 const legacyToVueRoutes: Record<string, string> = {
-  'alarm/index.htm':                   'ui/index.html#/alarms',
-  'dashboard.jsp':                     'ui/index.html#/surveillance-dashboard',
-  'surveillance-view.jsp':             'ui/index.html#/surveillance-dashboard',
-  'element/nodeList.htm':              'ui/index.html#/nodes',
-  'outage/index.jsp':                  'ui/index.html#/outages',
-  'graph/index.jsp':                'ui/index.html#/resource-graphs',
-  'topology':                       'ui/index.html#/topology',
-  'admin/jmxConfigGenerator.jsp':   'ui/index.html#/jmx-config-generator',
-  'admin/mibCompiler.jsp':          'ui/index.html#/mib-compiler',
-  'admin/wallboardConfig.jsp':         'ui/index.html#/wallboard-config',
-  'admin/surveillanceViewsConfig.jsp':    'ui/index.html#/surveillance-views-config',
-  'admin/manageSnmpCollections.jsp':      'ui/index.html#/snmp-collections-config',
-  'vaadin-wallboard':                     'ui/index.html#/wallboard-config',
-  'admin/bsm/adminpage.jsp':             'ui/index.html#/bsm-admin',
-  'admin/manageEvents.jsp':              'ui/index.html#/event-config'
+  'alarm/index.htm':                   'ui/alarms',
+  'dashboard.jsp':                     'ui/surveillance-dashboard',
+  'surveillance-view.jsp':             'ui/surveillance-dashboard',
+  'element/nodeList.htm':              'ui/nodes',
+  'outage/index.jsp':                  'ui/outages',
+  'graph/index.jsp':                   'ui/resource-graphs',
+  'topology':                          'ui/topology',
+  'admin/jmxConfigGenerator.jsp':      'ui/jmx-config-generator',
+  'admin/mibCompiler.jsp':             'ui/mib-compiler',
+  'admin/wallboardConfig.jsp':         'ui/wallboard-config',
+  'admin/surveillanceViewsConfig.jsp': 'ui/surveillance-views-config',
+  'admin/manageSnmpCollections.jsp':   'ui/snmp-collections-config',
+  'vaadin-wallboard':                  'ui/wallboard-config',
+  'admin/bsm/adminpage.jsp':           'ui/bsm-admin',
+  'admin/manageEvents.jsp':            'ui/event-config'
 }
 
 const getMenuLink = (menuItem: MenuItem) => {

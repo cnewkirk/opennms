@@ -27,5 +27,5 @@
 %>
 <%
   // Redirect to Vue SPA MIB Compiler
-  response.sendRedirect(request.getContextPath() + "/ui/index.html#/mib-compiler");
+  response.sendRedirect(request.getContextPath() + "/ui/mib-compiler");
 %>

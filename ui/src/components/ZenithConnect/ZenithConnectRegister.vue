@@ -155,8 +155,8 @@ const onRegisterWithZenith = () => {
     return
   }
 
-  // Example callbackUrl: http://localhost:8980/opennms/ui/index.html#/zenith-connect/register-result
-  const callbackUrl = `${baseHref.value}ui/index.html#/zenith-connect/register-result`
+  // Example callbackUrl: http://localhost:8980/opennms/ui/zenith-connect/register-result
+  const callbackUrl = `${baseHref.value}ui/zenith-connect/register-result`
 
   const queryString = `?systemId=${encodeURIComponent(systemId.value)}&displayName=${encodeURIComponent(displayName.value)}&callbackUrl=${encodeURIComponent(callbackUrl)}`
 

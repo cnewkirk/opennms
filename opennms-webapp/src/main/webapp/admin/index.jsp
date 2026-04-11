@@ -130,7 +130,7 @@
 
             <% String showZenithConnectLink = System.getProperty("opennms.zenithConnect.enabled", "false");
                 if (Boolean.parseBoolean(showZenithConnectLink)) { %>
-                    <li><a href="ui/index.html#/zenith-connect">Connect to Zenith</a></li>
+                    <li><a href="ui/zenith-connect">Connect to Zenith</a></li>
             <% } %>
         </ul>
       </div> <!-- card-body -->
@@ -152,7 +152,7 @@
             <li><a href="javascript:deletePost()">Delete Nodes</a></li>
             <li><a href="ui/index.html/#/configuration">Configure External Requisitions</a></li>
             <li><a href="admin/geoservice/index.jsp">Configure Geocoder Service</a></li>
-            <li><a href="/opennms/ui/index.html#/scv">Secure Credentials Vault</a></li>
+            <li><a href="/opennms/ui/scv">Secure Credentials Vault</a></li>
         </ul>
       </div> <!-- card-body -->
     </div> <!-- panel -->
@@ -168,7 +168,7 @@
                     <a href="admin/eventconf/list.jsp">Configure Events</a> 
             -->
             <li><a href="admin/notification/index.jsp">Configure Notifications</a></li>
-            <li><a href="ui/index.html#/event-config">Manage Event Configurations</a></li>
+            <li><a href="ui/event-config">Manage Event Configurations</a></li>
         </ul>
       </div> <!-- card-body -->
       <div class="card-footer text-right">

@@ -20,7 +20,7 @@
 /// License.
 ///
 
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { Plugin } from '@/types'
 import DeviceConfigBackup from '@/containers/DeviceConfigBackup.vue'
 import Home from '@/containers/Home.vue'
@@ -66,8 +66,15 @@ const isLegacyPlugin = (plugin: Plugin) => {
 
 const zenithConnectEnabled = computed<boolean>(() => menuStore.value?.mainMenu?.zenithConnectEnabled ?? false)
 
+// Backwards compatibility: redirect legacy hash-based URLs to clean paths
+// e.g. /opennms/ui/index.html#/alarms → /opennms/ui/alarms
+const legacyHash = window.location.hash
+if (legacyHash.startsWith('#/')) {
+  history.replaceState(null, '', '/opennms/ui' + legacyHash.slice(1))
+}
+
 const router = createRouter({
-  history: createWebHashHistory('/opennms/ui'),
+  history: createWebHistory('/opennms/ui'),
   routes: [
     {
       path: '/',

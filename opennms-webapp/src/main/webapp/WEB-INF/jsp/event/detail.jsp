@@ -8,6 +8,6 @@
   if (eventId == null || eventId.isEmpty()) {
     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing id parameter");
   } else {
-    response.sendRedirect(request.getContextPath() + "/ui/index.html#/event/" + eventId);
+    response.sendRedirect(request.getContextPath() + "/ui/event/" + eventId);
   }
 %>

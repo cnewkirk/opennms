@@ -22,4 +22,4 @@
 
 --%>
 <%@page language="java" contentType="text/html" session="true" %>
-<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/jmx-config-generator"); %>
+<% response.sendRedirect(request.getContextPath() + "/ui/jmx-config-generator"); %>

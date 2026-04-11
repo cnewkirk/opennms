@@ -41,7 +41,7 @@ public class DashboardIT extends OpenNMSSeleniumIT {
 
     @Before
     public void setUp() {
-        getDriver().get(getBaseUrlInternal() + "opennms/ui/index.html#/dashboard");
+        getDriver().get(getBaseUrlInternal() + "opennms/ui/dashboard");
         wait.until(pageContainsText("Dashboard"));
     }
 

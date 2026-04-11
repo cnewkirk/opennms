@@ -112,7 +112,7 @@ public class AlarmDetailController extends MultiActionController {
         if (!"false".equals(System.getProperty("opennms.alarms.vueEnabled", "true"))) {
             try {
                 final int numericId = Integer.parseInt(httpServletRequest.getParameter("id"));
-                httpServletResponse.sendRedirect(httpServletRequest.getContextPath() + "/ui/index.html#/alarm/" + numericId);
+                httpServletResponse.sendRedirect(httpServletRequest.getContextPath() + "/ui/alarm/" + numericId);
                 return null;
             } catch (NumberFormatException ignored) {
                 // fall through to legacy JSP which handles invalid/missing ID with proper error handling

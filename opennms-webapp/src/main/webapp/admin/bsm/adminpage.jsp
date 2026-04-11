@@ -1,2 +1,2 @@
 <%@page language="java" contentType="text/html" session="true" %>
-<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/bsm-admin"); %>
+<% response.sendRedirect(request.getContextPath() + "/ui/bsm-admin"); %>

@@ -32,6 +32,6 @@ public class AdminPageNavEntry implements PageNavEntry {
 
     @Override
     public String getUrl() {
-        return "ui/index.html#/usage-statistics";
+        return "ui/usage-statistics";
     }
 }

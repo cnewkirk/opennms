@@ -108,7 +108,7 @@
     </action>
     <action>
         <label>Configure External Requisitions</label>
-        <url>ui/index.html/#/configuration</url>
+        <url>ui/configuration</url>
         <roles>
             <role>ROLE_ADMIN</role>
         </roles>
@@ -138,7 +138,7 @@
     </action>
     <action>
         <label>Manage Event Configurations</label>
-        <url>ui/index.html#/event-config</url>
+        <url>ui/event-config</url>
         <roles>
             <role>ROLE_ADMIN</role>
         </roles>

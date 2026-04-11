@@ -8,6 +8,6 @@
   if (nodeId == null || nodeId.isEmpty()) {
     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing node parameter");
   } else {
-    response.sendRedirect(request.getContextPath() + "/ui/index.html#/node/" + nodeId);
+    response.sendRedirect(request.getContextPath() + "/ui/node/" + nodeId);
   }
 %>
