@@ -107,7 +107,7 @@ const adminCards = computed(() => {
       links: [
         { label: 'Configure SNMP Collections and Data Collection Groups', to: '/snmp-collections-config' },
         { label: 'Configure SNMP Data Collection per Interface', href: baseHref.value + 'admin/snmpInterfaces.jsp' },
-        { label: 'Configure Thresholds', href: baseHref.value + 'admin/thresholds/index.htm' },
+        { label: 'Configure Thresholds', to: '/threshold-config' },
       ]
     },
     {

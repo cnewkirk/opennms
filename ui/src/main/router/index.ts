@@ -514,6 +514,36 @@ const router = createRouter({
       }
     },
     {
+      path: '/threshold-config',
+      name: 'Threshold Configuration',
+      component: () => import('@/containers/ThresholdConfig.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access Threshold Configuration.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
+      path: '/threshold-config/:groupName',
+      name: 'Edit Threshold Group',
+      component: () => import('@/containers/ThresholdGroupEdit.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access Threshold Configuration.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }
