@@ -98,7 +98,7 @@ const adminCards = computed(() => {
     {
       title: 'Service Monitoring',
       links: [
-        { label: 'Configure Scheduled Outages', href: baseHref.value + 'admin/sched-outages/index.jsp' },
+        { label: 'Configure Scheduled Outages', to: '/scheduled-outages' },
         { label: 'Manage and Unmanage Interfaces and Services', href: baseHref.value + 'admin/manage.jsp' },
       ]
     },

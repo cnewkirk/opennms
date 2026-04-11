@@ -454,6 +454,21 @@ const router = createRouter({
       }
     },
     {
+      path: '/scheduled-outages',
+      name: 'Scheduled Outages',
+      component: () => import('@/containers/ScheduledOutages.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access Scheduled Outages.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }

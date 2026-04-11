@@ -774,3 +774,30 @@ export interface OnmsInfo {
   datetimeformatConfig: { zoneId: string; datetimeformat: string }
   services: Record<string, string>
 }
+
+export interface SchedOutageTime {
+  id: number | null
+  day?: string
+  begins: string
+  ends: string
+}
+
+export interface SchedOutageNode {
+  id: number
+}
+
+export interface SchedOutageInterface {
+  address: string
+}
+
+export interface SchedOutage {
+  name: string
+  type: 'daily' | 'weekly' | 'monthly' | 'specific'
+  time: SchedOutageTime[]
+  node: SchedOutageNode[]
+  interface: SchedOutageInterface[]
+}
+
+export interface SchedOutagesApiResponse {
+  outage: SchedOutage[]
+}
