@@ -30,6 +30,7 @@ import { getNodeById, getNodeIpInterfaces } from '@/services/nodeService'
 import { TopologyVertex, TopologyEdge, TopologyLayer, TopologyElement, AlarmSeverity } from '@/types/topology'
 import { numericSeverityLevel } from '@/components/Map/utils'
 import { prettifyProtocol } from '@/components/Topology/protocolColors'
+import { edgeKey } from '@/stores/weathermapStore'
 import { Alarm, Node, IpInterface } from '@/types'
 
 export interface NodeDetail {
@@ -98,7 +99,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
       if (!g) continue
       const label = prettifyProtocol(availableLayers.value.find(l => l.namespace === ns)?.label ?? ns)
       for (const e of g.edges) {
-        const key = `${Math.min(e.source.id, e.target.id)}-${Math.max(e.source.id, e.target.id)}`
+        const key = edgeKey(e.source.id, e.target.id)
         const existing = map.get(key)
         if (!existing) {
           map.set(key, { source: e.source, target: e.target, protocols: [label] })
@@ -110,7 +111,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
 
     // Merge user-defined edges
     for (const ude of userDefinedEdges.value) {
-      const key = `${Math.min(ude.source.id, ude.target.id)}-${Math.max(ude.source.id, ude.target.id)}`
+      const key = edgeKey(ude.source.id, ude.target.id)
       const existing = map.get(key)
       if (!existing) {
         map.set(key, { ...ude, protocols: ['User Defined'] })
@@ -159,12 +160,12 @@ export const useTopologyStore = defineStore('topologyStore', () => {
 
     // Default to all protocol layers; fall back to 'nodes' if none exist
     const defaults = availableLayers.value.filter(l => l.namespace !== 'nodes')
-    const toLaod = defaults.length > 0 ? defaults : availableLayers.value.slice(0, 1)
+    const toLoad = defaults.length > 0 ? defaults : availableLayers.value.slice(0, 1)
 
     loading.value = true
     error.value = null
-    await Promise.all(toLaod.map(ensureLayerLoaded))
-    activeLayers.value = toLaod.map(l => l.namespace)
+    await Promise.all(toLoad.map(ensureLayerLoaded))
+    activeLayers.value = toLoad.map(l => l.namespace)
     loading.value = false
   }
 

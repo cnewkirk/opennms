@@ -261,7 +261,7 @@ import { FeatherSpinner } from '@featherds/progress'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import PersesPanel from '@/components/Perses/PersesPanel.vue'
 import { useTopologyStore } from '@/stores/topologyStore'
-import { useWeathermapStore } from '@/stores/weathermapStore'
+import { useWeathermapStore, edgeKey } from '@/stores/weathermapStore'
 import { isVertex } from '@/types/topology'
 import { extractNodeId } from '@/services/enlinkdService'
 import { buildSnmpResourceId } from '@/services/measurementsService'
@@ -428,10 +428,9 @@ const goToNodeDetail = () => {
 
 // ── Edge detail ───────────────────────────────────────────────────────────────
 
-const edgeKey = computed(() => {
+const selectedEdgeKey = computed(() => {
   if (!edge.value) return ''
-  const s = edge.value.source.id; const t = edge.value.target.id
-  return `${Math.min(s, t)}-${Math.max(s, t)}`
+  return edgeKey(edge.value.source.id, edge.value.target.id)
 })
 
 const detailLoading = ref(false)
@@ -439,7 +438,7 @@ const detailLoading = ref(false)
 watch(edge, async (e) => {
   if (!e) return
   const s = e.source.id; const t = e.target.id
-  const key = `${Math.min(s, t)}-${Math.max(s, t)}`
+  const key = edgeKey(s, t)
   if (!store.edgeLinkDetails[key]) {
     detailLoading.value = true
     await store.loadEdgeLinkDetail(key, s, t)
@@ -447,7 +446,7 @@ watch(edge, async (e) => {
   }
 }, { immediate: true })
 
-const edgeDetail = computed(() => edgeKey.value ? store.edgeLinkDetails[edgeKey.value] ?? null : null)
+const edgeDetail = computed(() => selectedEdgeKey.value ? store.edgeLinkDetails[selectedEdgeKey.value] ?? null : null)
 const edgeProtocols = computed(() => edge.value?.protocols ?? [])
 
 const sourceLabel = computed(() => {

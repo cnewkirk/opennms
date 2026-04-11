@@ -125,8 +125,9 @@ const props = defineProps<{ tooltip: EdgeTooltipState | null }>()
 const localResourceId = computed<string | null>(() => {
   const t = props.tooltip
   if (!t?.srcNodeId || !t.labelData?.localIfName) return null
-  const mac = t.labelData.localMac ?? ''
-  return `node[${t.srcNodeId}].interfaceSnmp[${t.labelData.localIfName}-${mac}]`
+  const name = t.labelData.localIfName
+  const suffix = t.labelData.localMac ? `${name}-${t.labelData.localMac}` : name
+  return `node[${t.srcNodeId}].interfaceSnmp[${suffix}]`
 })
 
 const bwQuery = computed<OpenNMSBatchQuerySpec | null>(() => {

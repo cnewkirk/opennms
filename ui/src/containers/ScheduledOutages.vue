@@ -174,7 +174,6 @@ const onSaved = async () => {
     text-align: left;
     border-bottom: 1px solid var($border-on-surface);
     vertical-align: top;
-    @include body1();
   }
 
   th {

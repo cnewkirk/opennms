@@ -53,10 +53,18 @@ const onSaveView = (opts: { name: string; description: string; scope: 'private' 
   // TODO: server-side save for user/shared/global scopes once REST endpoint exists
 }
 
-const onRestoreView = (view: TopologyView) => {
+const onRestoreView = async (view: TopologyView) => {
   try {
     const data = JSON.parse(view.data)
-    if (data.activeLayers) store.setAllLayers(false)
+    if (data.activeLayers && Array.isArray(data.activeLayers)) {
+      await store.setAllLayers(false)
+      for (const ns of data.activeLayers) {
+        const layer = store.availableLayers.find(l => l.namespace === ns)
+        if (layer && !store.activeLayers.includes(ns)) {
+          await store.toggleLayer(layer)
+        }
+      }
+    }
     viewStore.clearDirty()
   } catch {
     console.warn('[topology] Failed to restore view', view)
@@ -93,6 +101,7 @@ onBeforeUnmount(() => {
 .topology-page {
   display: flex;
   flex-direction: column;
+  // 120px = FeatherAppLayout header (64px) + breadcrumb row (32px) + padding (24px)
   height: calc(100vh - 120px);
   overflow: hidden;
 }

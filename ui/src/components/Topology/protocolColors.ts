@@ -61,18 +61,6 @@ export const getProtocolColor = (protocol: string): string => {
 }
 
 /**
- * Returns evenly-spaced, symmetric offsets for N parallel bezier edges.
- * n=1 → [0]  (straight)
- * n=2 → [-8, 8]
- * n=3 → [-8, 0, 8]
- */
-export const parallelOffsets = (n: number): number[] => {
-  if (n === 1) return [0]
-  const spacing = 8
-  return Array.from({ length: n }, (_, i) => Math.round((i - (n - 1) / 2) * spacing))
-}
-
-/**
  * Maps a utilization percentage (0-100) to a traffic-light color.
  */
 export const utilizationColor = (pct: number): string => {

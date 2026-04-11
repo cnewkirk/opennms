@@ -22,6 +22,9 @@
 
 export type AlarmSeverity = 'CRITICAL' | 'MAJOR' | 'MINOR' | 'WARNING' | 'NORMAL' | 'INDETERMINATE'
 
+// REST API type asymmetry: vertex IDs are strings (from graph response),
+// but edge source/target IDs are numbers (from edge references).
+// Use String(edge.source.id) when looking up vertices by edge endpoint.
 export interface TopologyVertex {
   id: string
   namespace: string
@@ -72,6 +75,8 @@ export interface TopologyLayer {
 
 export type TopologyElement = TopologyVertex | TopologyEdge
 
+// Discriminates by checking for 'id' — works because TopologyEdge has no 'id' field.
+// If 'id' is ever added to TopologyEdge, this guard will silently break.
 export const isVertex = (el: TopologyElement): el is TopologyVertex =>
   'label' in el && 'id' in el
 

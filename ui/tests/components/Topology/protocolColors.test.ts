@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { getProtocolColor, parallelOffsets, utilizationColor, throughputWidth, formatBitsPerSec, PROTOCOL_COLORS, FALLBACK_COLOR } from '@/components/Topology/protocolColors'
+import { getProtocolColor, utilizationColor, throughputWidth, formatBitsPerSec, PROTOCOL_COLORS, FALLBACK_COLOR } from '@/components/Topology/protocolColors'
 
 describe('getProtocolColor', () => {
   // getProtocolColor is theme-aware: dark palette when .open-dark is set, light palette otherwise.
@@ -21,33 +21,6 @@ describe('getProtocolColor', () => {
 
   it('handles "User Defined" as a known protocol', () => {
     expect(getProtocolColor('User Defined')).toBe(PROTOCOL_COLORS['user-defined'])
-  })
-})
-
-describe('parallelOffsets', () => {
-  it('returns [0] for a single protocol', () => {
-    expect(parallelOffsets(1)).toEqual([0])
-  })
-
-  it('returns symmetric offsets for 2 protocols', () => {
-    const offsets = parallelOffsets(2)
-    expect(offsets).toHaveLength(2)
-    expect(offsets[0]).toBeLessThan(0)
-    expect(offsets[1]).toBeGreaterThan(0)
-    expect(offsets[0]).toBe(-offsets[1])
-  })
-
-  it('returns symmetric offsets centered on 0 for 3 protocols', () => {
-    const offsets = parallelOffsets(3)
-    expect(offsets).toHaveLength(3)
-    expect(offsets[1]).toBe(0)
-    expect(offsets[0]).toBe(-offsets[2])
-  })
-
-  it('always returns n offsets for n protocols', () => {
-    for (let n = 1; n <= 7; n++) {
-      expect(parallelOffsets(n)).toHaveLength(n)
-    }
   })
 })
 

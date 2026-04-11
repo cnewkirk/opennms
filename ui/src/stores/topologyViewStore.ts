@@ -42,16 +42,6 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
     namePattern: (savedDefaults?.namePattern ?? '') as string,
   })
 
-  // Edge label visibility (mirrors edgeLabelStore but lives here for view persistence)
-  const edgeLabels = reactive({
-    showUtilization: true,
-    showLocalPort:   false,
-    showRemotePort:  false,
-    showIp:          false,
-    showMac:         false,
-    showSpeed:       false,
-  })
-
   // Icon mappings (persisted in localStorage)
   const categoryIconMap = ref<IconMapping[]>([])
   const oidIconMap      = ref<IconMapping[]>([])
@@ -95,7 +85,6 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
   return {
     gridSnap,
     filters,
-    edgeLabels,
     categoryIconMap,
     oidIconMap,
     lagPrefixPatterns,

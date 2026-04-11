@@ -26,12 +26,16 @@ export interface EdgeLabelData {
   ifSpeed?: number        // link speed in bits/sec
 }
 
-/** Stable canonical key for an edge between two nodes. */
+/**
+ * Canonical edge key for a node pair — used across topology stores, composables, and components.
+ * Guarantees stable key regardless of which endpoint is "source" vs "target".
+ */
 export const edgeKey = (srcId: number, tgtId: number): string =>
   `${Math.min(srcId, tgtId)}-${Math.max(srcId, tgtId)}`
 
 /**
  * Compute utilization % for a full-duplex link.
+ * Full-duplex: each direction has independent ifSpeed capacity, so total capacity = 2 * ifSpeed.
  * utilPct = (inBps + outBps) / (2 * ifSpeed) * 100, capped at 100.
  */
 export const computeUtilPct = (inBps: number, outBps: number, ifSpeed: number): number => {
@@ -150,7 +154,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
         if (lldpLink) {
           const ifIndexMatch = lldpLink.lldpLocalPort.match(/ifindex:(\d+)/i)
           if (ifIndexMatch) {
-            const localIface = nodeIfIndexMap[srcId].get(Number(ifIndexMatch[1]))
+            const localIface = nodeIfIndexMap[srcId]?.get(Number(ifIndexMatch[1]))
             if (localIface) {
               data.localIfName = localIface.ifName ?? localIface.ifDescr ?? undefined
               data.localMac    = localIface.physAddr ?? undefined
@@ -196,7 +200,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
   }
 
   const start = async (vertices: TopologyVertex[], edges: TopologyEdge[]) => {
-    // _activeVertices kept for potential future use (e.g., marking isolated/unconnected nodes as down)
+    // Cached for _fetchAll() edge label correlation
     _activeVertices = vertices
     _activeEdges = edges
     if (_timer) clearTimeout(_timer)

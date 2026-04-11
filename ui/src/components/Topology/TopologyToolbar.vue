@@ -220,9 +220,9 @@
           Scope
           <select v-model="newViewScope">
             <option value="private">Private (this browser only)</option>
-            <option value="user">My Account (all my browsers)</option>
-            <option value="shared">Shared (all users)</option>
-            <option v-if="authStore.whoAmI?.roles?.includes('ROLE_ADMIN')" value="global">Global Default</option>
+            <option value="user" disabled>My Account (not yet available)</option>
+            <option value="shared" disabled>Shared (not yet available)</option>
+            <option v-if="authStore.whoAmI?.roles?.includes('ROLE_ADMIN')" value="global" disabled>Global Default (not yet available)</option>
           </select>
         </label>
         <div class="topology-toolbar__modal-actions">
@@ -244,6 +244,7 @@ import { getProtocolColor, prettifyProtocol } from './protocolColors'
 import { useTopologyViewStore } from '@/stores/topologyViewStore'
 import { isValidCidr } from '@/components/Topology/cidrUtils'
 import { getCategories } from '@/services/categoryService'
+import { cached } from '@/services/cacheService'
 import { getSharedViews, getGlobalView, deleteView as deleteRemoteView } from '@/services/topologyViewService'
 import { useAuthStore } from '@/stores/authStore'
 import type { TopologyView } from '@/types/topology'
@@ -428,7 +429,7 @@ const deletePrivateView = (id: string) => viewStore.deletePrivateView(id)
 onMounted(async () => {
   await refreshServerViews()
   try {
-    const result = await getCategories()
+    const result = await cached('surveillanceCategories', 600_000, () => getCategories())
     if (result) availableCategories.value = result.category.map((c: { name: string }) => c.name).sort()
   } catch {
     console.warn('[topology] Failed to load surveillance categories')
