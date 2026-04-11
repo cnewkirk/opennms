@@ -171,8 +171,16 @@ watch(() => appStore.theme, rerender)
 </script>
 
 <style scoped>
+/*
+ * Let the parent control height. The AutoSizedPanel ResizeObserver reads
+ * this element's actual size and passes it as contentDimensions to the
+ * Perses PanelComponent. A fixed pixel height here would override any
+ * parent constraint and cause the React tree to overflow its container.
+ */
 .perses-panel-container {
   width: 100%;
-  height: 300px;
+  height: 100%;
+  min-height: 80px;
+  overflow: hidden;
 }
 </style>

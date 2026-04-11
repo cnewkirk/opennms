@@ -163,10 +163,11 @@ const timeRange = computed<AbsoluteTimeRange>(() => ({
   background: var($surface);
   border: 1px solid var($border-on-surface);
   border-radius: vars.$border-radius-sm;
-  padding: 8px 12px 12px;
+  padding: 10px 12px 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  width: 320px;
+  width: 340px;
   transform: translate(12px, -50%);
+  overflow: hidden;
 
   &__endpoints {
     font-size: 0.75rem;
@@ -249,8 +250,17 @@ const timeRange = computed<AbsoluteTimeRange>(() => ({
     margin-top: 8px;
     padding-top: 8px;
     border-top: 1px solid var($border-on-surface);
-    width: 296px;
-    height: 160px;
+    // Explicit block size — the PersesPanel fills 100% of this, so the
+    // React tree renders exactly at this height. overflow:hidden is a
+    // safety clip in case any React child escapes.
+    height: 180px;
+    overflow: hidden;
+    // Negative side margins let the chart bleed to the tooltip edge for
+    // a more integrated, full-bleed appearance
+    margin-left: -12px;
+    margin-right: -12px;
+    padding-left: 4px;
+    padding-right: 4px;
   }
 }
 </style>
