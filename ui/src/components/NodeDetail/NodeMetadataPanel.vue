@@ -1,6 +1,7 @@
 <template>
   <div class="node-metadata-panel">
     <div v-if="loading" class="node-metadata-panel__loading">Loading metadata…</div>
+    <div v-else-if="error" class="node-metadata-panel__empty">Failed to load metadata.</div>
     <div v-else-if="!entries.length" class="node-metadata-panel__empty">No metadata entries.</div>
     <template v-else>
       <template v-for="group in groupedEntries" :key="group.context">
@@ -31,11 +32,13 @@ import { OnmsMetaData } from '@/types'
 const props = defineProps<{ nodeId: string }>()
 
 const loading = ref(true)
+const error = ref(false)
 const entries = ref<OnmsMetaData[]>([])
 
 onMounted(async () => {
   const result = await getNodeMetaData(props.nodeId)
-  if (result) entries.value = result.metaData ?? []
+  if (result === false) error.value = true
+  else entries.value = result.metaData ?? []
   loading.value = false
 })
 
@@ -70,7 +73,7 @@ const groupedEntries = computed(() => {
     border-bottom: 1px solid var($border-on-surface);
     color: var($primary-text-on-surface);
 
-    &:first-child {
+    &:first-of-type {
       margin-top: 0;
     }
   }
