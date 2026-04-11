@@ -268,14 +268,17 @@ const handleSave = async () => {
     const toAdd = form.value.roles.filter(r => !originalRoles.value.includes(r))
     const toRemove = originalRoles.value.filter(r => !form.value.roles.includes(r))
 
-    for (const role of toAdd) {
-      await addUserRole(username, role)
-    }
-    for (const role of toRemove) {
-      await removeUserRole(username, role)
-    }
+    const roleResults = await Promise.all([
+      ...toAdd.map(r => addUserRole(username, r)),
+      ...toRemove.map(r => removeUserRole(username, r))
+    ])
 
     saving.value = false
+
+    if (roleResults.some(r => r === false)) {
+      showSnackBar({ msg: 'Some role changes could not be applied.', error: true })
+      return
+    }
   }
 
   emit('saved')

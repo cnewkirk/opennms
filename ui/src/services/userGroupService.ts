@@ -9,7 +9,8 @@ const escXml = (s: string): string =>
 const listUsers = async (): Promise<OnmsUser[] | false> => {
   try {
     const resp = await rest.get<OnmsUsersApiResponse>('/users')
-    return [].concat(resp.data.user as any) as OnmsUser[]
+    const raw = resp.data.user
+    return (Array.isArray(raw) ? raw : raw ? [raw] : []) as OnmsUser[]
   } catch { return false }
 }
 
@@ -76,7 +77,8 @@ const deleteUser = async (username: string): Promise<boolean> => {
 const listGroups = async (): Promise<OnmsGroup[] | false> => {
   try {
     const resp = await rest.get<OnmsGroupsApiResponse>('/groups')
-    return [].concat(resp.data.group as any) as OnmsGroup[]
+    const raw = resp.data.group
+    return (Array.isArray(raw) ? raw : raw ? [raw] : []) as OnmsGroup[]
   } catch { return false }
 }
 
@@ -87,6 +89,16 @@ const createGroup = async (name: string, comments: string): Promise<boolean> => 
 </group>`
   try {
     await rest.post('/groups', xml, { headers: { 'Content-Type': 'application/xml' } })
+    return true
+  } catch { return false }
+}
+
+const updateGroup = async (name: string, comments: string): Promise<boolean> => {
+  const params = new URLSearchParams({ comments })
+  try {
+    await rest.put(`/groups/${encodeURIComponent(name)}`, params.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
     return true
   } catch { return false }
 }
@@ -115,5 +127,5 @@ const removeGroupUser = async (groupName: string, userName: string): Promise<boo
 export {
   listUsers, createUser, updateUser, changePassword,
   addUserRole, removeUserRole, deleteUser,
-  listGroups, createGroup, deleteGroup, addGroupUser, removeGroupUser
+  listGroups, createGroup, updateGroup, deleteGroup, addGroupUser, removeGroupUser
 }

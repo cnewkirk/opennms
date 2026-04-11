@@ -35,7 +35,7 @@
               <td>{{ user['user-id'] }}</td>
               <td>{{ user['full-name'] }}</td>
               <td>{{ user.email }}</td>
-              <td>{{ user.role.join(', ') }}</td>
+              <td>{{ (user.role ?? []).join(', ') }}</td>
               <td class="ug-table__actions">
                 <FeatherButton text @click="openEditUser(user)">Edit</FeatherButton>
                 <FeatherButton text @click="confirmDeleteUser(user['user-id'])">Delete</FeatherButton>
@@ -66,7 +66,7 @@
             <tr v-for="group in groups" :key="group.name">
               <td>{{ group.name }}</td>
               <td>{{ group.comments }}</td>
-              <td>{{ group.user.join(', ') }}</td>
+              <td>{{ (group.user ?? []).join(', ') }}</td>
               <td class="ug-table__actions">
                 <FeatherButton text @click="openEditGroup(group)">Edit</FeatherButton>
                 <FeatherButton text @click="confirmDeleteGroup(group.name)">Delete</FeatherButton>

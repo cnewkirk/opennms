@@ -809,8 +809,8 @@ export interface OnmsUser {
   email: string
   password?: string
   passwordSalt?: boolean
-  'duty-schedule': string[]
-  role: string[]
+  'duty-schedule'?: string[]
+  role?: string[]
 }
 
 export interface OnmsUsersApiResponse {
@@ -823,7 +823,7 @@ export interface OnmsUsersApiResponse {
 export interface OnmsGroup {
   name: string
   comments: string
-  user: string[]
+  user?: string[]
 }
 
 export interface OnmsGroupsApiResponse {

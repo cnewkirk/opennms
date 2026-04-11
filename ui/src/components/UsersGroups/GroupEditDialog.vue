@@ -59,7 +59,7 @@ import { FeatherDialog } from '@featherds/dialog'
 import { FeatherInput } from '@featherds/input'
 import { FeatherButton } from '@featherds/button'
 import { OnmsGroup, OnmsUser } from '@/types'
-import { createGroup, addGroupUser, removeGroupUser } from '@/services/userGroupService'
+import { createGroup, updateGroup, addGroupUser, removeGroupUser } from '@/services/userGroupService'
 import useSnackbar from '@/composables/useSnackbar'
 
 const props = defineProps<{
@@ -158,15 +158,26 @@ const handleSave = async () => {
   } else {
     const groupName = form.value.name
 
+    const updateOk = await updateGroup(groupName, form.value.comments)
+    if (!updateOk) {
+      saving.value = false
+      showSnackBar({ msg: 'Failed to update group.', error: true })
+      return
+    }
+
     // Diff members
     const toAdd = form.value.members.filter(m => !originalMembers.value.includes(m))
     const toRemove = originalMembers.value.filter(m => !form.value.members.includes(m))
 
-    for (const user of toAdd) {
-      await addGroupUser(groupName, user)
-    }
-    for (const user of toRemove) {
-      await removeGroupUser(groupName, user)
+    const memberResults = await Promise.all([
+      ...toAdd.map(u => addGroupUser(groupName, u)),
+      ...toRemove.map(u => removeGroupUser(groupName, u))
+    ])
+
+    if (memberResults.some(r => r === false)) {
+      saving.value = false
+      showSnackBar({ msg: 'Some member changes could not be applied.', error: true })
+      return
     }
   }
 
