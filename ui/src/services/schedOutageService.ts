@@ -10,12 +10,6 @@ const listSchedOutages = async (): Promise<SchedOutage[] | false> => {
   } catch { return false }
 }
 
-const getSchedOutage = async (name: string): Promise<SchedOutage | false> => {
-  try {
-    const resp = await rest.get<SchedOutage>(`${endpoint}/${encodeURIComponent(name)}`)
-    return resp.data
-  } catch { return false }
-}
 
 const saveSchedOutage = async (outage: SchedOutage, isNew: boolean): Promise<boolean> => {
   const xml = buildOutageXml(outage)
@@ -54,4 +48,4 @@ const buildOutageXml = (outage: SchedOutage): string => {
 const escapeXml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
-export { listSchedOutages, getSchedOutage, saveSchedOutage, deleteSchedOutage }
+export { listSchedOutages, saveSchedOutage, deleteSchedOutage }

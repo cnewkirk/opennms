@@ -776,7 +776,7 @@ export interface OnmsInfo {
 }
 
 export interface SchedOutageTime {
-  id: number | null
+  id: string | null
   day?: string
   begins: string
   ends: string
