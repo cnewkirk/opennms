@@ -24,10 +24,14 @@ import { v2, rest } from './axiosInstances'
 import {
   NodeApiResponse,
   SnmpInterfaceApiResponse,
+  SnmpInterface,
   QueryParameters,
   IpInterfaceApiResponse,
+  IpInterface,
   NodeAvailability,
-  OutagesApiResponse
+  OutagesApiResponse,
+  NodeIfServiceApiResponse,
+  MetaDataApiResponse
 } from '@/types'
 import { queryParametersHandler } from './serviceHelpers'
 import { orderBy } from 'lodash'
@@ -114,6 +118,77 @@ const getNodeIpInterfaces = async (
   }
 }
 
+const getNodeIpInterface = async (
+  nodeId: string,
+  ipAddress: string
+): Promise<IpInterface | false> => {
+  try {
+    const resp = await v2.get(`${endpoint}/${nodeId}/ipinterfaces/${encodeURIComponent(ipAddress)}`)
+    return resp.data as IpInterface
+  } catch (err) {
+    return false
+  }
+}
+
+const getNodeIpInterfaceServices = async (
+  nodeId: string,
+  ipAddress: string
+): Promise<NodeIfServiceApiResponse | false> => {
+  try {
+    const resp = await v2.get(`${endpoint}/${nodeId}/ipinterfaces/${encodeURIComponent(ipAddress)}/services?limit=100`)
+    return resp.data as NodeIfServiceApiResponse
+  } catch (err) {
+    return false
+  }
+}
+
+const getNodeSnmpInterfaceByIfIndex = async (
+  nodeId: string,
+  ifIndex: string
+): Promise<SnmpInterface | false> => {
+  try {
+    const resp = await v2.get(`${endpoint}/${nodeId}/snmpinterfaces/${ifIndex}`)
+    return resp.data as SnmpInterface
+  } catch (err) {
+    return false
+  }
+}
+
+const getNodeMetaData = async (
+  nodeId: string
+): Promise<MetaDataApiResponse | false> => {
+  try {
+    const resp = await v2.get(`${endpoint}/${nodeId}/metadata`)
+    return resp.data as MetaDataApiResponse
+  } catch (err) {
+    return false
+  }
+}
+
+const getNodeIpInterfaceMetaData = async (
+  nodeId: string,
+  ipAddress: string
+): Promise<MetaDataApiResponse | false> => {
+  try {
+    const resp = await v2.get(`${endpoint}/${nodeId}/ipinterfaces/${encodeURIComponent(ipAddress)}/metadata`)
+    return resp.data as MetaDataApiResponse
+  } catch (err) {
+    return false
+  }
+}
+
+const deleteNodeIpInterface = async (
+  nodeId: string,
+  ipAddress: string
+): Promise<boolean> => {
+  try {
+    await rest.delete(`/nodes/${nodeId}/ipinterfaces/${encodeURIComponent(ipAddress)}`)
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
 const getNodeAvailabilityPercentage = async (id: string): Promise<NodeAvailability | false> => {
   try {
     const resp: { data: NodeAvailability } = await rest.get(`/availability/nodes/${id}`)
@@ -147,6 +222,12 @@ export {
   getNodeById,
   getNodeOutages,
   getNodeIpInterfaces,
+  getNodeIpInterface,
+  getNodeIpInterfaceServices,
+  getNodeIpInterfaceMetaData,
+  deleteNodeIpInterface,
   getNodeSnmpInterfaces,
-  getNodeAvailabilityPercentage
+  getNodeSnmpInterfaceByIfIndex,
+  getNodeAvailabilityPercentage,
+  getNodeMetaData
 }

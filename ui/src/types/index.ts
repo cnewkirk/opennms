@@ -99,6 +99,37 @@ export interface IfServiceApiResponse extends ApiResponse {
   'monitored-service': IfService[]
 }
 
+// Metadata types
+export interface OnmsMetaData {
+  context: string
+  key: string
+  value: string
+}
+
+export interface MetaDataApiResponse extends ApiResponse {
+  metaData: OnmsMetaData[]
+}
+
+// Services returned by /nodes/{id}/ipinterfaces/{ip}/services
+// (Different shape from IfService which is for /api/v2/ifservices)
+export interface NodeIfService {
+  id: number
+  ipInterfaceId: number
+  serviceType: { name: string; id: number }
+  status: string        // "A"=active, "N"=not monitored, "D"=forced down, etc.
+  statusLong: string    // "Managed", "Not Monitored", "Forced Unmanaged", etc.
+  down: boolean
+  source: string | null
+  qualifier: string | null
+  notify: string | null
+  lastGood: number | null
+  lastFail: number | null
+}
+
+export interface NodeIfServiceApiResponse extends ApiResponse {
+  service: NodeIfService[]
+}
+
 export interface MonitoringLocationApiResponse extends ApiResponse {
   location: MonitoringLocation[]
 }
