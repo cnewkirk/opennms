@@ -318,7 +318,7 @@ export interface IpInterface {
   lastIngressFlow: any
   monitoredServiceCount: number
   nodeId: number
-  snmpInterface: SnmpInterface
+  snmpInterface: SnmpInterface | null
   snmpPrimary: string
   hostName: string
 }

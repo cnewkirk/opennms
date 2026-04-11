@@ -28,11 +28,16 @@
     </div>
 
     <div class="interface-header__actions">
-      <a
+      <router-link
         v-if="responseTimeResourceId"
-        :href="`/opennms/ui/index.html#/resource-graphs/graphs/${encodeURIComponent(nodeLabel)}/${encodeURIComponent('all')}/${encodeURIComponent(responseTimeResourceId)}`"
+        :to="`/resource-graphs/graphs/${encodeURIComponent(nodeLabel)}/${encodeURIComponent('all')}/${encodeURIComponent(responseTimeResourceId)}`"
         class="btn btn-secondary btn-sm"
-      >Response Time Graphs</a>
+      >Response Time Graphs</router-link>
+      <router-link
+        v-if="snmpIntfResourceId"
+        :to="`/resource-graphs/graphs/${encodeURIComponent(nodeLabel)}/${encodeURIComponent('all')}/${encodeURIComponent(snmpIntfResourceId)}`"
+        class="btn btn-secondary btn-sm"
+      >SNMP Interface Graphs</router-link>
       <button
         v-if="isAdmin"
         class="btn btn-danger btn-sm"
@@ -73,6 +78,12 @@ const responseTimeResourceId = computed(() => {
   if (!props.iface.nodeId || !props.iface.ipAddress) return null
   const safeIp = props.iface.ipAddress.replace(/\./g, '_')
   return `node[${props.iface.nodeId}].responseTime[${safeIp}]`
+})
+
+const snmpIntfResourceId = computed(() => {
+  if (!props.iface.snmpInterface?.ifIndex) return null
+  const ifName = props.iface.snmpInterface.ifName || props.iface.snmpInterface.ifDescr || String(props.iface.snmpInterface.ifIndex)
+  return `node[${props.iface.nodeId}].interfaceSnmp[${ifName}]`
 })
 </script>
 

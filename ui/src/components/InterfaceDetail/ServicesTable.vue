@@ -2,7 +2,7 @@
   <div class="services-table card">
     <div class="headline4 services-table__title">Monitored Services</div>
 
-    <div v-if="loading" class="services-table__empty">Loading services…</div>
+    <div v-if="loading" class="services-table__loading">Loading services…</div>
     <div v-else-if="!services.length" class="services-table__empty">No monitored services</div>
     <table v-else class="tl1 tl2 tl3 tl4">
       <thead>
@@ -60,9 +60,10 @@ const formatTime = (ts: number | null) => {
 
   &__title { margin-bottom: 12px; }
   &__empty { color: var($secondary-text-on-surface); padding: 8px 0; }
+  &__loading { color: var($secondary-text-on-surface); padding: 8px 0; }
 
   &__row--down {
-    td { background: rgba(176, 0, 32, 0.08); }
+    td { background: rgba(var(--feather-error-rgb, 176, 0, 32), 0.08); }
   }
 
   &__status {
