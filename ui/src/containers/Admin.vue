@@ -49,7 +49,7 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 const adminCards = computed(() => {
   type AdminLink = { label: string; href?: string; to?: string; external?: boolean }
   const openNMSSystemLinks: AdminLink[] = [
-    { label: 'System Configuration', href: baseHref.value + 'admin/sysconfig.jsp' },
+    { label: 'System Configuration', to: '/system-config' },
     { label: 'Configure Users, Groups and On-Call Roles', href: baseHref.value + 'admin/userGroupView/index.jsp' },
   ]
   if (zenithEnabled.value) {

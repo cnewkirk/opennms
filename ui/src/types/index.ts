@@ -764,3 +764,13 @@ export interface TileProviderItem {
   attribution: string
   visible?: boolean
 }
+
+export interface OnmsInfo {
+  displayVersion: string
+  version: string
+  packageName: string
+  packageDescription: string
+  ticketerConfig: { plugin: string | null; enabled: boolean }
+  datetimeformatConfig: { zoneId: string; datetimeformat: string }
+  services: Record<string, string>
+}

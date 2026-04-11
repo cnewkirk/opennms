@@ -20,7 +20,7 @@
 /// License.
 ///
 
-import { AppInfo } from '@/types'
+import { AppInfo, OnmsInfo } from '@/types'
 import { rest } from './axiosInstances'
 
 const endpoint = '/info'
@@ -34,4 +34,13 @@ const getInfo = async (): Promise<AppInfo> => {
   }
 }
 
-export { getInfo }
+const getSystemInfo = async (): Promise<OnmsInfo | false> => {
+  try {
+    const resp = await rest.get<OnmsInfo>(endpoint)
+    return resp.data
+  } catch {
+    return false
+  }
+}
+
+export { getInfo, getSystemInfo }
