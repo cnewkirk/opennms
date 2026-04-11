@@ -162,8 +162,8 @@ const onMenuItemClick = async (item: MenuItem) => {
 
 .self-service-menubar-dropdown-button-dark {
   // make it look more like OG menu
-  color: rgba(255, 255, 255, 0.78); // --feather-surface-light or --feather-state-text-color-on-surface-dark
-  background-color: #131736; // --feather-surface-dark
+  color: rgba(255, 255, 255, 0.78);
+  background-color: transparent; // header provides the background (blue in light mode, dark in dark mode)
   text-transform: none;
   letter-spacing: normal;
   font-weight: 600; // 400
@@ -175,7 +175,7 @@ const onMenuItemClick = async (item: MenuItem) => {
 .btn.self-service-menubar-dropdown-button-dark {
   :deep(.btn-content) {
     // make it look more like OG menu
-    color: rgba(255, 255, 255, 0.78); // --feather-surface-light or --feather-state-text-color-on-surface-dark
+    color: rgba(255, 255, 255, 0.78);
     text-transform: none;
     letter-spacing: normal;
     font-weight: 600;
