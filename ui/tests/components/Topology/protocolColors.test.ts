@@ -1,7 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { getProtocolColor, parallelOffsets, utilizationColor, throughputWidth, formatBitsPerSec, PROTOCOL_COLORS, FALLBACK_COLOR } from '@/components/Topology/protocolColors'
 
 describe('getProtocolColor', () => {
+  // getProtocolColor is theme-aware: dark palette when .open-dark is set, light palette otherwise.
+  // Test in dark mode to match the PROTOCOL_COLORS export (which is the dark palette).
+  beforeEach(() => document.documentElement.classList.add('open-dark'))
+  afterEach(() => document.documentElement.classList.remove('open-dark'))
+
   it('returns the correct hex for known protocols (case-insensitive)', () => {
     expect(getProtocolColor('LLDP')).toBe(PROTOCOL_COLORS['lldp'])
     expect(getProtocolColor('lldp')).toBe(PROTOCOL_COLORS['lldp'])
@@ -47,8 +52,12 @@ describe('parallelOffsets', () => {
 })
 
 describe('utilizationColor', () => {
+  // utilizationColor is theme-aware. Test in dark mode to match original expected values.
+  beforeEach(() => document.documentElement.classList.add('open-dark'))
+  afterEach(() => document.documentElement.classList.remove('open-dark'))
+
   it('returns green for low utilization (0-50%)', () => {
-    expect(utilizationColor(0)).toBe('#48BB78')
+    expect(utilizationColor(0)).toBe('#4FD1C5')   // teal for exactly 0
     expect(utilizationColor(25)).toBe('#48BB78')
     expect(utilizationColor(49.9)).toBe('#48BB78')
   })

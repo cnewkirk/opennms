@@ -1,5 +1,10 @@
 import { rest, v2 } from './axiosInstances'
 import { SnmpInterface, SnmpInterfaceApiResponse, IpInterface, IpInterfaceApiResponse } from '@/types'
+import { cached } from './cacheService'
+import { getIntervals } from './intervalService'
+
+/** Align t down to the nearest step boundary so cache keys are stable within a collection window. */
+const _floor = (t: number, step: number) => Math.floor(t / step) * step
 
 export interface InterfaceUtil {
   inBps: number   // bits/sec inbound
@@ -31,27 +36,37 @@ export const pickBestInterface = (ifaces: SnmpInterface[]): SnmpInterface | null
  * Fetch all SNMP interfaces for a node.
  */
 export const fetchNodeSnmpIfaces = async (nodeId: number): Promise<SnmpInterface[]> => {
-  try {
-    // limit=100 is intentional: weathermap needs all interfaces up-front, not paginated
-    const resp = await v2.get(`/nodes/${nodeId}/snmpinterfaces?limit=100`)
-    if (resp.status === 204) return []
-    const data: SnmpInterfaceApiResponse = resp.data
-    return data.snmpInterface ?? []
-  } catch {
-    return []
-  }
+  const intervals = await getIntervals()
+  const ttl = intervals.collection.SNMP
+
+  return cached(`snmpIfaces:${nodeId}`, ttl, async () => {
+    try {
+      // limit=100 is intentional: weathermap needs all interfaces up-front, not paginated
+      const resp = await v2.get(`/nodes/${nodeId}/snmpinterfaces?limit=100`)
+      if (resp.status === 204) return []
+      const data: SnmpInterfaceApiResponse = resp.data
+      return data.snmpInterface ?? []
+    } catch {
+      return []
+    }
+  })
 }
 
 /**
  * Fetch node type ('A' = active/up, else down).
  */
 export const fetchNodeType = async (nodeId: number): Promise<string | null> => {
-  try {
-    const resp = await v2.get(`/nodes/${nodeId}`)
-    return resp.data?.type ?? null
-  } catch {
-    return null
-  }
+  const intervals = await getIntervals()
+  const ttl = intervals.collection.SNMP
+
+  return cached(`nodeType:${nodeId}`, ttl, async () => {
+    try {
+      const resp = await v2.get(`/nodes/${nodeId}`)
+      return resp.data?.type ?? null
+    } catch {
+      return null
+    }
+  })
 }
 
 /**
@@ -65,49 +80,43 @@ export const fetchInterfaceUtilization = async (
   nodeId: number,
   iface: SnmpInterface
 ): Promise<InterfaceUtil | null> => {
+  const intervals = await getIntervals()
+  const STEP = intervals.collection.SNMP
   const resourceId = buildSnmpResourceId(nodeId, iface)
-  const now = Date.now()
-  const payload = {
-    start: now - 300_000,  // 5 minutes ago
-    end: now,
-    step: 300_000,
-    source: [
-      { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
-      { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }
-    ]
-  }
+  const end   = _floor(Date.now(), STEP)
+  const start = end - (STEP * 3)   // 3 collection samples
 
-  try {
-    const resp = await rest.post('/measurements', payload)
-    const labels: string[] = resp.data.labels ?? []
-    const columns: { values: number[] }[] = resp.data.columns ?? []
-
-    const inIdx  = labels.indexOf('inOctets')
-    const outIdx = labels.indexOf('outOctets')
-    if (inIdx < 0 || outIdx < 0) return null
-
-    const inValues  = columns[inIdx]?.values  ?? []
-    const outValues = columns[outIdx]?.values ?? []
-
-    // Take the last non-NaN value from each series
-    const lastValid = (vals: number[]) => {
-      for (let i = vals.length - 1; i >= 0; i--) {
-        if (!isNaN(vals[i]) && vals[i] >= 0) return vals[i]
+  return cached(`util:${resourceId}:${end}`, STEP, async () => {
+    const payload = {
+      start, end, step: STEP,
+      source: [
+        { attribute: 'ifHCInOctets',  label: 'inOctets',  resourceId, transient: false },
+        { attribute: 'ifHCOutOctets', label: 'outOctets', resourceId, transient: false }
+      ]
+    }
+    try {
+      const resp = await rest.post('/measurements', payload)
+      const labels: string[]                = resp.data.labels  ?? []
+      const columns: { values: number[] }[] = resp.data.columns ?? []
+      const inIdx  = labels.indexOf('inOctets')
+      const outIdx = labels.indexOf('outOctets')
+      if (inIdx < 0 || outIdx < 0) return null
+      const lastValid = (vals: number[]) => {
+        for (let i = vals.length - 1; i >= 0; i--)
+          if (!isNaN(vals[i]) && vals[i] >= 0) return vals[i]
+        return 0
       }
-      return 0
+      const inBytesPerSec  = lastValid(columns[inIdx]?.values  ?? [])
+      const outBytesPerSec = lastValid(columns[outIdx]?.values ?? [])
+      return {
+        inBps:   inBytesPerSec  * 8,
+        outBps:  outBytesPerSec * 8,
+        ifSpeed: iface.ifSpeed
+      }
+    } catch {
+      return null
     }
-
-    const inBytesPerSec  = lastValid(inValues)
-    const outBytesPerSec = lastValid(outValues)
-
-    return {
-      inBps:   inBytesPerSec  * 8,
-      outBps:  outBytesPerSec * 8,
-      ifSpeed: iface.ifSpeed
-    }
-  } catch {
-    return null
-  }
+  })
 }
 
 /**
@@ -115,12 +124,17 @@ export const fetchInterfaceUtilization = async (
  * Used to find the primary management IP (snmpPrimary === 'P') for edge label display.
  */
 export const fetchNodeIpInterfaces = async (nodeId: number): Promise<IpInterface[]> => {
-  try {
-    const resp = await v2.get(`/nodes/${nodeId}/ipinterfaces?limit=100`)
-    if (resp.status === 204) return []
-    const data: IpInterfaceApiResponse = resp.data
-    return data.ipInterface ?? []
-  } catch {
-    return []
-  }
+  const intervals = await getIntervals()
+  const ttl = intervals.collection.SNMP
+
+  return cached(`ipIfaces:${nodeId}`, ttl, async () => {
+    try {
+      const resp = await v2.get(`/nodes/${nodeId}/ipinterfaces?limit=100`)
+      if (resp.status === 204) return []
+      const data: IpInterfaceApiResponse = resp.data
+      return data.ipInterface ?? []
+    } catch {
+      return []
+    }
+  })
 }

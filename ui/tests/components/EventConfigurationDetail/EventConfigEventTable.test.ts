@@ -8,7 +8,7 @@ import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { CreateEditMode } from '@/types'
 import { EventConfigSource } from '@/types/eventConfig'
 import { FeatherButton } from '@featherds/button'
-import { FeatherChip } from '@featherds/chips'
+import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
 import { FeatherIcon } from '@featherds/icon'
 import { FeatherInput } from '@featherds/input'
@@ -79,7 +79,7 @@ describe('EventConfigEventTable.vue', () => {
         plugins: [pinia],
         components: {
           FeatherButton,
-          FeatherChip,
+          SeverityBadge,
           FeatherDropdown,
           FeatherDropdownItem,
           FeatherIcon,
@@ -523,12 +523,12 @@ describe('EventConfigEventTable.vue', () => {
       expect(tds[3].text()).toContain('Enabled')
     })
 
-    it('renders severity chip with correct text and class', () => {
-      const chip = wrapper.findComponent(FeatherChip)
-      expect(chip.text()).toBe('Critical')
-      const chipElement = chip.element as Element
-      expect(chipElement.classList.contains('critical-color')).toBe(true)
-      expect(chipElement.classList.contains('severity')).toBe(true)
+    it('renders severity badge with correct text and class', () => {
+      const badge = wrapper.findComponent(SeverityBadge)
+      expect(badge.text()).toBe('Critical')
+      const el = badge.element as Element
+      expect(el.classList.contains('critical')).toBe(true)
+      expect(el.classList.contains('severity-badge')).toBe(true)
     })
 
     it('toggles status text based on enabled flag', async () => {
@@ -989,7 +989,7 @@ describe('EventConfigEventTable.vue', () => {
       expect(wrapper.find('td').text()).toContain('') // Or empty, but no crash
     })
 
-    it('renders severity chip with lowercase severity class', async () => {
+    it('renders severity badge with lowercase severity class', async () => {
       store.events = [
         {
           id: 1,
@@ -1008,9 +1008,9 @@ describe('EventConfigEventTable.vue', () => {
         }
       ]
       await nextTick()
-      const chip = wrapper.findComponent(FeatherChip)
-      const chipElement = chip.element as Element
-      expect(chipElement.classList.contains('critical-color')).toBe(true)
+      const badge = wrapper.findComponent(SeverityBadge)
+      const el = badge.element as Element
+      expect(el.classList.contains('critical')).toBe(true)
     })
 
     it('displays different severity levels with correct colors', async () => {
@@ -1034,13 +1034,13 @@ describe('EventConfigEventTable.vue', () => {
 
       await nextTick()
 
-      const chips = wrapper.findAllComponents(FeatherChip)
-      expect(chips).toHaveLength(severities.length)
+      const badges = wrapper.findAllComponents(SeverityBadge)
+      expect(badges).toHaveLength(severities.length)
 
-      chips.forEach((chip, index) => {
-        const chipElement = chip.element as Element
-        expect(chipElement.classList.contains(`${severities[index].toLowerCase()}-color`)).toBe(true)
-        expect(chip.text()).toBe(severities[index])
+      badges.forEach((badge, index) => {
+        const el = badge.element as Element
+        expect(el.classList.contains(severities[index].toLowerCase())).toBe(true)
+        expect(badge.text()).toBe(severities[index])
       })
     })
 

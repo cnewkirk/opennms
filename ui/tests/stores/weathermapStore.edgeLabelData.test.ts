@@ -18,6 +18,13 @@ vi.mock('@/services/enlinkdService', () => ({
   getNodeEnlinkd: vi.fn(),
   cleanName: (s: string) => s.split('(')[0].trim() || s
 }))
+vi.mock('@/services/intervalService', () => ({
+  getIntervals: vi.fn().mockResolvedValue({
+    collection: { SNMP: 30_000 }, rrdStep: 300,
+    enlinkd: { lldp: 7_200_000, ospf: 7_200_000, isis: 7_200_000, cdp: 7_200_000, bridge: 7_200_000, topology: 30_000 }
+  }),
+  getSnmpInterval: vi.fn().mockResolvedValue(30_000)
+}))
 
 const EMPTY_ENLINKD = {
   lldpLinkNodes: [], ospfLinkNodes: [], isisLinkNodes: [],

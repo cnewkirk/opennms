@@ -21,6 +21,7 @@
 ///
 
 import { v2, rest } from './axiosInstances'
+import { cached } from './cacheService'
 import {
   QueryParameters,
   GraphNodesApiResponse,
@@ -55,12 +56,14 @@ const getGraphNodesNodes = async (queryParameters?: QueryParameters): Promise<Gr
 }
 
 const getGraphDefinitionsByResourceId = async (id: string): Promise<ResourceDefinitionsApiResponse> => {
-  try {
-    const resp = await rest.get(`/graphs/for/${id}`)
-    return resp.data
-  } catch (err) {
-    return (<unknown>{ name: [] }) as ResourceDefinitionsApiResponse
-  }
+  return cached(`graphDefs:${id}`, Infinity, async () => {
+    try {
+      const resp = await rest.get(`/graphs/for/${id}`)
+      return resp.data
+    } catch (err) {
+      return (<unknown>{ name: [] }) as ResourceDefinitionsApiResponse
+    }
+  })
 }
 
 const getPreFabGraphs = async (node: string): Promise<PreFabGraph[]> => {

@@ -1,8 +1,30 @@
-import { describe, it, expect } from 'vitest'
-import { buildSnmpResourceId, pickBestInterface } from '@/services/measurementsService'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { _resetForTesting } from '@/services/cacheService'
+import { buildSnmpResourceId, pickBestInterface, fetchInterfaceUtilization } from '@/services/measurementsService'
 import { SnmpInterface } from '@/types'
 
-const makeIface = (overrides: Partial<SnmpInterface>): SnmpInterface => ({
+const { rest } = await import('@/services/axiosInstances')
+
+vi.mock('@/services/axiosInstances', () => ({
+  rest: { post: vi.fn() },
+  v2:   { get:  vi.fn() }
+}))
+
+vi.mock('@/services/intervalService', () => ({
+  getIntervals: vi.fn().mockResolvedValue({
+    collection: { SNMP: 30_000 },
+    rrdStep: 300,
+    enlinkd: { lldp: 7_200_000, ospf: 7_200_000, isis: 7_200_000, cdp: 7_200_000, bridge: 7_200_000, topology: 30_000 }
+  }),
+  getSnmpInterval: vi.fn().mockResolvedValue(30_000),
+  FALLBACK: {
+    collection: { SNMP: 300_000, JMX: 300_000 },
+    rrdStep: 300,
+    enlinkd: { lldp: 7_200_000, ospf: 7_200_000, isis: 7_200_000, cdp: 7_200_000, bridge: 7_200_000, topology: 30_000 }
+  }
+}))
+
+const makeIface = (overrides: Partial<SnmpInterface> = {}): SnmpInterface => ({
   collect: true, collectFlag: 'C', collectionUserSpecified: false,
   hasEgressFlows: false, hasFlows: false, hasIngressFlows: false,
   id: 1, ifAdminStatus: 1, ifAlias: null, ifDescr: 'eth0', ifIndex: 1,
@@ -50,5 +72,22 @@ describe('pickBestInterface', () => {
     const loopback = makeIface({ ifType: 24 })
     const down = makeIface({ ifOperStatus: 2 })
     expect(pickBestInterface([loopback, down])).toBeNull()
+  })
+})
+
+describe('fetchInterfaceUtilization', () => {
+  beforeEach(() => { vi.clearAllMocks(); _resetForTesting() })
+
+  it('floors current time to STEP boundary and uses 3-STEP window', async () => {
+    vi.mocked(rest.post).mockResolvedValue({
+      data: { labels: ['inOctets', 'outOctets'], columns: [{ values: [125_000] }, { values: [62_500] }] }
+    })
+    const before = Date.now()
+    await fetchInterfaceUtilization(42, makeIface())
+    const payload = vi.mocked(rest.post).mock.calls[0][1] as any
+    // _floor rounds down, so end ≤ before
+    expect(payload.end).toBeLessThanOrEqual(before)
+    expect(before - payload.end).toBeLessThan(30_000) // at most one STEP behind
+    expect(payload.end - payload.start).toBe(90_000) // STEP(30_000) * 3
   })
 })

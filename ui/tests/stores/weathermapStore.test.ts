@@ -1,5 +1,25 @@
-import { describe, it, expect } from 'vitest'
-import { computeUtilPct, edgeKey } from '@/stores/weathermapStore'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { computeUtilPct, edgeKey, useWeathermapStore } from '@/stores/weathermapStore'
+
+vi.mock('@/services/measurementsService', () => ({
+  fetchNodeSnmpIfaces: vi.fn().mockResolvedValue([]),
+  fetchNodeType: vi.fn().mockResolvedValue('A'),
+  fetchNodeIpInterfaces: vi.fn().mockResolvedValue([]),
+  fetchInterfaceUtilization: vi.fn().mockResolvedValue(null),
+  pickBestInterface: vi.fn().mockReturnValue(null)
+}))
+vi.mock('@/services/enlinkdService', () => ({
+  getNodeEnlinkd: vi.fn().mockResolvedValue({ lldpLinkNodes: [], ospfLinkNodes: [], isisLinkNodes: [], cdpLinkNodes: [], bridgeLinkNodes: [], lldpElementNode: null, ospfElementNode: null, isisElementNode: null }),
+  cleanName: (s: string) => s
+}))
+vi.mock('@/services/intervalService', () => ({
+  getIntervals: vi.fn().mockResolvedValue({
+    collection: { SNMP: 30_000 }, rrdStep: 300,
+    enlinkd: { lldp: 7_200_000, ospf: 7_200_000, isis: 7_200_000, cdp: 7_200_000, bridge: 7_200_000, topology: 30_000 }
+  }),
+  getSnmpInterval: vi.fn().mockResolvedValue(30_000)
+}))
 
 describe('computeUtilPct', () => {
   it('returns 0 when ifSpeed is 0', () => {

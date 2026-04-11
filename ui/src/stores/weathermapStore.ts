@@ -8,6 +8,7 @@ import {
   InterfaceUtil
 } from '@/services/measurementsService'
 import { getNodeEnlinkd, cleanName, NodeEnlinkdData } from '@/services/enlinkdService'
+import { getIntervals } from '@/services/intervalService'
 
 export interface EdgeUtil {
   inBps: number
@@ -45,7 +46,7 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
   const edgeLabelData = ref<Record<string, EdgeLabelData>>({})
   const loading      = ref(false)
   const error        = ref<string | null>(null)
-  const pollInterval = ref(60)   // seconds; 0 = disabled
+  const pollInterval = ref(0)    // seconds; initialized from config in start()
   const lastUpdated  = ref<Date | null>(null)
 
   let _timer: ReturnType<typeof setTimeout> | null = null
@@ -199,6 +200,13 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
     _activeVertices = vertices
     _activeEdges = edges
     if (_timer) clearTimeout(_timer)
+
+    // Initialize poll interval from configured SNMP collection interval
+    if (pollInterval.value === 0) {
+      const intervals = await getIntervals()
+      pollInterval.value = Math.round(intervals.collection.SNMP / 1000) // ms → seconds
+    }
+
     await refresh()
   }
 

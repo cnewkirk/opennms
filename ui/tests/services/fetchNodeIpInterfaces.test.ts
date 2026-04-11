@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { _resetForTesting } from '@/services/cacheService'
 import { fetchNodeIpInterfaces } from '@/services/measurementsService'
 
 vi.mock('@/services/axiosInstances', () => ({
@@ -6,10 +7,18 @@ vi.mock('@/services/axiosInstances', () => ({
   v2: { get: vi.fn() }
 }))
 
+vi.mock('@/services/intervalService', () => ({
+  getIntervals: vi.fn().mockResolvedValue({
+    collection: { SNMP: 30_000 }, rrdStep: 300,
+    enlinkd: { lldp: 7_200_000, ospf: 7_200_000, isis: 7_200_000, cdp: 7_200_000, bridge: 7_200_000, topology: 30_000 }
+  }),
+  getSnmpInterval: vi.fn().mockResolvedValue(30_000)
+}))
+
 import { v2 } from '@/services/axiosInstances'
 
 describe('fetchNodeIpInterfaces', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => { vi.clearAllMocks(); _resetForTesting() })
 
   it('returns IP interfaces from the API response', async () => {
     vi.mocked(v2.get).mockResolvedValueOnce({

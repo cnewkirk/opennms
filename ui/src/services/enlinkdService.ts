@@ -21,6 +21,8 @@
 ///
 
 import { v2 } from './axiosInstances'
+import { cached } from './cacheService'
+import { getIntervals } from './intervalService'
 
 export interface LldpLink {
   lldpLocalPort: string
@@ -200,23 +202,28 @@ export const normalizeLinks = (data: NodeEnlinkdData): NormalizedLink[] => {
 }
 
 export const getNodeEnlinkd = async (nodeId: number): Promise<NodeEnlinkdData | null> => {
-  try {
-    const resp = await v2.get(`/enlinkd/${nodeId}`)
-    if (resp.status === 204) return null
-    const d = resp.data
-    return {
-      lldpLinkNodes: d.lldpLinkNodes ?? [],
-      ospfLinkNodes: d.ospfLinkNodes ?? [],
-      isisLinkNodes: d.isisLinkNodes ?? [],
-      cdpLinkNodes: d.cdpLinkNodes ?? [],
-      bridgeLinkNodes: d.bridgeLinkNodes ?? [],
-      lldpElementNode: d.lldpElementNode ?? null,
-      ospfElementNode: d.ospfElementNode ?? null,
-      isisElementNode: d.isisElementNode ?? null
+  const intervals = await getIntervals()
+  const ttl = intervals.enlinkd.lldp
+
+  return cached(`enlinkd:${nodeId}`, ttl, async () => {
+    try {
+      const resp = await v2.get(`/enlinkd/${nodeId}`)
+      if (resp.status === 204) return null
+      const d = resp.data
+      return {
+        lldpLinkNodes: d.lldpLinkNodes ?? [],
+        ospfLinkNodes: d.ospfLinkNodes ?? [],
+        isisLinkNodes: d.isisLinkNodes ?? [],
+        cdpLinkNodes: d.cdpLinkNodes ?? [],
+        bridgeLinkNodes: d.bridgeLinkNodes ?? [],
+        lldpElementNode: d.lldpElementNode ?? null,
+        ospfElementNode: d.ospfElementNode ?? null,
+        isisElementNode: d.isisElementNode ?? null
+      }
+    } catch {
+      return null
     }
-  } catch {
-    return null
-  }
+  })
 }
 
 /** Extract the `node=` value from an enlinkd href like "element/linkednode.jsp?node=6" */

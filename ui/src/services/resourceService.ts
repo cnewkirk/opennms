@@ -22,6 +22,8 @@
 
 import { rest } from './axiosInstances'
 import { Resource, ResourcesApiResponse } from '@/types'
+import { cached } from './cacheService'
+import { getIntervals } from './intervalService'
 
 const endpoint = '/resources'
 
@@ -40,17 +42,18 @@ const getResources = async (): Promise<ResourcesApiResponse | null> => {
 }
 
 const getResourceForNode = async (name: string): Promise<Resource | null> => {
-  try {
-    const resp = await rest.get(`${endpoint}/fornode/${name}`)
+  const intervals = await getIntervals()
+  const ttl = intervals.collection.SNMP
 
-    if (resp.status === 204) {
+  return cached(`resources:${name}`, ttl, async () => {
+    try {
+      const resp = await rest.get(`${endpoint}/fornode/${name}`)
+      if (resp.status === 204) return null
+      return resp.data
+    } catch (err) {
       return null
     }
-
-    return resp.data
-  } catch (err) {
-    return null
-  }
+  })
 }
 
 const getResourceById = async (id: string): Promise<Resource | null> => {

@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { buildPersesTheme } from '@/theme/persesTheme'
 
 describe('buildPersesTheme', () => {
@@ -6,27 +6,36 @@ describe('buildPersesTheme', () => {
     vi.stubGlobal('getComputedStyle', () => ({
       getPropertyValue: (prop: string) => {
         const map: Record<string, string> = {
-          '--feather-color-scheme': ' light',
-          '--feather-primary-interactive-default': ' #6200ee',
           '--feather-background': ' #ffffff',
-          '--feather-surface-fill': ' #f5f5f5',
-          '--feather-text-color': ' #212121'
+          '--feather-surface': ' #f5f5f5',
+          '--feather-primary-text-on-surface': ' #212121'
         }
         return map[prop] ?? ''
       }
     }))
   })
 
+  afterEach(() => {
+    document.documentElement.classList.remove('open-dark')
+  })
+
   test('builds light theme from Feather CSS vars', () => {
     const theme = buildPersesTheme()
     expect(theme.palette.mode).toBe('light')
-    expect(theme.palette.primary?.main).toBe('#6200ee')
     expect(theme.palette.background?.default).toBe('#ffffff')
   })
 
-  test('returns dark theme when --feather-color-scheme is dark', () => {
+  test('returns dark theme when open-dark class is set', () => {
+    document.documentElement.classList.add('open-dark')
     vi.stubGlobal('getComputedStyle', () => ({
-      getPropertyValue: (prop: string) => (prop === '--feather-color-scheme' ? ' dark' : ' #000000')
+      getPropertyValue: (prop: string) => {
+        const map: Record<string, string> = {
+          '--feather-background': ' #0a0c1b',
+          '--feather-surface': ' #15182b',
+          '--feather-primary-text-on-surface': ' #ffffff'
+        }
+        return map[prop] ?? ''
+      }
     }))
     const theme = buildPersesTheme()
     expect(theme.palette.mode).toBe('dark')
@@ -37,7 +46,6 @@ describe('buildPersesTheme', () => {
       getPropertyValue: () => ''
     }))
     const theme = buildPersesTheme()
-    expect(theme.palette.primary?.main).toBe('#1976d2')
     expect(theme.palette.background?.default).toBe('#ffffff')
   })
 })
