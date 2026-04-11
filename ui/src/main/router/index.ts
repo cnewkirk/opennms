@@ -211,6 +211,11 @@ const router = createRouter({
       component: () => import('@/containers/NodeDetails.vue')
     },
     {
+      path: '/node/:nodeId/interface/:ipAddress',
+      name: 'Interface Detail',
+      component: () => import('@/containers/InterfaceDetail.vue')
+    },
+    {
       path: '/event/:id',
       name: 'Event Detail',
       component: () => import('@/containers/EventDetail.vue')
