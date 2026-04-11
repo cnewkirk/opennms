@@ -81,12 +81,10 @@ const adminCards = computed(() => {
       title: 'Event Management',
       links: [
         { label: 'Manually Send an Event', href: baseHref.value + 'admin/sendevent.htm' },
-        { label: 'Configure Notifications', href: baseHref.value + 'admin/notification/index.jsp' },
+        { label: 'Configure Notifications', to: '/notification-config' },
+        { label: 'Configure Destination Paths', to: '/notification-config/paths' },
         { label: 'Manage Event Configurations', to: '/event-config' },
-        // TODO: Notification On/Off toggle requires REST endpoint for NotifdConfigFactory status.
-        // No endpoint exists yet (no GET/PUT /rest/notifd/status). Falls back to legacy JSP
-        // until opennms-webapp-rest exposes it. See admin/index.jsp card-footer form.
-        { label: 'Notification Status', href: baseHref.value + 'admin/notification/index.jsp' },
+        { label: 'Configure Path Outages (legacy)', href: baseHref.value + 'admin/notification/noticeWizard/buildPathOutage.jsp' },
       ]
     },
     {
