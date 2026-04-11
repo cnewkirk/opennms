@@ -884,3 +884,29 @@ export interface DiscoveryConfig {
   includeUrls: DiscoveryIncludeUrl[]
   excludeUrls: DiscoveryExcludeUrl[]
 }
+
+export interface SnmpInfo {
+  version: string | null
+  location: string | null
+  port: number | null
+  retries: number | null
+  timeout: number | null
+  proxyHost: string | null
+  readCommunity: string | null
+  writeCommunity: string | null
+  maxRequestSize: number | null
+  maxVarsPerPdu: number | null
+  maxRepetitions: number | null
+  ttl: number | null
+  // v3
+  securityName: string | null
+  securityLevel: string | null
+  authPassPhrase: string | null
+  authProtocol: string | null
+  privPassPhrase: string | null
+  privProtocol: string | null
+  engineId: string | null
+  contextEngineId: string | null
+  contextName: string | null
+  enterpriseId: string | null
+}

@@ -69,7 +69,7 @@ const adminCards = computed(() => {
         { label: 'Manage Surveillance Categories', href: baseHref.value + 'admin/categories.htm' },
         { label: 'Configure Discovery', to: '/discovery-config' },
         { label: 'Run Single Discovery Scan', href: baseHref.value + 'admin/discovery/edit-scan.jsp' },
-        { label: 'Configure SNMP Community Names by IP Address', href: baseHref.value + 'admin/snmpConfig.jsp' },
+        { label: 'Configure SNMP Community Names by IP Address', to: '/snmp-config' },
         { label: 'Manually Add an Interface', href: baseHref.value + 'admin/newInterface.jsp' },
         { label: 'Delete Nodes', href: baseHref.value + 'admin/delete.jsp' },
         { label: 'Configure External Requisitions', to: '/configuration' },
