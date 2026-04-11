@@ -29,6 +29,7 @@ import { getNodeEnlinkd, NodeEnlinkdData } from '@/services/enlinkdService'
 import { getNodeById, getNodeIpInterfaces } from '@/services/nodeService'
 import { TopologyVertex, TopologyEdge, TopologyLayer, TopologyElement, AlarmSeverity } from '@/types/topology'
 import { numericSeverityLevel } from '@/components/Map/utils'
+import { prettifyProtocol } from '@/components/Topology/protocolColors'
 import { Alarm, Node, IpInterface } from '@/types'
 
 export interface NodeDetail {
@@ -95,7 +96,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     for (const ns of activeLayers.value) {
       const g = layerCache.value[ns]
       if (!g) continue
-      const label = availableLayers.value.find(l => l.namespace === ns)?.label ?? ns
+      const label = prettifyProtocol(availableLayers.value.find(l => l.namespace === ns)?.label ?? ns)
       for (const e of g.edges) {
         const key = `${Math.min(e.source.id, e.target.id)}-${Math.max(e.source.id, e.target.id)}`
         const existing = map.get(key)
@@ -153,7 +154,7 @@ export const useTopologyStore = defineStore('topologyStore', () => {
     availableLayers.value = nodesContainer.graphs.map(g => ({
       containerId: ENLINKD_CONTAINER_ID,
       namespace: g.namespace,
-      label: g.label ?? g.namespace
+      label: prettifyProtocol(g.label ?? g.namespace)
     }))
 
     // Default to all protocol layers; fall back to 'nodes' if none exist

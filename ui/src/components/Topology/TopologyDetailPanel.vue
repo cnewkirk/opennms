@@ -155,7 +155,7 @@
             <span class="topo-panel__endpoint-ip">{{ targetIp }}</span>
           </div>
           <div v-if="edgeProtocols.length" class="topo-panel__chips">
-            <span v-for="p in edgeProtocols" :key="p" class="topo-panel__chip">{{ prettifyProtocol(p) }}</span>
+            <span v-for="p in edgeProtocols" :key="p" class="topo-panel__chip">{{ p }}</span>
           </div>
 
           <!-- User-defined link details -->
@@ -265,7 +265,6 @@ import { useWeathermapStore } from '@/stores/weathermapStore'
 import { isVertex } from '@/types/topology'
 import { extractNodeId } from '@/services/enlinkdService'
 import { buildSnmpResourceId } from '@/services/measurementsService'
-import { prettifyProtocol } from './protocolColors'
 import type { AbsoluteTimeRange } from '@perses-dev/core'
 import type { OpenNMSBatchQuerySpec } from '@/datasource/opennms/types'
 
