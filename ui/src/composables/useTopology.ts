@@ -28,6 +28,7 @@ import { TopologyVertex } from '@/types/topology'
 import { getProtocolColor, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
 import { useWeathermapStore, EdgeLabelData } from '@/stores/weathermapStore'
 import { useEdgeLabelStore } from '@/stores/edgeLabelStore'
+import { useTopologyViewStore } from '@/stores/topologyViewStore'
 
 cytoscape.use(cxtmenu)
 
@@ -158,6 +159,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   const store = useTopologyStore()
   const wmStore = useWeathermapStore()
   const elStore = useEdgeLabelStore()
+  const viewStore = useTopologyViewStore()
   let cy: Core | null = null
 
   interface EdgeTooltipState {
@@ -657,7 +659,26 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy = null
   })
 
-  return { getCy: () => cy, saveLayout, resetLayout, pendingLinkSource, pendingLinkTarget, edgeTooltip, nodeTooltip }
+  const toggleGrid = () => {
+    viewStore.gridSnap.enabled = !viewStore.gridSnap.enabled
+  }
+
+  const alignToGrid = () => {
+    if (!cy) return
+    const size = viewStore.gridSnap.size || 40
+    cy.batch(() => {
+      cy!.nodes().forEach(n => {
+        const pos = n.position()
+        n.position({
+          x: Math.round(pos.x / size) * size,
+          y: Math.round(pos.y / size) * size,
+        })
+      })
+    })
+    saveLayout()
+  }
+
+  return { getCy: () => cy, saveLayout, resetLayout, toggleGrid, alignToGrid, pendingLinkSource, pendingLinkTarget, edgeTooltip, nodeTooltip }
 }
 
 export default useTopology

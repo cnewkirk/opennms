@@ -74,3 +74,17 @@ export type TopologyElement = TopologyVertex | TopologyEdge
 
 export const isVertex = (el: TopologyElement): el is TopologyVertex =>
   'label' in el && 'id' in el
+
+export interface IconMapping {
+  key: string
+  iconKey: string
+}
+
+export interface TopologyView {
+  id: string
+  name: string
+  description?: string
+  scope: 'private' | 'user' | 'shared' | 'global'
+  owner?: string
+  data: string  // JSON-serialized view state
+}

@@ -41,6 +41,17 @@ export const PROTOCOL_COLORS: Record<string, string> = {
 export const FALLBACK_COLOR = '#718096'
 
 /**
+ * Returns a human-readable display name for a protocol key.
+ * e.g. "is-is" → "IS-IS", "user-defined" → "User Defined"
+ */
+export const prettifyProtocol = (protocol: string): string => {
+  if (!protocol) return ''
+  const upper: Record<string, string> = { 'lldp': 'LLDP', 'ospf': 'OSPF', 'bgp': 'BGP', 'mpls': 'MPLS', 'arp': 'ARP', 'mac': 'MAC', 'cdp': 'CDP', 'cdpd': 'CDPd', 'is-is': 'IS-IS', 'isis': 'IS-IS' }
+  const key = protocol.toLowerCase().replace(/\s+/g, '-')
+  return upper[key] ?? protocol.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+/**
  * Returns the hex color for a given protocol name.
  * Case-insensitive. Falls back to neutral gray for unknown protocols.
  */

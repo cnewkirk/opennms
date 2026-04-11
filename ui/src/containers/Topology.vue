@@ -9,6 +9,10 @@
     <TopologyToolbar
       @save-layout="graphRef?.saveLayout()"
       @reset-layout="graphRef?.resetLayout()"
+      @toggle-grid="graphRef?.toggleGrid()"
+      @align-to-grid="graphRef?.alignToGrid()"
+      @save-view-requested="onSaveView"
+      @restore-view="onRestoreView"
     />
     <TopologyGraph ref="graphRef" />
   </div>
@@ -22,13 +26,42 @@ import TopologyGraph from '@/components/Topology/TopologyGraph.vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { useWeathermapStore } from '@/stores/weathermapStore'
 import { useMenuStore } from '@/stores/menuStore'
+import { useTopologyViewStore } from '@/stores/topologyViewStore'
 import { BreadCrumb } from '@/types'
+import type { TopologyView } from '@/types/topology'
 
 const store = useTopologyStore()
 const wmStore = useWeathermapStore()
 const menuStore = useMenuStore()
+const viewStore = useTopologyViewStore()
 
 const graphRef = ref<InstanceType<typeof TopologyGraph> | null>(null)
+
+const onSaveView = (opts: { name: string; description: string; scope: 'private' | 'user' | 'shared' | 'global' }) => {
+  // Private views are stored in localStorage via the viewStore
+  if (opts.scope === 'private') {
+    const view: TopologyView = {
+      id: `private-${Date.now()}`,
+      name: opts.name,
+      description: opts.description,
+      scope: 'private',
+      data: JSON.stringify({ activeLayers: store.activeLayers })
+    }
+    viewStore.addPrivateView(view)
+    viewStore.clearDirty()
+  }
+  // TODO: server-side save for user/shared/global scopes once REST endpoint exists
+}
+
+const onRestoreView = (view: TopologyView) => {
+  try {
+    const data = JSON.parse(view.data)
+    if (data.activeLayers) store.setAllLayers(false)
+    viewStore.clearDirty()
+  } catch {
+    console.warn('[topology] Failed to restore view', view)
+  }
+}
 
 const homeUrl = computed<string>(() => menuStore.mainMenu?.homeUrl ?? '/opennms')
 const breadcrumbs = computed<BreadCrumb[]>(() => [
