@@ -37,7 +37,7 @@
         class="edge-tooltip__chip"
         :style="{ backgroundColor: getProtocolColor(p) }"
       ></span>
-      {{ p }}
+      {{ prettifyProtocol(p) }}
     </div>
     <div v-if="tooltip.util" class="edge-tooltip__util">
       <span
@@ -103,7 +103,7 @@ import type { AbsoluteTimeRange } from '@perses-dev/core'
 import type { OpenNMSBatchQuerySpec } from '@/datasource/opennms/types'
 import PersesPanel from '@/components/Perses/PersesPanel.vue'
 import { EdgeLabelData } from '@/stores/weathermapStore'
-import { getProtocolColor, utilizationColor, formatBitsPerSec } from './protocolColors'
+import { getProtocolColor, prettifyProtocol, utilizationColor, formatBitsPerSec } from './protocolColors'
 
 export interface EdgeTooltipState {
   x: number
