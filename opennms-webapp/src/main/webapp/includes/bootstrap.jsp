@@ -152,23 +152,6 @@
     <jsp:param name="asset" value="global" />
   </jsp:include>
 
-  <%--
-   Vaadin uses the window.name property to implement the preserveOnRefresh functionality.
-   However if now window.name is set, a random name is generated.
-   As most vaadin applications are embedded via <iframe src=...></iframe> the name is always random.
-   This results in a new UI creation per each refresh of the page - even if preserveOnRefresh is enabled,
-   which breaks the functionality. See NMS-10601 for more details.
-  --%>
-  <script type="text/javascript">
-    // If no window.name is set, define one, to ensure it is not empty.
-    // This is required for Vaadin to work properly (especially for @PreserveOnRefresh UIs).
-    // The random bits ensure that multiple windows have a different name, as well as different versions of OpenNMS
-    // can be used in parallel.
-    if (!window.name) {
-      window.name = "opennms-" + Math.random();
-    }
-  </script>
-
   <c:if test='${__bs_flags.contains("renderGraphs")}'>
       <!-- Graphing -->
       <script type="text/javascript">
@@ -200,13 +183,6 @@
     <jsp:include page="/assets/load-assets.jsp" flush="false">
       <jsp:param name="asset" value="ionicons-css" />
     </jsp:include>
-  </c:if>
-
-  <c:if test="${param.vaadinEmbeddedStyles == 'true'}">
-    <!-- embedded Vaadin app, fix container to leave room for headers -->
-    <style type="text/css">
-      footer#footer { position:absolute; bottom:0; width:100%; }
-    </style>
   </c:if>
 
   <%-- Vue side menu --%>
@@ -245,69 +221,6 @@
 </c:if>
 <%= ">" %>
 
-<%-- Propagate the active theme class into Vaadin iframes.
-     Vaadin pages run in a separate document so body-scoped CSS from the parent
-     page does not reach them.  This script watches for iframes being added to
-     the DOM and, once they finish loading, copies the active theme class onto
-     their <html> element so that dark-mode.scss (which uses the html.open-dark
-     selector) applies inside the iframe as well. --%>
-<script type="text/javascript">
-  (function() {
-    function applyThemeToFrame(frame) {
-      var applyNow = function() {
-        try {
-          var doc = frame.contentDocument || frame.contentWindow.document;
-          var theme = document.documentElement.className;
-          if (theme === 'open-dark' || theme === 'open-light') {
-            doc.documentElement.classList.remove('open-dark', 'open-light');
-            doc.documentElement.classList.add(theme);
-          }
-        } catch(e) { /* cross-origin frame, ignore */ }
-      };
-      if (frame.contentDocument && frame.contentDocument.readyState === 'complete') {
-        applyNow();
-      } else {
-        frame.addEventListener('load', applyNow);
-      }
-    }
-
-    // Watch for iframes added after page load (Vaadin embeds them dynamically)
-    var observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(m) {
-        m.addedNodes.forEach(function(node) {
-          if (node.nodeName === 'IFRAME') {
-            applyThemeToFrame(node);
-          }
-          if (node.querySelectorAll) {
-            node.querySelectorAll('iframe').forEach(applyThemeToFrame);
-          }
-        });
-      });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    // Also handle any iframes already in the DOM at script-run time
-    document.querySelectorAll('iframe').forEach(applyThemeToFrame);
-
-    // Re-apply when the Vue menu changes the theme on the body
-    var bodyObserver = new MutationObserver(function() {
-      var theme = document.documentElement.className;
-      document.querySelectorAll('iframe').forEach(function(frame) {
-        try {
-          var doc = frame.contentDocument || frame.contentWindow.document;
-          if (theme === 'open-dark' || theme === 'open-light') {
-            doc.documentElement.classList.remove('open-dark', 'open-light');
-            doc.documentElement.classList.add(theme);
-          } else {
-            doc.documentElement.classList.remove('open-dark', 'open-light');
-          }
-        } catch(e) { /* cross-origin frame, ignore */ }
-      });
-    });
-    bodyObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-  }());
-</script>
-
 <!-- Bootstrap header -->
 <c:choose>
   <c:when test='${__bs_flags.contains("quiet")}'>
@@ -327,26 +240,10 @@
      footer), so we hide it in a JSP code fragment so the Eclipse HTML
      validator does not complain.  See bug #1728.
 --%>
-<%--
-    Note, if 'fromVaadin' is true, we display the menu anyway, even if 'superQuiet' is true.
-    This means this is a Vaadin page loaded at the top level and should have the menu.
-    For Vaadin pages that are actually dashlets loaded inside a Wallboard, they will have
-    'fromVaadinDashlet=true', which we treat the same as 'superQuiet', i.e. do not display a menu.
-    'fromVaadinDashlet' might be used to add additional code to fix margins, etc.
-    See header-component_connector.js and org.opennms.features.vaadin.components.header.HeaderComponent.java for more.
---%>
 <c:choose>
   <c:when test="${param.superQuiet == 'true'}">
-    <c:choose>
-      <c:when test="${param.fromVaadin == 'true'}">
-        <!-- both superQuiet and fromVaadin are true -->
-        <% if (oldMenuValue == null || !oldMenuValue.equals("true")) { %>
-          <div id="opennms-sidemenu-container"></div>
-          <script type="module" src="<%= __baseHref %>ui-components/assets/index.js"></script>
-        <% } %>
-      </c:when>
-    </c:choose>
- </c:when>
+    <!-- quiet mode: no menu -->
+  </c:when>
   <c:otherwise>
     <jsp:include page="/assets/load-assets.jsp" flush="false">
       <jsp:param name="asset" value="onms-default-apps" />

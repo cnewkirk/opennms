@@ -32,6 +32,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Activator>org.opennms.osgi.internal.Activator</Bundle-Activator>
+                        <Export-Package>org.opennms.osgi,org.opennms.osgi.*,org.opennms.vaadin.extender</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -45,18 +46,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.features.vaadin-components</groupId>
-            <artifactId>extender-service</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-compatibility-server</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
