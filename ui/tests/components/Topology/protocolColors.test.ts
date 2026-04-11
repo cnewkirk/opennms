@@ -52,12 +52,8 @@ describe('parallelOffsets', () => {
 })
 
 describe('utilizationColor', () => {
-  // utilizationColor is theme-aware. Test in dark mode to match original expected values.
-  beforeEach(() => document.documentElement.classList.add('open-dark'))
-  afterEach(() => document.documentElement.classList.remove('open-dark'))
-
   it('returns green for low utilization (0-50%)', () => {
-    expect(utilizationColor(0)).toBe('#4FD1C5')   // teal for exactly 0
+    expect(utilizationColor(0)).toBe('#48BB78')
     expect(utilizationColor(25)).toBe('#48BB78')
     expect(utilizationColor(49.9)).toBe('#48BB78')
   })
