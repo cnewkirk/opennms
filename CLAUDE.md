@@ -13,6 +13,19 @@ This is the #1 rule. Everything else is secondary.
 
 ## HARD RULES
 
+### Session Start Protocol
+
+**Before touching a single file**, run:
+```bash
+git log --oneline -10
+git status
+```
+And read MEMORY.md. Every session starts blind — these three steps give you context.
+
+**NEVER make sweeping "cleanup" commits** touching multiple unrelated files without understanding each one. The commit `c223dcdae54 ui redesign cleanup` (2026-04-10) wiped multiple prior fixes because the session didn't read context first. If something looks wrong, check `git log --oneline -5 -- <file>` before changing it.
+
+**NEVER use `git reset --hard`** without first running `git stash` or verifying there are no uncommitted fixes. The April 10 incident lost 15 commits + light-mode menu fixes that were re-broken 4 times over 24 hours as a result.
+
 ### Git Hygiene
 
 1. **NEVER commit to `master`, `develop`, or any upstream branch.** All work goes on `feature/*` or `feat/*` branches.
