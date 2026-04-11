@@ -132,10 +132,18 @@ const getNodeIpInterface = async (
 
 const getNodeIpInterfaceServices = async (
   nodeId: string,
-  ipAddress: string
+  ipAddress: string,
+  queryParameters?: QueryParameters
 ): Promise<NodeIfServiceApiResponse | false> => {
+  const servicesEndpoint = `${endpoint}/${nodeId}/ipinterfaces/${encodeURIComponent(ipAddress)}/services`
+  let endpointWithQueryString = ''
+
+  if (queryParameters) {
+    endpointWithQueryString = queryParametersHandler(queryParameters, servicesEndpoint)
+  }
+
   try {
-    const resp = await v2.get(`${endpoint}/${nodeId}/ipinterfaces/${encodeURIComponent(ipAddress)}/services?limit=100`)
+    const resp = await v2.get(endpointWithQueryString || `${servicesEndpoint}?limit=100`)
     return resp.data as NodeIfServiceApiResponse
   } catch (err) {
     return false
