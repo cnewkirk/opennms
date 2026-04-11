@@ -325,6 +325,11 @@
       <artifactId>opennms-config-jaxb</artifactId>
       <scope>${onmsLibScope}</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opennms</groupId>
+      <artifactId>opennms-config</artifactId>
+      <scope>${onmsLibScope}</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.opennms.features.timeformat</groupId>

@@ -67,7 +67,7 @@ const adminCards = computed(() => {
         { label: 'Manage Provisioning Requisitions', href: baseHref.value + 'admin/ng-requisitions/index.jsp' },
         { label: 'Import and Export Asset Information', href: baseHref.value + 'admin/asset/index.jsp' },
         { label: 'Manage Surveillance Categories', href: baseHref.value + 'admin/categories.htm' },
-        { label: 'Configure Discovery', href: baseHref.value + 'admin/discovery/edit-config.jsp' },
+        { label: 'Configure Discovery', to: '/discovery-config' },
         { label: 'Run Single Discovery Scan', href: baseHref.value + 'admin/discovery/edit-scan.jsp' },
         { label: 'Configure SNMP Community Names by IP Address', href: baseHref.value + 'admin/snmpConfig.jsp' },
         { label: 'Manually Add an Interface', href: baseHref.value + 'admin/newInterface.jsp' },

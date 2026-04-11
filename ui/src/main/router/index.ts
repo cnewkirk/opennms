@@ -469,6 +469,21 @@ const router = createRouter({
       }
     },
     {
+      path: '/discovery-config',
+      name: 'Discovery Configuration',
+      component: () => import('@/containers/DiscoveryConfig.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access Discovery Configuration.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/users-groups',
       name: 'Users and Groups',
       component: () => import('@/containers/UsersGroups.vue'),

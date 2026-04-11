@@ -21,12 +21,16 @@
  */
 package org.opennms.web.rest.v2;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlElement;
@@ -35,6 +39,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.opennms.core.soa.ServiceRegistry;
+import org.opennms.netmgt.config.DiscoveryConfigFactory;
 import org.opennms.netmgt.config.discovery.DiscoveryConfiguration;
 import org.opennms.netmgt.config.discovery.ExcludeRange;
 import org.opennms.netmgt.config.discovery.ExcludeUrl;
@@ -42,6 +47,10 @@ import org.opennms.netmgt.config.discovery.IncludeRange;
 import org.opennms.netmgt.config.discovery.IncludeUrl;
 import org.opennms.netmgt.config.discovery.Specific;
 import org.opennms.netmgt.discovery.DiscoveryTaskExecutor;
+import org.opennms.netmgt.events.api.EventConstants;
+import org.opennms.netmgt.events.api.EventProxy;
+import org.opennms.netmgt.events.api.EventProxyException;
+import org.opennms.netmgt.model.events.EventBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,6 +190,7 @@ public class DiscoveryRestService {
         public static class ExcludeRangeDTO {
             private String begin;
             private String end;
+            private String location;
 
             public ExcludeRangeDTO() {
             }
@@ -199,6 +209,14 @@ public class DiscoveryRestService {
 
             public void setEnd(String end) {
                 this.end = end;
+            }
+
+            public String getLocation() {
+                return location;
+            }
+
+            public void setLocation(String location) {
+                this.location = location;
             }
         }
 
@@ -293,6 +311,8 @@ public class DiscoveryRestService {
         private Long timeout = 2000l;
         private String foreignSource;
         private Integer chunkSize = 100;
+        private Long initialSleepTime = (long) DiscoveryConfigFactory.DEFAULT_INITIAL_SLEEP_TIME;
+        private Long restartSleepTime = (long) DiscoveryConfigFactory.DEFAULT_RESTART_SLEEP_TIME;
 
         private List<SpecificDTO> specificDTOList = new ArrayList<>();
         private List<IncludeRangeDTO> includeRangeDTOList = new ArrayList<>();
@@ -338,6 +358,22 @@ public class DiscoveryRestService {
 
         public void setChunkSize(Integer chunkSize) {
             this.chunkSize = chunkSize;
+        }
+
+        public Long getInitialSleepTime() {
+            return initialSleepTime;
+        }
+
+        public void setInitialSleepTime(Long initialSleepTime) {
+            this.initialSleepTime = initialSleepTime;
+        }
+
+        public Long getRestartSleepTime() {
+            return restartSleepTime;
+        }
+
+        public void setRestartSleepTime(Long restartSleepTime) {
+            this.restartSleepTime = restartSleepTime;
         }
 
         @XmlElementWrapper(name="specifics")
@@ -393,6 +429,163 @@ public class DiscoveryRestService {
 
     @Autowired
     ServiceRegistry serviceRegistry;
+
+    @Autowired
+    DiscoveryConfigFactory discoveryConfigFactory;
+
+    @Autowired
+    EventProxy eventProxy;
+
+    @GET
+    @Path("config")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getConfig() {
+        try {
+            discoveryConfigFactory.reload();
+            return Response.ok(toDTO(discoveryConfigFactory.getConfiguration())).build();
+        } catch (IOException e) {
+            LOG.error("Failed to read discovery configuration", e);
+            return Response.serverError().build();
+        }
+    }
+
+    @PUT
+    @Path("config")
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response saveConfig(DiscoveryConfigurationDTO dto) {
+        try {
+            // Load existing config to preserve required schema fields (e.g. packets-per-second)
+            discoveryConfigFactory.reload();
+            DiscoveryConfiguration config = discoveryConfigFactory.getConfiguration();
+            // Update top-level fields
+            config.setTimeout(dto.getTimeout());
+            config.setRetries(dto.getRetries());
+            config.setForeignSource(dto.getForeignSource());
+            config.setLocation(dto.getLocation());
+            config.setChunkSize(dto.getChunkSize());
+            config.setInitialSleepTime(dto.getInitialSleepTime());
+            config.setRestartSleepTime(dto.getRestartSleepTime());
+            // Replace all list entries from DTO
+            config.clearSpecifics();
+            for (DiscoveryConfigurationDTO.SpecificDTO s : dto.getSpecificDTOList()) {
+                Specific specific = new Specific();
+                specific.setAddress(s.getContent());
+                specific.setTimeout(s.getTimeout());
+                specific.setRetries(s.getRetries());
+                specific.setForeignSource(s.getForeignSource());
+                specific.setLocation(s.getLocation());
+                config.addSpecific(specific);
+            }
+            config.clearIncludeRanges();
+            for (DiscoveryConfigurationDTO.IncludeRangeDTO ir : dto.getIncludeRangeDTOList()) {
+                IncludeRange includeRange = new IncludeRange();
+                includeRange.setBegin(ir.getBegin());
+                includeRange.setEnd(ir.getEnd());
+                includeRange.setTimeout(ir.getTimeout());
+                includeRange.setRetries(ir.getRetries());
+                includeRange.setForeignSource(ir.getForeignSource());
+                includeRange.setLocation(ir.getLocation());
+                config.addIncludeRange(includeRange);
+            }
+            config.clearExcludeRanges();
+            for (DiscoveryConfigurationDTO.ExcludeRangeDTO er : dto.getExcludeRangeDTOList()) {
+                ExcludeRange excludeRange = new ExcludeRange();
+                excludeRange.setBegin(er.getBegin());
+                excludeRange.setEnd(er.getEnd());
+                if (er.getLocation() != null) excludeRange.setLocation(er.getLocation());
+                config.addExcludeRange(excludeRange);
+            }
+            config.clearIncludeUrls();
+            for (DiscoveryConfigurationDTO.IncludeUrlDTO iu : dto.getIncludeUrlDTOList()) {
+                IncludeUrl includeUrl = new IncludeUrl();
+                includeUrl.setUrl(iu.getContent());
+                includeUrl.setTimeout(iu.getTimeout());
+                includeUrl.setRetries(iu.getRetries());
+                includeUrl.setForeignSource(iu.getForeignSource());
+                includeUrl.setLocation(iu.getLocation());
+                config.addIncludeUrl(includeUrl);
+            }
+            config.clearExcludeUrls();
+            for (DiscoveryConfigurationDTO.ExcludeUrlDTO eu : dto.getExcludeUrlDTOList()) {
+                ExcludeUrl excludeUrl = new ExcludeUrl();
+                excludeUrl.setUrl(eu.getContent());
+                excludeUrl.setForeignSource(eu.getForeignSource());
+                excludeUrl.setLocation(eu.getLocation());
+                config.addExcludeUrl(excludeUrl);
+            }
+            discoveryConfigFactory.saveConfiguration(config);
+        } catch (IOException e) {
+            LOG.error("Failed to save discovery configuration", e);
+            return Response.serverError().build();
+        }
+        EventBuilder bldr = new EventBuilder(EventConstants.DISCOVERYCONFIG_CHANGED_EVENT_UEI, "DiscoveryRestService");
+        try {
+            eventProxy.send(bldr.getEvent());
+        } catch (EventProxyException e) {
+            LOG.warn("Could not send discoveryConfigChanged event", e);
+        }
+        return Response.noContent().build();
+    }
+
+    private DiscoveryConfigurationDTO toDTO(DiscoveryConfiguration config) {
+        DiscoveryConfigurationDTO dto = new DiscoveryConfigurationDTO();
+        dto.setLocation(config.getLocation().orElse("Default"));
+        dto.setRetries(config.getRetries().orElse(DiscoveryConfigFactory.DEFAULT_RETRIES));
+        dto.setTimeout(config.getTimeout().orElse(DiscoveryConfigFactory.DEFAULT_TIMEOUT));
+        dto.setForeignSource(config.getForeignSource().orElse(null));
+        dto.setChunkSize(config.getChunkSize().orElse(DiscoveryConfigFactory.DEFAULT_CHUNK_SIZE));
+        dto.setInitialSleepTime(config.getInitialSleepTime().orElse((long) DiscoveryConfigFactory.DEFAULT_INITIAL_SLEEP_TIME));
+        dto.setRestartSleepTime(config.getRestartSleepTime().orElse((long) DiscoveryConfigFactory.DEFAULT_RESTART_SLEEP_TIME));
+
+        for (Specific s : config.getSpecifics()) {
+            DiscoveryConfigurationDTO.SpecificDTO sdto = new DiscoveryConfigurationDTO.SpecificDTO();
+            sdto.setContent(s.getAddress());
+            sdto.setTimeout(s.getTimeout().orElse(null));
+            sdto.setRetries(s.getRetries().orElse(null));
+            sdto.setForeignSource(s.getForeignSource().orElse(null));
+            sdto.setLocation(s.getLocation().orElse(null));
+            dto.getSpecificDTOList().add(sdto);
+        }
+
+        for (IncludeRange ir : config.getIncludeRanges()) {
+            DiscoveryConfigurationDTO.IncludeRangeDTO irdto = new DiscoveryConfigurationDTO.IncludeRangeDTO();
+            irdto.setBegin(ir.getBegin());
+            irdto.setEnd(ir.getEnd());
+            irdto.setTimeout(ir.getTimeout().orElse(null));
+            irdto.setRetries(ir.getRetries().orElse(null));
+            irdto.setForeignSource(ir.getForeignSource().orElse(null));
+            irdto.setLocation(ir.getLocation().orElse(null));
+            dto.getIncludeRangeDTOList().add(irdto);
+        }
+
+        for (ExcludeRange er : config.getExcludeRanges()) {
+            DiscoveryConfigurationDTO.ExcludeRangeDTO erdto = new DiscoveryConfigurationDTO.ExcludeRangeDTO();
+            erdto.setBegin(er.getBegin());
+            erdto.setEnd(er.getEnd());
+            erdto.setLocation(er.getLocation().orElse(null));
+            dto.getExcludeRangeDTOList().add(erdto);
+        }
+
+        for (IncludeUrl iu : config.getIncludeUrls()) {
+            DiscoveryConfigurationDTO.IncludeUrlDTO iudto = new DiscoveryConfigurationDTO.IncludeUrlDTO();
+            iudto.setContent(iu.getUrl().orElse(""));
+            iudto.setTimeout(iu.getTimeout().orElse(null));
+            iudto.setRetries(iu.getRetries().orElse(null));
+            iudto.setForeignSource(iu.getForeignSource().orElse(null));
+            iudto.setLocation(iu.getLocation().orElse(null));
+            dto.getIncludeUrlDTOList().add(iudto);
+        }
+
+        for (ExcludeUrl eu : config.getExcludeUrls()) {
+            DiscoveryConfigurationDTO.ExcludeUrlDTO eudto = new DiscoveryConfigurationDTO.ExcludeUrlDTO();
+            eudto.setContent(eu.getUrl());
+            eudto.setForeignSource(eu.getForeignSource().orElse(null));
+            eudto.setLocation(eu.getLocation().orElse(null));
+            dto.getExcludeUrlDTOList().add(eudto);
+        }
+
+        return dto;
+    }
 
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -465,6 +658,9 @@ public class DiscoveryRestService {
             ExcludeRange excludeRange = new ExcludeRange();
             excludeRange.setBegin(excludeRangeDTO.getBegin());
             excludeRange.setEnd(excludeRangeDTO.getEnd());
+            if (excludeRangeDTO.getLocation() != null) {
+                excludeRange.setLocation(excludeRangeDTO.getLocation());
+            }
             discoveryConfiguration.addExcludeRange(excludeRange);
         }
 

@@ -832,3 +832,55 @@ export interface OnmsGroupsApiResponse {
   totalCount: number
   group: OnmsGroup[]
 }
+
+export interface DiscoverySpecific {
+  content: string | null
+  timeout: number | null
+  retries: number | null
+  foreignSource: string | null
+  location: string | null
+}
+
+export interface DiscoveryIncludeRange {
+  begin: string | null
+  end: string | null
+  timeout: number | null
+  retries: number | null
+  foreignSource: string | null
+  location: string | null
+}
+
+export interface DiscoveryExcludeRange {
+  begin: string | null
+  end: string | null
+  location: string | null
+}
+
+export interface DiscoveryIncludeUrl {
+  content: string | null
+  timeout: number | null
+  retries: number | null
+  foreignSource: string | null
+  location: string | null
+}
+
+export interface DiscoveryExcludeUrl {
+  content: string | null
+  foreignSource: string | null
+  location: string | null
+}
+
+export interface DiscoveryConfig {
+  location: string
+  retries: number
+  timeout: number
+  foreignSource: string | null
+  chunkSize: number
+  initialSleepTime: number
+  restartSleepTime: number
+  specifics: DiscoverySpecific[]
+  includeRanges: DiscoveryIncludeRange[]
+  excludeRanges: DiscoveryExcludeRange[]
+  includeUrls: DiscoveryIncludeUrl[]
+  excludeUrls: DiscoveryExcludeUrl[]
+}
