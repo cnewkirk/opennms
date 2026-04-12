@@ -25,7 +25,7 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import { Ref, nextTick } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
-import { getProtocolColor, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
+import { getProtocolColor, utilizationColor, throughputWidth, formatBitsPerSec, capacityColor } from '@/components/Topology/protocolColors'
 import { useWeathermapStore, EdgeLabelData } from '@/stores/weathermapStore'
 import { useEdgeLabelStore } from '@/stores/edgeLabelStore'
 import { useTopologyViewStore } from '@/stores/topologyViewStore'
@@ -513,9 +513,23 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy.batch(() => {
       cy!.edges().forEach(edge => {
         const key = edge.data('edgeKey') as string
+
+        if (elStore.colorMode === 'protocol') {
+          edge.style('line-color', edge.data('color'))
+          edge.style('width', 3)
+          return
+        }
+
+        if (elStore.colorMode === 'capacity') {
+          const ifSpeed = wmStore.edgeLabelData[key]?.ifSpeed ?? 0
+          edge.style('line-color', ifSpeed > 0 ? capacityColor(ifSpeed) : edge.data('color'))
+          edge.style('width', 3)
+          return
+        }
+
+        // utilization mode (default)
         const util = wmStore.edgeUtilMap[key]
         if (!util) {
-          // revert to protocol color if data disappears
           edge.style('line-color', edge.data('color'))
           edge.style('width', 3)
           return
@@ -633,6 +647,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   watch(() => wmStore.edgeUtilMap, () => { applyWeathermapStyles(); applyEdgeLabels() })
   watch(() => wmStore.edgeLabelData, applyEdgeLabels)
   watch(() => wmStore.nodeDownMap, applyNodeDownStyles)
+  watch(() => elStore.colorMode, applyWeathermapStyles)
   watch(() => [
     elStore.showUtilization,
     elStore.showLocalPort,
