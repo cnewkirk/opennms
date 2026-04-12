@@ -89,6 +89,29 @@
       </span>
     </div>
 
+    <!-- Edge Color Mode -->
+    <div class="topology-toolbar__color-mode">
+      <span class="topology-toolbar__color-label">Colors</span>
+      <div class="topology-toolbar__seg">
+        <button
+          type="button"
+          class="topology-toolbar__seg-btn"
+          :class="{ active: elStore.colorMode === 'protocol' }"
+          @click="elStore.colorMode = 'protocol'"
+        >Protocol</button><button
+          type="button"
+          class="topology-toolbar__seg-btn"
+          :class="{ active: elStore.colorMode === 'utilization' }"
+          @click="elStore.colorMode = 'utilization'"
+        >Utilization</button><button
+          type="button"
+          class="topology-toolbar__seg-btn"
+          :class="{ active: elStore.colorMode === 'capacity' }"
+          @click="elStore.colorMode = 'capacity'"
+        >Capacity</button>
+      </div>
+    </div>
+
     <!-- Filter -->
     <div class="topology-toolbar__dd" ref="filterPanelRef">
       <button
@@ -598,6 +621,52 @@ onMounted(async () => {
     color: var($secondary-text-on-surface);
     white-space: nowrap;
     &.error { color: var($error); }
+  }
+
+  &__color-mode {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__color-label {
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: var($secondary-text-on-surface);
+    white-space: nowrap;
+  }
+
+  &__seg {
+    display: inline-flex;
+    border-radius: vars.$border-radius-pill;
+    overflow: hidden;
+    border: 1px solid var($primary);
+  }
+
+  &__seg-btn {
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var($primary);
+    line-height: 1.5;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+
+    &:not(:last-child) {
+      border-right: 1px solid var($primary);
+    }
+
+    &.active {
+      background: var($primary);
+      color: #fff;
+    }
+
+    &:not(.active):hover {
+      opacity: 0.8;
+    }
   }
 
   // Filter panel internals
