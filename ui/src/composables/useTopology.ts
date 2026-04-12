@@ -22,6 +22,9 @@
 
 import cytoscape, { Core } from 'cytoscape'
 import cxtmenu from 'cytoscape-cxtmenu'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import fcose from 'cytoscape-fcose'
 import { Ref, nextTick } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
@@ -32,6 +35,7 @@ import { useTopologyViewStore } from '@/stores/topologyViewStore'
 import { useAppStore } from '@/stores/appStore'
 
 cytoscape.use(cxtmenu)
+cytoscape.use(fcose)
 
 // Read a Feather DS CSS custom property value from the document at runtime.
 // Cytoscape renders to canvas so CSS variables don't apply directly —
@@ -246,7 +250,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   // Run the best layout for the current graph:
   //   1. Saved positions from localStorage → preset
   //   2. Spine/leaf naming detected        → breadthfirst (hierarchical)
-  //   3. Fallback                          → cose (force-directed)
+  //   3. Fallback                          → fcose (force-directed)
   const runLayout = (forceAuto = false) => {
     if (!cy || cy.nodes().length === 0) return
 
@@ -275,20 +279,22 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         padding: 40,
         spacingFactor: 1.75,
         avoidOverlap: true,
-        nodeDimensionsIncludeLabels: false
+        nodeDimensionsIncludeLabels: true
       } as cytoscape.LayoutOptions).run()
       return
     }
 
     cy.layout({
-      name: 'cose',
-      animate: false,
+      name: 'fcose',
+      quality: 'default',
       randomize: true,
-      nodeRepulsion: () => 400000,
-      idealEdgeLength: () => 100,
-      edgeElasticity: () => 100,
-      numIter: 1000,
-      gravity: 80,
+      animate: false,
+      nodeDimensionsIncludeLabels: true,
+      idealEdgeLength: 120,
+      nodeRepulsion: () => 450000,
+      edgeElasticity: () => 0.45,
+      numIter: 2500,
+      gravity: 0.25,
       padding: 30
     } as cytoscape.LayoutOptions).run()
   }
