@@ -38,3 +38,11 @@ a:visited {
 .card {
   border-radius: vars.$border-radius-surface;
 }
+
+// Light mode surface softening — override the Feather DS defaults so cards
+// and panels use a muted blue-gray instead of pure white. The background
+// is deepened in parallel to preserve the surface-over-background depth contrast.
+html.open-light {
+  --feather-surface: #e8ecf5;
+  --feather-background: #dde4f0;
+}

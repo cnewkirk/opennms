@@ -37,6 +37,7 @@ import * as VueRouter from 'vue-router'
 import '@featherds/styles'
 import '@featherds/styles/themes/open-light.css'
 import '@featherds/styles/themes/open-dark.css'
+import '@/styles/opennms-feather-styles.scss'
 
 // Apply saved theme and watch for changes from the menu toggle
 const applyTheme = (theme: string | null) => {

@@ -112,6 +112,9 @@ defineExpose({ saveLayout, resetLayout, toggleGrid, alignToGrid })
     position: absolute;
     top: 0;
     left: 0;
+    // --feather-background is #dde4f0 in light mode (muted blue-gray) and
+    // #0a0c1b in dark mode — correct canvas color for both themes.
+    background: var(--feather-background);
   }
 
   &__loading,
