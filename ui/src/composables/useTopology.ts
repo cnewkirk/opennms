@@ -165,7 +165,8 @@ const buildStylesheet = (): any[] => {
         'text-outline-color':      cssVar('--feather-background') || '#0a0c1b',
         'text-outline-opacity':    1,
         'text-background-opacity': 0,
-      } as cytoscape.Css.Edge
+        'text-wrap':               'wrap',
+      }
     },
     // Weathermap: down node — red fill
     {
