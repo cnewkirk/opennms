@@ -90,3 +90,18 @@ export const formatBitsPerSec = (bps: number): string => {
   if (bps >= 1_000)         return `${+(bps / 1_000).toPrecision(3)}K`
   return `${Math.round(bps)}`
 }
+
+/**
+ * Maps link capacity (ifSpeed in bits/sec) to a distinct tier color.
+ * Uses categorical tiers — not a gradient — so each speed class is visually
+ * identifiable at a glance (all 10G links are cyan, all 1G links are green, etc.).
+ * Falls back to the neutral gray fallback color when ifSpeed is 0 or unknown.
+ */
+export const capacityColor = (ifSpeed: number): string => {
+  if (ifSpeed >= 100_000_000_000) return '#a855f7'  // 100G+ — purple
+  if (ifSpeed >= 40_000_000_000)  return '#3b82f6'  // 40G   — bright blue
+  if (ifSpeed >= 10_000_000_000)  return '#06b6d4'  // 10G   — cyan
+  if (ifSpeed >= 1_000_000_000)   return '#22c55e'  // 1G    — green
+  if (ifSpeed >= 100_000_000)     return '#eab308'  // 100M  — yellow
+  return FALLBACK_COLOR                              // <100M — gray
+}
