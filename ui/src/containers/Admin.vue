@@ -111,9 +111,9 @@ const adminCards = computed(() => {
     {
       title: 'Distributed Monitoring',
       links: [
-        { label: 'Manage Monitoring Locations', href: baseHref.value + 'locations/index.jsp' },
+        { label: 'Manage Monitoring Locations', to: '/monitoring-locations' },
         { label: 'Manage Applications', href: baseHref.value + 'admin/applications.htm' },
-        { label: 'Manage Minions', href: baseHref.value + 'minion/index.jsp' },
+        { label: 'Manage Minions', to: '/minions' },
       ]
     },
     {

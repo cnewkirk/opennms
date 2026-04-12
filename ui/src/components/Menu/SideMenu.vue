@@ -66,7 +66,9 @@ const legacyToVueRoutes: Record<string, string> = {
   'vaadin-wallboard':                  'ui/wallboard-config',
   'admin/bsm/adminpage.jsp':           'ui/bsm-admin',
   'admin/manageEvents.jsp':            'ui/event-config',
-  'admin/index.jsp':                   'ui/admin'
+  'admin/index.jsp':                   'ui/admin',
+  'locations/index.jsp':               'ui/monitoring-locations',
+  'minion/index.jsp':                  'ui/minions'
 }
 
 const getMenuLink = (menuItem: MenuItem) => {

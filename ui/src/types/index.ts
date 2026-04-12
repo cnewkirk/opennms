@@ -134,6 +134,22 @@ export interface MonitoringLocationApiResponse extends ApiResponse {
   location: MonitoringLocation[]
 }
 
+export interface Minion {
+  id: string
+  label: string
+  location: string
+  type: string
+  status: string
+  date: string | null       // lastUpdated (ISO string)
+  lastCheckedIn: string | null
+  version: string | null
+  properties: Record<string, string>
+}
+
+export interface MinionApiResponse extends ApiResponse {
+  minion: Minion[]
+}
+
 export interface MonitoringSystemMainResponse {
   id: string
   label: string
