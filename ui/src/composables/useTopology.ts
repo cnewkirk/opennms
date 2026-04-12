@@ -577,8 +577,11 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       // Source-end: local interface name
       if (elStore.showLocalPort && d.localIfName) srcParts.push(d.localIfName)
 
-      // Target-end: remote port string
-      if (elStore.showRemotePort && d.remotePortId) tgtParts.push(d.remotePortId)
+      // Target-end: remote interface name (prefer symmetric LLDP result; fall back to raw remotePortId)
+      if (elStore.showRemotePort) {
+        const remotePort = d.remoteIfName ?? d.remotePortId
+        if (remotePort) tgtParts.push(remotePort)
+      }
 
       // Source-end: local IP address
       if (elStore.showIp && d.localIp) srcParts.push(d.localIp)

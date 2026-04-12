@@ -20,6 +20,7 @@ export interface EdgeUtil {
 export interface EdgeLabelData {
   localIfName?: string    // ifName/ifDescr of local connecting interface
   remotePortId?: string   // remote port from LLDP (ldpRemPort after cleanName)
+  remoteIfName?: string   // ifName/ifDescr of target node's connecting interface (symmetric LLDP)
   localIp?: string        // primary IP of source node (snmpPrimary === 'P')
   remoteIp?: string       // primary IP of target node
   localMac?: string       // physAddr of local interface
@@ -175,6 +176,32 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
           data.localMac    = best.physAddr ?? undefined
           data.ifSpeed     = best.ifSpeed > 0 ? best.ifSpeed : undefined
         }
+      }
+
+      // Symmetric LLDP: look up from tgtId's perspective to get its local interface toward srcId.
+      // nodeEnlinkdMap[tgtId] is already fetched above — no extra network call needed.
+      const tgtEnlinkd  = nodeEnlinkdMap[tgtId]
+      const srcLabel    = vertexLabelById.get(String(srcId))
+      if (tgtEnlinkd && srcLabel) {
+        const tgtLldpLink = tgtEnlinkd.lldpLinkNodes.find(l =>
+          cleanName(l.lldpRemInfo).toLowerCase() === srcLabel.toLowerCase()
+        )
+        if (tgtLldpLink) {
+          const ifIndexMatch = tgtLldpLink.lldpLocalPort.match(/ifindex:(\d+)/i)
+          if (ifIndexMatch) {
+            const remoteIface = nodeIfIndexMap[tgtId]?.get(Number(ifIndexMatch[1]))
+            if (remoteIface) {
+              data.remoteIfName = remoteIface.ifName ?? remoteIface.ifDescr ?? undefined
+            }
+          } else {
+            const cleaned = cleanName(tgtLldpLink.lldpLocalPort)
+            data.remoteIfName = cleaned || undefined
+          }
+        }
+      }
+      if (!data.remoteIfName) {
+        const best = nodeSnmpMap[tgtId]
+        if (best) data.remoteIfName = best.ifName ?? best.ifDescr ?? undefined
       }
 
       labelMap[key] = data
