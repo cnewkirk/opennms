@@ -22,13 +22,14 @@
 
 import cytoscape, { Core } from 'cytoscape'
 import cxtmenu from 'cytoscape-cxtmenu'
-import { Ref } from 'vue'
+import { Ref, nextTick } from 'vue'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { TopologyVertex } from '@/types/topology'
 import { getProtocolColor, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
 import { useWeathermapStore, EdgeLabelData } from '@/stores/weathermapStore'
 import { useEdgeLabelStore } from '@/stores/edgeLabelStore'
 import { useTopologyViewStore } from '@/stores/topologyViewStore'
+import { useAppStore } from '@/stores/appStore'
 
 cytoscape.use(cxtmenu)
 
@@ -58,6 +59,11 @@ const SPINE_TIER_SELECTOR =
 const buildStylesheet = (): any[] => {
   const defaultNodeColor = cssVar('--feather-primary')
   const selectedColor    = cssVar('--feather-primary-dark')
+  // Use the surface color as a halo behind label text so it reads cleanly on
+  // the canvas. The '#0d1117' fallback is near-black, safe for dark mode when
+  // CSS vars haven't resolved yet — avoids the near-white fallback that was
+  // creating visible white boxes around labels.
+  const labelBg = cssVar('--feather-surface')
 
   return [
     {
@@ -71,7 +77,9 @@ const buildStylesheet = (): any[] => {
         'text-valign': 'bottom',
         'text-halign': 'center',
         'text-margin-y': 6,
-        'text-outline-width': 0,
+        'text-outline-width': 2,
+        'text-outline-color': labelBg || '#0d1117',
+        'text-outline-opacity': 0.8,
         'text-background-opacity': 0,
         'text-border-opacity': 0,
         'width': 36,
@@ -128,19 +136,22 @@ const buildStylesheet = (): any[] => {
         'border-style': 'dashed'
       }
     },
-    // Weathermap: edge with live utilization label
+    // Weathermap: edge with live utilization label.
+    // Uses a text-outline halo matching the canvas background so labels read
+    // cleanly without a visible rectangular box. The halo clears just enough
+    // canvas around each glyph to hide the edge line behind the text.
     {
       selector: 'edge.weathermap',
       css: {
         'label': 'data(wmLabel)',
         'font-size': 9,
-        'color': '#ffffff',
-        'text-background-color': '#2d3748',
-        'text-background-opacity': 0.85,
-        'text-background-padding': '2px',
+        'color': cssVar('--feather-primary-text-on-surface') || '#e8eaed',
+        'text-outline-width': 3,
+        'text-outline-color': cssVar('--feather-background') || '#0a0c1b',
+        'text-outline-opacity': 1,
+        'text-background-opacity': 0,
         'text-rotation': 'autorotate',
         'text-margin-y': -8,
-        'text-background-shape': 'roundrectangle'
       }
     },
     // Weathermap: down node — red fill
@@ -160,6 +171,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   const wmStore = useWeathermapStore()
   const elStore = useEdgeLabelStore()
   const viewStore = useTopologyViewStore()
+  const appStore = useAppStore()
   let cy: Core | null = null
 
   interface EdgeTooltipState {
@@ -501,52 +513,63 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   }
 
   /**
-   * Build the multi-line label string for a single edge from enabled fields.
-   * Returns empty string if no fields are enabled or no data available.
+   * Build three-slot edge labels from enabled fields.
+   * Returns object with center/sourceEnd/targetEnd slots.
+   * - center: protocol list, utilization, speed (stays at edge midpoint)
+   * - sourceEnd: local interface name, local IP, MAC (near source vertex)
+   * - targetEnd: remote port string, remote IP (near target vertex)
    */
-  const composeEdgeLabel = (key: string, protocols: string[]): string => {
-    const parts: string[] = []
+  const composeEdgeLabel = (
+    key: string,
+    protocols: string[]
+  ): { center: string; sourceEnd: string; targetEnd: string } => {
+    const centerParts: string[] = []
+    const srcParts:    string[] = []
+    const tgtParts:    string[] = []
 
-    // Protocol list — shown when multiple protocols share this edge
+    // Center: protocol list when multiple protocols share this edge
     if (protocols.length > 1) {
-      parts.push(protocols.join(' · '))
+      centerParts.push(protocols.join(' · '))
     }
 
-    // Utilization line (from weathermap data)
+    // Center: utilization
     const util = wmStore.edgeUtilMap[key]
     if (elStore.showUtilization && util) {
-      parts.push(`${Math.round(util.utilPct)}% · ↑${formatBitsPerSec(util.inBps)} ↓${formatBitsPerSec(util.outBps)}`)
+      centerParts.push(`${Math.round(util.utilPct)}% · ↑${formatBitsPerSec(util.inBps)} ↓${formatBitsPerSec(util.outBps)}`)
     }
 
-    // Port / IP / MAC / speed lines (from edgeLabelData)
     const d = wmStore.edgeLabelData[key]
     if (d) {
-      // Port: combine local and remote if both enabled, otherwise show whichever is enabled
-      if (elStore.showLocalPort || elStore.showRemotePort) {
-        const local  = elStore.showLocalPort  ? d.localIfName  : undefined
-        const remote = elStore.showRemotePort ? d.remotePortId : undefined
-        if (local && remote) parts.push(`${local} ↔ ${remote}`)
-        else if (local)  parts.push(local)
-        else if (remote) parts.push(remote)
-      }
+      // Source-end: local interface name
+      if (elStore.showLocalPort && d.localIfName) srcParts.push(d.localIfName)
 
-      if (elStore.showIp && (d.localIp || d.remoteIp)) {
-        if (d.localIp && d.remoteIp) parts.push(`${d.localIp} ↔ ${d.remoteIp}`)
-        else parts.push(d.localIp ?? d.remoteIp ?? '')
-      }
+      // Target-end: remote port string
+      if (elStore.showRemotePort && d.remotePortId) tgtParts.push(d.remotePortId)
 
-      if (elStore.showMac && d.localMac) parts.push(d.localMac)
+      // Source-end: local IP address
+      if (elStore.showIp && d.localIp) srcParts.push(d.localIp)
 
-      if (elStore.showSpeed && d.ifSpeed) parts.push(`${formatBitsPerSec(d.ifSpeed)}bps`)
+      // Target-end: remote IP address
+      if (elStore.showIp && d.remoteIp) tgtParts.push(d.remoteIp)
+
+      // Source-end: MAC address
+      if (elStore.showMac && d.localMac) srcParts.push(d.localMac)
+
+      // Center: link speed
+      if (elStore.showSpeed && d.ifSpeed) centerParts.push(`${formatBitsPerSec(d.ifSpeed)}bps`)
     }
 
-    return parts.join('\n')
+    return {
+      center:    centerParts.join('\n'),
+      sourceEnd: srcParts.join('\n'),
+      targetEnd: tgtParts.join('\n'),
+    }
   }
 
   /**
-   * Stamp the composed label onto every edge in a single cy.batch().
+   * Stamp the composed three-slot labels onto every edge in a single cy.batch().
    * Adds the 'weathermap' CSS class (which enables the label stylesheet rule) when
-   * a label is present; removes it when empty so no blank label pill is shown.
+   * any label slot has content; removes it when all slots are empty.
    */
   const applyEdgeLabels = () => {
     if (!cy) return
@@ -555,11 +578,16 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         const key = edge.data('edgeKey') as string
         const protocols = (edge.data('protocols') as string[]) ?? []
         const label = composeEdgeLabel(key, protocols)
-        if (label) {
-          edge.data('wmLabel', label)
+        const hasAny = label.center || label.sourceEnd || label.targetEnd
+        if (hasAny) {
+          edge.data('wmLabel',    label.center)
+          edge.data('wmLabelSrc', label.sourceEnd)
+          edge.data('wmLabelTgt', label.targetEnd)
           edge.addClass('weathermap')
         } else {
-          edge.data('wmLabel', '')
+          edge.data('wmLabel',    '')
+          edge.data('wmLabelSrc', '')
+          edge.data('wmLabelTgt', '')
           edge.removeClass('weathermap')
         }
       })
@@ -628,15 +656,22 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     }
   })
 
-  // Rebuild stylesheet when the OS/app color scheme changes so dark mode is respected
+  // Rebuild stylesheet when the OS color scheme or app theme changes so dark/light mode is respected
   if (typeof window !== 'undefined') {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rebuildStylesheet)
   }
+  // React to app-level theme toggle (stored in appStore.theme as 'open-dark'/'open-light')
+  watch(() => appStore.theme, rebuildStylesheet)
 
   let resizeObserver: ResizeObserver | null = null
 
-  onMounted(() => {
+  onMounted(async () => {
     initCytoscape()
+    // Defer stylesheet rebuild to the next tick so Menubar.vue's onMounted has
+    // had a chance to apply the theme class to document.documentElement, ensuring
+    // CSS vars resolve to the correct light/dark values.
+    await nextTick()
+    rebuildStylesheet()
     if (store.vertices.length > 0) syncElements()
 
     if (containerRef.value) {
