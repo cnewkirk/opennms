@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a segmented control to the topology toolbar that lets users switch edge coloring between protocol-based and utilization-based, with the control itself serving as the persistent mode indicator.
+**Goal:** Add a 3-segment toolbar control (`Protocol | Utilization | Capacity`) that lets users switch edge coloring, with the active segment always visible as the mode indicator.
 
-**Architecture:** A new `colorMode` field in `edgeLabelStore` drives behavior in `applyWeathermapStyles` (useTopology.ts). The toolbar renders a two-segment button group that reads and writes `colorMode` directly. No new components — three existing files touched.
+**Architecture:** `capacityColor()` added to `protocolColors.ts`; `edgeLabelStore` gains a `colorMode` field; `applyWeathermapStyles` in `useTopology.ts` branches on the mode; `TopologyToolbar.vue` renders the segmented control. Four files, no new components.
 
 **Tech Stack:** Vue 3, Pinia, TypeScript, Cytoscape.js, SCSS (Feather DS variables)
 
@@ -14,13 +14,58 @@
 
 | File | Change |
 |------|--------|
+| `ui/src/components/Topology/protocolColors.ts` | Add `capacityColor` function |
 | `ui/src/stores/edgeLabelStore.ts` | Add `colorMode` ref, persist to localStorage |
-| `ui/src/composables/useTopology.ts` | Mode-aware `applyWeathermapStyles`, new colorMode watcher |
-| `ui/src/components/Topology/TopologyToolbar.vue` | Segmented control HTML + SCSS |
+| `ui/src/composables/useTopology.ts` | Mode-aware `applyWeathermapStyles` + watcher |
+| `ui/src/components/Topology/TopologyToolbar.vue` | 3-segment control HTML + SCSS |
 
 ---
 
-### Task 1: Add `colorMode` to `edgeLabelStore`
+### Task 1: Add `capacityColor` to `protocolColors.ts`
+
+**Files:**
+- Modify: `ui/src/components/Topology/protocolColors.ts`
+
+- [ ] **Step 1: Append `capacityColor` to the file**
+
+Add this function at the end of `ui/src/components/Topology/protocolColors.ts`, after `formatBitsPerSec`:
+
+```ts
+/**
+ * Maps link capacity (ifSpeed in bits/sec) to a distinct tier color.
+ * Uses categorical tiers — not a gradient — so each speed class is visually
+ * identifiable at a glance (all 10G links are cyan, all 1G links are green, etc.).
+ * Falls back to the neutral gray fallback color when ifSpeed is 0 or unknown.
+ */
+export const capacityColor = (ifSpeed: number): string => {
+  if (ifSpeed >= 100_000_000_000) return '#a855f7'  // 100G+ — purple
+  if (ifSpeed >= 40_000_000_000)  return '#3b82f6'  // 40G   — bright blue
+  if (ifSpeed >= 10_000_000_000)  return '#06b6d4'  // 10G   — cyan
+  if (ifSpeed >= 1_000_000_000)   return '#22c55e'  // 1G    — green
+  if (ifSpeed >= 100_000_000)     return '#eab308'  // 100M  — yellow
+  return FALLBACK_COLOR                              // <100M — gray
+}
+```
+
+- [ ] **Step 2: Verify TypeScript compiles**
+
+```bash
+cd /Users/chance/git/opennms/ui && ./target/node/yarn/dist/bin/yarn build
+```
+
+Expected: clean build, no errors.
+
+- [ ] **Step 3: Commit**
+
+```bash
+cd /Users/chance/git/opennms
+git add ui/src/components/Topology/protocolColors.ts
+git commit -m "feat(topology): add capacityColor tier function to protocolColors"
+```
+
+---
+
+### Task 2: Add `colorMode` to `edgeLabelStore`
 
 **Files:**
 - Modify: `ui/src/stores/edgeLabelStore.ts`
@@ -48,8 +93,10 @@ export const useEdgeLabelStore = defineStore('edgeLabelStore', () => {
   const showIp          = ref<boolean>((_saved.showIp          as boolean) ?? false)
   const showMac         = ref<boolean>((_saved.showMac         as boolean) ?? false)
   const showSpeed       = ref<boolean>((_saved.showSpeed       as boolean) ?? false)
-  const colorMode       = ref<'protocol' | 'utilization'>(
-    _saved.colorMode === 'protocol' ? 'protocol' : 'utilization'
+  const colorMode       = ref<'protocol' | 'utilization' | 'capacity'>(
+    _saved.colorMode === 'protocol' ? 'protocol'
+    : _saved.colorMode === 'capacity' ? 'capacity'
+    : 'utilization'
   )
 
   watch([showUtilization, showLocalPort, showRemotePort, showIp, showMac, showSpeed, colorMode], () => {
@@ -71,8 +118,8 @@ export const useEdgeLabelStore = defineStore('edgeLabelStore', () => {
 Key changes from the original:
 - `_load` return type widened to `Record<string, unknown>` to accommodate the string `colorMode`
 - Each boolean field cast with `as boolean` to satisfy TypeScript with the widened type
-- `colorMode` defaults to `'utilization'` if absent from storage (preserves existing behavior on first load)
-- `colorMode` added to the watch array and the serialized object
+- `colorMode` is a 3-way union; defaults to `'utilization'` for any unrecognized/absent value
+- `colorMode` included in the watch array and the serialized object
 
 - [ ] **Step 2: Verify TypeScript compiles**
 
@@ -80,7 +127,7 @@ Key changes from the original:
 cd /Users/chance/git/opennms/ui && ./target/node/yarn/dist/bin/yarn build
 ```
 
-Expected: clean build, no errors. If there are TypeScript errors on the boolean casts, check that the `as boolean` pattern matches how Pinia's ref typing works — the `?? true` fallback guarantees a boolean at runtime.
+Expected: clean build, no errors.
 
 - [ ] **Step 3: Commit**
 
@@ -92,14 +139,28 @@ git commit -m "feat(topology): add colorMode to edgeLabelStore"
 
 ---
 
-### Task 2: Make `applyWeathermapStyles` mode-aware
+### Task 3: Make `applyWeathermapStyles` mode-aware
 
 **Files:**
 - Modify: `ui/src/composables/useTopology.ts`
 
-- [ ] **Step 1: Update `applyWeathermapStyles` to check `colorMode`**
+- [ ] **Step 1: Add `capacityColor` to the import from protocolColors**
 
-Find the existing function (around line 497 in the current file):
+Find the existing import at the top of the file (around line 28):
+
+```ts
+import { getProtocolColor, utilizationColor, throughputWidth, formatBitsPerSec } from '@/components/Topology/protocolColors'
+```
+
+Replace with:
+
+```ts
+import { getProtocolColor, utilizationColor, throughputWidth, formatBitsPerSec, capacityColor } from '@/components/Topology/protocolColors'
+```
+
+- [ ] **Step 2: Update `applyWeathermapStyles` to branch on `colorMode`**
+
+Find the existing function (around line 497):
 
 ```ts
 const applyWeathermapStyles = () => {
@@ -129,8 +190,23 @@ const applyWeathermapStyles = () => {
   cy.batch(() => {
     cy!.edges().forEach(edge => {
       const key = edge.data('edgeKey') as string
+
+      if (elStore.colorMode === 'protocol') {
+        edge.style('line-color', edge.data('color'))
+        edge.style('width', 3)
+        return
+      }
+
+      if (elStore.colorMode === 'capacity') {
+        const ifSpeed = wmStore.edgeLabelData[key]?.ifSpeed ?? 0
+        edge.style('line-color', ifSpeed > 0 ? capacityColor(ifSpeed) : edge.data('color'))
+        edge.style('width', 3)
+        return
+      }
+
+      // utilization mode (default)
       const util = wmStore.edgeUtilMap[key]
-      if (!util || elStore.colorMode === 'protocol') {
+      if (!util) {
         edge.style('line-color', edge.data('color'))
         edge.style('width', 3)
         return
@@ -142,9 +218,7 @@ const applyWeathermapStyles = () => {
 }
 ```
 
-The only change is `if (!util)` → `if (!util || elStore.colorMode === 'protocol')`. When in protocol mode, every edge always gets its protocol color at fixed width 3, regardless of whether utilization data exists.
-
-- [ ] **Step 2: Add a watcher for `colorMode`**
+- [ ] **Step 3: Add a watcher for `colorMode`**
 
 Find the block of existing weathermap watchers (around line 603):
 
@@ -160,9 +234,7 @@ Add one line immediately after that block:
 watch(() => elStore.colorMode, applyWeathermapStyles)
 ```
 
-This re-applies edge colors immediately when the user toggles the segmented control, without waiting for the next weathermap poll.
-
-- [ ] **Step 3: Verify TypeScript compiles**
+- [ ] **Step 4: Verify TypeScript compiles**
 
 ```bash
 cd /Users/chance/git/opennms/ui && ./target/node/yarn/dist/bin/yarn build
@@ -170,17 +242,17 @@ cd /Users/chance/git/opennms/ui && ./target/node/yarn/dist/bin/yarn build
 
 Expected: clean build, no errors.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 cd /Users/chance/git/opennms
 git add ui/src/composables/useTopology.ts
-git commit -m "feat(topology): mode-aware edge color — protocol vs utilization"
+git commit -m "feat(topology): mode-aware edge color — protocol, utilization, capacity"
 ```
 
 ---
 
-### Task 3: Add segmented control to the toolbar
+### Task 4: Add segmented control to the toolbar
 
 **Files:**
 - Modify: `ui/src/components/Topology/TopologyToolbar.vue`
@@ -204,18 +276,23 @@ In the template, find the comment `<!-- Filter -->` (around line 93). Insert the
           class="topology-toolbar__seg-btn"
           :class="{ active: elStore.colorMode === 'utilization' }"
           @click="elStore.colorMode = 'utilization'"
-        >Utilization</button>
+        >Utilization</button><button
+          type="button"
+          class="topology-toolbar__seg-btn"
+          :class="{ active: elStore.colorMode === 'capacity' }"
+          @click="elStore.colorMode = 'capacity'"
+        >Capacity</button>
       </div>
     </div>
 ```
 
-> **Important:** The two `<button>` elements must have no whitespace between them (the `</button><button>` on adjacent lines with no gap). Whitespace between inline-block elements creates a 1px visual gap in the border between segments. The template above is written correctly — preserve it exactly.
+> **Important:** The three `<button>` elements must be adjacent with no whitespace between closing and opening tags (`</button><button>`). Whitespace between inline elements creates a 1px visual gap in the border between segments. The template above is correct — preserve it exactly.
 
 The `elStore` ref is already imported and instantiated in the `<script setup>` section (`const elStore = useEdgeLabelStore()`). No new imports needed.
 
 - [ ] **Step 2: Add the SCSS**
 
-In the `<style>` block, find the `&__weathermap` rule (around line 580). Add the following rules after the `&__wm-status` rule and before `&__section` (or anywhere in the `.topology-toolbar` block — order doesn't matter for SCSS):
+In the `<style lang="scss" scoped>` block, add the following rules inside the `.topology-toolbar { }` block, after the `&__wm-status` rule:
 
 ```scss
   &__color-mode {
@@ -283,7 +360,7 @@ git commit -m "feat(topology): edge color mode segmented control in toolbar"
 
 ---
 
-### Task 4: Deploy and verify
+### Task 5: Deploy and verify
 
 **Files:** None — verification only
 
@@ -304,8 +381,7 @@ Expected: `200`
 - [ ] **Step 2: Deploy**
 
 ```bash
-cd /Users/chance/git/opennms
-./ui/deploy-to-container.sh test-opennms
+cd /Users/chance/git/opennms && ./ui/deploy-to-container.sh test-opennms
 ```
 
 - [ ] **Step 3: Verify bundle hashes match**
@@ -331,8 +407,9 @@ Expected: `200`
 Hard-refresh: `Cmd+Option+R` (Safari) or Shift+Reload (Chrome).
 
 1. Navigate to the Topology view.
-2. Confirm the toolbar shows: `Colors  [ Protocol | Utilization ]` between the Weathermap group and the Filter button. "Utilization" should be filled (active) by default.
-3. Click **Protocol** — the segment fills, "Utilization" goes to bordered-only. All edges immediately switch to protocol colors (blue/green/etc.) at uniform width.
-4. Click **Utilization** — segment switches back. If weathermap data is loaded, edges return to utilization gradient colors with variable widths.
-5. Reload the page — the selected mode should persist (localStorage).
-6. Confirm that with weathermap data absent (e.g., refresh interval set to Off and no data loaded), both modes show protocol colors — no difference. This is expected.
+2. Confirm the toolbar shows `Colors  [ Protocol | Utilization | Capacity ]` between the Weathermap group and the Filter button. **Utilization** should be filled (active) by default.
+3. Click **Protocol** — edges switch to protocol colors (blue/green/orange per protocol type) at uniform width 3. "Protocol" segment fills.
+4. Click **Utilization** — if weathermap data is loaded, edges switch to traffic-light gradient with variable widths. If no data, edges stay protocol-colored (correct fallback).
+5. Click **Capacity** — edges switch to tier colors by link speed: cyan for 10G, green for 1G, yellow for 100M, etc. If no `ifSpeed` data, falls back to protocol color.
+6. Reload the page — the selected mode persists (localStorage).
+7. Confirm that toggling between modes is immediate (no page reload required).
