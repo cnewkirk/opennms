@@ -136,23 +136,36 @@ const buildStylesheet = (): any[] => {
         'border-style': 'dashed'
       }
     },
-    // Weathermap: edge with live utilization label.
+    // Weathermap: edge with three-slot labels (center, source-end, target-end).
     // Uses a text-outline halo matching the canvas background so labels read
     // cleanly without a visible rectangular box. The halo clears just enough
     // canvas around each glyph to hide the edge line behind the text.
     {
       selector: 'edge.weathermap',
       css: {
-        'label': 'data(wmLabel)',
-        'font-size': 9,
-        'color': cssVar('--feather-primary-text-on-surface') || '#e8eaed',
-        'text-outline-width': 3,
-        'text-outline-color': cssVar('--feather-background') || '#0a0c1b',
-        'text-outline-opacity': 1,
+        // Center label — utilization, protocols, speed
+        'label':                   'data(wmLabel)',
+        'text-rotation':           'autorotate',
+        'text-margin-y':           -8,
+
+        // Endpoint labels — interface name / IP near each vertex
+        'source-label':            'data(wmLabelSrc)',
+        'target-label':            'data(wmLabelTgt)',
+        'source-text-offset':      45,
+        'target-text-offset':      45,
+        'source-text-rotation':    'autorotate',
+        'target-text-rotation':    'autorotate',
+        'source-text-margin-y':    -6,
+        'target-text-margin-y':    -6,
+
+        // Shared text styling for all three slots
+        'font-size':               9,
+        'color':                   cssVar('--feather-primary-text-on-surface') || '#e8eaed',
+        'text-outline-width':      3,
+        'text-outline-color':      cssVar('--feather-background') || '#0a0c1b',
+        'text-outline-opacity':    1,
         'text-background-opacity': 0,
-        'text-rotation': 'autorotate',
-        'text-margin-y': -8,
-      }
+      } as cytoscape.Css.Edge
     },
     // Weathermap: down node — red fill
     {
