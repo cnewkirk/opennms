@@ -35,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import API from '@/services'
 import { getActiveOutageCount } from '@/services/outageService'
 import { type SummaryWidgetConfig } from '@/services/dashboardConfigService'
@@ -58,7 +59,7 @@ const kpis = ref<Kpi[]>([
 
 const load = async () => {
   const [outageCount, alarmResp, nodeResp] = await Promise.all([
-    getActiveOutageCount([]),
+    getActiveOutageCount(props.config.categories),
     API.getAlarms({ limit: 0, _s: 'severity!=NORMAL;severity!=CLEARED' } as any),
     API.getNodes({ limit: 0 } as any)
   ])
