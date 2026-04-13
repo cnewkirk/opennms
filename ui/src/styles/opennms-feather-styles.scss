@@ -2,6 +2,23 @@
 @use "@featherds/styles/themes/variables";
 @use '@/styles/vars' as vars;
 
+// ─── Global font baseline ───────────────────────────────────────────────────
+//
+// Feather DS loads OpenSans + Inter via @font-face in open-light/dark.css but
+// only applies font-family to specific semantic selectors (h*, p, a,
+// .feather-styles). PrimeVue components — Dialog, InputText, Select, etc. —
+// inherit from the document body, which has no explicit font-family, so they
+// fall back to the browser default (San Francisco on macOS).
+//
+// Setting body here makes every element (PrimeVue or Feather) inherit OpenSans.
+// font-smoothing gives crisp rendering on retina displays.
+body {
+  font-family: var(--feather-font-family);  // OpenSans, Helvetica, Arial, sans-serif
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 /**
 * Add some additional base styles that weren't included in the base Feather typography.
 * These help override legacy OpenNMS Bootstrap styles so that all text on legacy pages
