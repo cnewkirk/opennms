@@ -10,10 +10,6 @@ vi.stubGlobal('localStorage', {
   removeItem: (k: string) => { delete store[k] }
 })
 
-// stub document.querySelector for the app-shell class toggle
-const fakeShell = { classList: { toggle: vi.fn() } }
-vi.spyOn(document, 'querySelector').mockReturnValue(fakeShell as any)
-
 vi.mock('vue-router', () => ({
   useRoute: () => ({ path: '/dashboard' }),
   useRouter: () => ({ push: vi.fn() }),
@@ -21,10 +17,15 @@ vi.mock('vue-router', () => ({
 }))
 
 describe('SideNav collapse state', () => {
+  let fakeShell: { classList: { toggle: ReturnType<typeof vi.fn> } }
+
   beforeEach(() => {
     Object.keys(store).forEach(k => delete store[k])
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    // Reinstate the querySelector mock AFTER clearAllMocks so it's fresh each test
+    fakeShell = { classList: { toggle: vi.fn() } }
+    vi.spyOn(document, 'querySelector').mockReturnValue(fakeShell as any)
   })
 
   it('starts expanded by default', () => {
@@ -38,18 +39,20 @@ describe('SideNav collapse state', () => {
     expect(wrapper.classes()).toContain('sidenav--collapsed')
   })
 
-  it('toggles collapsed state on button click', async () => {
+  it('toggles collapsed state on button click and notifies app shell', async () => {
     const wrapper = mount(SideNav)
     await wrapper.find('.sidenav__toggle').trigger('click')
     expect(wrapper.classes()).toContain('sidenav--collapsed')
     expect(store['onms.sidenav.collapsed']).toBe('true')
+    expect(fakeShell.classList.toggle).toHaveBeenCalledWith('sidenav-collapsed', true)
   })
 
-  it('persists expanded state after toggle back', async () => {
+  it('persists expanded state after toggle back and notifies app shell', async () => {
     store['onms.sidenav.collapsed'] = 'true'
     const wrapper = mount(SideNav)
     await wrapper.find('.sidenav__toggle').trigger('click')
     expect(wrapper.classes()).not.toContain('sidenav--collapsed')
     expect(store['onms.sidenav.collapsed']).toBe('false')
+    expect(fakeShell.classList.toggle).toHaveBeenCalledWith('sidenav-collapsed', false)
   })
 })
