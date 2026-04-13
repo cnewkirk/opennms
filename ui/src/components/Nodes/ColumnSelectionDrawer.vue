@@ -181,14 +181,6 @@ watch(() => nodeStructureStore.columns, (newColumns) => {
   width: 100px;
 }
 
-button.primary {
-  margin-top: 2rem;
-  background-color: var($primary);
-  color: var($primary-text-on-color);
-  padding: 0.5em 1.5em;
-  border: none;
-}
-
 .columns-selector {
     width: 80%;
 }
