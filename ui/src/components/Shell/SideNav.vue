@@ -3,6 +3,7 @@
     class="sidenav"
     :class="{ 'sidenav--collapsed': collapsed }"
   >
+    <div class="sidenav__resize-handle" @mousedown.prevent="startResize" />
     <div class="sidenav__sections">
       <div
         v-for="section in visibleSections"
@@ -231,6 +232,24 @@ const onSectionClick = (id: string) => {
   }
   openSection.value = openSection.value === id ? '' : id
   localStorage.setItem(OPEN_SECTION_KEY, openSection.value)
+}
+
+const startResize = (e: MouseEvent) => {
+  const nav = (e.currentTarget as HTMLElement).closest('nav') as HTMLElement | null
+  if (!nav) return
+  const startX = e.clientX
+  const startWidth = nav.offsetWidth
+
+  const onMove = (ev: MouseEvent) => {
+    const newWidth = Math.max(48, Math.min(400, startWidth + (ev.clientX - startX)))
+    nav.style.width = `${newWidth}px`
+  }
+  const onUp = () => {
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onUp)
+  }
+  document.addEventListener('mousemove', onMove)
+  document.addEventListener('mouseup', onUp)
 }
 </script>
 

@@ -24,35 +24,19 @@
     <div class="dashboard-toolbar">
       <h1 class="headline4">Dashboard</h1>
       <div class="toolbar-actions">
-        <div class="add-widget-menu">
-          <FeatherButton
-            text
-            @click="addMenuOpen = !addMenuOpen"
-          >
-            <FeatherIcon :icon="AddIcon" />
-            Add Widget
-          </FeatherButton>
-          <div
-            v-if="addMenuOpen"
-            class="add-widget-dropdown"
-          >
-            <button
-              v-for="type in WIDGET_TYPES"
-              :key="type"
-              class="add-widget-item"
-              @click="addWidget(type)"
-            >
-              {{ WIDGET_DEFAULTS[type].title }}
-            </button>
-          </div>
-        </div>
-        <FeatherButton
+        <DashboardTimeRangePicker v-if="hasTimeAwareWidgets" />
+
+        <SplitButton
+          label="Add Widget"
+          :model="addWidgetItems"
           text
+        />
+        <Button
+          text
+          label="Reset"
           title="Reset to default layout"
           @click="confirmReset"
-        >
-          Reset
-        </FeatherButton>
+        />
       </div>
     </div>
 
@@ -63,35 +47,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import AddIcon from '@featherds/icon/action/Add'
+import Button from 'primevue/button'
+import SplitButton from 'primevue/splitbutton'
 import { useDashboardStore } from '@/stores/dashboardStore'
 import { type WidgetConfig, type WidgetType } from '@/services/dashboardConfigService'
 import DashboardGrid from '@/components/Dashboard/DashboardGrid.vue'
+import DashboardTimeRangePicker from '@/components/Dashboard/DashboardTimeRangePicker.vue'
 import useSnackbar from '@/composables/useSnackbar'
 
 const dashboardStore = useDashboardStore()
 const { showSnackBar } = useSnackbar()
 
-const addMenuOpen = ref(false)
-const WIDGET_TYPES: WidgetType[] = ['summary', 'outages', 'alarms', 'nodes']
+const hasTimeAwareWidgets = computed(() =>
+  dashboardStore.widgets.some(w => w.type === 'graph' || w.type === 'availability')
+)
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const WIDGET_DEFAULTS: Record<string, Partial<any>> = {
-  summary:       { title: 'Network Summary', w: 12, h: 2 },
-  outages:       { title: 'Active Outages',  w: 6,  h: 3, limit: 10 },
-  alarms:        { title: 'Active Alarms',   w: 6,  h: 3, limit: 10, severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
-  nodes:         { title: 'Nodes',           w: 12, h: 3, limit: 10 },
-  graph:         { title: 'Graph',           w: 6,  h: 3 },
-  'node-status': { title: 'Node Status',     w: 6,  h: 3 },
-  availability:  { title: 'Availability',    w: 6,  h: 3 }
+const WIDGET_DEFAULTS: Record<WidgetType, Partial<WidgetConfig>> = {
+  summary:      { title: 'Network Summary',   w: 12, h: 2 },
+  outages:      { title: 'Active Outages',    w: 6,  h: 3, limit: 10 },
+  alarms:       { title: 'Active Alarms',     w: 6,  h: 3, limit: 10, severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
+  nodes:        { title: 'Nodes',             w: 12, h: 3, limit: 10 },
+  graph:        { title: 'Graph',             w: 6,  h: 4, series: [], stack: false },
+  'node-status':{ title: 'Node Status',       w: 4,  h: 3 },
+  availability: { title: 'Availability',      w: 4,  h: 3 }
 }
 
 const addWidget = (type: WidgetType) => {
-  addMenuOpen.value = false
-  // place new widget at bottom (y=999 lets gridstack find the next open row)
   const widget = {
     id: `widget-${type}-${Date.now()}`,
     type,
@@ -109,15 +90,28 @@ const addWidget = (type: WidgetType) => {
   dashboardStore.addWidget(widget)
 }
 
+const WIDGET_TYPES: WidgetType[] = ['summary', 'outages', 'alarms', 'nodes', 'graph', 'node-status', 'availability']
+const WIDGET_LABELS: Record<WidgetType, string> = {
+  summary:      'Network Summary',
+  outages:      'Active Outages',
+  alarms:       'Active Alarms',
+  nodes:        'Nodes',
+  graph:        'Graph',
+  'node-status':'Node Status',
+  availability: 'Availability'
+}
+
+const addWidgetItems = WIDGET_TYPES.map(type => ({
+  label: WIDGET_LABELS[type],
+  command: () => addWidget(type)
+}))
+
 const confirmReset = () => {
   dashboardStore.reset()
   showSnackBar({ msg: 'Dashboard reset to defaults.' })
 }
 
-// server-first initialization
-onMounted(() => {
-  dashboardStore.initialize()
-})
+onMounted(() => { dashboardStore.initialize() })
 </script>
 
 <style scoped lang="scss">
@@ -137,6 +131,7 @@ onMounted(() => {
   justify-content: space-between;
   padding: 16px 32px 8px;
   flex-shrink: 0;
+  gap: 16px;
 }
 
 .dashboard-grid-wrapper {
@@ -149,39 +144,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.add-widget-menu {
-  position: relative;
-}
-
-.add-widget-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  background: var($surface);
-  border: 1px solid var($border-light-on-surface);
-  border-radius: vars.$border-radius-surface;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 100;
-  min-width: 160px;
-  overflow: hidden;
-}
-
-.add-widget-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 10px 16px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  @include body-large;
-  color: var($primary-text-on-surface);
-
-  &:hover {
-    background: var($surface-dark);
-  }
+  flex-wrap: wrap;
 }
 
 h1 {
