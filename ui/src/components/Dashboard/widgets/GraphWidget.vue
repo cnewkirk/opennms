@@ -41,31 +41,47 @@ const persesTimeRange = computed<AbsoluteTimeRange>(() => ({
   end:   effectiveTimeRange.value.end
 }))
 
+const refreshToken = ref(0)
+const refresh = () => { refreshToken.value++ }
+
 const queries = computed((): Array<OpenNMSBatchQuerySpec> => {
+  void refreshToken.value // creates reactive dependency so refresh() triggers recompute
+
   if (validSeries.value.length === 0) return []
+
+  const withExpr    = validSeries.value.filter(s => !!s.expression)
+  const withoutExpr = validSeries.value.filter(s => !s.expression)
 
   const batchSpec: OpenNMSBatchQuerySpec = {
     batch: true,
-    sources: validSeries.value.map(s => ({
-      resourceId:  s.resourceId,
-      attribute:   s.attribute,
-      aggregation: 'AVERAGE' as const,
-      label:       s.label || s.attribute,
-      transient:   false
-    })),
-    expressions: validSeries.value
-      .filter(s => s.expression)
-      .map(s => ({
-        value:     s.expression!,
-        label:     s.label || s.attribute,
-        transient: false
+    sources: [
+      // Non-expression series: fetched and rendered directly as chart lines
+      ...withoutExpr.map(s => ({
+        resourceId:  s.resourceId,
+        attribute:   s.attribute,
+        aggregation: 'AVERAGE' as const,
+        label:       s.label || s.attribute,
+        transient:   false
+      })),
+      // Expression series: transient raw fetch so JEXL can reference the value
+      ...withExpr.map(s => ({
+        resourceId:  s.resourceId,
+        attribute:   s.attribute,
+        aggregation: 'AVERAGE' as const,
+        label:       s.label || s.attribute,
+        transient:   true
       }))
+    ],
+    expressions: withExpr.map(s => ({
+      value:     s.expression!,
+      label:     s.label || s.attribute,
+      transient: false
+    }))
   }
 
   return [batchSpec]
 })
 
-const refresh = () => { /* PersesPanel re-fetches when queries/timeRange props change */ }
 defineExpose({ refresh })
 </script>
 

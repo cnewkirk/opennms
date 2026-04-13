@@ -118,9 +118,9 @@ const resourcesFor = ref<Record<string, { id: string; label: string }[]>>({})
 const attrsFor     = ref<Record<string, string[]>>({})
 
 onMounted(async () => {
-  const resp = await API.getNodes({ limit: 1000 } as any)
+  const resp = await API.getNodes({ limit: 1000 })
   if (resp) {
-    nodes.value = (resp as any).node.map((n: any) => ({
+    nodes.value = resp.node.map(n => ({
       id: String(n.id),
       label: n.label ?? String(n.id)
     }))
@@ -160,18 +160,15 @@ const onNodeChange = async (series: GraphSeries) => {
   series.resourceId = ''
   series.attribute = ''
   await loadResources(series.nodeId)
-  emit('update:modelValue', localSeries.value.map(s => ({ ...s })))
 }
 
 const onResourceChange = async (series: GraphSeries) => {
   series.attribute = ''
   await loadAttributes(series.resourceId)
-  emit('update:modelValue', localSeries.value.map(s => ({ ...s })))
 }
 
 const onAttrChange = (series: GraphSeries) => {
   if (!series.label || series.label === '') series.label = series.attribute
-  emit('update:modelValue', localSeries.value.map(s => ({ ...s })))
 }
 
 const toggleAdvanced = (id: string) => {
@@ -189,15 +186,14 @@ const addSeries = () => {
     color: undefined,
     expression: undefined
   })
-  emit('update:modelValue', localSeries.value.map(s => ({ ...s })))
 }
 
 const removeSeries = (idx: number) => {
   localSeries.value.splice(idx, 1)
-  emit('update:modelValue', localSeries.value.map(s => ({ ...s })))
 }
 
-// Emit on every local change (watcher for color/label edits)
+// Single emit path for all mutations — color, label (no handlers), and structural changes
+// (node/resource/attribute/add/remove handlers mutate localSeries and rely on this watcher)
 watch(localSeries, () => {
   emit('update:modelValue', localSeries.value.map(s => ({ ...s })))
 }, { deep: true })
