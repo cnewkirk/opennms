@@ -137,10 +137,13 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
   const deleteServerView = async (id: string) => {
     await deleteViewApi(id)
     if (activeView.value?.id === id) {
-      activeView.value         = null
-      viewLayout.value         = {}
-      suppressedVertices.value = []
-      suppressedEdges.value    = []
+      activeView.value          = null
+      viewLayout.value          = {}
+      suppressedVertices.value  = []
+      suppressedEdges.value     = []
+      editMode.value            = false
+      editPendingVertices.value = []
+      editPendingEdges.value    = []
     }
     await fetchServerViews()
   }
