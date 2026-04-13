@@ -824,6 +824,8 @@ onMounted(() => {
   }
 }
 
+// Outlined severity filter chip — severity color as border + text, subtle tinted bg.
+// Light mode overrides (solid fill) live in opennms-feather-styles.scss.
 .sev-toggle {
   @include body-small;
   border: 1.5px solid transparent;
@@ -834,17 +836,17 @@ onMounted(() => {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   cursor: pointer;
-  opacity: 0.35;
+  opacity: 0.4;
   background: none;
   transition: opacity 0.1s;
   &.active { opacity: 1; }
 
-  &.critical      { color: var($error);         border-color: var($error);         background: utils.alpha(fvars.$error,         0.12); }
-  &.major         { color: var($major);         border-color: var($major);         background: utils.alpha(fvars.$major,         0.12); }
-  &.minor         { color: var($minor);         border-color: var($minor);         background: utils.alpha(fvars.$minor,         0.12); }
-  &.warning       { color: var($warning);       border-color: var($warning);       background: utils.alpha(fvars.$warning,       0.12); }
-  &.normal        { color: var($success);       border-color: var($success);       background: utils.alpha(fvars.$success,       0.12); }
-  &.cleared       { color: var($cleared);       border-color: var($cleared);       background: utils.alpha(fvars.$cleared,       0.12); }
+  &.critical { color: var($error);         border-color: var($error);         background: utils.alpha(fvars.$error,   0.12); }
+  &.major    { color: var($major);         border-color: var($major);         background: utils.alpha(fvars.$major,   0.12); }
+  &.minor    { color: var($minor);         border-color: var($minor);         background: utils.alpha(fvars.$minor,   0.12); }
+  &.warning  { color: var($warning);       border-color: var($warning);       background: utils.alpha(fvars.$warning, 0.12); }
+  &.normal   { color: var($success);       border-color: var($success);       background: utils.alpha(fvars.$success, 0.12); }
+  &.cleared  { color: var($cleared);       border-color: var($cleared);       background: utils.alpha(fvars.$cleared, 0.12); }
 }
 
 @keyframes shimmer {

@@ -12,8 +12,9 @@ defineProps<{ severity: string }>()
 @use '@featherds/styles/themes/utils';
 
 // Outlined severity badge: severity color as border + text, subtle tinted background.
-// Works in both light and dark themes without per-severity white/black text decisions.
-$bg: 0.12;
+// Light mode overrides (solid fill) live in opennms-feather-styles.scss because
+// :global(X) .child selectors lose the child when Vue transforms them.
+$bg: 0.15;
 .severity-badge {
   display: inline-block;
   padding: 1px 8px;

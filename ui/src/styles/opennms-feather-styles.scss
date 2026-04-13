@@ -42,7 +42,66 @@ a:visited {
 // Light mode surface softening — override the Feather DS defaults so cards
 // and panels use a muted blue-gray instead of pure white. The background
 // is deepened in parallel to preserve the surface-over-background depth contrast.
-html.open-light {
-  --feather-surface: #e8ecf5;
-  --feather-background: #dde4f0;
+// --feather-elevation-background-* must also be overridden: Feather DS hardcodes
+// all of them to #fff in the light theme, bypassing --feather-surface entirely.
+// body.open-light targets the same element Feather DS targets (body gets the
+// class too), and with higher specificity (0,1,1 vs 0,1,0) our values win.
+body.open-light {
+  --feather-surface: #c8d3e6;
+  --feather-background: #b8c5d8;
+
+  // Elevation layers — step up from background through surface toward lighter,
+  // anchored to the gray-blue palette.
+  --feather-elevation-background-0:  #b8c5d8;
+  --feather-elevation-background-1:  #bfcbde;
+  --feather-elevation-background-2:  #c8d3e6;
+  --feather-elevation-background-3:  #c8d3e6;
+  --feather-elevation-background-4:  #cdd8ea;
+  --feather-elevation-background-6:  #cdd8ea;
+  --feather-elevation-background-8:  #d2dcec;
+  --feather-elevation-background-12: #d2dcec;
+  --feather-elevation-background-16: #d6dfee;
+  --feather-elevation-background-24: #d6dfee;
+
+  // Borders were calibrated for white surfaces — boost opacity so card edges
+  // and table dividers remain visible against the darker gray palette.
+  --feather-border-on-surface:       rgba(10, 12, 27, 0.28);
+  --feather-border-light-on-surface: rgba(10, 12, 27, 0.16);
+
+  // Shade helpers (used for hover states, row stripes, etc.) also need a bump.
+  --feather-shade-4: rgba(10, 12, 27, 0.18);
+}
+
+// Light mode severity overrides — solid fill badges and chips.
+// These live here (not in scoped component styles) because Vue's CSS transformer
+// silently drops descendant selectors inside :global(X) .child { } blocks,
+// turning them into html-element rules. Plain SCSS here has no such issue.
+//
+// Specificity: html:not(.open-dark) .class.severity = (0,3,1), which beats
+// the scoped base rule .class[data-v-xxx].severity = (0,3,0). ✓
+html:not(.open-dark) {
+  // Severity badges (SeverityBadge.vue)
+  .severity-badge {
+    &.critical       { background: #b71c1c; color: #fff;    border-color: #b71c1c; }
+    &.major          { background: #e64a19; color: #fff;    border-color: #e64a19; }
+    &.minor          { background: #e67e00; color: #fff;    border-color: #e67e00; }
+    &.warning        { background: #f9a825; color: #1a1a2e; border-color: #f9a825; }
+    &.normal         { background: #2e7d32; color: #fff;    border-color: #2e7d32; }
+    &.cleared,
+    &.unacknowledged { background: #757575; color: #fff;    border-color: #757575; }
+    &.indeterminate  { background: #0277bd; color: #fff;    border-color: #0277bd; }
+  }
+
+  // Severity filter chips in Alarms table (AlarmsListTable.vue)
+  .sev-toggle {
+    &.critical { background: #b71c1c; color: #fff;    border-color: #b71c1c; }
+    &.major    { background: #e64a19; color: #fff;    border-color: #e64a19; }
+    &.minor    { background: #e67e00; color: #fff;    border-color: #e67e00; }
+    &.warning  { background: #f9a825; color: #1a1a2e; border-color: #f9a825; }
+    &.normal   { background: #2e7d32; color: #fff;    border-color: #2e7d32; }
+    &.cleared  { background: #757575; color: #fff;    border-color: #757575; }
+  }
+
+  // Dashboard summary widget — warning KPI value (#fbe947 is unreadable on light surfaces)
+  .kpi-card--warning .kpi-value { color: #856400; }
 }
