@@ -39,6 +39,8 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
   const wmStore = useWeathermapStore()
 
   let map: maplibregl.Map | null = null
+  let watchStops: (() => void)[] = []
+  let resizeObserver: ResizeObserver | null = null
 
   const popupNode = ref<PopupState | null>(null)
   const edgeTooltip = ref<EdgeTooltipState | null>(null)
@@ -226,7 +228,9 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
         if (zoom === null) return
         const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
         map!.easeTo({ center: coords, zoom })
-      }).catch(() => { /* ignore */ })
+      }).catch((err) => {
+        if (import.meta.env.DEV) console.warn('[useMapLibre] getClusterExpansionZoom failed', err)
+      })
     })
 
     // Cursor changes
@@ -268,6 +272,20 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
         'line-opacity': 0.75
       }
     }, 'map-clusters') // insert below node layers
+
+    map!.addLayer({
+      id: 'map-edges-user-defined',
+      type: 'line',
+      source: 'map-edges',
+      filter: ['==', ['get', 'userDefined'], true],
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: {
+        'line-color': '#A0AEC0',
+        'line-width': 2,
+        'line-dasharray': [6, 3],
+        'line-opacity': 0.85
+      }
+    }, 'map-clusters')
 
     // Edge hover tooltip
     map!.on('mousemove', 'map-edges-line', (e) => {
@@ -311,9 +329,11 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
         edgesLoading.value = false
       }
       map?.setLayoutProperty('map-edges-line', 'visibility', 'visible')
+      map?.setLayoutProperty('map-edges-user-defined', 'visibility', 'visible')
       syncEdgeSource()
     } else {
       map?.setLayoutProperty('map-edges-line', 'visibility', 'none')
+      map?.setLayoutProperty('map-edges-user-defined', 'visibility', 'none')
     }
   }
 
@@ -357,7 +377,10 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
     map = new maplibregl.Map({
       container: containerRef.value,
       style: buildStyle(),
-      center: [mapStore.mapCenter.longitude as number, mapStore.mapCenter.latitude as number],
+      center: [
+        parseFloat(String(mapStore.mapCenter.longitude)),
+        parseFloat(String(mapStore.mapCenter.latitude))
+      ],
       zoom: 2,
       minZoom: 2,
       maxZoom: 19
@@ -369,6 +392,7 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
       addNodeLayers()
       addEdgeLayers()
       map!.setLayoutProperty('map-edges-line', 'visibility', 'none')
+      map!.setLayoutProperty('map-edges-user-defined', 'visibility', 'none')
       applyDarkMode()
       updateSeverityColors()
       syncNodeSource()
@@ -394,22 +418,21 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
       mapStore.setMapBounds(adaptedBounds as any)
     })
 
-    watch(() => appStore.theme, () => {
-      applyDarkMode()
-      updateSeverityColors()
-    })
-
-    watch(() => [mapStore.nodesWithCoordinates, mapStore.getNodeAlarmSeverityMap()], syncNodeSource, { deep: true })
-
-    watch(() => topologyStore.edges, () => { if (edgesVisible.value) syncEdgeSource() }, { deep: true })
-    watch(() => wmStore.edgeUtilMap, () => { if (edgesVisible.value) syncEdgeSource() }, { deep: true })
-
-    const observer = new ResizeObserver(() => map?.resize())
-    observer.observe(containerRef.value!)
-    onBeforeUnmount(() => observer.disconnect())
+    resizeObserver = new ResizeObserver(() => map?.resize())
+    resizeObserver.observe(containerRef.value!)
   })
 
+  watchStops = [
+    watch(() => appStore.theme, () => { applyDarkMode(); updateSeverityColors() }),
+    watch(() => [mapStore.nodesWithCoordinates, mapStore.getNodeAlarmSeverityMap()], syncNodeSource, { deep: true }),
+    watch(() => topologyStore.edges, () => { if (edgesVisible.value) syncEdgeSource() }, { deep: true }),
+    watch(() => wmStore.edgeUtilMap, () => { if (edgesVisible.value) syncEdgeSource() }, { deep: true })
+  ]
+
   onBeforeUnmount(() => {
+    watchStops.forEach(stop => stop())
+    resizeObserver?.disconnect()
+    resizeObserver = null
     map?.remove()
     map = null
   })
