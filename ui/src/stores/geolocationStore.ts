@@ -44,14 +44,16 @@ export const useGeolocationStore = defineStore('geolocationStore', () => {
         visible: true,
         attribution:
           '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        isMapLibreStyle: false
       },
       {
         name: 'OpenTopoMap',
         visible: false,
         url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
         attribution:
-          'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+          'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+        isMapLibreStyle: false
       }
     ]
   }
@@ -69,7 +71,8 @@ export const useGeolocationStore = defineStore('geolocationStore', () => {
         name,
         url: resp.tileServerUrl,
         attribution: resp.options?.attribution ?? '',
-        visible: true
+        visible: true,
+        isMapLibreStyle: resp.tileServerUrl.endsWith('.json')
       } as TileProviderItem
     }
   }

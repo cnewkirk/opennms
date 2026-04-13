@@ -779,6 +779,7 @@ export interface TileProviderItem {
   url: string
   attribution: string
   visible?: boolean
+  isMapLibreStyle?: boolean  // true when url is a MapLibre style JSON URL (ends with .json)
 }
 
 export interface OnmsInfo {
