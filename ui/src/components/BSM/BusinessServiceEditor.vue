@@ -434,12 +434,12 @@ async function onRemoveEdge(edgeId: number) {
   text-transform: uppercase;
   white-space: nowrap;
 
-  &.status-critical      { background: #c0392b; color: #fff; }
-  &.status-major         { background: #e67e22; color: #fff; }
-  &.status-minor         { background: #f1c40f; color: #333; }
-  &.status-warning       { background: #3498db; color: #fff; }
-  &.status-normal        { background: #27ae60; color: #fff; }
-  &.status-indeterminate { background: #95a5a6; color: #fff; }
+  &.status-critical      { background: var($error);         color: var($primary-text-on-color); }
+  &.status-major         { background: var($major);         color: var($primary-text-on-color); }
+  &.status-minor         { background: var($minor);         color: var($primary-text-on-color); }
+  &.status-warning       { background: var($warning);       color: #1a1a2e; }
+  &.status-normal        { background: var($success);       color: var($primary-text-on-color); }
+  &.status-indeterminate { background: var($indeterminate); color: var($primary-text-on-color); }
 }
 
 .empty-hint {
