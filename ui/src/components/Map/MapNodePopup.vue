@@ -3,10 +3,9 @@
     v-if="node"
     class="map-node-popup"
     :style="{ left: x + 'px', top: y + 'px' }"
-    ref="popupEl"
   >
     <div class="map-node-popup__header">
-      <a :href="`${baseHref}${baseNodeUrl}${node.id}`" target="_blank" class="map-node-popup__title">
+      <a :href="`${baseHref}${baseNodeUrl}${node.id}`" target="_blank" rel="noopener noreferrer" class="map-node-popup__title">
         {{ node.label }}
       </a>
       <SeverityBadge :severity="severity" />
@@ -42,8 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
-import { PropType } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, type PropType } from 'vue'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import { useMenuStore } from '@/stores/menuStore'
 import { useMapStore } from '@/stores/mapStore'
@@ -60,7 +58,6 @@ const emit = defineEmits(['close'])
 
 const menuStore = useMenuStore()
 const mapStore = useMapStore()
-const popupEl = ref<HTMLElement | null>(null)
 
 const baseHref = computed(() => menuStore.mainMenu.baseHref ?? '')
 const baseNodeUrl = computed(() => menuStore.mainMenu.baseNodeUrl ?? 'element/node.jsp?node=')
