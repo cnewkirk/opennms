@@ -438,6 +438,16 @@ const router = createRouter({
       }
     },
     {
+      path: '/provision/quick-add',
+      name: 'Quick Add Node',
+      component: () => import('@/containers/Admin.vue') // temporary stub — provisioning phase replaces this
+    },
+    {
+      path: '/provision/requisitions',
+      name: 'Manage Requisitions',
+      component: () => import('@/containers/Admin.vue') // temporary stub — provisioning phase replaces this
+    },
+    {
       path: '/system-config',
       name: 'System Configuration',
       component: () => import('@/containers/SystemConfig.vue'),
