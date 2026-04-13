@@ -243,7 +243,6 @@
           Scope
           <select v-model="newViewScope">
             <option value="private">Private (this browser only)</option>
-            <option value="user" disabled>My Account (not yet available)</option>
             <option value="shared" disabled>Shared (not yet available)</option>
             <option v-if="authStore.whoAmI?.roles?.includes('ROLE_ADMIN')" value="global" disabled>Global Default (not yet available)</option>
           </select>
@@ -278,7 +277,7 @@ const emit = defineEmits<{
   'reset-layout': []
   'toggle-grid': []
   'align-to-grid': []
-  'save-view-requested': [{ name: string; description: string; scope: 'private' | 'user' | 'shared' | 'global' }]
+  'save-view-requested': [{ name: string; description: string; scope: 'private' | 'shared' | 'global' }]
   'restore-view': [TopologyView]
 }>()
 
@@ -314,7 +313,7 @@ onClickOutside(displayPanelRef, () => { displayPanelOpen.value = false })
 const saveViewOpen      = ref(false)
 const newViewName       = ref('')
 const newViewDescription = ref('')
-const newViewScope      = ref<'private' | 'user' | 'shared' | 'global'>('private')
+const newViewScope      = ref<'private' | 'shared' | 'global'>('private')
 const globalView        = ref<TopologyView | null>(null)
 const sharedViews       = ref<TopologyView[]>([])
 const userViews         = ref<TopologyView[]>([])
