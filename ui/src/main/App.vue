@@ -1,13 +1,8 @@
 <template>
-  <FeatherAppLayout content-layout="full">
-    <template v-slot:header>
-      <Menubar />
-      <SideMenu
-        pushedSelector=".app-layout"
-      />
-    </template>
-
-    <div class="main-content">
+  <div class="app-shell">
+    <TopBar class="app-shell__topbar" />
+    <SideNav class="app-shell__sidenav" />
+    <main class="app-shell__content">
       <Spinner />
       <Snackbar />
       <router-view v-slot="{ Component }">
@@ -15,21 +10,13 @@
           <component :is="Component" />
         </keep-alive>
       </router-view>
-    </div>
-    <template v-slot:footer>
-      <Footer />
-    </template>
-  </FeatherAppLayout>
+    </main>
+  </div>
 </template>
 
-<script
-  setup
-  lang="ts"
->
-import { FeatherAppLayout } from '@featherds/app-layout'
-import Footer from '@/components/Layout/Footer.vue'
-import Menubar from '@/components/Menu/Menubar.vue'
-import SideMenu from '@/components/Menu/SideMenu.vue'
+<script setup lang="ts">
+import TopBar from '@/components/Shell/TopBar.vue'
+import SideNav from '@/components/Shell/SideNav.vue'
 import Spinner from '@/components/Common/Spinner.vue'
 import Snackbar from '@/components/Common/Snackbar.vue'
 import { useAuthStore } from '@/stores/authStore'
@@ -51,7 +38,6 @@ onMounted(() => {
   infoStore.getInfo()
   menuStore.getMainMenu()
   menuStore.getNotificationSummary()
-  menuStore.loadSideMenuExpanded()
   monitoringSystemStore.getMainMonitoringSystem()
   nodeStructureStore.getCategories()
   nodeStructureStore.getMonitoringLocations()
@@ -60,10 +46,16 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import "@featherds/styles/lib/grid";
-@import "@featherds/styles/mixins/typography";
-@import "@featherds/styles/themes/open-mixins";
-@import "@featherds/styles/themes/variables";
+@import "@featherds/styles/themes/open-light.css";
+@import "@featherds/styles/themes/open-dark.css";
+@import "@/styles/opennms-feather-styles.scss";
+
+:root {
+  --topbar-height: 56px;
+  --sidebar-width-expanded: 180px;
+  --sidebar-width-collapsed: 56px;
+  --sidebar-width: var(--sidebar-width-expanded);
+}
 
 html {
   overflow-x: hidden;
@@ -74,41 +66,57 @@ html:not(.open-dark) {
   --feather-surface: #f8f9fa;
   --feather-background: #eef1f6;
 }
-.main-content {
-  table {
-    width: 100%;
+
+.app-shell {
+  display: grid;
+  grid-template-rows: var(--topbar-height) 1fr;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  height: 100dvh;
+  overflow: hidden;
+  transition: grid-template-columns 200ms ease;
+
+  &__topbar {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  &__sidenav {
+    grid-column: 1;
+    grid-row: 2;
+    overflow: hidden;
+  }
+
+  &__content {
+    grid-column: 2;
+    grid-row: 2;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: calc(100dvh - var(--topbar-height));
   }
 }
 
-// Feather grid has horizontal gutters but no vertical gap.
-// Add breathing room between stacked rows on every page.
+// Collapsed sidebar: shrink the grid column
+.app-shell.sidenav-collapsed {
+  --sidebar-width: var(--sidebar-width-collapsed);
+}
+
+table {
+  width: 100%;
+}
+
 .feather-row + .feather-row {
   margin-top: 12px;
 }
+
 a {
   text-decoration: none;
-  color: var($clickable-normal);
-  // Override Feather's a:visited { color: --feather-clickable-visited } which is pink in dark mode.
-  // !important needed because Feather's base styles load after App.vue styles in the CSS bundle.
+  color: var(--feather-clickable-normal);
   &:visited {
-    color: var($clickable-normal) !important;
+    color: var(--feather-clickable-normal) !important;
   }
 }
+
 .pointer {
   cursor: pointer !important;
-}
-
-// global feather typography classes
-.headline3 {
-  @include headline3;
-}
-.headline4 {
-  @include headline4;
-}
-.subtitle1 {
-  @include subtitle1;
-}
-.subtitle2 {
-  @include subtitle2;
 }
 </style>
