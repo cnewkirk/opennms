@@ -63,6 +63,11 @@
             :ref="el => registerWidgetRef(widget.id, el)"
             :config="widget"
           />
+          <GraphWidget
+            v-else-if="widget.type === 'graph'"
+            :ref="el => registerWidgetRef(widget.id, el)"
+            :config="widget as GraphWidgetConfig"
+          />
         </WidgetFrame>
       </div>
     </div>
@@ -88,6 +93,8 @@ import SummaryWidget from './widgets/SummaryWidget.vue'
 import OutagesWidget from './widgets/OutagesWidget.vue'
 import AlarmsWidget from './widgets/AlarmsWidget.vue'
 import NodesWidget from './widgets/NodesWidget.vue'
+import GraphWidget from './widgets/GraphWidget.vue'
+import type { GraphWidgetConfig } from '@/services/dashboardConfigService'
 
 const dashboardStore = useDashboardStore()
 const widgets = computed(() => dashboardStore.widgets)

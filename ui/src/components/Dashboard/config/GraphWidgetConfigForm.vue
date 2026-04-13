@@ -5,9 +5,9 @@
       <InputText v-model="draft.title" class="w-full" />
     </div>
 
-    <!-- GraphSeriesBuilder is added in Task 8 -->
-    <div class="field placeholder-note">
-      Series builder coming soon — configure series after adding the widget.
+    <div class="field">
+      <label>Series</label>
+      <GraphSeriesBuilder v-model="draft.series" />
     </div>
 
     <div class="field">
@@ -54,6 +54,7 @@
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Checkbox from 'primevue/checkbox'
+import GraphSeriesBuilder from '@/components/Dashboard/GraphSeriesBuilder.vue'
 import type { GraphWidgetConfig, RelativeWindow } from '@/services/dashboardConfigService'
 
 const props = defineProps<{ modelValue: GraphWidgetConfig }>()
@@ -96,7 +97,5 @@ const refreshOptions = [
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field-row { display: flex; align-items: center; gap: 8px; }
 label { @include subtitle2; color: var($primary-text-on-surface); }
-.checkbox-label { @include body-large; color: var($primary-text-on-surface); cursor: pointer; }
-.placeholder-note { @include body-small; color: var($secondary-text-on-surface); font-style: italic; }
-.w-full { width: 100%; }
+.checkbox-label { @include body-large; color: var($primary-text-on-surface); cursor: pointer; }.w-full { width: 100%; }
 </style>
