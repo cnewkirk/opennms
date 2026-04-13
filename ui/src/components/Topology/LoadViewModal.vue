@@ -212,7 +212,7 @@ const onDelete = async (id: string) => {
 
     &--primary {
       background: var($primary);
-      color: #fff;
+      color: var($primary-text-on-color);
       &:hover { opacity: 0.9; }
     }
 
@@ -220,7 +220,7 @@ const onDelete = async (id: string) => {
       background: none;
       border-color: var($error);
       color: var($error);
-      &:hover { background: var($error); color: #fff; }
+      &:hover { background: var($error); color: var($primary-text-on-color); }
     }
   }
 }

@@ -164,7 +164,7 @@ const onSave = () => {
 
     &--primary {
       background: var($primary);
-      color: #fff;
+      color: var($primary-text-on-color);
       &:hover:not(:disabled) { opacity: 0.9; }
       &:disabled { opacity: 0.4; cursor: default; }
     }
