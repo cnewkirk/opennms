@@ -206,6 +206,11 @@ const router = createRouter({
       component: () => import('@/containers/Alarms.vue')
     },
     {
+      path: '/events',
+      name: 'Events',
+      component: () => import('@/containers/Events.vue')
+    },
+    {
       path: '/node/:id',
       name: 'Node Details',
       component: () => import('@/containers/NodeDetails.vue')
