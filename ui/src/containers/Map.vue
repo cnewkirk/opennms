@@ -11,7 +11,7 @@
         @resize="resize"
       >
         <pane min-size="1" max-size="100" :size="72">
-          <LeafletMap v-if="nodesReady" ref="leafletComponent" />
+          <MapLibreMap v-if="nodesReady" ref="leafletComponent" />
         </pane>
         <pane min-size="1" max-size="100" :size="28" class="bottom-pane">
           <GridTabs />
@@ -30,7 +30,7 @@ export default { name: 'MapKeepAlive' }
 import { debounce } from 'lodash'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-import LeafletMap from '../components/Map/LeafletMap.vue'
+import MapLibreMap from '../components/Map/MapLibreMap.vue'
 import GridTabs from '@/components/Map/GridTabs.vue'
 import useSpinner from '@/composables/useSpinner'
 import { useMapStore } from '@/stores/mapStore'
