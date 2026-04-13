@@ -60,19 +60,39 @@ html.open-dark {
   --p-surface-section: #1c1c1f;      // between zinc-900/800 — section backgrounds
   --p-surface-card: #1c1c1f;
   --p-surface-overlay: #27272a;      // zinc-800 — overlays sit above panels
-  --p-surface-border: rgba(255, 255, 255, 0.10);
+  --p-surface-border: rgba(255, 255, 255, 0.12);
 
   --p-content-background: #1c1c1f;
   --p-content-hover-background: #27272a;
-  --p-content-border-color: rgba(255, 255, 255, 0.10);
+  --p-content-border-color: rgba(255, 255, 255, 0.12);
+
+  // Global text — PrimeVue's dark mode is gated on .p-dark (which we never
+  // toggle). Without explicit values here, PrimeVue's light-mode text tokens
+  // (dark text) land on our dark surfaces.
+  --p-text-color: rgba(255, 255, 255, 0.87);
+  --p-text-muted-color: rgba(255, 255, 255, 0.55);
+  --p-text-hover-color: #ffffff;
 
   --p-overlay-modal-background: #1c1c1f;
   --p-overlay-popover-background: #27272a;
   --p-overlay-select-background: #1c1c1f;
-  --p-overlay-modal-border-color: rgba(255, 255, 255, 0.10);
-  --p-overlay-popover-border-color: rgba(255, 255, 255, 0.10);
-  --p-overlay-select-border-color: rgba(255, 255, 255, 0.10);
+  --p-overlay-modal-border-color: rgba(255, 255, 255, 0.12);
+  --p-overlay-popover-border-color: rgba(255, 255, 255, 0.12);
+  --p-overlay-select-border-color: rgba(255, 255, 255, 0.12);
+  --p-overlay-modal-color: rgba(255, 255, 255, 0.87);
 
-  --p-form-field-background: #09090b;    // zinc-950 — inputs recede behind cards
-  --p-form-field-border-color: rgba(255, 255, 255, 0.15);
+  // Form inputs — raised above the modal surface (zinc-900 dialog → zinc-800
+  // input) so there's visible separation. Explicit text/placeholder because
+  // PrimeVue's .p-dark-gated styles never fire.
+  --p-form-field-background: #27272a;              // zinc-800 — raised above #1c1c1f modal
+  --p-form-field-border-color: rgba(255, 255, 255, 0.20);
+  --p-form-field-color: rgba(255, 255, 255, 0.87);
+  --p-form-field-placeholder-color: rgba(255, 255, 255, 0.42);
+  --p-form-field-focus-border-color: #38bdf8;      // sky-400 — matches our accent palette
+
+  // Select / dropdown options
+  --p-select-option-color: rgba(255, 255, 255, 0.87);
+  --p-select-option-selected-color: rgba(255, 255, 255, 0.87);
+  --p-select-option-selected-background: rgba(56, 189, 248, 0.15);  // sky-400 tint
+  --p-select-option-focus-background: rgba(255, 255, 255, 0.07);
 }
