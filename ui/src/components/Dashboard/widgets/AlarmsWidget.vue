@@ -102,12 +102,12 @@ import { FeatherIcon } from '@featherds/icon'
 import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import API from '@/services'
-import { type WidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
+import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Alarm, type QueryParameters } from '@/types'
 import { useDashboardStore } from '@/stores/dashboardStore'
 
 const props = defineProps<{
-  config: WidgetConfig
+  config: TableWidgetConfig
 }>()
 
 const store = useDashboardStore()

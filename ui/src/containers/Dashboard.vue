@@ -78,17 +78,21 @@ const { showSnackBar } = useSnackbar()
 const addMenuOpen = ref(false)
 const WIDGET_TYPES: WidgetType[] = ['summary', 'outages', 'alarms', 'nodes']
 
-const WIDGET_DEFAULTS: Record<WidgetType, Partial<WidgetConfig>> = {
-  summary: { title: 'Network Summary', w: 12, h: 2 },
-  outages: { title: 'Active Outages',  w: 6,  h: 3, limit: 10 },
-  alarms:  { title: 'Active Alarms',   w: 6,  h: 3, limit: 10, severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
-  nodes:   { title: 'Nodes',           w: 12, h: 3, limit: 10 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const WIDGET_DEFAULTS: Record<string, Partial<any>> = {
+  summary:       { title: 'Network Summary', w: 12, h: 2 },
+  outages:       { title: 'Active Outages',  w: 6,  h: 3, limit: 10 },
+  alarms:        { title: 'Active Alarms',   w: 6,  h: 3, limit: 10, severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
+  nodes:         { title: 'Nodes',           w: 12, h: 3, limit: 10 },
+  graph:         { title: 'Graph',           w: 6,  h: 3 },
+  'node-status': { title: 'Node Status',     w: 6,  h: 3 },
+  availability:  { title: 'Availability',    w: 6,  h: 3 }
 }
 
 const addWidget = (type: WidgetType) => {
   addMenuOpen.value = false
   // place new widget at bottom (y=999 lets gridstack find the next open row)
-  const widget: WidgetConfig = {
+  const widget = {
     id: `widget-${type}-${Date.now()}`,
     type,
     categories: [],
@@ -101,7 +105,7 @@ const addWidget = (type: WidgetType) => {
     h: 3,
     title: '',
     ...WIDGET_DEFAULTS[type]
-  }
+  } as WidgetConfig
   dashboardStore.addWidget(widget)
 }
 

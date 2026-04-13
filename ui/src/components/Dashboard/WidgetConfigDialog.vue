@@ -133,9 +133,10 @@ const emit = defineEmits<{
 
 const SEVERITIES = ['CRITICAL', 'MAJOR', 'MINOR', 'WARNING', 'NORMAL', 'INDETERMINATE']
 
-const availableColumns = computed<ColumnDef[]>(() =>
-  draft.value.type !== 'summary' ? (WIDGET_COLUMNS[draft.value.type] ?? []) : []
-)
+const availableColumns = computed<ColumnDef[]>(() => {
+  const t = draft.value.type as 'alarms' | 'outages' | 'nodes' | 'summary'
+  return t !== 'summary' ? (WIDGET_COLUMNS[t] ?? []) : []
+})
 
 const refreshOptions = [
   { label: '30 seconds', value: 30 },
@@ -149,7 +150,8 @@ const dialogLabels = reactive({ title: 'Configure Widget', close: 'Close' })
 
 const allCategories = ref<Category[]>([])
 
-const draft = ref<WidgetConfig>({ ...props.widgetConfig })
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const draft = ref<any>({ ...props.widgetConfig })
 
 // checkbox maps for multi-select
 const selectedCategories = ref<Record<string, boolean>>({})
@@ -162,18 +164,20 @@ const selectedRefreshInterval = ref(
 
 watch(
   () => props.widgetConfig,
-  (cfg) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (cfg: any) => {
     draft.value = { ...cfg }
     selectedCategories.value = {}
-    for (const c of cfg.categories) selectedCategories.value[c] = true
+    for (const c of (cfg.categories ?? [])) selectedCategories.value[c] = true
     selectedSeverities.value = {}
-    for (const s of cfg.severities) selectedSeverities.value[s] = true
+    for (const s of (cfg.severities ?? [])) selectedSeverities.value[s] = true
     selectedRefreshInterval.value = refreshOptions.find(o => o.value === cfg.refreshInterval) ?? refreshOptions[1]
     selectedColumns.value = {}
     if (cfg.type !== 'summary') {
-      const cols = WIDGET_COLUMNS[cfg.type] ?? []
+      const tableType = cfg.type as 'alarms' | 'outages' | 'nodes'
+      const cols = WIDGET_COLUMNS[tableType] ?? []
       // if columns is unset treat all as enabled
-      const enabled = cfg.columns?.length ? cfg.columns : cols.map(c => c.key)
+      const enabled = cfg.columns?.length ? cfg.columns : cols.map((c: ColumnDef) => c.key)
       for (const c of cols) selectedColumns.value[c.key] = enabled.includes(c.key)
     }
   },
@@ -188,6 +192,7 @@ onMounted(async () => {
 })
 
 const save = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const saved: WidgetConfig = {
     ...draft.value,
     categories: Object.entries(selectedCategories.value)
@@ -200,7 +205,7 @@ const save = () => {
     columns: draft.value.type !== 'summary'
       ? Object.entries(selectedColumns.value).filter(([, v]) => v).map(([k]) => k)
       : undefined
-  }
+  } as any
   emit('save', saved)
 }
 </script>

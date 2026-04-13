@@ -96,12 +96,12 @@
 import { FeatherIcon } from '@featherds/icon'
 import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
 import { getActiveOutages } from '@/services/outageService'
-import { type WidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
+import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Outage } from '@/types'
 import { useDashboardStore } from '@/stores/dashboardStore'
 
 const props = defineProps<{
-  config: WidgetConfig
+  config: TableWidgetConfig
 }>()
 
 const store = useDashboardStore()

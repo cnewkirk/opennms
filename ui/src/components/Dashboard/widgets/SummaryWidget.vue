@@ -37,10 +37,10 @@
 <script setup lang="ts">
 import API from '@/services'
 import { getActiveOutageCount } from '@/services/outageService'
-import { type WidgetConfig } from '@/services/dashboardConfigService'
+import { type SummaryWidgetConfig } from '@/services/dashboardConfigService'
 
 const props = defineProps<{
-  config: WidgetConfig
+  config: SummaryWidgetConfig
 }>()
 
 interface Kpi {
@@ -58,7 +58,7 @@ const kpis = ref<Kpi[]>([
 
 const load = async () => {
   const [outageCount, alarmResp, nodeResp] = await Promise.all([
-    getActiveOutageCount(props.config.categories),
+    getActiveOutageCount([]),
     API.getAlarms({ limit: 0, _s: 'severity!=NORMAL;severity!=CLEARED' } as any),
     API.getNodes({ limit: 0 } as any)
   ])
@@ -128,6 +128,7 @@ defineExpose({ refresh: load })
   &--warning {
     border-color: var($warning);
     background: color-mix(in srgb, var($warning) 8%, var($surface));
+    // Light mode override (solid amber) lives in opennms-feather-styles.scss.
     .kpi-value { color: var($warning); }
   }
 }

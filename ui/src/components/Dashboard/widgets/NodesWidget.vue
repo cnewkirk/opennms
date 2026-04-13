@@ -90,13 +90,13 @@
 import { FeatherIcon } from '@featherds/icon'
 import InfoIcon from '@featherds/icon/action/Info'
 import API from '@/services'
-import { type WidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
+import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Node, type QueryParameters } from '@/types'
 import { getNodeCriteria } from '@/components/Nodes/utils'
 import { useDashboardStore } from '@/stores/dashboardStore'
 
 const props = defineProps<{
-  config: WidgetConfig
+  config: TableWidgetConfig
 }>()
 
 const store = useDashboardStore()
