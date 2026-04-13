@@ -25,6 +25,7 @@ import type { GridStackNode } from 'gridstack'
 import {
   type WidgetConfig,
   type DashboardConfig,
+  type DashboardTimeRange,
   loadConfig,
   saveConfig,
   resetConfig,
@@ -37,7 +38,8 @@ export const useDashboardStore = defineStore('dashboardStore', () => {
   const config = ref<DashboardConfig>(loadConfig())
   const menuStore = useMenuStore()
 
-  const widgets = computed(() => config.value.widgets)
+  const widgets  = computed(() => config.value.widgets)
+  const timeRange = computed(() => config.value.timeRange)
 
   // server-sync debounce handle
   let syncTimer: ReturnType<typeof setTimeout> | null = null
@@ -102,6 +104,11 @@ export const useDashboardStore = defineStore('dashboardStore', () => {
     persist()
   }
 
+  const updateTimeRange = (tr: DashboardTimeRange) => {
+    config.value.timeRange = tr
+    persist()
+  }
+
   const reset = () => {
     config.value = resetConfig()
     persist()
@@ -110,11 +117,13 @@ export const useDashboardStore = defineStore('dashboardStore', () => {
   return {
     config,
     widgets,
+    timeRange,
     initialize,
     updateLayout,
     updateWidget,
     addWidget,
     removeWidget,
+    updateTimeRange,
     reset
   }
 })

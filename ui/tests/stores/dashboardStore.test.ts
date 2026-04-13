@@ -108,3 +108,28 @@ describe('dashboardStore', () => {
     expect(dashStore.widgets.length).toBe(4)
   })
 })
+
+describe('dashboardStore timeRange', () => {
+  beforeEach(() => {
+    Object.keys(store).forEach(k => delete store[k])
+    setActivePinia(createPinia())
+    vi.restoreAllMocks()
+  })
+
+  test('initial timeRange is relative 24h', async () => {
+    const { useDashboardStore } = await import('@/stores/dashboardStore')
+    const s = useDashboardStore()
+    expect(s.timeRange.mode).toBe('relative')
+    expect(s.timeRange.relativeWindow).toBe('24h')
+  })
+
+  test('updateTimeRange persists change', async () => {
+    const { useDashboardStore } = await import('@/stores/dashboardStore')
+    const s = useDashboardStore()
+    s.updateTimeRange({ mode: 'relative', relativeWindow: '7d' })
+    expect(s.timeRange.relativeWindow).toBe('7d')
+    // localStorage should be updated
+    const saved = JSON.parse(store['opennms.dashboard.config'] ?? '{}')
+    expect(saved.timeRange?.relativeWindow).toBe('7d')
+  })
+})
