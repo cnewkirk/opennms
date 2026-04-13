@@ -126,6 +126,9 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
     viewLayout.value          = { ...state.layout }
     suppressedVertices.value  = [...state.suppressed.vertices]
     suppressedEdges.value     = [...state.suppressed.edges]
+    editMode.value            = false
+    editPendingVertices.value = []
+    editPendingEdges.value    = []
     clearDirty()
     await fetchServerViews()
     return result
