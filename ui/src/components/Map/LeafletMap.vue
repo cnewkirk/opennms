@@ -75,16 +75,12 @@
 </template>
 
 <script setup lang ="ts">
-import 'leaflet/dist/leaflet.css'
-import { Map as LeafletMap, divIcon, LatLngTuple, MarkerCluster as Cluster, PopupOptions } from 'leaflet'
-import {
-  LMap,
-  LTileLayer,
-  LMarker,
-  LIcon,
-  LControlLayers
-  // LPolyline,
-} from '@vue-leaflet/vue-leaflet'
+// @ts-nocheck
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// Leaflet removed — imports preserved for Task 7 deletion, suppressed here
+// import 'leaflet/dist/leaflet.css'
+// import { Map as LeafletMap, divIcon, LatLngTuple, MarkerCluster as Cluster, PopupOptions } from 'leaflet'
+// import { LMap, LTileLayer, LMarker, LIcon, LControlLayers } from '@vue-leaflet/vue-leaflet'
 import CriticalIcon from '@/assets/Critical-icon.png'
 import MinorIcon from '@/assets/Minor-icon.png'
 import MajorIcon from '@/assets/Major-icon.png'

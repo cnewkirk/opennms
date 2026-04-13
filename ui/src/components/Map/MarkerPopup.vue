@@ -40,10 +40,12 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import { PropType } from 'vue'
 import { FeatherIcon } from '@featherds/icon'
 import Location from '@featherds/icon/action/Location'
-import { LPopup } from '@vue-leaflet/vue-leaflet'
+// import { LPopup } from '@vue-leaflet/vue-leaflet' // Leaflet removed — pending Task 7 deletion
+const LPopup = { template: '<slot />' }
 import { Node } from '@/types'
 import { stringToFixedFloat } from './utils'
 

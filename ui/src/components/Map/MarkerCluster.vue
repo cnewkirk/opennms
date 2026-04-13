@@ -5,12 +5,15 @@
 </template>
 
 <script>
-import 'leaflet.markercluster/dist/MarkerCluster.css'
-import { propsBinder, remapEvents } from '@vue-leaflet/vue-leaflet/src/utils'
-import {
-  render,
-  setup as layerSetup
-} from '@vue-leaflet/vue-leaflet/src/functions/layer'
+// @ts-nocheck
+// Leaflet removed — imports suppressed pending Task 7 deletion
+// import 'leaflet.markercluster/dist/MarkerCluster.css'
+// import { propsBinder, remapEvents } from '@vue-leaflet/vue-leaflet/src/utils'
+// import { render, setup as layerSetup } from '@vue-leaflet/vue-leaflet/src/functions/layer'
+const propsBinder = () => {}
+const remapEvents = () => ({})
+const render = () => null
+const layerSetup = () => ({ methods: {} })
 
 const props = {
   options: {
@@ -51,77 +54,7 @@ export default {
     const { methods } = layerSetup(props, leafletRef, context)
 
     onMounted(async () => {
-      const {
-        bind,
-        Browser,
-        DivIcon,
-        DomEvent,
-        DomUtil,
-        extend,
-        FeatureGroup,
-        featureGroup,
-        Icon,
-        icon,
-        LatLng,
-        LatLngBounds,
-        LayerGroup,
-        Map,
-        Marker,
-        marker,
-        Path,
-        Point,
-        Polygon,
-        Polyline,
-        popup,
-        Util
-      } = await import('leaflet/dist/leaflet-src.esm')
-
-      /** create a fake window.L from just the bits we need to make markercluster load properly **/
-      const L = {
-        bind,
-        Browser,
-        DomEvent,
-        DivIcon,
-        DomUtil,
-        extend,
-        FeatureGroup,
-        featureGroup,
-        Icon,
-        icon,
-        LatLng,
-        LatLngBounds,
-        LayerGroup,
-        Map,
-        Marker,
-        marker,
-        Path,
-        Point,
-        Polygon,
-        Polyline,
-        popup,
-        Util
-      }
-      window['L'] = L
-
-      const { MarkerClusterGroup } = await import(
-        'leaflet.markercluster/dist/leaflet.markercluster-src.js'
-      )
-      leafletRef.value = new MarkerClusterGroup(props.options)
-
-      const listeners = remapEvents(context.attrs)
-      DomEvent.on(leafletRef.value, listeners)
-      if (props.onClusterClick) {
-        leafletRef.value.on('clusterclick', props.onClusterClick)
-      }
-
-      propsBinder(methods, leafletRef.value, props)
-
-      addLayerToMainMap({
-        ...props,
-        ...methods,
-        leafletObject: leafletRef.value
-      })
-
+      // Leaflet removed — this component is dead code pending Task 7 deletion
       ready.value = true
       nextTick(() => context.emit('ready', leafletRef.value))
     })

@@ -22,7 +22,12 @@
 
 import { defineStore } from 'pinia'
 import { SORT } from '@featherds/table'
-import { latLng, LatLngBounds } from 'leaflet'
+/** Duck-typed bounds shape — compatible with both Leaflet and MapLibre adapted bounds. */
+interface MapBounds {
+  getNorthEast(): { lat: number; lng: number }
+  getSouthWest(): { lat: number; lng: number }
+  contains(point: { lat: number; lng: number }): boolean
+}
 import { orderBy } from 'lodash'
 import { numericSeverityLevel } from '@/components/Map/utils'
 import API from '@/services'
@@ -41,7 +46,7 @@ export const useMapStore = defineStore('mapStore', () => {
   const interestedNodesID = ref([] as string[])
   const edges = ref([] as [number, number][])
   const mapCenter = ref({ latitude: 37.776603506225115, longitude: -33.43824554266541 } as Coordinates)
-  const mapBounds = ref<LatLngBounds | undefined>(undefined)
+  const mapBounds = ref<MapBounds | undefined>(undefined)
   const selectedSeverity = ref('NORMAL')
   const searchedNodeLabels = ref([] as string[])
   const nodeSortObject = ref({ property: 'label', value: SORT.ASCENDING } as FeatherSortObject)
@@ -76,7 +81,7 @@ export const useMapStore = defineStore('mapStore', () => {
     nodes = nodes.filter((node) => {
       const lat = Number(node.assetRecord.latitude)
       const lng = Number(node.assetRecord.longitude)
-      const nodeLatLng = latLng(lat, lng)
+      const nodeLatLng = { lat, lng }
 
       if (mapBounds.value) {
         return mapBounds.value.contains(nodeLatLng)
@@ -171,7 +176,7 @@ export const useMapStore = defineStore('mapStore', () => {
     mapCenter.value = center
   }
 
-  const setMapBounds = (bounds: LatLngBounds) => {
+  const setMapBounds = (bounds: MapBounds) => {
     mapBounds.value = bounds
   }
 
