@@ -124,6 +124,7 @@ Complete reorganization. Items under each section link to Vue SPA routes only �
 MONITOR
   Dashboard             → /dashboard
   Alarms                → /alarms
+  Events                → /events  (new — see Events List below)
   Outages               → /outages
   Surveillance Dashboard → /surveillance-dashboard
   Resource Graphs       → /resource-graphs
@@ -165,6 +166,25 @@ ADMINISTRATION
     Flow Classification       → (legacy href until JSP phase)
     Open API                  → /open-api
 ```
+
+## Events List Page (New — Bundled with Shell Phase)
+
+A standalone events list is a core monitoring workflow. Since there's no `/events` Vue route yet, one is added in this phase to make the nav entry functional.
+
+**Route:** `/events`
+**Container:** `ui/src/containers/Events.vue`
+**REST:** `GET /api/v2/events` (same FIQL pagination pattern as `/api/v2/alarms`)
+
+**What it shows:**
+- Paginated, sortable table: time, severity, node label, UEI (event type), description
+- Filter bar: severity, node, UEI, time range
+- Row click → `EventDetail.vue` (already exists)
+
+This is deliberately minimal — the same column/filter pattern as `Alarms.vue`. No new REST API work needed.
+
+**Router entry:** added to `ui/src/main/router/index.ts` alongside `/alarms`.
+
+---
 
 **Nav architecture — hybrid model:**
 The current sidebar is fully data-driven from the backend menu REST API (`menuStore.mainMenu`). The new `SideNav.vue` uses a **hardcoded core structure** for the three known sections (MONITOR, NETWORK, ADMINISTRATION) and appends any server-provided plugin items from `menuStore.mainMenu` below as a "Plugins" section. Role/feature guards (`zenithEnabled`, `dcbRole`, `adminRole`, etc.) remain identical to today. This eliminates the `legacyToVueRoutes` intercept map for core items — all core nav links are direct Vue route refs.
@@ -211,6 +231,7 @@ The existing toggle logic in `Menubar.vue` (adding `open-dark` / `open-light` cl
 - `ui/src/components/Shell/TopBar.vue`
 - `ui/src/components/Shell/SideNav.vue`
 - `ui/src/utils/legacyRoutes.ts` (extracted from SideMenu.vue)
+- `ui/src/containers/Events.vue` (new events list page)
 
 **Modified:**
 - `ui/src/App.vue` — swap layout; import `TopBar.vue` + `SideNav.vue`
