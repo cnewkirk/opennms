@@ -157,18 +157,47 @@ const localResourceId = computed<string | null>(() => {
   return `node[${t.srcNodeId}].interfaceSnmp[${suffix}]`
 })
 
+// Build the SNMP interface resource ID for the remote (target) side.
+// Format: node[{tgtNodeId}].interfaceSnmp[{remoteIfName}-{remoteMac}]
+const remoteResourceId = computed<string | null>(() => {
+  const t = props.tooltip
+  if (!t?.tgtNodeId || !t.labelData?.remoteIfName) return null
+  const name = t.labelData.remoteIfName
+  const suffix = t.labelData.remoteMac ? `${name}-${t.labelData.remoteMac}` : name
+  return `node[${t.tgtNodeId}].interfaceSnmp[${suffix}]`
+})
+
 const bwQuery = computed<OpenNMSBatchQuerySpec | null>(() => {
   const rid = localResourceId.value
   if (!rid) return null
+  const remRid = remoteResourceId.value
+  if (!remRid) {
+    // Z-side resource unavailable — fall back to two-series (A-side only)
+    return {
+      batch: true,
+      sources: [
+        { resourceId: rid, attribute: 'ifHCInOctets',  aggregation: 'AVERAGE', label: 'inOctets',  transient: true },
+        { resourceId: rid, attribute: 'ifHCOutOctets', aggregation: 'AVERAGE', label: 'outOctets', transient: true }
+      ],
+      expressions: [
+        { value: 'inOctets * 8',  label: 'In (bps)'  },
+        { value: 'outOctets * 8', label: 'Out (bps)' }
+      ]
+    }
+  }
   return {
     batch: true,
     sources: [
-      { resourceId: rid, attribute: 'ifHCInOctets',  aggregation: 'AVERAGE', label: 'inOctets',  transient: true },
-      { resourceId: rid, attribute: 'ifHCOutOctets', aggregation: 'AVERAGE', label: 'outOctets', transient: true }
+      { resourceId: rid,    attribute: 'ifHCInOctets',  aggregation: 'AVERAGE', label: 'aInOctets',  transient: true },
+      { resourceId: rid,    attribute: 'ifHCOutOctets', aggregation: 'AVERAGE', label: 'aOutOctets', transient: true },
+      { resourceId: remRid, attribute: 'ifHCInOctets',  aggregation: 'AVERAGE', label: 'zInOctets',  transient: true },
+      { resourceId: remRid, attribute: 'ifHCOutOctets', aggregation: 'AVERAGE', label: 'zOutOctets', transient: true },
     ],
     expressions: [
-      { value: 'inOctets * 8',  label: 'In (bps)'  },
-      { value: 'outOctets * 8', label: 'Out (bps)' }
+      { value: 'aInOctets * 8',  label: 'A In (bps)'  },
+      { value: 'aOutOctets * 8', label: 'A Out (bps)' },
+      { value: 'zInOctets * 8',  label: 'Z In (bps)'  },
+      { value: 'zOutOctets * 8', label: 'Z Out (bps)' },
     ]
   }
 })
