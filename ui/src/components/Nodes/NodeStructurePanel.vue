@@ -211,7 +211,7 @@ div.category-button-group {
 
 .title {
   @include overline();
-  color: #4b5ad6;
+  color: var($primary);
   margin-bottom: 8px;
 }
 </style>

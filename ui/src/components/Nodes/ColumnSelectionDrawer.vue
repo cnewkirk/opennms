@@ -183,8 +183,8 @@ watch(() => nodeStructureStore.columns, (newColumns) => {
 
 button.primary {
   margin-top: 2rem;
-  background-color: #1d2f75;
-  color: white;
+  background-color: var($primary);
+  color: var($primary-text-on-color);
   padding: 0.5em 1.5em;
   border: none;
 }
