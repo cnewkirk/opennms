@@ -255,6 +255,7 @@ const startResize = (e: MouseEvent) => {
 
 <style lang="scss" scoped>
 .sidenav {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -262,6 +263,16 @@ const startResize = (e: MouseEvent) => {
   border-right: 1px solid var(--feather-border-light-on-surface);
   overflow: hidden;
   // NOTE: no width transition here — the CSS Grid handles the animation in App.vue
+
+  &__resize-handle {
+    position: absolute;
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: col-resize;
+    z-index: 10;
+  }
 
   &__sections {
     flex: 1;

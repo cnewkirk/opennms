@@ -16,7 +16,6 @@
         date-format="yy-mm-dd"
         placeholder="From"
         class="date-input"
-        @date-select="onAbsoluteChange"
       />
       <span class="separator">→</span>
       <DatePicker
@@ -26,7 +25,6 @@
         date-format="yy-mm-dd"
         placeholder="To"
         class="date-input"
-        @date-select="onAbsoluteChange"
       />
     </template>
   </div>
@@ -64,7 +62,7 @@ const onPresetChange = () => {
   })
 }
 
-const onAbsoluteChange = () => {
+watch([absoluteFrom, absoluteTo], () => {
   if (!absoluteFrom.value || !absoluteTo.value) return
   dashboardStore.updateTimeRange({
     mode: 'absolute',
@@ -72,7 +70,7 @@ const onAbsoluteChange = () => {
     from: absoluteFrom.value.toISOString(),
     to: absoluteTo.value.toISOString()
   })
-}
+})
 </script>
 
 <style scoped lang="scss">
