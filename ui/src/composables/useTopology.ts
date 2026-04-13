@@ -196,6 +196,23 @@ const buildStylesheet = (canvasEl?: HTMLElement | null): any[] => {
         'border-width': 3
       }
     },
+    // Edit mode: suppressed elements shown semi-transparent with dashed border/line
+    {
+      selector: 'node.element-suppressed',
+      css: {
+        'opacity': 0.25,
+        'border-style': 'dashed',
+        'border-width': 2,
+        'border-color': cssVar('--feather-error') || '#e53e3e'
+      }
+    },
+    {
+      selector: 'edge.element-suppressed',
+      css: {
+        'opacity': 0.25,
+        'line-style': 'dashed',
+      }
+    },
   ]
 }
 
@@ -240,6 +257,10 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   }
 
   const savedPositions = (): Record<string, { x: number; y: number }> | null => {
+    // View layout takes priority over localStorage when a view is loaded
+    if (Object.keys(viewStore.viewLayout).length > 0) {
+      return viewStore.viewLayout
+    }
     const key = localStorageKey()
     if (!key) return null
     const raw = localStorage.getItem(key)
@@ -430,15 +451,58 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(cy as any).cxtmenu({
       selector: 'node',
-      commands: [
-        {
-          content: 'Create Link',
-          select: (ele: cytoscape.SingularElementReturnValue) => {
-            const vertex = store.vertices.find(v => v.id === ele.id())
-            if (vertex) store.startLinkMode(vertex)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      commands: (ele: any) => {
+        const cmds: object[] = [
+          {
+            content: 'Create Link',
+            select: (el: cytoscape.SingularElementReturnValue) => {
+              const vertex = store.vertices.find(v => v.id === el.id())
+              if (vertex) store.startLinkMode(vertex)
+            }
           }
+        ]
+        if (viewStore.editMode) {
+          const isSuppressed = viewStore.editPendingVertices.includes(ele.id())
+          cmds.push({
+            content: isSuppressed ? 'Restore from view' : 'Hide from view',
+            select: (el: cytoscape.SingularElementReturnValue) => {
+              viewStore.toggleSuppression(el.id(), 'vertex')
+              updateSuppressionClasses()
+            }
+          })
         }
-      ],
+        return cmds
+      },
+      fillColor: cssVar('--feather-surface') || '#1e1e2e',
+      activeFillColor: cssVar('--feather-primary') || '#1f78c1',
+      activePadding: 10,
+      indicatorSize: 14,
+      separatorWidth: 3,
+      spotlightPadding: 4,
+      adaptativeNodeSpotlightRadius: true,
+      minSpotlightRadius: 20,
+      maxSpotlightRadius: 38,
+      itemTextShadowColor: 'transparent'
+    })
+
+    // Context menu for edges (right-click)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(cy as any).cxtmenu({
+      selector: 'edge',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      commands: (ele: any) => {
+        if (!viewStore.editMode) return []
+        const edgeKey = ele.data('edgeKey') as string
+        const isSuppressed = viewStore.editPendingEdges.includes(edgeKey)
+        return [{
+          content: isSuppressed ? 'Restore from view' : 'Hide from view',
+          select: (el: cytoscape.SingularElementReturnValue) => {
+            viewStore.toggleSuppression(el.data('edgeKey') as string, 'edge')
+            updateSuppressionClasses()
+          }
+        }]
+      },
       fillColor: cssVar('--feather-surface') || '#1e1e2e',
       activeFillColor: cssVar('--feather-primary') || '#1f78c1',
       activePadding: 10,
@@ -454,6 +518,25 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
   const rebuildStylesheet = () => {
     cy?.style(buildStylesheet(containerRef.value))
+  }
+
+  const updateSuppressionClasses = () => {
+    if (!cy) return
+    cy.nodes().forEach(n => {
+      if (viewStore.editPendingVertices.includes(n.id())) {
+        n.addClass('element-suppressed')
+      } else {
+        n.removeClass('element-suppressed')
+      }
+    })
+    cy.edges().forEach(e => {
+      const key = e.data('edgeKey') as string
+      if (viewStore.editPendingEdges.includes(key)) {
+        e.addClass('element-suppressed')
+      } else {
+        e.removeClass('element-suppressed')
+      }
+    })
   }
 
   const syncElements = () => {
@@ -519,6 +602,18 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     applyNodeDownStyles()
     applyEdgeLabels()
     runLayout()
+
+    // Apply loaded-view suppression
+    if (!viewStore.editMode) {
+      viewStore.suppressedVertices.forEach(id => {
+        cy!.getElementById(id).remove()
+      })
+      viewStore.suppressedEdges.forEach(key => {
+        cy!.edges(`[edgeKey="${key}"]`).remove()
+      })
+    } else {
+      updateSuppressionClasses()
+    }
   }
 
   const applySeverityClasses = () => {
@@ -712,6 +807,11 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     }
   })
 
+  // When edit mode changes, re-sync elements so suppression is applied or lifted
+  watch(() => viewStore.editMode, () => {
+    syncElements()
+  })
+
   // Rebuild stylesheet when the OS color scheme or app theme changes so dark/light mode is respected
   if (typeof window !== 'undefined') {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rebuildStylesheet)
@@ -769,7 +869,15 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     saveLayout()
   }
 
-  return { getCy: () => cy, saveLayout, resetLayout, toggleGrid, alignToGrid, pendingLinkSource, pendingLinkTarget, edgeTooltip, nodeTooltip }
+  const getPositions = (): Record<string, { x: number; y: number }> => {
+    const positions: Record<string, { x: number; y: number }> = {}
+    cy?.nodes().forEach(n => { positions[n.id()] = { ...n.position() } })
+    return positions
+  }
+
+  return { getCy: () => cy, saveLayout, resetLayout, toggleGrid, alignToGrid,
+           pendingLinkSource, pendingLinkTarget, edgeTooltip, nodeTooltip,
+           getPositions }
 }
 
 export default useTopology

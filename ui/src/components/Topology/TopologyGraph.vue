@@ -48,7 +48,8 @@ const store = useTopologyStore()
 const { showSnackBar } = useSnackbar()
 const graphContainer = ref<HTMLElement | null>(null)
 
-const { saveLayout, resetLayout, toggleGrid, alignToGrid, pendingLinkSource, pendingLinkTarget, edgeTooltip, nodeTooltip } = useTopology(graphContainer)
+const { saveLayout, resetLayout, toggleGrid, alignToGrid, pendingLinkSource,
+        pendingLinkTarget, edgeTooltip, nodeTooltip, getPositions } = useTopology(graphContainer)
 
 // Modal state
 const showLinkModal = ref(false)
@@ -94,7 +95,7 @@ const onKeydown = (e: KeyboardEvent) => {
 onMounted(() => document.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
-defineExpose({ saveLayout, resetLayout, toggleGrid, alignToGrid })
+defineExpose({ saveLayout, resetLayout, toggleGrid, alignToGrid, getPositions })
 </script>
 
 <style lang="scss" scoped>
