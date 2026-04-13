@@ -25,7 +25,7 @@ const props = defineProps<{ config: AvailabilityWidgetConfig }>()
 const dashboardStore = useDashboardStore()
 
 const availability = ref<number>(100)
-const displayPercent = computed(() => availability.value.toFixed(2))
+const displayPercent = computed(() => availability.value.toFixed(1))
 
 const severityClass = computed(() => {
   if (availability.value >= 99) return 'sev-ok'
