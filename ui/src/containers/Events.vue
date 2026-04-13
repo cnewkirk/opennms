@@ -12,7 +12,7 @@
       @page="onPage"
       stripedRows
       class="events-table"
-      data-key="id"
+      dataKey="id"
       @row-click="onRowClick"
       row-hover
     >
@@ -101,7 +101,7 @@ const loadEvents = async (offset = 0) => {
   const params = {
     limit: pageSize,
     offset,
-    orderBy: 'time',
+    orderBy: 'eventTime',
     order: 'desc' as any,
     ...(searchText.value ? { _s: `nodeLabel==${searchText.value}*,uei==${searchText.value}*` } : {})
   }
