@@ -120,19 +120,27 @@ defineExpose({ refresh: load })
   transition: box-shadow 0.15s;
   &:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
 
+  // Light mode (default): explicit rgba values to avoid color-mix() interaction with
+  // Feather DS CSS vars that both theme files set unconditionally in :root.
   &--critical {
-    border-color: var($error);
-    background: color-mix(in srgb, var($error) 8%, var($surface));
-    .kpi-value { color: var($error); }
+    border-color: #b71c1c;
+    background: rgba(183, 28, 28, 0.08);
+    .kpi-value { color: #b71c1c; }
   }
 
   &--warning {
-    border-color: var($warning);
-    background: color-mix(in srgb, var($warning) 8%, var($surface));
-    // Light mode override (solid amber) lives in opennms-feather-styles.scss.
-    .kpi-value { color: var($warning); }
+    border-color: #f9a825;
+    background: rgba(249, 168, 37, 0.08);
+    .kpi-value { color: #856400; }
   }
 }
+
+// Dark mode overrides — full selector in :global() to prevent Vue's CSS scoper
+// from stripping the descendant and applying styles to html directly.
+:global(html.open-dark .kpi-card--critical)           { background: rgba(255, 163, 181, 0.12); border-color: #fca5a5; }
+:global(html.open-dark .kpi-card--critical .kpi-value){ color: #fca5a5; }
+:global(html.open-dark .kpi-card--warning)            { background: rgba(251, 233, 71, 0.12);  border-color: #fde047; }
+:global(html.open-dark .kpi-card--warning .kpi-value) { color: #fde047; }
 
 .kpi-value {
   @include headline3;
