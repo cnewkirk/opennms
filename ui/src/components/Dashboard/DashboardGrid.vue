@@ -68,6 +68,16 @@
             :ref="el => registerWidgetRef(widget.id, el)"
             :config="widget as GraphWidgetConfig"
           />
+          <NodeStatusWidget
+            v-else-if="widget.type === 'node-status'"
+            :ref="el => registerWidgetRef(widget.id, el)"
+            :config="widget as NodeStatusWidgetConfig"
+          />
+          <AvailabilityWidget
+            v-else-if="widget.type === 'availability'"
+            :ref="el => registerWidgetRef(widget.id, el)"
+            :config="widget as AvailabilityWidgetConfig"
+          />
         </WidgetFrame>
       </div>
     </div>
@@ -94,7 +104,9 @@ import OutagesWidget from './widgets/OutagesWidget.vue'
 import AlarmsWidget from './widgets/AlarmsWidget.vue'
 import NodesWidget from './widgets/NodesWidget.vue'
 import GraphWidget from './widgets/GraphWidget.vue'
-import type { GraphWidgetConfig } from '@/services/dashboardConfigService'
+import NodeStatusWidget from './widgets/NodeStatusWidget.vue'
+import AvailabilityWidget from './widgets/AvailabilityWidget.vue'
+import type { GraphWidgetConfig, NodeStatusWidgetConfig, AvailabilityWidgetConfig } from '@/services/dashboardConfigService'
 
 const dashboardStore = useDashboardStore()
 const widgets = computed(() => dashboardStore.widgets)
