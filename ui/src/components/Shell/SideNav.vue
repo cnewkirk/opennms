@@ -48,7 +48,7 @@
 
       <!-- Plugin items from server -->
       <div v-if="pluginItems.length" class="nav-section" :class="{ 'nav-section--open': openSection === 'plugins' }">
-        <button class="nav-section__header" :title="'Plugins'" @click="onSectionClick('plugins')">
+        <button class="nav-section__header" title="Plugins" @click="onSectionClick('plugins')">
           <i class="pi pi-puzzle nav-section__icon" />
           <span class="nav-section__label">Plugins</span>
           <i class="pi nav-section__chevron" :class="openSection === 'plugins' ? 'pi-angle-down' : 'pi-angle-right'" />
@@ -152,26 +152,26 @@ const sections = computed<NavSection[]>(() => [
       { label: 'External Requisitions', to: '/configuration', icon: 'pi-cloud-download' },
       { label: 'Secure Credentials Vault', to: '/scv', icon: 'pi-lock', visible: adminRole.value },
       // System sub-group
-      { label: 'System', header: true },
+      { label: 'System', header: true, visible: adminRole.value },
       { label: 'System Configuration', to: '/system-config', icon: 'pi-sliders-h', visible: adminRole.value },
       { label: 'Users & Groups', to: '/users-groups', icon: 'pi-users', visible: adminRole.value },
       { label: 'Monitoring Locations', to: '/monitoring-locations', icon: 'pi-map-marker', visible: adminRole.value },
       { label: 'Minions', to: '/minions', icon: 'pi-server', visible: adminRole.value },
       ...(zenithEnabled.value ? [{ label: 'Zenith Connect', to: '/zenith-connect', icon: 'pi-link' }] : []),
       // Monitoring Config sub-group
-      { label: 'Monitoring Config', header: true },
+      { label: 'Monitoring Config', header: true, visible: adminRole.value },
       { label: 'Scheduled Outages', to: '/scheduled-outages', icon: 'pi-calendar-times', visible: adminRole.value },
       { label: 'Discovery', to: '/discovery-config', icon: 'pi-search', visible: adminRole.value },
       { label: 'SNMP by IP', to: '/snmp-config', icon: 'pi-sitemap', visible: adminRole.value },
       { label: 'SNMP Collections', to: '/snmp-collections-config', icon: 'pi-database', visible: adminRole.value },
       { label: 'Thresholds', to: '/threshold-config', icon: 'pi-filter', visible: adminRole.value },
       // Notifications sub-group
-      { label: 'Notifications', header: true },
+      { label: 'Notifications', header: true, visible: adminRole.value },
       { label: 'Notification Rules', to: '/notification-config/rules', icon: 'pi-envelope', visible: adminRole.value },
       { label: 'Destination Paths', to: '/notification-config/paths', icon: 'pi-directions', visible: adminRole.value },
       { label: 'Event Configurations', to: '/event-config', icon: 'pi-bolt', visible: adminRole.value },
       // Tools sub-group
-      { label: 'Tools', header: true },
+      { label: 'Tools', header: true, visible: adminRole.value || dcbRole.value },
       { label: 'JMX Config Generator', to: '/jmx-config-generator', icon: 'pi-wrench', visible: adminRole.value },
       { label: 'MIB Compiler', to: '/mib-compiler', icon: 'pi-file-edit', visible: adminRole.value },
       { label: 'File Editor', to: '/file-editor', icon: 'pi-file', visible: adminRole.value },
@@ -201,7 +201,9 @@ const pluginItems = computed(() => {
 // Auto-open section that contains the active route on load
 const autoOpenSection = () => {
   for (const section of sections.value) {
-    const hasActive = section.items.some(item => item.to && route.path.startsWith(item.to))
+    const hasActive = section.items.some(
+      item => item.to && (route.path === item.to || route.path.startsWith(item.to + '/'))
+    )
     if (hasActive) {
       openSection.value = section.id
       return
