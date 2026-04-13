@@ -1,5 +1,5 @@
 <template>
-  <div class="user-notifications" ref="containerRef">
+  <div class="user-notifications">
     <Button
       text
       rounded

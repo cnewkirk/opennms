@@ -16,7 +16,7 @@
     <Popover ref="popoverRef" class="self-service-popover">
       <div class="self-service-menu">
         <a
-          :href="computeLink('')"
+          href="#"
           class="self-service-menu__item self-service-menu__item--username"
           @click.prevent="onUserProfileMenuClick"
         >
