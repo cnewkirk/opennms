@@ -192,16 +192,12 @@
           {{ view.name }}
           <button v-if="canDelete(view)" type="button" class="topology-toolbar__del-btn" @click.stop="deleteViewById(view.id)">×</button>
         </div>
-        <div v-if="userViews.length > 0 || viewStore.privateViews.length > 0" class="topology-toolbar__section-label topology-toolbar__section-label--padded">My Views</div>
+        <div v-if="userViews.length > 0" class="topology-toolbar__section-label topology-toolbar__section-label--padded">My Views</div>
         <div v-for="view in userViews" :key="view.id" class="topology-toolbar__menu-item topology-toolbar__menu-item--row" @click="loadView(view)">
           {{ view.name }}
           <button type="button" class="topology-toolbar__del-btn" @click.stop="deleteViewById(view.id)">×</button>
         </div>
-        <div v-for="view in viewStore.privateViews" :key="view.id" class="topology-toolbar__menu-item topology-toolbar__menu-item--row" @click="loadView(view)">
-          {{ view.name }}
-          <button type="button" class="topology-toolbar__del-btn" @click.stop="deletePrivateView(view.id)">×</button>
-        </div>
-        <div v-if="!globalView && sharedViews.length === 0 && userViews.length === 0 && viewStore.privateViews.length === 0"
+        <div v-if="!globalView && sharedViews.length === 0 && userViews.length === 0"
           class="topology-toolbar__empty">No saved views</div>
       </div>
     </div>
@@ -446,7 +442,6 @@ const deleteViewById = async (id: string) => {
   }
 }
 
-const deletePrivateView = (id: string) => viewStore.deletePrivateView(id)
 
 onMounted(async () => {
   await refreshServerViews()

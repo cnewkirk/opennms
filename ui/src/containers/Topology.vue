@@ -37,38 +37,12 @@ const viewStore = useTopologyViewStore()
 
 const graphRef = ref<InstanceType<typeof TopologyGraph> | null>(null)
 
-const onSaveView = (opts: { name: string; description: string; scope: 'private' | 'user' | 'shared' | 'global' }) => {
-  // Private views are stored in localStorage via the viewStore
-  if (opts.scope === 'private') {
-    const view: TopologyView = {
-      id: `private-${Date.now()}`,
-      name: opts.name,
-      description: opts.description,
-      scope: 'private',
-      data: JSON.stringify({ activeLayers: store.activeLayers })
-    }
-    viewStore.addPrivateView(view)
-    viewStore.clearDirty()
-  }
-  // TODO: server-side save for user/shared/global scopes once REST endpoint exists
+const onSaveView = (_opts: { name: string; description: string; scope: 'private' | 'user' | 'shared' | 'global' }) => {
+  // TODO: server-side save wired up in a future task
 }
 
 const onRestoreView = async (view: TopologyView) => {
-  try {
-    const data = JSON.parse(view.data)
-    if (data.activeLayers && Array.isArray(data.activeLayers)) {
-      await store.setAllLayers(false)
-      for (const ns of data.activeLayers) {
-        const layer = store.availableLayers.find(l => l.namespace === ns)
-        if (layer && !store.activeLayers.includes(ns)) {
-          await store.toggleLayer(layer)
-        }
-      }
-    }
-    viewStore.clearDirty()
-  } catch {
-    console.warn('[topology] Failed to restore view', view)
-  }
+  viewStore.applyView(view)
 }
 
 const homeUrl = computed<string>(() => menuStore.mainMenu?.homeUrl ?? '/opennms')
