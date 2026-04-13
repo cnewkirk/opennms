@@ -9,7 +9,7 @@ import { useWeathermapStore } from '@/stores/weathermapStore'
 import type { Node } from '@/types'
 import type { EdgeTooltipState } from '@/components/Topology/TopologyEdgeTooltip.vue'
 import { buildNodeCoordMap, buildNodeFeatureCollection, buildEdgeFeatureCollection, type EdgeFeatureProperties } from '@/components/Map/mapGeoUtils'
-import { getProtocolColor } from '@/components/Topology/protocolColors'
+import { getProtocolColor, utilizationColor } from '@/components/Topology/protocolColors'
 
 // Read a Feather DS CSS custom property at runtime — same pattern as useTopology.ts
 const cssVar = (name: string): string =>
@@ -252,6 +252,15 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
     if (!map || !map.getSource('map-edges')) return
     const coordMap = getNodeCoordMap()
     const fc = buildEdgeFeatureCollection(topologyStore.edges, topologyStore.vertices, coordMap)
+
+    // Compute per-edge color: utilization (if available) overrides protocol color
+    for (const feature of fc.features) {
+      const props = feature.properties as { edgeKey: string; protocols: string[]; color?: string }
+      const util = wmStore.edgeUtilMap[props.edgeKey]
+      const proto = Array.isArray(props.protocols) ? props.protocols[0] : ''
+      props.color = util ? utilizationColor(util.utilPct) : getProtocolColor(proto ?? '')
+    }
+
     ;(map.getSource('map-edges') as maplibregl.GeoJSONSource).setData(fc)
   }
 
@@ -267,7 +276,7 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
       source: 'map-edges',
       layout: { 'line-join': 'round', 'line-cap': 'round' },
       paint: {
-        'line-color': getProtocolColor('lldp'),
+        'line-color': ['get', 'color'] as maplibregl.ExpressionSpecification,
         'line-width': 2,
         'line-opacity': 0.75
       }
