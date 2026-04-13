@@ -1,19 +1,19 @@
 <template>
-  <div class="geo-map" ref="mapContainer">
+  <div class="geo-map">
     <!-- Overlay controls positioned above the map canvas -->
-    <MapSearch class="map-search-bar" @fly-to-node="composable.flyTo" @set-bounding-box="composable.setBoundingBox" />
+    <MapSearch class="map-search-bar" @fly-to-node="flyTo" @set-bounding-box="setBoundingBox" />
     <SeverityFilter class="map-severity-bar" />
 
     <!-- Edge toggle button -->
     <button
       class="map-edge-toggle"
-      :class="{ 'map-edge-toggle--active': composable.edgesVisible.value }"
-      @click="composable.toggleEdges"
-      :disabled="composable.edgesLoading.value"
-      :title="composable.edgesVisible.value ? 'Hide topology links' : 'Show topology links'"
+      :class="{ 'map-edge-toggle--active': edgesVisible }"
+      @click="toggleEdges"
+      :disabled="edgesLoading"
+      :title="edgesVisible ? 'Hide topology links' : 'Show topology links'"
     >
-      <span v-if="composable.edgesLoading.value">Loading…</span>
-      <span v-else>{{ composable.edgesVisible.value ? 'Hide Links' : 'Show Links' }}</span>
+      <span v-if="edgesLoading">Loading…</span>
+      <span v-else>{{ edgesVisible ? 'Hide Links' : 'Show Links' }}</span>
     </button>
 
     <!-- MapLibre renders into this div -->
@@ -22,13 +22,13 @@
     <!-- Overlay: popup and tooltip render here, positioned relative to the map container -->
     <div class="geo-map__overlay">
       <MapNodePopup
-        v-if="composable.popupNode.value"
-        :node="composable.popupNode.value.node"
-        :x="composable.popupNode.value.x"
-        :y="composable.popupNode.value.y"
-        @close="composable.popupNode.value = null"
+        v-if="popupNode"
+        :node="popupNode.node"
+        :x="popupNode.x"
+        :y="popupNode.y"
+        @close="popupNode = null"
       />
-      <TopologyEdgeTooltip :tooltip="composable.edgeTooltip.value" />
+      <TopologyEdgeTooltip :tooltip="edgeTooltip" />
     </div>
   </div>
 </template>
@@ -42,10 +42,10 @@ import TopologyEdgeTooltip from '@/components/Topology/TopologyEdgeTooltip.vue'
 import useMapLibre from '@/composables/useMapLibre'
 
 const mapEl = ref<HTMLElement | null>(null)
-const composable = useMapLibre(mapEl)
+const { popupNode, edgesVisible, edgesLoading, edgeTooltip, flyTo, setBoundingBox, toggleEdges, invalidateSize } = useMapLibre(mapEl)
 
 // Exposed for Map.vue's resize debounce
-const invalidateSizeFn = () => composable.invalidateSize()
+const invalidateSizeFn = () => invalidateSize()
 defineExpose({ invalidateSizeFn })
 </script>
 
@@ -77,11 +77,6 @@ defineExpose({ invalidateSizeFn })
   position: absolute;
   top: 10px;
   left: 10px;
-  z-index: 200;
-}
-
-.map-severity-bar {
-  position: absolute;
   z-index: 200;
 }
 
