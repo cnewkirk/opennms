@@ -26,16 +26,8 @@
         <span class="topbar__time">{{ formattedTime }}</span>
         <span class="topbar__date">{{ formattedDate }}</span>
       </div>
-      <UserNotificationsMenuItem
-        :expanded="currentDropdown === 'notifications'"
-        @menu-show="currentDropdown = 'notifications'"
-        @menu-hide="currentDropdown === 'notifications' && (currentDropdown = null)"
-      />
-      <UserSelfServiceMenuItem
-        :expanded="currentDropdown === 'selfService'"
-        @menu-show="currentDropdown = 'selfService'"
-        @menu-hide="currentDropdown === 'selfService' && (currentDropdown = null)"
-      />
+      <UserNotificationsMenuItem />
+      <UserSelfServiceMenuItem />
       <Button
         :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
         text
@@ -69,9 +61,6 @@ const homeUrl = computed(() => mainMenu.value?.homeUrl ?? '/opennms/')
 const formattedDate = computed(() => mainMenu.value?.formattedDate ?? '')
 const formattedTime = computed(() => mainMenu.value?.formattedTime ?? '')
 const showAddNode = computed(() => mainMenu.value?.displayAddNodeButton ?? false)
-
-// Dropdown expanded state for child menu items — single ref enforces mutual exclusivity
-const currentDropdown = ref<'notifications' | 'selfService' | null>(null)
 
 // Theme toggle
 const light = 'open-light'

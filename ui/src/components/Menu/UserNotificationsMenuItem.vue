@@ -32,7 +32,7 @@
 
         <a
           v-for="item in userNotificationItems"
-          :key="item.name"
+          :key="item.name ?? ''"
           :href="computeLink(item.url || '')"
           class="notifications-menu-item"
           @click.prevent="onMenuItemClick(item.url || '')"
@@ -43,7 +43,7 @@
 
         <a
           v-for="item in teamNotificationItems"
-          :key="item.name"
+          :key="item.name ?? ''"
           :href="computeLink(item.url || '')"
           class="notifications-menu-item"
           @click.prevent="onMenuItemClick(item.url || '')"
