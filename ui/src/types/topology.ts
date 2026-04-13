@@ -85,11 +85,36 @@ export interface IconMapping {
   iconKey: string
 }
 
+export interface TopologyViewState {
+  layers: string[]
+  filters: {
+    surveillanceCategories: string[]
+    cidrs: string[]
+    namePattern: string
+  }
+  layout: Record<string, { x: number; y: number }>
+  suppressed: {
+    vertices: string[]
+    edges: string[]
+  }
+  edgeColorMode: 'protocol' | 'utilization' | 'capacity'
+  edgeLabels: {
+    showUtilization: boolean
+    showLocalPort: boolean
+    showRemotePort: boolean
+    showIp: boolean
+    showMac: boolean
+    showSpeed: boolean
+  }
+}
+
 export interface TopologyView {
   id: string
   name: string
   description?: string
-  scope: 'private' | 'user' | 'shared' | 'global'
+  scope: 'private' | 'shared' | 'global'
   owner?: string
-  data: string  // JSON-serialized view state
+  created?: string
+  updated?: string
+  state: TopologyViewState
 }
