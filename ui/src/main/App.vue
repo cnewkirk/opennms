@@ -48,7 +48,7 @@ onMounted(() => {
 <style lang="scss">
 :root {
   --topbar-height: 56px;
-  --sidebar-width-expanded: 180px;
+  --sidebar-width-expanded: 220px;
   --sidebar-width-collapsed: 56px;
   --sidebar-width: var(--sidebar-width-expanded);
 }

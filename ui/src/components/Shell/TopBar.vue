@@ -106,10 +106,10 @@ const onAddNode = () => {
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  background: var(--feather-primary);
-  color: var(--feather-primary-text-on-primary);
+  background: var(--feather-surface);
+  color: var(--feather-primary-text-on-surface);
   height: var(--topbar-height, 56px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid var(--feather-border-light-on-surface);
 
   &__left {
     display: flex;
@@ -172,7 +172,7 @@ const onAddNode = () => {
   }
 
   &__theme-toggle {
-    color: var(--feather-primary-text-on-primary) !important;
+    color: inherit !important;
     opacity: 0.85;
 
     &:hover {

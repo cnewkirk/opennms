@@ -70,7 +70,7 @@ svg {
     max-width:198px;
 }
 .cls-1 {
-    fill: #fff;
+    fill: currentColor;
 }
 
 .cls-2 {

@@ -213,7 +213,12 @@ const autoOpenSection = () => {
 }
 
 onMounted(() => {
-  document.querySelector('.app-shell')?.classList.toggle('sidenav-collapsed', collapsed.value)
+  const appShell = document.querySelector('.app-shell') as HTMLElement | null
+  const savedWidth = localStorage.getItem(STORAGE_WIDTH_KEY)
+  if (savedWidth && appShell) {
+    appShell.style.setProperty('--sidebar-width-expanded', `${savedWidth}px`)
+  }
+  appShell?.classList.toggle('sidenav-collapsed', collapsed.value)
   autoOpenSection()
 })
 
@@ -234,20 +239,30 @@ const onSectionClick = (id: string) => {
   localStorage.setItem(OPEN_SECTION_KEY, openSection.value)
 }
 
+const STORAGE_WIDTH_KEY = 'onms.sidenav.width'
+
 let _onMove: ((ev: MouseEvent) => void) | null = null
 let _onUp:   (() => void) | null = null
 
 const startResize = (e: MouseEvent) => {
+  const appShell = document.querySelector('.app-shell') as HTMLElement | null
   const nav = (e.currentTarget as HTMLElement).closest('nav') as HTMLElement | null
-  if (!nav) return
+  if (!appShell || !nav) return
+
   const startX = e.clientX
   const startWidth = nav.offsetWidth
 
+  // Disable grid transition during drag for snappy feedback
+  appShell.style.transition = 'none'
+
   _onMove = (ev: MouseEvent) => {
-    const newWidth = Math.max(48, Math.min(400, startWidth + (ev.clientX - startX)))
-    nav.style.width = `${newWidth}px`
+    const newWidth = Math.max(160, Math.min(480, startWidth + (ev.clientX - startX)))
+    appShell.style.setProperty('--sidebar-width-expanded', `${newWidth}px`)
   }
   _onUp = () => {
+    appShell.style.transition = ''
+    const finalWidth = appShell.style.getPropertyValue('--sidebar-width-expanded')
+    if (finalWidth) localStorage.setItem(STORAGE_WIDTH_KEY, finalWidth.trim().replace('px', ''))
     document.removeEventListener('mousemove', _onMove!)
     document.removeEventListener('mouseup', _onUp!)
     _onMove = null

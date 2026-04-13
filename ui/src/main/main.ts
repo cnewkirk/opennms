@@ -41,8 +41,28 @@ import '@/styles/opennms-feather-styles.scss'
 
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
+import { definePreset } from '@primevue/themes'
 import 'primeicons/primeicons.css'
 import '@/styles/primevue-theme-bridge.scss'
+
+// Replace Aura's default violet palette with sky-blue to match OpenNMS brand
+const OpenNMSPreset = definePreset(Aura, {
+  semantic: {
+    primary: {
+      50:  '{sky.50}',
+      100: '{sky.100}',
+      200: '{sky.200}',
+      300: '{sky.300}',
+      400: '{sky.400}',
+      500: '{sky.500}',
+      600: '{sky.600}',
+      700: '{sky.700}',
+      800: '{sky.800}',
+      900: '{sky.900}',
+      950: '{sky.950}'
+    }
+  }
+})
 
 // Apply saved theme and watch for changes from the menu toggle
 const applyTheme = (theme: string | null) => {
@@ -110,6 +130,6 @@ createApp({
   .use(VueDiff)
   .use(router)
   .use(createPinia())
-  .use(PrimeVue, { theme: { preset: Aura, options: { darkModeSelector: '.open-dark' } } })
+  .use(PrimeVue, { theme: { preset: OpenNMSPreset, options: { darkModeSelector: '.open-dark' } } })
   .directive('date', dateFormatDirective)
   .mount('#app')

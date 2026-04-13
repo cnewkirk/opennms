@@ -106,7 +106,7 @@ const onMenuItemClick = (url: string) => {
   position: relative;
 
   &__btn {
-    color: var(--feather-primary-text-on-primary) !important;
+    color: inherit !important;
     display: flex;
     align-items: center;
     gap: 4px;
