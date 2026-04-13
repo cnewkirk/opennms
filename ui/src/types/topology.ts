@@ -112,7 +112,7 @@ export interface TopologyView {
   id: string
   name: string
   description?: string
-  scope: 'private' | 'user' | 'shared' | 'global'
+  scope: 'private' | 'shared' | 'global'
   owner?: string
   created?: string
   updated?: string

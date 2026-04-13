@@ -268,7 +268,7 @@ import { useTopologyViewStore } from '@/stores/topologyViewStore'
 import { isValidCidr } from '@/components/Topology/cidrUtils'
 import { getCategories } from '@/services/categoryService'
 import { cached } from '@/services/cacheService'
-import { getViews, deleteView as deleteRemoteView } from '@/services/topologyViewService'
+import { getSharedViews, getGlobalView, deleteView as deleteRemoteView } from '@/services/topologyViewService'
 import { useAuthStore } from '@/stores/authStore'
 import type { TopologyView } from '@/types/topology'
 import TopologyIconSettings from './TopologyIconSettings.vue'
@@ -324,10 +324,10 @@ const canDelete = (view: TopologyView) =>
 
 const refreshServerViews = async () => {
   try {
-    const all = await getViews()
-    globalView.value = all.find((v: TopologyView) => v.scope === 'global') ?? null
-    sharedViews.value = all.filter((v: TopologyView) => v.scope === 'shared')
-    userViews.value   = all.filter((v: TopologyView) => v.scope === 'user')
+    const [gv, all] = await Promise.all([getGlobalView(), getSharedViews()])
+    globalView.value = gv
+    sharedViews.value = all.filter(v => v.scope === 'shared')
+    userViews.value   = all.filter(v => v.scope === 'user')
   } catch {
     console.warn('[topology] Failed to refresh server views')
   }
