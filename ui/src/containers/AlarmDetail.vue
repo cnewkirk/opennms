@@ -732,4 +732,16 @@ $row-opacity: 0.15;
   &--unacknowledged { background: utils.alpha(fvars.$cleared,      $row-opacity); td:first-child { border-left: 3px solid var(--feather-cleared); } }
   &--indeterminate { background: utils.alpha(fvars.$indeterminate, $row-opacity); td:first-child { border-left: 3px solid var(--feather-indeterminate); } }
 }
+
+// Severity header card tinting — {severity}-color applied to alarm-detail__header.
+// These must live here because _severities.scss is not a global stylesheet.
+$header-opacity: 0.2;
+.critical-color       { background: utils.alpha(fvars.$error,         $header-opacity); border-left: 4px solid var(--feather-error); }
+.major-color          { background: utils.alpha(fvars.$major,         $header-opacity); border-left: 4px solid var(--feather-major); }
+.minor-color          { background: utils.alpha(fvars.$minor,         $header-opacity); border-left: 4px solid var(--feather-minor); }
+.warning-color        { background: utils.alpha(fvars.$warning,       $header-opacity); border-left: 4px solid var(--feather-warning); }
+.normal-color         { background: utils.alpha(fvars.$success,       $header-opacity); border-left: 4px solid var(--feather-success); }
+.cleared-color,
+.unacknowledged-color { background: utils.alpha(fvars.$cleared,       $header-opacity); border-left: 4px solid var(--feather-cleared); }
+.indeterminate-color  { background: utils.alpha(fvars.$indeterminate, $header-opacity); border-left: 4px solid var(--feather-indeterminate); }
 </style>
