@@ -82,4 +82,19 @@ describe('useDashboardLayout', () => {
     expect(events).toContain('change')
     expect(events).toContain('resizestop')
   })
+
+  test('initializes gridstack with margin 16', () => {
+    const container = ref<HTMLElement | null>(document.createElement('div'))
+    mount(defineComponent({
+      setup() {
+        useDashboardLayout(container, vi.fn())
+        return {}
+      },
+      template: '<div />'
+    }))
+    expect(GridStack.init).toHaveBeenCalledWith(
+      expect.objectContaining({ margin: 16 }),
+      expect.any(HTMLElement)
+    )
+  })
 })

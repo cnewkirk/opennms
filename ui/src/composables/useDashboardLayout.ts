@@ -27,7 +27,7 @@ import { onMounted, onUnmounted, type Ref } from 'vue'
 const GRID_OPTIONS: GridStackOptions = {
   column: 12,
   cellHeight: 150,
-  margin: 8,
+  margin: 16,
   animate: true,
   handle: '.widget-drag-handle',
   resizable: { handles: 'se' }
