@@ -43,6 +43,12 @@ cytoscape.use(fcose)
 const cssVar = (name: string): string =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 
+// Feather DS themes are applied as a class on <html>: 'open-light' or 'open-dark'.
+// Used to pick safe fallback colors for Cytoscape canvas elements.
+const isLightMode = (): boolean =>
+  document.documentElement.classList.contains('open-light') ||
+  document.body.classList.contains('open-light')
+
 // Map severity names to their Feather DS CSS variable names
 const SEVERITY_CSS_VARS: Record<string, string> = {
   CRITICAL:      '--feather-error',
@@ -60,14 +66,19 @@ const SPINE_TIER_SELECTOR =
   '[label ^= "distribution-"],[label ^= "dist-"],[label ^= "agg-"],[label ^= "aggregate-"]'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const buildStylesheet = (): any[] => {
+const buildStylesheet = (canvasEl?: HTMLElement | null): any[] => {
   const defaultNodeColor = cssVar('--feather-primary')
   const selectedColor    = cssVar('--feather-primary-dark')
-  // Use the surface color as a halo behind label text so it reads cleanly on
-  // the canvas. The '#0d1117' fallback is near-black, safe for dark mode when
-  // CSS vars haven't resolved yet — avoids the near-white fallback that was
-  // creating visible white boxes around labels.
-  const labelBg = cssVar('--feather-surface')
+  const light = isLightMode()
+
+  // In dark mode: light text + dark halo clears the edge line behind the label.
+  // In light mode: read the canvas element's actual computed background so the
+  // text outline blends perfectly instead of appearing as a colored pill.
+  const labelTextColor    = light ? '#1a1a2e' : (cssVar('--feather-primary-text-on-surface') || '#e8eaed')
+  const canvasBg = (canvasEl && light) ? getComputedStyle(canvasEl).backgroundColor : null
+  const labelOutlineColor = light
+    ? (canvasBg || cssVar('--feather-background') || '#dde4f0')
+    : (cssVar('--feather-surface') || '#0d1117')
 
   return [
     {
@@ -75,21 +86,21 @@ const buildStylesheet = (): any[] => {
       css: {
         'background-color': defaultNodeColor || '#1f78c1',
         'label': 'data(label)',
-        'color': cssVar('--feather-primary-text-on-surface') || '#e8eaed',
+        'color': labelTextColor,
         'font-size': 11,
         'font-weight': 500,
         'text-valign': 'bottom',
         'text-halign': 'center',
         'text-margin-y': 6,
         'text-outline-width': 2,
-        'text-outline-color': labelBg || '#0d1117',
-        'text-outline-opacity': 0.8,
+        'text-outline-color': labelOutlineColor,
+        'text-outline-opacity': 0.85,
         'text-background-opacity': 0,
         'text-border-opacity': 0,
         'width': 36,
         'height': 36,
         'border-width': 2,
-        'border-color': 'rgba(255,255,255,0.25)'
+        'border-color': light ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.25)'
       }
     },
     {
@@ -111,7 +122,9 @@ const buildStylesheet = (): any[] => {
         'line-color': 'data(color)',
         'target-arrow-shape': 'none',
         'curve-style': 'bezier',
-        'opacity': 0.75
+        // Slightly lower opacity in light mode tones down the saturated protocol
+        // colors which look harsh against a bright white canvas.
+        'opacity': light ? 0.6 : 0.75
       }
     },
     {
@@ -162,11 +175,13 @@ const buildStylesheet = (): any[] => {
         'source-text-margin-y':    -6,
         'target-text-margin-y':    -6,
 
-        // Shared text styling for all three slots
+        // Shared text styling for all three slots.
+        // Same light/dark inversion as node labels: dark text + white halo in
+        // light mode, light text + dark halo in dark mode.
         'font-size':               9,
-        'color':                   cssVar('--feather-primary-text-on-surface') || '#e8eaed',
+        'color':                   labelTextColor,
         'text-outline-width':      3,
-        'text-outline-color':      cssVar('--feather-background') || '#0a0c1b',
+        'text-outline-color':      labelOutlineColor,
         'text-outline-opacity':    1,
         'text-background-opacity': 0,
         'text-wrap':               'wrap',
@@ -309,7 +324,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     cy = cytoscape({
       container: containerRef.value,
       elements: [],
-      style: buildStylesheet(),
+      style: buildStylesheet(containerRef.value),
       layout: { name: 'preset' },
       userZoomingEnabled: true,
       userPanningEnabled: true,
@@ -435,7 +450,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   }
 
   const rebuildStylesheet = () => {
-    cy?.style(buildStylesheet())
+    cy?.style(buildStylesheet(containerRef.value))
   }
 
   const syncElements = () => {
