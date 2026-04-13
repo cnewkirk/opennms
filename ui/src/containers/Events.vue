@@ -78,7 +78,6 @@ import InputText from 'primevue/inputtext'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import { getEvents } from '@/services/eventService'
 import { useMenuStore } from '@/stores/menuStore'
-import { SORT } from '@featherds/table'
 import type { Event, BreadCrumb } from '@/types'
 
 const router = useRouter()
@@ -103,7 +102,7 @@ const loadEvents = async (offset = 0) => {
     limit: pageSize,
     offset,
     orderBy: 'time',
-    order: SORT.DESCENDING,
+    order: 'desc' as any,
     ...(searchText.value ? { _s: `nodeLabel==${searchText.value}*,uei==${searchText.value}*` } : {})
   }
   const result = await getEvents(params)
