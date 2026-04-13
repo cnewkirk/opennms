@@ -172,11 +172,11 @@ const cellClass = (severity: Severity): string => {
   }
 
   // Severity background colors — solid fills for the status grid
-  .sev-normal   { background: #2e7d32; color: #fff; }
-  .sev-warning  { background: #f9a825; color: #000; }
-  .sev-minor    { background: #ef6c00; color: #fff; }
-  .sev-major    { background: #c62828; color: #fff; }
-  .sev-critical { background: #6a1b9a; color: #fff; }
+  .sev-normal   { background: var($success);  color: var($primary-text-on-color); }
+  .sev-warning  { background: var($warning);  color: #1a1a2e; }
+  .sev-minor    { background: var($minor);    color: var($primary-text-on-color); }
+  .sev-major    { background: var($major);    color: var($primary-text-on-color); }
+  .sev-critical { background: var($error);    color: var($primary-text-on-color); }
 
   .cell-dimmed {
     opacity: 0.35;

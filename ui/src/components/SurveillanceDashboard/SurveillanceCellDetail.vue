@@ -176,11 +176,11 @@ const nodeClass = (nodeId: number): string => {
   border-radius: 2px;
   letter-spacing: 0.05em;
 
-  &.down     { background: #c62828; color: #fff; }
-  &.critical { background: #6a1b9a; color: #fff; }
-  &.major    { background: #c62828; color: #fff; }
-  &.minor    { background: #ef6c00; color: #fff; }
-  &.warning  { background: #f9a825; color: #000; }
-  &.normal   { background: #2e7d32; color: #fff; }
+  &.down     { background: var($major);    color: var($primary-text-on-color); }
+  &.critical { background: var($error);    color: var($primary-text-on-color); }
+  &.major    { background: var($major);    color: var($primary-text-on-color); }
+  &.minor    { background: var($minor);    color: var($primary-text-on-color); }
+  &.warning  { background: var($warning);  color: #1a1a2e; }
+  &.normal   { background: var($success);  color: var($primary-text-on-color); }
 }
 </style>
