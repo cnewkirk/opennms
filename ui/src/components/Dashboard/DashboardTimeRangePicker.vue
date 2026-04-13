@@ -33,10 +33,12 @@
 <script setup lang="ts">
 import Select from 'primevue/select'
 import DatePicker from 'primevue/datepicker'
+import { storeToRefs } from 'pinia'
 import { useDashboardStore } from '@/stores/dashboardStore'
 import type { DashboardTimeRange } from '@/services/dashboardConfigService'
 
 const dashboardStore = useDashboardStore()
+const { timeRange } = storeToRefs(dashboardStore)
 
 const presetOptions = [
   { label: 'Last 1 hour',  value: '1h' },
@@ -47,12 +49,24 @@ const presetOptions = [
   { label: 'Custom range…',value: 'custom' }
 ]
 
-const currentTr = dashboardStore.timeRange
 const selectedPreset = ref<string>(
-  currentTr.mode === 'absolute' ? 'custom' : currentTr.relativeWindow
+  timeRange.value.mode === 'absolute' ? 'custom' : timeRange.value.relativeWindow
 )
-const absoluteFrom = ref<Date | null>(currentTr.from ? new Date(currentTr.from) : null)
-const absoluteTo   = ref<Date | null>(currentTr.to   ? new Date(currentTr.to)   : null)
+const absoluteFrom = ref<Date | null>(timeRange.value.from ? new Date(timeRange.value.from) : null)
+const absoluteTo   = ref<Date | null>(timeRange.value.to   ? new Date(timeRange.value.to)   : null)
+
+// Re-sync when the store resets externally (e.g. toolbar Reset button)
+watch(timeRange, (tr) => {
+  if (tr.mode === 'relative') {
+    selectedPreset.value = tr.relativeWindow
+    absoluteFrom.value = null
+    absoluteTo.value = null
+  } else {
+    selectedPreset.value = 'custom'
+    absoluteFrom.value = tr.from ? new Date(tr.from) : null
+    absoluteTo.value = tr.to ? new Date(tr.to) : null
+  }
+}, { deep: true })
 
 const onPresetChange = () => {
   if (selectedPreset.value === 'custom') return
@@ -64,6 +78,7 @@ const onPresetChange = () => {
 
 watch([absoluteFrom, absoluteTo], () => {
   if (!absoluteFrom.value || !absoluteTo.value) return
+  if (absoluteFrom.value >= absoluteTo.value) return
   dashboardStore.updateTimeRange({
     mode: 'absolute',
     relativeWindow: '24h',

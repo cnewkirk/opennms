@@ -234,23 +234,33 @@ const onSectionClick = (id: string) => {
   localStorage.setItem(OPEN_SECTION_KEY, openSection.value)
 }
 
+let _onMove: ((ev: MouseEvent) => void) | null = null
+let _onUp:   (() => void) | null = null
+
 const startResize = (e: MouseEvent) => {
   const nav = (e.currentTarget as HTMLElement).closest('nav') as HTMLElement | null
   if (!nav) return
   const startX = e.clientX
   const startWidth = nav.offsetWidth
 
-  const onMove = (ev: MouseEvent) => {
+  _onMove = (ev: MouseEvent) => {
     const newWidth = Math.max(48, Math.min(400, startWidth + (ev.clientX - startX)))
     nav.style.width = `${newWidth}px`
   }
-  const onUp = () => {
-    document.removeEventListener('mousemove', onMove)
-    document.removeEventListener('mouseup', onUp)
+  _onUp = () => {
+    document.removeEventListener('mousemove', _onMove!)
+    document.removeEventListener('mouseup', _onUp!)
+    _onMove = null
+    _onUp = null
   }
-  document.addEventListener('mousemove', onMove)
-  document.addEventListener('mouseup', onUp)
+  document.addEventListener('mousemove', _onMove)
+  document.addEventListener('mouseup', _onUp)
 }
+
+onUnmounted(() => {
+  if (_onMove) document.removeEventListener('mousemove', _onMove)
+  if (_onUp)   document.removeEventListener('mouseup', _onUp)
+})
 </script>
 
 <style lang="scss" scoped>

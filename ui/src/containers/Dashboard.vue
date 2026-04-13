@@ -50,7 +50,7 @@
 import Button from 'primevue/button'
 import SplitButton from 'primevue/splitbutton'
 import { useDashboardStore } from '@/stores/dashboardStore'
-import { type WidgetConfig, type WidgetType } from '@/services/dashboardConfigService'
+import { type WidgetConfig, type WidgetType, DEFAULT_COLUMNS } from '@/services/dashboardConfigService'
 import DashboardGrid from '@/components/Dashboard/DashboardGrid.vue'
 import DashboardTimeRangePicker from '@/components/Dashboard/DashboardTimeRangePicker.vue'
 import useSnackbar from '@/composables/useSnackbar'
@@ -63,23 +63,20 @@ const hasTimeAwareWidgets = computed(() =>
 )
 
 const WIDGET_DEFAULTS: Record<WidgetType, Partial<WidgetConfig>> = {
-  summary:      { title: 'Network Summary',   w: 12, h: 2 },
-  outages:      { title: 'Active Outages',    w: 6,  h: 3, limit: 10 },
-  alarms:       { title: 'Active Alarms',     w: 6,  h: 3, limit: 10, severities: ['CRITICAL', 'MAJOR', 'MINOR'] },
-  nodes:        { title: 'Nodes',             w: 12, h: 3, limit: 10 },
-  graph:        { title: 'Graph',             w: 6,  h: 4, series: [], stack: false },
-  'node-status':{ title: 'Node Status',       w: 4,  h: 3 },
-  availability: { title: 'Availability',      w: 4,  h: 3 }
+  summary:       { title: 'Network Summary', w: 12, h: 2, categories: [] },
+  outages:       { title: 'Active Outages',  w: 6,  h: 3, limit: 10, categories: [], severities: [], columns: DEFAULT_COLUMNS.outages },
+  alarms:        { title: 'Active Alarms',   w: 6,  h: 3, limit: 10, categories: [], severities: ['CRITICAL', 'MAJOR', 'MINOR'], columns: DEFAULT_COLUMNS.alarms },
+  nodes:         { title: 'Nodes',           w: 12, h: 3, limit: 10, categories: [], severities: [], columns: DEFAULT_COLUMNS.nodes },
+  graph:         { title: 'Graph',           w: 6,  h: 4, series: [], stack: false },
+  'node-status': { title: 'Node Status',     w: 4,  h: 3, categories: [] },
+  availability:  { title: 'Availability',    w: 4,  h: 3, categories: [] }
 }
 
 const addWidget = (type: WidgetType) => {
   const widget = {
     id: `widget-${type}-${Date.now()}`,
     type,
-    categories: [],
     refreshInterval: 60,
-    severities: [],
-    limit: 10,
     x: 0,
     y: 999,
     w: 6,

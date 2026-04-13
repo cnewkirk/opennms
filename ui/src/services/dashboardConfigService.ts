@@ -121,7 +121,7 @@ export const WIDGET_COLUMNS: Record<'alarms' | 'outages' | 'nodes', ColumnDef[]>
   ]
 }
 
-const DEFAULT_COLUMNS: Record<'alarms' | 'outages' | 'nodes', string[]> = {
+export const DEFAULT_COLUMNS: Record<'alarms' | 'outages' | 'nodes', string[]> = {
   alarms:  ['severity', 'node', 'message', 'count'],
   outages: ['node', 'service', 'ip'],
   nodes:   ['node', 'location', 'categories']
