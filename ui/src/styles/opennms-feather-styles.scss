@@ -39,22 +39,30 @@ a:visited {
   border-radius: vars.$border-radius-surface;
 }
 
-// Light mode surface softening — override the Feather DS defaults so cards
-// and panels use a muted blue-gray instead of pure white. The background
-// is deepened in parallel to preserve the surface-over-background depth contrast.
-// --feather-elevation-background-* must also be overridden: Feather DS hardcodes
-// all of them to #fff in the light theme, bypassing --feather-surface entirely.
-// body.open-light targets the same element Feather DS targets (body gets the
-// class too), and with higher specificity (0,1,1 vs 0,1,0) our values win.
+// ─── Light mode Feather DS token corrections ───────────────────────────────
 //
-// surface (#e8ecf5) and background (#dde4f0) match html:not(.open-dark) in
-// App.vue so whichever rule wins the cascade battle, the result is identical.
-body.open-light {
+// Root cause: open-light.css and open-dark.css both declare ALL their vars in
+// :root (specificity 0,1,0). Since both are imported statically in main.ts and
+// open-dark.css loads last, its values win in :root for EVERY page load —
+// including light mode. The app only toggles html.open-dark; body never receives
+// an open-light class, so body.open-light rules (the previous approach) were
+// dead code.
+//
+// Fix: re-assert the correct light-mode values under html:not(.open-dark)
+// (specificity 0,1,1 > :root 0,1,0). This block is authoritative for all
+// Feather DS tokens that differ between the two themes.
+//
+// surface (#e8ecf5) and background (#dde4f0) are also set by html:not(.open-dark)
+// in App.vue — both rules agree; whichever the cascade picks, the result is
+// identical.
+html:not(.open-dark) {
+  // Surface palette — muted blue-gray instead of pure white.
   --feather-surface: #e8ecf5;
   --feather-background: #dde4f0;
 
   // Elevation layers — step up from background (#dde4f0) through surface
   // (#e8ecf5) toward lighter, anchored to the blue-gray palette.
+  // (open-light.css hardcodes all of these to #fff, bypassing --feather-surface)
   --feather-elevation-background-0:  #dde4f0;
   --feather-elevation-background-1:  #dfe6f1;
   --feather-elevation-background-2:  #e1e8f2;
@@ -66,13 +74,25 @@ body.open-light {
   --feather-elevation-background-16: #eef2f8;
   --feather-elevation-background-24: #f0f4f9;
 
-  // Borders were calibrated for white surfaces — boost opacity so card edges
-  // and table dividers remain visible against the darker gray palette.
+  // Text — open-dark.css sets these to white; re-assert dark values for
+  // legibility on the light surface (this was causing invisible sidebar text).
+  --feather-primary-text-on-surface:   rgba(10, 12, 27, 0.9);
+  --feather-primary-text-on-surface-r: 10;
+  --feather-primary-text-on-surface-g: 12;
+  --feather-primary-text-on-surface-b: 27;
+  --feather-secondary-text-on-surface: rgba(10, 12, 27, 0.7);
+
+  // Borders — dark theme uses rgba(white, 0.12/0.24); boost for blue-gray surface.
   --feather-border-on-surface:       rgba(10, 12, 27, 0.28);
   --feather-border-light-on-surface: rgba(10, 12, 27, 0.16);
 
-  // Shade helpers (used for hover states, row stripes, etc.) also need a bump.
+  // Shade helpers (hover states, row stripes, etc.).
   --feather-shade-4: rgba(10, 12, 27, 0.18);
+
+  // Clickable / link color — dark theme sets a light sky-blue; light mode needs
+  // a dark, high-contrast value.
+  --feather-clickable-normal:   #0402a9;
+  --feather-clickable-selected: #0402a9;
 }
 
 // Dark mode Feather DS surface neutralization.
