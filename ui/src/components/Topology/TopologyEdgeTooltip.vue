@@ -48,33 +48,46 @@
         ↑ {{ formatBitsPerSec(tooltip.util.inBps) }}bps &nbsp; ↓ {{ formatBitsPerSec(tooltip.util.outBps) }}bps
       </span>
     </div>
-    <div
-      v-if="tooltip.labelData && (tooltip.labelData.localIfName || tooltip.labelData.remotePortId || tooltip.labelData.localIp || tooltip.labelData.remoteIp || tooltip.labelData.localMac || tooltip.labelData.ifSpeed)"
-      class="edge-tooltip__label-data"
-    >
-      <div
-        v-if="tooltip.labelData.localIfName || tooltip.labelData.remotePortId"
-        class="edge-tooltip__field"
-      >
-        <span class="edge-tooltip__field-name">Port</span>
-        <span>{{ tooltip.labelData.localIfName && tooltip.labelData.remotePortId
-          ? `${tooltip.labelData.localIfName} ↔ ${tooltip.labelData.remotePortId}`
-          : (tooltip.labelData.localIfName ?? tooltip.labelData.remotePortId) }}</span>
+    <div v-if="tooltip.labelData && hasSideData" class="edge-tooltip__sides">
+      <!-- A-side -->
+      <div class="edge-tooltip__side">
+        <div class="edge-tooltip__side-label">A</div>
+        <div v-if="tooltip.labelData.localIfName" class="edge-tooltip__field">
+          <span class="edge-tooltip__field-name">Port</span>
+          <span>{{ tooltip.labelData.localIfName }}</span>
+        </div>
+        <div v-if="tooltip.labelData.localIp" class="edge-tooltip__field">
+          <span class="edge-tooltip__field-name">IP</span>
+          <span>{{ tooltip.labelData.localIp }}</span>
+        </div>
+        <div v-if="tooltip.labelData.localMac" class="edge-tooltip__field">
+          <span class="edge-tooltip__field-name">MAC</span>
+          <span>{{ tooltip.labelData.localMac }}</span>
+        </div>
+        <div v-if="tooltip.labelData.ifSpeed && tooltip.labelData.ifSpeed > 0" class="edge-tooltip__field">
+          <span class="edge-tooltip__field-name">Speed</span>
+          <span>{{ formatBitsPerSec(tooltip.labelData.ifSpeed) }}bps</span>
+        </div>
       </div>
-      <div
-        v-if="tooltip.labelData.localIp || tooltip.labelData.remoteIp"
-        class="edge-tooltip__field"
-      >
-        <span class="edge-tooltip__field-name">IP</span>
-        <span>{{ [tooltip.labelData.localIp, tooltip.labelData.remoteIp].filter(Boolean).join(' ↔ ') }}</span>
-      </div>
-      <div v-if="tooltip.labelData.localMac" class="edge-tooltip__field">
-        <span class="edge-tooltip__field-name">MAC</span>
-        <span>{{ tooltip.labelData.localMac }}</span>
-      </div>
-      <div v-if="tooltip.labelData.ifSpeed != null && tooltip.labelData.ifSpeed > 0" class="edge-tooltip__field">
-        <span class="edge-tooltip__field-name">Speed</span>
-        <span>{{ formatBitsPerSec(tooltip.labelData.ifSpeed) }}bps</span>
+      <!-- Z-side -->
+      <div class="edge-tooltip__side">
+        <div class="edge-tooltip__side-label">Z</div>
+        <div v-if="remotePort" class="edge-tooltip__field">
+          <span class="edge-tooltip__field-name">Port</span>
+          <span>{{ remotePort }}</span>
+        </div>
+        <div v-if="tooltip.labelData.remoteIp" class="edge-tooltip__field">
+          <span class="edge-tooltip__field-name">IP</span>
+          <span>{{ tooltip.labelData.remoteIp }}</span>
+        </div>
+        <div v-if="tooltip.labelData.remoteMac" class="edge-tooltip__field">
+          <span class="edge-tooltip__field-name">MAC</span>
+          <span>{{ tooltip.labelData.remoteMac }}</span>
+        </div>
+        <div v-if="tooltip.labelData.remoteIfSpeed && tooltip.labelData.remoteIfSpeed > 0" class="edge-tooltip__field">
+          <span class="edge-tooltip__field-name">Speed</span>
+          <span>{{ formatBitsPerSec(tooltip.labelData.remoteIfSpeed) }}bps</span>
+        </div>
       </div>
     </div>
 
@@ -103,6 +116,7 @@ import type { AbsoluteTimeRange } from '@perses-dev/core'
 import type { OpenNMSBatchQuerySpec } from '@/datasource/opennms/types'
 import PersesPanel from '@/components/Perses/PersesPanel.vue'
 import { EdgeLabelData } from '@/stores/weathermapStore'
+import { computed } from 'vue'
 import { getProtocolColor, utilizationColor, formatBitsPerSec } from './protocolColors'
 
 export interface EdgeTooltipState {
@@ -120,6 +134,17 @@ export interface EdgeTooltipState {
 }
 
 const props = defineProps<{ tooltip: EdgeTooltipState | null }>()
+
+const remotePort = computed(() =>
+  props.tooltip?.labelData?.remoteIfName ?? props.tooltip?.labelData?.remotePortId ?? null
+)
+
+const hasSideData = computed(() => {
+  const d = props.tooltip?.labelData
+  if (!d) return false
+  return !!(d.localIfName || d.localIp || d.localMac || d.ifSpeed ||
+            remotePort.value || d.remoteIp || d.remoteMac || d.remoteIfSpeed)
+})
 
 // Build the SNMP interface resource ID for the local (source) side of this link.
 // Format: node[{srcNodeId}].interfaceSnmp[{ifName}-{physAddr}]
@@ -224,10 +249,26 @@ const timeRange = computed<AbsoluteTimeRange>(() => ({
     white-space: nowrap;
   }
 
-  &__label-data {
+  &__sides {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
     margin-top: 6px;
     padding-top: 6px;
     border-top: 1px solid var($border-on-surface);
+  }
+
+  &__side {
+    min-width: 0;
+  }
+
+  &__side-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var($primary);
+    margin-bottom: 4px;
   }
 
   &__field {
