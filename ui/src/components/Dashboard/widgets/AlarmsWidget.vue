@@ -263,7 +263,7 @@ defineExpose({ refresh: load })
 .more-hint {
   @include body-small;
   color: var($secondary-text-on-surface);
-  padding: 8px 16px;
+  padding: 12px 16px;
   text-align: right;
   font-style: italic;
 }

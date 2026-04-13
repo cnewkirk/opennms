@@ -104,14 +104,13 @@ defineEmits<{
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 220px;
 }
 
 .widget-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 8px;
+  padding: 14px 20px 10px;
   border-bottom: 1px solid var($border-light-on-surface);
   flex-shrink: 0;
   cursor: grab;
@@ -133,7 +132,7 @@ defineEmits<{
 .widget-body {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 
 .widget-loading,

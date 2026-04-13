@@ -145,6 +145,8 @@ export const defaultConfig = (): DashboardConfig => ({
   version: CONFIG_VERSION,
   timeRange: { ...DEFAULT_TIME_RANGE },
   widgets: [
+    // cellHeight:100 — h units × 100px per row
+    // Total: 200 + 300 + 300 = 800px — fits summary+tables in a typical ~900px viewport
     { id: 'widget-summary', type: 'summary', title: 'Network Summary',  x: 0, y: 0, w: 12, h: 2, categories: [], refreshInterval: 60 },
     { id: 'widget-outages', type: 'outages', title: 'Active Outages',   x: 0, y: 2, w: 6,  h: 3, categories: [], limit: 10, refreshInterval: 60,  severities: [], columns: DEFAULT_COLUMNS.outages },
     { id: 'widget-alarms',  type: 'alarms',  title: 'Active Alarms',    x: 6, y: 2, w: 6,  h: 3, categories: [], limit: 10, refreshInterval: 60,  severities: ['CRITICAL', 'MAJOR', 'MINOR'], columns: DEFAULT_COLUMNS.alarms },

@@ -20,6 +20,11 @@ fi
 
 echo "Deploying to $CONTAINER..."
 
+# Wipe stale assets first — podman cp only adds files, never removes them.
+# Without this, every build accumulates orphaned hash-named chunks that waste
+# disk space and can confuse debugging ("which CSS file is actually in use?").
+podman exec "$CONTAINER" sh -c "rm -rf $DEST/assets && mkdir -p $DEST/assets"
+
 podman cp "$DIST_DIR/assets/." "$CONTAINER:$DEST/assets/"
 podman cp "$DIST_DIR/index.html" "$CONTAINER:$DEST/index.html"
 

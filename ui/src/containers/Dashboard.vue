@@ -133,7 +133,7 @@ onMounted(() => { dashboardStore.initialize() })
 
 .dashboard-grid-wrapper {
   flex: 1;
-  padding: 0 24px 16px;
+  padding: 0 16px 0;
   overflow: auto;
 }
 

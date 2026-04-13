@@ -71,6 +71,7 @@ This downloads the correct Node and Yarn versions into `ui/target/node/`.
 2. Verify `ui/src/main/dist/index.html` has `src="/opennms/ui/assets/index-*.js"` paths
 3. Verify built CSS has no bare `--feather-*` values (must be wrapped in `var()`)
 4. `./ui/deploy-to-container.sh test-opennms` (if container is stopped, START IT FIRST)
+   - The script now **wipes the assets directory before copying** to prevent stale chunk accumulation. Without this, every build leaves orphaned hash-named CSS/JS files that make it impossible to know which file is actually in use. If you ever see a container with many `Dashboard-*.css` files from different builds, the container predates this fix — recreate it.
 5. Verify live bundle hash matches built hash:
    - `podman exec test-opennms grep -o 'assets/index-[^"]*\.js' /opt/opennms/jetty-webapps/opennms/ui/index.html`
    - `grep -o 'assets/index-[^"]*\.js' ui/src/main/dist/index.html`

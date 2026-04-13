@@ -110,7 +110,7 @@ defineExpose({ refresh: load })
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
+  padding: 28px 20px;
   border-radius: vars.$border-radius-surface;
   border: 1px solid var($border-light-on-surface);
   background: var($surface);
