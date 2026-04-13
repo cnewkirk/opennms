@@ -156,8 +156,8 @@ onBeforeUnmount(() => {
 .topology-page {
   display: flex;
   flex-direction: column;
-  // 120px = FeatherAppLayout header (64px) + breadcrumb row (32px) + padding (24px)
-  height: calc(100vh - 120px);
+  // 56px = breadcrumb row (32px) + padding (24px); CSS Grid already subtracts the 56px topbar
+  height: calc(100% - 56px);
   overflow: hidden;
 }
 </style>
