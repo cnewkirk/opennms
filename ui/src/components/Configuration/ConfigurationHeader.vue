@@ -27,10 +27,11 @@ const props = defineProps({
 <style lang="scss" scoped>
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/mixins/elevation";
+@import "@featherds/styles/themes/variables";
 
 .title {
   @include overline();
-  color: #4b5ad6;
+  color: var($primary);
   margin-top: 28px;
   margin-bottom: 8px;
 }

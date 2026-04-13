@@ -200,7 +200,7 @@ const toggleHelp = () => {
 }
 .expansion-panel {
   .feather-expansion-header-button-text {
-    color: #273180;
+    color: var($primary);
   }
 }
 
@@ -284,8 +284,8 @@ const toggleHelp = () => {
   padding-right: 40px;
   padding-bottom: 8px;
   background-color: var($background);
-  border-top: 1px solid #d7d7dc;
-  border-bottom: 1px solid #d7d7dc;
+  border-top: 1px solid var($border-on-surface);
+  border-bottom: 1px solid var($border-on-surface);
 }
 .title {
   @include headline2();
@@ -313,7 +313,7 @@ const toggleHelp = () => {
   top: 0;
   bottom: 0;
   transition: all ease-in-out 0.3s;
-  border-left: 1px solid #b2b2b2;
+  border-left: 1px solid var($border-on-surface);
 }
 .sidepanel {
   right: 0;
