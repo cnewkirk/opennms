@@ -215,6 +215,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     tgtLabel: string
     /** Numeric OpenNMS node ID of the source vertex — used to build measurements resource ID. */
     srcNodeId: string | null
+    /** Numeric OpenNMS node ID of the target vertex — used to build remote measurements resource ID. */
+    tgtNodeId: string | null
     util?: { utilPct: number; inBps: number; outBps: number } | null
     labelData?: EdgeLabelData | null
   }
@@ -407,7 +409,8 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       const labelData = wmStore.edgeLabelData[edgeKey] ?? null
       // nodeID is the OpenNMS numeric node ID; needed to build measurements resource IDs
       const srcNodeId = (cy.getElementById(srcId)?.data('nodeID') as string | undefined) ?? null
-      edgeTooltip.value = { x: pos.x, y: pos.y, protocols, srcLabel, tgtLabel, srcNodeId, util, labelData }
+      const tgtNodeId = (cy.getElementById(tgtId)?.data('nodeID') as string | undefined) ?? null
+      edgeTooltip.value = { x: pos.x, y: pos.y, protocols, srcLabel, tgtLabel, srcNodeId, tgtNodeId, util, labelData }
     })
 
     cy.on('mouseout', 'edge', () => {

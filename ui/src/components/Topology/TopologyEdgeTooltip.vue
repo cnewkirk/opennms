@@ -113,6 +113,8 @@ export interface EdgeTooltipState {
   tgtLabel: string
   /** Numeric OpenNMS node ID of the source vertex — used to build measurements resource ID. */
   srcNodeId: string | null
+  /** Numeric OpenNMS node ID of the target vertex — used to build remote measurements resource ID. */
+  tgtNodeId: string | null
   util?: { utilPct: number; inBps: number; outBps: number } | null
   labelData?: EdgeLabelData | null
 }
