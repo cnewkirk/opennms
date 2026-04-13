@@ -40,6 +40,11 @@ describe('buildNodeCoordMap', () => {
     const map = buildNodeCoordMap(nodes)
     expect(map.size).toBe(2)
   })
+
+  it('excludes nodes with non-numeric coordinates starting with letters like "abc40"', () => {
+    const nodes = [makeNode('1', 'r1', 'abc40', '-74')]
+    expect(buildNodeCoordMap(nodes).has('1')).toBe(false)
+  })
 })
 
 describe('buildNodeFeatureCollection', () => {
@@ -105,6 +110,13 @@ describe('buildEdgeFeatureCollection', () => {
   it('deduplicates edges with the same node pair', () => {
     const coordMap = buildNodeCoordMap(nodes)
     const fc = buildEdgeFeatureCollection([...edges, ...edges], vertices, coordMap)
+    expect(fc.features).toHaveLength(1)
+  })
+
+  it('deduplicates reversed-direction edges (2→1 against 1→2)', () => {
+    const coordMap = buildNodeCoordMap(nodes)
+    const reversedEdge = makeEdge(2, 1, ['OSPF'])
+    const fc = buildEdgeFeatureCollection([...edges, reversedEdge], vertices, coordMap)
     expect(fc.features).toHaveLength(1)
   })
 

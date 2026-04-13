@@ -6,6 +6,7 @@ import type { TopologyEdge, TopologyVertex } from '@/types/topology'
 export const SEVERITY_RANK: Record<string, number> = {
   NORMAL: 0,
   INDETERMINATE: 0,
+  CLEARED: 0,
   WARNING: 1,
   MINOR: 2,
   MAJOR: 3,
@@ -38,7 +39,7 @@ export const buildNodeCoordMap = (nodes: Node[]): Map<string, [number, number]> 
   for (const node of nodes) {
     const lat = parseFloat(String(node.assetRecord?.latitude))
     const lng = parseFloat(String(node.assetRecord?.longitude))
-    if (!isNaN(lat) && !isNaN(lng)) {
+    if (isFinite(lat) && isFinite(lng)) {
       map.set(node.id, [lng, lat])
     }
   }
