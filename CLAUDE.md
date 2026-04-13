@@ -19,8 +19,26 @@ This is the #1 rule. Everything else is secondary.
 ```bash
 git log --oneline -10
 git status
+podman image inspect localhost/opennms/horizon:35.0.5-dark-mode --format '{{.Created}}' 2>/dev/null
+podman ps --filter name=test-opennms --format '{{.Status}} {{.Image}}'
 ```
-And read MEMORY.md. Every session starts blind — these three steps give you context.
+And read MEMORY.md. Every session starts blind — these steps give you context.
+
+**Container freshness is NOT optional.** Compare the image `Created` date against `git log -1 --format='%ci' HEAD`. **If the image is more than 24 hours older than HEAD and the fix touches ANYTHING outside `ui/src/`** (JSPs, REST, Karaf features, backend jars, config XML, etc.), you **MUST** rebuild before trusting the container:
+```bash
+./build-dark-mode-overlay.sh                 # ~3-5 min
+podman rm -f test-opennms && podman run -d --name test-opennms --privileged \
+  -p 8980:8980 -p 8101:8101 \
+  -e POSTGRES_HOST=host.containers.internal -e POSTGRES_PORT=5432 \
+  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres \
+  -e OPENNMS_DBNAME=opennms -e OPENNMS_DBUSER=opennms -e OPENNMS_DBPASS=opennms \
+  localhost/opennms/horizon:35.0.5-dark-mode -s
+# wait for /opennms/rest/info → 200, then set password to 'notdefault' via Jasypt
+# (see tail of build-dark-mode-overlay.sh output for the exact Jasypt command)
+cd ui && ./target/node/yarn/dist/bin/yarn build
+./ui/deploy-to-container.sh test-opennms
+```
+**Hot-deploying the Vue SPA via `deploy-to-container.sh` does NOT update JSPs, jars, features, or `applicationContext-*.xml`.** Those only land in the container through a full `build-dark-mode-overlay.sh` → image → container recreate cycle. Treating a stale container as current has caused multiple failed-fix loops that wasted hours and money. If in doubt, rebuild.
 
 **NEVER make sweeping "cleanup" commits** touching multiple unrelated files without understanding each one. The commit `c223dcdae54 ui redesign cleanup` (2026-04-10) wiped multiple prior fixes because the session didn't read context first. If something looks wrong, check `git log --oneline -5 -- <file>` before changing it.
 

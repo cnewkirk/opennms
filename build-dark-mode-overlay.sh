@@ -337,6 +337,11 @@ COPY --chown=10001:10001 surveillance-view.jsp /opt/opennms/jetty-webapps/opennm
 # full web.xml overlay breaks CXF servlet mappings (source version != base image version)
 RUN sed -i 's|<welcome-file>frontPage.jsp</welcome-file>|<welcome-file>index.jsp</welcome-file>|' /opt/opennms/jetty-webapps/opennms/WEB-INF/web.xml
 
+# Patch Content-Security-Policy so MapLibre GL JS can fetch vector/raster tiles and
+# run its Web Workers. Keeps 'self' for same-origin API calls and adds tile domains
+# to connect-src; adds worker-src for the blob-URL workers MapLibre spawns.
+RUN sed -i "s|connect-src 'self' ;|connect-src 'self' https://tiles.opennms.org https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://tile.opentopomap.org https://*.tile.opentopomap.org ; worker-src 'self' blob: ;|" /opt/opennms/jetty-webapps/opennms/WEB-INF/web.xml
+
 # jmxconfiggenerator + its transitive dep namecutter must be in the Bootstrap server
 # classpath (not WEB-INF/lib) so Jetty's WebAppClassLoader can resolve them.
 RUN cp /opt/opennms/system/org/opennms/features/jmxconfiggenerator/35.0.4/jmxconfiggenerator-35.0.4.jar /opt/opennms/lib/jmxconfiggenerator-35.0.4.jar && cp /opt/opennms/system/org/opennms/features/org.opennms.features.name-cutter/35.0.4/org.opennms.features.name-cutter-35.0.4.jar /opt/opennms/lib/org.opennms.features.name-cutter-35.0.4.jar
