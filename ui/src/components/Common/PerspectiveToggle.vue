@@ -58,8 +58,8 @@ const store = usePerspectiveStore()
     transition: background 0.12s, color 0.12s;
 
     &--active {
-      background: #0081ad;
-      color: #fff;
+      background: var($primary);
+      color: var($primary-text-on-color);
     }
 
     &:not(.perspective-toggle__btn--active):hover {

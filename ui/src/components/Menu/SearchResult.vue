@@ -69,6 +69,8 @@ const onItemOut = () => {
 </script>
 
 <style lang="scss" scoped>
+@import "@featherds/styles/themes/variables";
+
 .label-wrapper {
     display: flex;
     align-items: center;
@@ -106,28 +108,27 @@ const onItemOut = () => {
  */
 .search-result-button {
     background: transparent;
-    border:none;
+    border: none;
     appearance: none;
-    block-size:24px;
-    caret-color: rgb(10,12,27,0.7);
-    color: rgba(10, 12, 27, 0.7);
-    column-rule-color: rgba(10, 12, 27, 0.7);
+    block-size: 24px;
+    caret-color: var($secondary-text-on-surface);
+    color: var($secondary-text-on-surface);
+    column-rule-color: var($secondary-text-on-surface);
     cursor: pointer;
-    display:block;
+    display: block;
     font-family: OpenSans, Helvetica, Arial, sans-serif;
-    font-size:14px;
-    height:24px;
-    inline-size:266px;
-    letter-spacing:0.25px;
-    line-height:24px;
-    /* width for text in search result labels, so text does not get cut off */
+    font-size: 14px;
+    height: 24px;
+    inline-size: 266px;
+    letter-spacing: 0.25px;
+    line-height: 24px;
     min-width: 30em;
-    outline-color:rgba(10, 12, 27, 0.7);
-    padding:0;
+    outline-color: var($secondary-text-on-surface);
+    padding: 0;
     perspective-origin: 133px 12px;
-    text-align:left;
-    text-decoration-color: rgba(10, 12, 27, 0.7);
-    text-emphasis-color: rgba(10, 12, 27, 0.7);
+    text-align: left;
+    text-decoration-color: var($secondary-text-on-surface);
+    text-emphasis-color: var($secondary-text-on-surface);
     transform-origin: 133px 12px;
     unicode-bidi: isolate;
     user-select: auto;
@@ -136,7 +137,7 @@ const onItemOut = () => {
 .search-item-details {
   margin-left: 1em;
   z-index: 1100;
-  color: black;
+  color: var($primary-text-on-surface);
   padding: 0.25em;
 }
 </style>
