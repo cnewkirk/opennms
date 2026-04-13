@@ -108,6 +108,8 @@ const onSaveNewView = async (
 
 const onLoadView = (view: TopologyView) => {
   showLoadModal.value = false
+  // applyView() handles suppression state, layout, and editMode reset.
+  // Layers, filters, and edge settings must be applied here to their respective stores.
   viewStore.applyView(view)
   // Apply layers
   store.activeLayers = [...view.state.layers]

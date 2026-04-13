@@ -170,7 +170,7 @@ defineExpose({ saveLayout, resetLayout, toggleGrid, alignToGrid, getPositions })
     gap: 12px;
     padding: 8px 20px;
     background: var($surface);
-    border: 2px solid #b45309;
+    border: 2px solid var($primary);
     border-radius: vars.$border-radius-sm;
     font-size: 0.9rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
