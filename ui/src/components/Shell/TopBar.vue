@@ -26,8 +26,16 @@
         <span class="topbar__time">{{ formattedTime }}</span>
         <span class="topbar__date">{{ formattedDate }}</span>
       </div>
-      <UserNotificationsMenuItem :expanded="notificationsExpanded" @menu-show="notificationsExpanded = true" @menu-hide="notificationsExpanded = false" />
-      <UserSelfServiceMenuItem :expanded="selfServiceExpanded" @menu-show="selfServiceExpanded = true" @menu-hide="selfServiceExpanded = false" />
+      <UserNotificationsMenuItem
+        :expanded="currentDropdown === 'notifications'"
+        @menu-show="currentDropdown = 'notifications'"
+        @menu-hide="currentDropdown === 'notifications' && (currentDropdown = null)"
+      />
+      <UserSelfServiceMenuItem
+        :expanded="currentDropdown === 'selfService'"
+        @menu-show="currentDropdown = 'selfService'"
+        @menu-hide="currentDropdown === 'selfService' && (currentDropdown = null)"
+      />
       <Button
         :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
         text
@@ -45,6 +53,7 @@
 import Button from 'primevue/button'
 import { useRouter } from 'vue-router'
 import { useMenuStore } from '@/stores/menuStore'
+import { useAppStore } from '@/stores/appStore'
 import Search from '@/components/Menu/Search.vue'
 import UserNotificationsMenuItem from '@/components/Menu/UserNotificationsMenuItem.vue'
 import UserSelfServiceMenuItem from '@/components/Menu/UserSelfServiceMenuItem.vue'
@@ -53,6 +62,7 @@ import IconLogo from './src/assets/ProductLogo.vue'
 
 const router = useRouter()
 const menuStore = useMenuStore()
+const appStore = useAppStore()
 
 const mainMenu = computed(() => menuStore.mainMenu)
 const homeUrl = computed(() => mainMenu.value?.homeUrl ?? '/opennms/')
@@ -60,14 +70,13 @@ const formattedDate = computed(() => mainMenu.value?.formattedDate ?? '')
 const formattedTime = computed(() => mainMenu.value?.formattedTime ?? '')
 const showAddNode = computed(() => mainMenu.value?.displayAddNodeButton ?? false)
 
-// Dropdown expanded state for child menu items
-const notificationsExpanded = ref(false)
-const selfServiceExpanded = ref(false)
+// Dropdown expanded state for child menu items — single ref enforces mutual exclusivity
+const currentDropdown = ref<'notifications' | 'selfService' | null>(null)
 
 // Theme toggle
 const light = 'open-light'
 const dark = 'open-dark'
-const isDark = ref<boolean>(document.body.classList.contains(dark))
+const isDark = ref<boolean>(localStorage.getItem('theme') === dark)
 
 const toggleTheme = () => {
   const el = document.body
@@ -82,6 +91,7 @@ const toggleTheme = () => {
   isDark.value = newTheme === dark
 
   localStorage.setItem('theme', newTheme)
+  appStore.setTheme(newTheme)
 }
 
 // Restore saved theme on mount
@@ -92,7 +102,7 @@ onMounted(() => {
     document.body.classList.add(saved)
     document.documentElement.classList.remove(light, dark)
     document.documentElement.classList.add(saved)
-    isDark.value = saved === dark
+    appStore.setTheme(saved)
   }
 })
 
