@@ -21,6 +21,8 @@ import { rest } from '@/services/axiosInstances'
 import { useDashboardStore } from '@/stores/dashboardStore'
 import { resolveTimeRange, type AvailabilityWidgetConfig } from '@/services/dashboardConfigService'
 
+interface AvailCategoryResp { availability?: number }
+
 const props = defineProps<{ config: AvailabilityWidgetConfig }>()
 const dashboardStore = useDashboardStore()
 
@@ -79,7 +81,7 @@ const load = async () => {
     if (typeof data?.availability === 'number') {
       availability.value = data.availability
     } else if (Array.isArray(data)) {
-      const values: number[] = data.map((c: any) => c.availability ?? 100)
+      const values = (data as AvailCategoryResp[]).map(c => c.availability ?? 100)
       availability.value = values.length
         ? values.reduce((a, b) => a + b, 0) / values.length
         : 100
@@ -127,6 +129,7 @@ defineExpose({ refresh: load })
   font-weight: 700;
   pointer-events: none;
   white-space: nowrap;
+  z-index: 1;
 
   &.sev-ok   { color: var(--feather-success, #4caf50); }
   &.sev-warn { color: var(--feather-warning, #ff9800); }

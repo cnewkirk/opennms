@@ -36,21 +36,26 @@ const downCount  = ref(0)
 const upCount    = computed(() => Math.max(0, totalCount.value - downCount.value))
 
 const load = async () => {
-  const params: Record<string, any> = { limit: 0 }
-  if (props.config.categories.length) {
-    params['category'] = props.config.categories.join(',')
+  try {
+    const params: Record<string, string | number> = { limit: 0 }
+    if (props.config.categories.length) {
+      params['category'] = props.config.categories.join(',')
+    }
+    const [nodeResp, outageDown] = await Promise.all([
+      API.getNodes(params),
+      getActiveOutageCount(props.config.categories)
+    ])
+    totalCount.value = nodeResp ? nodeResp.totalCount : 0
+    downCount.value  = Math.min(outageDown, totalCount.value)
+  } catch {
+    totalCount.value = 0
+    downCount.value  = 0
   }
-  const [nodeResp, outageDown] = await Promise.all([
-    API.getNodes(params),
-    getActiveOutageCount(props.config.categories)
-  ])
-  totalCount.value = nodeResp ? nodeResp.totalCount : 0
-  downCount.value  = outageDown
 }
 
 // Read CSS vars at runtime so colors respect dark/light mode
 const getColor = (varName: string) =>
-  getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || varName
+  getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '#888'
 
 const chartData = computed(() => ({
   labels: ['Up', 'Down'],
@@ -113,6 +118,7 @@ defineExpose({ refresh: load })
   font-weight: 700;
   color: var($primary-text-on-surface);
   pointer-events: none;
+  z-index: 1;
 }
 
 .legend {
