@@ -204,9 +204,11 @@ onUnmounted(() => {
   width: 100%;
 }
 
-// ensure widget content fills the gridstack item
+// Do NOT override height here — gridstack positions .grid-stack-item-content
+// with top/bottom/left/right insets (the margin values). Setting height:100%
+// causes the bottom inset to be ignored, making the vertical gap between rows
+// half the horizontal gap (16px vs 32px).
 .grid-stack-item-content {
-  height: 100%;
   overflow: hidden;
 }
 </style>
