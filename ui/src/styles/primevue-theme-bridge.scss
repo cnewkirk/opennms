@@ -1,0 +1,44 @@
+// Maps PrimeVue 4 (Aura preset) design tokens to Feather DS CSS variables.
+// This file is imported once in main.ts and ensures PrimeVue components
+// automatically respond to the app's dark/light mode toggle.
+:root {
+  // Surfaces
+  --p-surface-0: var(--feather-surface);
+  --p-surface-ground: var(--feather-background);
+  --p-surface-section: var(--feather-surface);
+  --p-surface-card: var(--feather-surface);
+  --p-surface-overlay: var(--feather-surface);
+  --p-surface-border: var(--feather-border-light-on-surface);
+
+  // Text
+  --p-text-color: var(--feather-primary-text-on-surface);
+  --p-text-muted-color: var(--feather-secondary-text-on-surface);
+  --p-text-hover-color: var(--feather-primary-text-on-surface);
+
+  // Primary (accent)
+  --p-primary-color: var(--feather-primary);
+  --p-primary-contrast-color: #ffffff;
+
+  // Content
+  --p-content-background: var(--feather-surface);
+  --p-content-hover-background: var(--feather-background);
+  --p-content-border-color: var(--feather-border-light-on-surface);
+  --p-content-color: var(--feather-primary-text-on-surface);
+  --p-content-hover-color: var(--feather-primary-text-on-surface);
+
+  // Overlays (dialogs, dropdowns)
+  --p-overlay-modal-background: var(--feather-surface);
+  --p-overlay-popover-background: var(--feather-surface);
+  --p-overlay-select-background: var(--feather-surface);
+  --p-overlay-modal-border-color: var(--feather-border-light-on-surface);
+  --p-overlay-popover-border-color: var(--feather-border-light-on-surface);
+  --p-overlay-select-border-color: var(--feather-border-light-on-surface);
+  --p-overlay-modal-color: var(--feather-primary-text-on-surface);
+
+  // Form inputs
+  --p-form-field-background: var(--feather-surface);
+  --p-form-field-border-color: var(--feather-border-light-on-surface);
+  --p-form-field-color: var(--feather-primary-text-on-surface);
+  --p-form-field-placeholder-color: var(--feather-secondary-text-on-surface);
+  --p-form-field-focus-border-color: var(--feather-primary);
+}

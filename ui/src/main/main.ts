@@ -39,6 +39,11 @@ import '@featherds/styles/themes/open-light.css'
 import '@featherds/styles/themes/open-dark.css'
 import '@/styles/opennms-feather-styles.scss'
 
+import PrimeVue from 'primevue/config'
+import Aura from '@primevue/themes/aura'
+import 'primeicons/primeicons.css'
+import '@/styles/primevue-theme-bridge.scss'
+
 // Apply saved theme and watch for changes from the menu toggle
 const applyTheme = (theme: string | null) => {
   document.documentElement.classList.toggle('open-dark', theme === 'open-dark')
@@ -105,5 +110,6 @@ createApp({
   .use(VueDiff)
   .use(router)
   .use(createPinia())
+  .use(PrimeVue, { theme: { preset: Aura, options: { darkModeSelector: '.open-dark' } } })
   .directive('date', dateFormatDirective)
   .mount('#app')
