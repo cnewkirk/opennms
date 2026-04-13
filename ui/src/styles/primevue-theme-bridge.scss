@@ -1,23 +1,30 @@
 // Maps PrimeVue 4 (Aura preset) design tokens to Feather DS CSS variables.
 // This file is imported once in main.ts and ensures PrimeVue components
 // automatically respond to the app's dark/light mode toggle.
+//
+// IMPORTANT — specificity strategy:
+//   PrimeVue injects its theme CSS at runtime via <style> tags in <head>,
+//   AFTER our bundled CSS link. For same-specificity rules (:root vs :root,
+//   .open-dark vs .open-dark), PrimeVue wins by source order. To beat it
+//   in dark mode we use html.open-dark (specificity 0,1,1) vs PrimeVue's
+//   .open-dark (specificity 0,1,0).
 :root {
-  // Surfaces
+  // Text
+  --p-text-color: var(--feather-primary-text-on-surface);
+  --p-text-muted-color: var(--feather-secondary-text-on-surface);
+  --p-text-hover-color: var(--feather-primary-text-on-surface);
+
+  // Primary (accent) — ties PrimeVue primary to the Feather brand colour.
+  --p-primary-color: var(--feather-primary);
+  --p-primary-contrast-color: #ffffff;
+
+  // Light-mode surfaces (dark-mode overrides live in html.open-dark below).
   --p-surface-0: var(--feather-surface);
   --p-surface-ground: var(--feather-background);
   --p-surface-section: var(--feather-surface);
   --p-surface-card: var(--feather-surface);
   --p-surface-overlay: var(--feather-surface);
   --p-surface-border: var(--feather-border-light-on-surface);
-
-  // Text
-  --p-text-color: var(--feather-primary-text-on-surface);
-  --p-text-muted-color: var(--feather-secondary-text-on-surface);
-  --p-text-hover-color: var(--feather-primary-text-on-surface);
-
-  // Primary (accent)
-  --p-primary-color: var(--feather-primary);
-  --p-primary-contrast-color: #ffffff;
 
   // Content
   --p-content-background: var(--feather-surface);
@@ -41,4 +48,31 @@
   --p-form-field-color: var(--feather-primary-text-on-surface);
   --p-form-field-placeholder-color: var(--feather-secondary-text-on-surface);
   --p-form-field-focus-border-color: var(--feather-primary);
+}
+
+// Dark-mode surface overrides — uses neutral zinc tones rather than the
+// Feather DS navy-purple (#15182B) to avoid "purple everywhere" in dark mode.
+// html.open-dark specificity (0,1,1) > PrimeVue's .open-dark (0,1,0), so
+// these win even though PrimeVue injects its theme CSS after our bundle loads.
+html.open-dark {
+  --p-surface-0: #27272a;            // zinc-800 — card/panel surfaces
+  --p-surface-ground: #09090b;       // zinc-950 — page canvas
+  --p-surface-section: #1c1c1f;      // between zinc-900/800 — section backgrounds
+  --p-surface-card: #1c1c1f;
+  --p-surface-overlay: #27272a;      // zinc-800 — overlays sit above panels
+  --p-surface-border: rgba(255, 255, 255, 0.10);
+
+  --p-content-background: #1c1c1f;
+  --p-content-hover-background: #27272a;
+  --p-content-border-color: rgba(255, 255, 255, 0.10);
+
+  --p-overlay-modal-background: #1c1c1f;
+  --p-overlay-popover-background: #27272a;
+  --p-overlay-select-background: #1c1c1f;
+  --p-overlay-modal-border-color: rgba(255, 255, 255, 0.10);
+  --p-overlay-popover-border-color: rgba(255, 255, 255, 0.10);
+  --p-overlay-select-border-color: rgba(255, 255, 255, 0.10);
+
+  --p-form-field-background: #09090b;    // zinc-950 — inputs recede behind cards
+  --p-form-field-border-color: rgba(255, 255, 255, 0.15);
 }

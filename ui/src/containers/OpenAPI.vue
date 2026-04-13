@@ -111,11 +111,14 @@ const setTheme = (element: HTMLElement | null) => {
       element.setAttribute('nav-accent-color', '#00BFCB')
       element.setAttribute('primary-color', '#00BFCB')
     } else {
+      const style = getComputedStyle(document.documentElement)
+      const surface = style.getPropertyValue('--feather-surface').trim() || '#1c1c1f'
+      const bg = style.getPropertyValue('--feather-background').trim() || '#09090b'
       element.setAttribute('theme', 'dark')
-      element.setAttribute('bg-color', '#15182B')
-      element.setAttribute('nav-bg-color', '#0a0c1b')
+      element.setAttribute('bg-color', surface)
+      element.setAttribute('nav-bg-color', bg)
       element.setAttribute('nav-text-color', '#fff')
-      element.setAttribute('nav-hover-bg-color', '#3a3d4d')
+      element.setAttribute('nav-hover-bg-color', '#27272a')
       element.setAttribute('nav-hover-text-color', '#fff')
       element.setAttribute('nav-accent-color', '#b5eff3')
       element.setAttribute('primary-color', '#00BFCB')

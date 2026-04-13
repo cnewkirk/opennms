@@ -123,11 +123,12 @@ onMounted(async () => {
   &--bridge  { background: #ede9fe; color: #5b21b6; }
 }
 
-:global(html.open-dark) {
-  .links-badge--lldp   { background: rgba(59,  130, 246, 0.2); color: #93c5fd; }
-  .links-badge--cdp    { background: rgba(234, 179,   8, 0.2); color: #fde047; }
-  .links-badge--ospf   { background: rgba(16,  185, 129, 0.2); color: #6ee7b7; }
-  .links-badge--isis   { background: rgba(236,  72, 153, 0.2); color: #f9a8d4; }
-  .links-badge--bridge { background: rgba(139,  92, 246, 0.2); color: #c4b5fd; }
-}
+// Dark mode badge overrides — use :global on the full selector chain to prevent
+// Vue's CSS scoper from stripping the descendant selector and applying
+// the background directly to the html element (which makes the page purple).
+:global(html.open-dark .links-badge--lldp)   { background: rgba(59,  130, 246, 0.2); color: #93c5fd; }
+:global(html.open-dark .links-badge--cdp)    { background: rgba(234, 179,   8, 0.2); color: #fde047; }
+:global(html.open-dark .links-badge--ospf)   { background: rgba(16,  185, 129, 0.2); color: #6ee7b7; }
+:global(html.open-dark .links-badge--isis)   { background: rgba(236,  72, 153, 0.2); color: #f9a8d4; }
+:global(html.open-dark .links-badge--bridge) { background: rgba(139,  92, 246, 0.2); color: #c4b5fd; }
 </style>

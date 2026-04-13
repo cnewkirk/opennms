@@ -57,10 +57,12 @@ html {
   overflow-x: hidden;
 }
 
-// Soften the light theme — pure white is too harsh
+// Soften the light theme — muted blue-gray surfaces instead of pure white.
+// body.open-light in opennms-feather-styles.scss carries the same values so
+// the cascade winner (both rules share specificity 0,1,1) is irrelevant.
 html:not(.open-dark) {
-  --feather-surface: #f8f9fa;
-  --feather-background: #eef1f6;
+  --feather-surface: #e8ecf5;
+  --feather-background: #dde4f0;
 }
 
 .app-shell {

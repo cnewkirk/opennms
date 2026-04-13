@@ -46,22 +46,25 @@ a:visited {
 // all of them to #fff in the light theme, bypassing --feather-surface entirely.
 // body.open-light targets the same element Feather DS targets (body gets the
 // class too), and with higher specificity (0,1,1 vs 0,1,0) our values win.
+//
+// surface (#e8ecf5) and background (#dde4f0) match html:not(.open-dark) in
+// App.vue so whichever rule wins the cascade battle, the result is identical.
 body.open-light {
-  --feather-surface: #c8d3e6;
-  --feather-background: #b8c5d8;
+  --feather-surface: #e8ecf5;
+  --feather-background: #dde4f0;
 
-  // Elevation layers — step up from background through surface toward lighter,
-  // anchored to the gray-blue palette.
-  --feather-elevation-background-0:  #b8c5d8;
-  --feather-elevation-background-1:  #bfcbde;
-  --feather-elevation-background-2:  #c8d3e6;
-  --feather-elevation-background-3:  #c8d3e6;
-  --feather-elevation-background-4:  #cdd8ea;
-  --feather-elevation-background-6:  #cdd8ea;
-  --feather-elevation-background-8:  #d2dcec;
-  --feather-elevation-background-12: #d2dcec;
-  --feather-elevation-background-16: #d6dfee;
-  --feather-elevation-background-24: #d6dfee;
+  // Elevation layers — step up from background (#dde4f0) through surface
+  // (#e8ecf5) toward lighter, anchored to the blue-gray palette.
+  --feather-elevation-background-0:  #dde4f0;
+  --feather-elevation-background-1:  #dfe6f1;
+  --feather-elevation-background-2:  #e1e8f2;
+  --feather-elevation-background-3:  #e3eaf3;
+  --feather-elevation-background-4:  #e5ecf4;
+  --feather-elevation-background-6:  #e8ecf5;
+  --feather-elevation-background-8:  #eaeff6;
+  --feather-elevation-background-12: #ecf1f7;
+  --feather-elevation-background-16: #eef2f8;
+  --feather-elevation-background-24: #f0f4f9;
 
   // Borders were calibrated for white surfaces — boost opacity so card edges
   // and table dividers remain visible against the darker gray palette.
@@ -70,6 +73,38 @@ body.open-light {
 
   // Shade helpers (used for hover states, row stripes, etc.) also need a bump.
   --feather-shade-4: rgba(10, 12, 27, 0.18);
+}
+
+// Dark mode Feather DS surface neutralization.
+// open-dark.css sets --feather-surface (#15182B, purple-navy) and all
+// --feather-elevation-background-* in :root (specificity 0,1,0) unconditionally.
+// html.open-dark here (0,1,1) wins the cascade and replaces those purple values
+// with neutral zinc tones that match the PrimeVue bridge's dark palette.
+html.open-dark {
+  --feather-background: #09090b;       // zinc-950 — page canvas
+  --feather-surface: #1c1c1f;          // zinc-900 — card / panel surfaces
+  --feather-surface-dark: #111113;     // zinc-950-ish — nav rail, sidebar item bg
+  --feather-background-r: 9;
+  --feather-background-g: 9;
+  --feather-background-b: 11;
+  --feather-surface-r: 28;
+  --feather-surface-g: 28;
+  --feather-surface-b: 31;
+  --feather-surface-dark-r: 17;
+  --feather-surface-dark-g: 17;
+  --feather-surface-dark-b: 19;
+
+  // Elevation ladder: zinc-950 → zinc-800, matching the PrimeVue bridge.
+  --feather-elevation-background-0:  #09090b;  // zinc-950 = background
+  --feather-elevation-background-1:  #111113;
+  --feather-elevation-background-2:  #18181b;  // zinc-900
+  --feather-elevation-background-3:  #1c1c1f;
+  --feather-elevation-background-4:  #202024;
+  --feather-elevation-background-6:  #1c1c1f;  // zinc-900 = surface
+  --feather-elevation-background-8:  #222226;
+  --feather-elevation-background-12: #27272a;  // zinc-800
+  --feather-elevation-background-16: #2c2c30;
+  --feather-elevation-background-24: #323236;
 }
 
 // Light mode severity overrides — solid fill badges and chips.
