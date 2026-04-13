@@ -22,8 +22,9 @@ export const legacyToVueRoutes: Record<string, string> = {
 }
 
 /**
- * Resolves a menu item URL from the server to a Vue SPA path if known,
- * otherwise returns null (caller should fall back to absolute href).
+ * Resolves a menu item URL from the server to a Vue Router path if known,
+ * otherwise returns null (caller should navigate to absolute href instead).
+ * Returned paths use leading `/` and are intended for router.push() — NOT href fragments.
  */
 export function resolveVueRoute(url: string): string | null {
   return legacyToVueRoutes[url] ?? null

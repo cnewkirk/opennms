@@ -15,7 +15,7 @@
 ## File Map
 
 **Created:**
-- `ui/src/utils/legacyRoutes.ts` — `legacyToVueRoutes` map + `resolveMenuUrl()` helper
+- `ui/src/utils/legacyRoutes.ts` — `legacyToVueRoutes` map + `resolveVueRoute()` helper
 - `ui/src/components/Shell/TopBar.vue` — top bar (logo, search, add-node, user menus, datetime, theme toggle)
 - `ui/src/components/Shell/SideNav.vue` — collapsible nav sidebar (MONITOR / NETWORK / ADMINISTRATION)
 - `ui/src/containers/Events.vue` — events list page
