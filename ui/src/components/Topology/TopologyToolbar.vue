@@ -179,26 +179,35 @@
         class="topology-toolbar__chip"
         :class="{ active: viewsPanelOpen }"
         @click="viewsPanelOpen = !viewsPanelOpen"
-      >Views</button>
-      <div v-if="viewsPanelOpen" class="topology-toolbar__panel topology-toolbar__panel--views">
-        <button type="button" class="topology-toolbar__menu-item topology-toolbar__menu-item--primary" @click="startSaveView">
-          + Save current view…
+      >Views ▾</button>
+      <div v-if="viewsPanelOpen" class="topology-toolbar__panel topology-toolbar__panel--sm">
+        <button class="topology-toolbar__menu-item" @click="emit('open-load-view'); viewsPanelOpen = false">
+          Load View…
         </button>
         <hr class="topology-toolbar__divider">
-        <div v-if="globalView" class="topology-toolbar__section-label topology-toolbar__section-label--padded">Global Default</div>
-        <div v-if="globalView" class="topology-toolbar__menu-item" @click="globalView && loadView(globalView)">{{ globalView.name }}</div>
-        <div v-if="sharedViews.length > 0" class="topology-toolbar__section-label topology-toolbar__section-label--padded">Shared</div>
-        <div v-for="view in sharedViews" :key="view.id" class="topology-toolbar__menu-item topology-toolbar__menu-item--row" @click="loadView(view)">
-          {{ view.name }}
-          <button v-if="canDelete(view)" type="button" class="topology-toolbar__del-btn" @click.stop="deleteViewById(view.id)">×</button>
-        </div>
-        <div v-if="userViews.length > 0" class="topology-toolbar__section-label topology-toolbar__section-label--padded">My Views</div>
-        <div v-for="view in userViews" :key="view.id" class="topology-toolbar__menu-item topology-toolbar__menu-item--row" @click="loadView(view)">
-          {{ view.name }}
-          <button type="button" class="topology-toolbar__del-btn" @click.stop="deleteViewById(view.id)">×</button>
-        </div>
-        <div v-if="!globalView && sharedViews.length === 0 && userViews.length === 0"
-          class="topology-toolbar__empty">No saved views</div>
+        <button
+          class="topology-toolbar__menu-item"
+          :class="{ disabled: !viewStore.activeView }"
+          :disabled="!viewStore.activeView"
+          @click="emit('save-view'); viewsPanelOpen = false"
+        >
+          Save
+        </button>
+        <button
+          class="topology-toolbar__menu-item"
+          @click="emit('save-new-view'); viewsPanelOpen = false"
+        >
+          Save as New…
+        </button>
+        <hr class="topology-toolbar__divider">
+        <button
+          class="topology-toolbar__menu-item"
+          :class="{ disabled: !viewStore.activeView || viewStore.editMode }"
+          :disabled="!viewStore.activeView || viewStore.editMode"
+          @click="viewStore.enterEditMode(); viewsPanelOpen = false"
+        >
+          Edit View
+        </button>
       </div>
     </div>
 
@@ -228,28 +237,6 @@
 
   </div>
 
-  <!-- Save View Modal (teleported to body to avoid clipping) -->
-  <Teleport to="body">
-    <div v-if="saveViewOpen" class="topology-toolbar__modal-overlay" @click.self="saveViewOpen = false">
-      <div class="topology-toolbar__modal">
-        <h3>Save View</h3>
-        <label>Name<input v-model="newViewName" type="text" placeholder="My view name"></label>
-        <label>Description<input v-model="newViewDescription" type="text"></label>
-        <label>
-          Scope
-          <select v-model="newViewScope">
-            <option value="private">Private (this browser only)</option>
-            <option value="shared" disabled>Shared (not yet available)</option>
-            <option v-if="authStore.whoAmI?.roles?.includes('ROLE_ADMIN')" value="global" disabled>Global Default (not yet available)</option>
-          </select>
-        </label>
-        <div class="topology-toolbar__modal-actions">
-          <button type="button" @click="saveViewOpen = false">Cancel</button>
-          <button type="button" :disabled="!newViewName" @click="confirmSaveView">Save</button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -263,9 +250,6 @@ import { useTopologyViewStore } from '@/stores/topologyViewStore'
 import { isValidCidr } from '@/components/Topology/cidrUtils'
 import { getCategories } from '@/services/categoryService'
 import { cached } from '@/services/cacheService'
-import { getViews, deleteView as deleteRemoteView } from '@/services/topologyViewService'
-import { useAuthStore } from '@/stores/authStore'
-import type { TopologyView } from '@/types/topology'
 import TopologyIconSettings from './TopologyIconSettings.vue'
 
 const emit = defineEmits<{
@@ -273,15 +257,15 @@ const emit = defineEmits<{
   'reset-layout': []
   'toggle-grid': []
   'align-to-grid': []
-  'save-view-requested': [{ name: string; description: string; scope: 'private' | 'shared' | 'global' }]
-  'restore-view': [TopologyView]
+  'open-load-view': []
+  'save-view': []
+  'save-new-view': []
 }>()
 
 const store = useTopologyStore()
 const wmStore = useWeathermapStore()
 const elStore = useEdgeLabelStore()
 const viewStore = useTopologyViewStore()
-const authStore = useAuthStore()
 const now = useNow({ interval: 5000 })
 
 // Dropdown open/close refs
@@ -305,30 +289,6 @@ const displayPanelOpen = ref(false)
 const displayPanelRef  = ref<HTMLElement | null>(null)
 onClickOutside(displayPanelRef, () => { displayPanelOpen.value = false })
 
-// Views state
-const saveViewOpen      = ref(false)
-const newViewName       = ref('')
-const newViewDescription = ref('')
-const newViewScope      = ref<'private' | 'shared' | 'global'>('private')
-const globalView        = ref<TopologyView | null>(null)
-const sharedViews       = ref<TopologyView[]>([])
-const userViews         = ref<TopologyView[]>([])
-
-const canDelete = (view: TopologyView) =>
-  view.owner === authStore.whoAmI?.id || (authStore.whoAmI?.roles ?? []).includes('ROLE_ADMIN')
-
-const refreshServerViews = async () => {
-  try {
-    const all = await getViews()
-    globalView.value  = all.find(v => v.scope === 'global') ?? null
-    sharedViews.value = all.filter(v => v.scope === 'shared')
-    userViews.value   = all.filter(v => v.scope === 'private')
-  } catch {
-    console.warn('[topology] Failed to refresh server views')
-  }
-}
-
-defineExpose({ refreshServerViews })
 
 const INTERVAL_OPTIONS = [
   { label: '30s', value: 30  },
@@ -410,41 +370,7 @@ const clearAllFilters = () => {
 const saveFilterDefaults  = () => viewStore.saveFilterDefaults()
 const clearFilterDefaults = () => viewStore.clearFilterDefaults()
 
-// Views
-const startSaveView = () => {
-  newViewName.value = ''
-  newViewDescription.value = ''
-  newViewScope.value = 'private'
-  saveViewOpen.value = true
-  viewsPanelOpen.value = false
-}
-
-const confirmSaveView = () => {
-  if (!newViewName.value) return
-  emit('save-view-requested', { name: newViewName.value, description: newViewDescription.value, scope: newViewScope.value })
-  saveViewOpen.value = false
-}
-
-const loadView = (view: TopologyView) => {
-  if (viewStore.isDirty && !window.confirm('You have unsaved changes. Load this view anyway?')) return
-  emit('restore-view', view)
-  viewsPanelOpen.value = false
-}
-
-const deleteViewById = async (id: string) => {
-  try {
-    await deleteRemoteView(id)
-    sharedViews.value = sharedViews.value.filter(v => v.id !== id)
-    userViews.value   = userViews.value.filter(v => v.id !== id)
-    if (globalView.value?.id === id) globalView.value = null
-  } catch {
-    window.alert('Failed to delete view.')
-  }
-}
-
-
 onMounted(async () => {
-  await refreshServerViews()
   try {
     const result = await cached('surveillanceCategories', 600_000, () => getCategories())
     if (result) availableCategories.value = result.category.map((c: { name: string }) => c.name).sort()
@@ -805,71 +731,4 @@ onMounted(async () => {
   }
 }
 
-// Modal — outside scoped tree so it renders in teleport
-.topology-toolbar__modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1200;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.topology-toolbar__modal {
-  background: var(--feather-surface);
-  border-radius: 6px;
-  padding: 24px 28px;
-  min-width: 320px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-
-  h3 {
-    margin: 0 0 16px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--feather-primary-text-on-surface);
-  }
-
-  label {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--feather-secondary-text-on-surface);
-    margin-bottom: 12px;
-
-    input, select {
-      display: block;
-      width: 100%;
-      margin-top: 4px;
-      padding: 6px 8px;
-      border: 1px solid var(--feather-border-on-surface);
-      border-radius: 4px;
-      background: var(--feather-surface);
-      color: var(--feather-primary-text-on-surface);
-      font-size: 0.85rem;
-    }
-  }
-}
-
-.topology-toolbar__modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
-
-  button {
-    padding: 6px 16px;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: 2px solid var(--feather-primary);
-
-    &:first-child { background: transparent; color: var(--feather-primary); }
-    &:last-child {
-      background: var(--feather-primary);
-      color: #fff;
-      &:disabled { opacity: 0.4; cursor: not-allowed; }
-    }
-  }
-}
 </style>

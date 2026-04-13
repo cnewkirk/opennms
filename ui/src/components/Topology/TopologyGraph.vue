@@ -17,6 +17,13 @@
       <FeatherButton text @click="store.cancelLinkMode()">Cancel (Esc)</FeatherButton>
     </div>
 
+    <!-- Edit mode banner -->
+    <div v-if="viewStore.editMode" class="topology-graph__edit-banner">
+      <span>Editing: <strong>{{ viewStore.activeView?.name }}</strong></span>
+      <FeatherButton text @click="emit('save-view')">Save</FeatherButton>
+      <FeatherButton text @click="viewStore.discardEditMode()">Discard</FeatherButton>
+    </div>
+
     <div ref="graphContainer" class="topology-graph__canvas" />
     <TopologyDetailPanel />
     <TopologyEdgeTooltip :tooltip="edgeTooltip" />
@@ -38,6 +45,7 @@ import { FeatherSpinner } from '@featherds/progress'
 import useTopology from '@/composables/useTopology'
 import useSnackbar from '@/composables/useSnackbar'
 import { useTopologyStore } from '@/stores/topologyStore'
+import { useTopologyViewStore } from '@/stores/topologyViewStore'
 import { TopologyVertex } from '@/types/topology'
 import TopologyDetailPanel from './TopologyDetailPanel.vue'
 import TopologyEdgeTooltip from './TopologyEdgeTooltip.vue'
@@ -45,6 +53,8 @@ import TopologyNodeTooltip from './TopologyNodeTooltip.vue'
 import CreateLinkModal from './CreateLinkModal.vue'
 
 const store = useTopologyStore()
+const viewStore = useTopologyViewStore()
+const emit = defineEmits<{ 'save-view': [] }>()
 const { showSnackBar } = useSnackbar()
 const graphContainer = ref<HTMLElement | null>(null)
 
@@ -144,6 +154,23 @@ defineExpose({ saveLayout, resetLayout, toggleGrid, alignToGrid, getPositions })
     padding: 8px 20px;
     background: var($surface);
     border: 2px solid var($primary);
+    border-radius: vars.$border-radius-sm;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  &__edit-banner {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 20px;
+    background: var($surface);
+    border: 2px solid #b45309;
     border-radius: vars.$border-radius-sm;
     font-size: 0.9rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
