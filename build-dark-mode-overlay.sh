@@ -180,6 +180,9 @@ echo "    opennms-webapp-rest.jar: OK (DashboardRestService stripped)"
 mkdir -p "${OVERLAY_DIR}/spring-context"
 cp "${SCRIPT_DIR}/opennms-webapp-rest/src/main/webapp/WEB-INF/applicationContext-cxf-rest-v2.xml" \
    "${OVERLAY_DIR}/spring-context/"
+# Spring Security XML — topology/views intercept rules must precede REST catch-all
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/WEB-INF/applicationContext-spring-security.xml" \
+   "${OVERLAY_DIR}/spring-context/"
 
 # Also copy .js stubs so the entry is resolvable if anything tries to load them
 cp "${WEBASSETS_DIST}/dark-mode.js"    "${OVERLAY_DIR}/assets/"
@@ -351,6 +354,8 @@ COPY --chown=10001:10001 webapp-rest-lib/${WEBAPP_REST_BASENAME} /opt/opennms/je
 
 # Spring context with jmxconfig + mibcompiler packages in component-scan (base image lacks them)
 COPY --chown=10001:10001 spring-context/applicationContext-cxf-rest-v2.xml /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-cxf-rest-v2.xml
+# Spring Security with topology/views intercept rules before the REST catch-all
+COPY --chown=10001:10001 spring-context/applicationContext-spring-security.xml /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-spring-security.xml
 
 # Tell AssetLocatorImpl to load assets.json from the filesystem (not the
 # classpath JAR that lacks dark-mode/modern-ui entries).
