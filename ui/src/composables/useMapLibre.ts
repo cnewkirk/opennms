@@ -381,6 +381,12 @@ const useMapLibre = (containerRef: Ref<HTMLElement | null>) => {
   onMounted(async () => {
     if (!containerRef.value) return
 
+    // Kick off data fetches concurrently with tile provider fetch.
+    // Reactive watches on nodesWithCoordinates / alarms will call syncNodeSource()
+    // once the data lands — even if the map.on('load') fires first.
+    mapStore.fetchNodes()
+    mapStore.fetchAlarms()
+
     await geolocationStore.fetchTileProviders()
 
     map = new maplibregl.Map({
