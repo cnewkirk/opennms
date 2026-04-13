@@ -127,6 +127,11 @@
     <intercept-url pattern="/rest/**" method="GET" access="ROLE_REST,ROLE_ADMIN,ROLE_MOBILE,ROLE_USER"/>
     <intercept-url pattern="/rest/**" method="HEAD" access="ROLE_REST,ROLE_ADMIN,ROLE_MOBILE,ROLE_USER"/>
 
+    <!-- Topology views: allow ROLE_USER to create/update/delete their own views -->
+    <intercept-url pattern="/rest/topology/views/**" method="DELETE" access="ROLE_USER,ROLE_REST,ROLE_ADMIN"/>
+    <intercept-url pattern="/rest/topology/views/**" method="POST" access="ROLE_USER,ROLE_REST,ROLE_ADMIN"/>
+    <intercept-url pattern="/rest/topology/views/**" method="PUT" access="ROLE_USER,ROLE_REST,ROLE_ADMIN"/>
+
     <!-- read-write calls should be allowed for the REST and ADMIN roles -->
     <intercept-url pattern="/rest/**" method="DELETE" access="ROLE_REST,ROLE_ADMIN"/>
     <intercept-url pattern="/rest/**" method="POST" access="ROLE_REST,ROLE_ADMIN"/>

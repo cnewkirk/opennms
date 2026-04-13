@@ -56,6 +56,8 @@ import java.util.stream.Stream;
 @Tag(name = "Topology Views", description = "Named topology view persistence API")
 public class TopologyViewRestService {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TopologyViewRestService.class);
+
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
     private static final YAMLMapper   YAML_MAPPER  = new YAMLMapper();
 
@@ -71,6 +73,10 @@ public class TopologyViewRestService {
      * Returns null if no file found.
      */
     private static Path resolveFile(final String id) {
+        // Validate id is a safe slug: only lowercase letters, digits, and hyphens
+        if (id == null || id.isEmpty() || !id.matches("[a-z0-9][a-z0-9-]*")) {
+            return null;
+        }
         for (final String scope : new String[]{"global", "shared"}) {
             final Path candidate = viewsDir().resolve(scope).resolve(id + ".yaml");
             if (Files.exists(candidate)) return candidate;
@@ -168,8 +174,9 @@ public class TopologyViewRestService {
         final ObjectNode out = incoming.deepCopy();
         out.put("id",      id);
         out.put("owner",   username);
-        out.put("created", Instant.now().toString());
-        out.put("updated", Instant.now().toString());
+        final String now = Instant.now().toString();
+        out.put("created", now);
+        out.put("updated", now);
 
         YAML_MAPPER.writeValue(file.toFile(), JSON_MAPPER.treeToValue(out, Object.class));
         return Response.status(Response.Status.CREATED)
@@ -221,6 +228,7 @@ public class TopologyViewRestService {
         try {
             return YAML_MAPPER.readTree(file.toFile());
         } catch (IOException e) {
+            LOG.warn("Failed to read topology view file {}: {}", file, e.getMessage());
             return null;
         }
     }
