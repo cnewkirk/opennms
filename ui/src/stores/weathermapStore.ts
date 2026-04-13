@@ -25,6 +25,8 @@ export interface EdgeLabelData {
   remoteIp?: string       // primary IP of target node
   localMac?: string       // physAddr of local interface
   ifSpeed?: number        // link speed in bits/sec
+  remoteMac?: string      // physAddr of target node's connecting interface
+  remoteIfSpeed?: number  // ifSpeed of target node's connecting interface
 }
 
 /**
@@ -191,7 +193,9 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
           if (ifIndexMatch) {
             const remoteIface = nodeIfIndexMap[tgtId]?.get(Number(ifIndexMatch[1]))
             if (remoteIface) {
-              data.remoteIfName = remoteIface.ifName ?? remoteIface.ifDescr ?? undefined
+              data.remoteIfName  = remoteIface.ifName ?? remoteIface.ifDescr ?? undefined
+              data.remoteMac     = remoteIface.physAddr ?? undefined
+              data.remoteIfSpeed = remoteIface.ifSpeed > 0 ? remoteIface.ifSpeed : undefined
             }
           } else {
             const cleaned = cleanName(tgtLldpLink.lldpLocalPort)
@@ -201,7 +205,11 @@ export const useWeathermapStore = defineStore('weathermapStore', () => {
       }
       if (!data.remoteIfName) {
         const best = nodeSnmpMap[tgtId]
-        if (best) data.remoteIfName = best.ifName ?? best.ifDescr ?? undefined
+        if (best) {
+          data.remoteIfName  = best.ifName ?? best.ifDescr ?? undefined
+          data.remoteMac     = best.physAddr ?? undefined
+          data.remoteIfSpeed = best.ifSpeed > 0 ? best.ifSpeed : undefined
+        }
       }
 
       labelMap[key] = data
