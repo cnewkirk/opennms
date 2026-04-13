@@ -51,24 +51,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Checkbox from 'primevue/checkbox'
-import type { GraphWidgetConfig } from '@/services/dashboardConfigService'
+import type { GraphWidgetConfig, RelativeWindow } from '@/services/dashboardConfigService'
 
 const props = defineProps<{ modelValue: GraphWidgetConfig }>()
 const emit  = defineEmits<{ (e: 'update:modelValue', v: GraphWidgetConfig): void }>()
 
 const draft = ref({ ...props.modelValue })
 const useCustomTimeRange = ref(!!draft.value.timeRange)
-const localTimeRangeWindow = ref(draft.value.timeRange?.relativeWindow ?? '24h')
+const localTimeRangeWindow = ref<RelativeWindow>(draft.value.timeRange?.relativeWindow ?? '24h')
 
 watch([draft, useCustomTimeRange, localTimeRangeWindow], () => {
   emit('update:modelValue', {
     ...draft.value,
     timeRange: useCustomTimeRange.value
-      ? { mode: 'relative', relativeWindow: localTimeRangeWindow.value as any }
+      ? { mode: 'relative', relativeWindow: localTimeRangeWindow.value }
       : undefined
   })
 }, { deep: true })

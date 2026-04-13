@@ -1,8 +1,8 @@
 <template>
   <div class="config-form">
     <div class="field">
-      <label>Widget Title</label>
-      <InputText v-model="draft.title" class="w-full" />
+      <label for="tbl-title">Widget Title</label>
+      <InputText id="tbl-title" v-model="draft.title" class="w-full" />
     </div>
 
     <div class="field">
@@ -16,6 +16,7 @@
         class="w-full"
         filter
       />
+      <small v-if="categoryLoadError" class="hint">Could not load categories.</small>
     </div>
 
     <div v-if="draft.type === 'alarms'" class="field">
@@ -58,7 +59,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import MultiSelect from 'primevue/multiselect'
@@ -87,9 +87,14 @@ const availableColumns = computed(() =>
 )
 
 const allCategories = ref<Category[]>([])
+const categoryLoadError = ref(false)
 onMounted(async () => {
   const resp = await API.getCategories()
-  if (resp) allCategories.value = [...resp.category].sort((a, b) => a.name.localeCompare(b.name))
+  if (resp) {
+    allCategories.value = [...resp.category].sort((a, b) => a.name.localeCompare(b.name))
+  } else {
+    categoryLoadError.value = true
+  }
 })
 </script>
 

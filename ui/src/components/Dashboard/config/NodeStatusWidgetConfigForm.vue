@@ -1,8 +1,8 @@
 <template>
   <div class="config-form">
     <div class="field">
-      <label>Widget Title</label>
-      <InputText v-model="draft.title" class="w-full" />
+      <label for="ns-title">Widget Title</label>
+      <InputText id="ns-title" v-model="draft.title" class="w-full" />
     </div>
 
     <div class="field">
@@ -16,6 +16,7 @@
         class="w-full"
         filter
       />
+      <small v-if="categoryLoadError" class="hint">Could not load categories.</small>
     </div>
 
     <div class="field">
@@ -32,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
 import InputText from 'primevue/inputtext'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
@@ -47,6 +47,7 @@ const draft = ref({ ...props.modelValue })
 watch(draft, v => emit('update:modelValue', { ...v }), { deep: true })
 
 const allCategories = ref<Category[]>([])
+const categoryLoadError = ref(false)
 const refreshOptions = [
   { label: '30 seconds', value: 30 },
   { label: '1 minute',   value: 60 },
@@ -57,7 +58,11 @@ const refreshOptions = [
 
 onMounted(async () => {
   const resp = await API.getCategories()
-  if (resp) allCategories.value = [...resp.category].sort((a, b) => a.name.localeCompare(b.name))
+  if (resp) {
+    allCategories.value = [...resp.category].sort((a, b) => a.name.localeCompare(b.name))
+  } else {
+    categoryLoadError.value = true
+  }
 })
 </script>
 
