@@ -105,3 +105,9 @@ html:not(.open-dark) {
   // Dashboard summary widget — warning KPI value (#fbe947 is unreadable on light surfaces)
   .kpi-card--warning .kpi-value { color: #856400; }
 }
+
+// Global Feather typography utility classes
+.headline3 { @include typo.headline3; }
+.headline4 { @include typo.headline4; }
+.subtitle1 { @include typo.subtitle1; }
+.subtitle2 { @include typo.subtitle2; }

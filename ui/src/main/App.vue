@@ -46,10 +46,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import "@featherds/styles/themes/open-light.css";
-@import "@featherds/styles/themes/open-dark.css";
-@import "@/styles/opennms-feather-styles.scss";
-
 :root {
   --topbar-height: 56px;
   --sidebar-width-expanded: 180px;
@@ -91,7 +87,6 @@ html:not(.open-dark) {
     grid-row: 2;
     overflow-y: auto;
     overflow-x: hidden;
-    height: calc(100dvh - var(--topbar-height));
   }
 }
 
