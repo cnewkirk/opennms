@@ -22,30 +22,39 @@
 <template>
   <div class="widget-frame">
     <div class="widget-header widget-drag-handle">
-      <span class="widget-title subtitle1">{{ title }}</span>
+      <span class="widget-title">{{ title }}</span>
       <div class="widget-actions">
-        <button
-          class="icon-btn"
-          title="Refresh"
+        <Button
+          text
+          rounded
+          severity="secondary"
+          size="small"
           :disabled="loading"
+          title="Refresh"
           @click="$emit('refresh')"
         >
-          <FeatherIcon :icon="RefreshIcon" />
-        </button>
-        <button
-          class="icon-btn"
+          <i class="pi pi-refresh" />
+        </Button>
+        <Button
+          text
+          rounded
+          severity="secondary"
+          size="small"
           title="Configure"
           @click="$emit('configure')"
         >
-          <FeatherIcon :icon="SettingsIcon" />
-        </button>
-        <button
-          class="icon-btn icon-btn--danger"
+          <i class="pi pi-cog" />
+        </Button>
+        <Button
+          text
+          rounded
+          severity="danger"
+          size="small"
           title="Remove widget"
           @click="$emit('remove')"
         >
-          <FeatherIcon :icon="RemoveIcon" />
-        </button>
+          <i class="pi pi-times" />
+        </Button>
       </div>
     </div>
     <div class="widget-body">
@@ -53,7 +62,7 @@
         v-if="loading"
         class="widget-loading"
       >
-        <FeatherSpinner />
+        <ProgressSpinner style="width:32px;height:32px" />
       </div>
       <div
         v-else-if="error"
@@ -67,11 +76,8 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherSpinner } from '@featherds/progress'
-import SettingsIcon from '@featherds/icon/action/Settings'
-import RefreshIcon from '@featherds/icon/navigation/Refresh'
-import RemoveIcon from '@featherds/icon/action/Remove'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
 
 defineProps<{
   title: string
@@ -110,9 +116,7 @@ defineEmits<{
   flex-shrink: 0;
   cursor: grab;
 
-  &:active {
-    cursor: grabbing;
-  }
+  &:active { cursor: grabbing; }
 }
 
 .widget-title {
@@ -123,38 +127,7 @@ defineEmits<{
 
 .widget-actions {
   display: flex;
-  gap: 4px;
-}
-
-.icon-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: vars.$border-radius-surface;
-  color: var($secondary-text-on-surface);
-  display: flex;
-  align-items: center;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover {
-    background: var($surface);
-    color: var($primary-text-on-surface);
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  &--danger:hover {
-    color: var($error);
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
+  gap: 2px;
 }
 
 .widget-body {
