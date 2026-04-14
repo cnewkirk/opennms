@@ -106,13 +106,15 @@ export const parallelOffsets = (n: number): number[] => {
 
 /**
  * Maps a utilization percentage (0-100) to a traffic-light color.
+ * Thresholds are TCP-aware: microbursts start causing drops above ~80%,
+ * so orange and red bands are intentionally early.
  */
 export const utilizationColor = (pct: number): string => {
-  if (pct === 0)  return '#4FD1C5'  // teal  — up, no load
-  if (pct < 50)   return '#48BB78'  // green — low utilization
-  if (pct < 75)   return '#ECC94B'  // yellow
-  if (pct < 90)   return '#ED8936'  // orange
-  return '#FC8181'                   // red   — near/over capacity
+  if (pct === 0)  return '#4FD1C5'  // teal   — up, no load
+  if (pct < 50)   return '#48BB78'  // green  — healthy
+  if (pct < 70)   return '#ECC94B'  // yellow — moderate
+  if (pct < 80)   return '#ED8936'  // orange — approaching congestion
+  return '#FC8181'                   // red    — microburst territory (≥80%)
 }
 
 /**
