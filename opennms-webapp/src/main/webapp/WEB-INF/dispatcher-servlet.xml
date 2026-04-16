@@ -154,16 +154,16 @@
     <bean name="/alarm/deleteFavorite" class="org.opennms.web.controller.alarm.AlarmFilterController"/>
 
     <alias name="/alarm/index.htm" alias="/alarm/index"/>
-    <bean name="/alarm/index.htm" class="org.opennms.web.controller.alarm.AlarmFilterController"/>
+    <bean name="/alarm/index.htm" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <property name="viewName" value="redirect:/ui/index.html#/alarms"/>
+    </bean>
 
     <alias name="/alarm/list.htm" alias="/alarm/list"/>
     <bean name="/alarm/list.htm" class="org.opennms.web.controller.alarm.AlarmFilterController"/>
 
     <alias name="/alarm/detail.htm" alias="/alarm/detail.jsp"/>
-    <bean name="/alarm/detail.htm" class="org.opennms.web.controller.alarm.AlarmDetailController">
-        <property name="alarmRepository" ref="alarmRepository"/>
-        <property name="webEventRepository" ref="webEventRepository"/>
-        <property name="defaultShortLimit" value="20"/>
+    <bean name="/alarm/detail.htm" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <property name="viewName" value="alarm/detail"/>
     </bean>
 
     <bean name="/alarm/saveStickyMemo.htm" class="org.opennms.web.controller.alarm.AlarmDetailController">

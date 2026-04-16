@@ -261,6 +261,7 @@ const onNotificationItemClick = (item: OnmsNotification) => {
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
+@import "@/styles/vars";
 
 .dropdown-menu-link {
   color: var($primary-text-on-surface) !important;
@@ -359,7 +360,7 @@ div.user-notification-badge-wrapper {
 
 .notice-status-display {
   font-size: 2em;
-  border-radius: 1.5em;
+  border-radius: $border-radius-pill;
   padding: 0.1em;
 }
 
@@ -430,11 +431,12 @@ div.user-notification-badge-wrapper {
 </style>
 
 <style lang="scss">
+@use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/open-mixins";
 @import "@featherds/styles/themes/variables";
 
 body .feather-menu .feather-menu-dropdown {
-  border-radius: 4px;
+  border-radius: vars.$border-radius-surface;
 
   .feather-dropdown {
     border: 1px solid rgba(0, 0, 0, .35);

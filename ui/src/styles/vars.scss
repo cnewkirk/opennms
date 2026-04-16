@@ -4,7 +4,8 @@ $border-radius: (
   sm: 8px,
   m: 10px,
   round: 50%,
-  surface: 4px
+  surface: 4px,
+  pill: 20px
 ) !default;
 
 @use "sass:map";
@@ -15,6 +16,7 @@ $border-radius-sm: map.get($border-radius, 'sm');
 $border-radius-m: map.get($border-radius, 'm');
 $border-radius-round: map.get($border-radius, 'round');
 $border-radius-surface: map.get($border-radius, 'surface');
+$border-radius-pill: map.get($border-radius, 'pill');
 
 $min-width-smallest-screen: 480px;
 

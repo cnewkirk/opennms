@@ -22,7 +22,8 @@
 
 // Reference: https://github.com/OpenNMS/backshift
 
-import { ConvertedGraphValue, Metric, PrintStatement, Series } from '@/types'
+import { ConvertedGraphValue, Metric, PrintStatement, PersesGraphSpec, PersesSeriesOverride, Series } from '@/types'
+import type { OpenNMSBatchQuerySpec } from '@/datasource/opennms'
 import Consolidator from './Consolidator'
 import RpnToJexlConverter from './RpnToJexlConverter.class'
 import RrdGraphVisitor from './RrdGraphVisitor.class'
@@ -99,6 +100,55 @@ class RrdGraphConverter extends RrdGraphVisitor {
     for (i = 0, n = this.model.metrics.length; i < n; i++) {
       const metric = this.model.metrics[i]
       metric.transient = !((metric.name as string) in nonTransientMetrics)
+    }
+  }
+
+  /**
+   * Produces a PersesGraphSpec for rendering with <PersesPanel>.
+   * All DEF metrics become batch sources; CDEF metrics become expressions.
+   * Both are submitted in a single /rest/measurements call so that JEXL
+   * expressions can reference DEF variable names server-side.
+   */
+  toPersesGraphSpec(): PersesGraphSpec {
+    const sources: OpenNMSBatchQuerySpec['sources'] = this.model.metrics
+      .filter((m: Metric) => !m.expression)
+      .map((m: Metric) => ({
+        resourceId: m.resourceId as string,
+        attribute: m.attribute as string,
+        aggregation: (m.aggregation as OpenNMSBatchQuerySpec['sources'][number]['aggregation']) ?? 'AVERAGE',
+        label: m.name as string,
+        transient: m.transient ?? false
+      }))
+
+    const expressions: OpenNMSBatchQuerySpec['expressions'] = this.model.metrics
+      .filter((m: Metric) => Boolean(m.expression))
+      .map((m: Metric) => ({
+        value: m.expression as string,
+        label: m.name as string,
+        transient: m.transient ?? false
+      }))
+
+    const seriesOverrides: PersesSeriesOverride[] = this.model.series
+      .filter((s: Series) => s.name && s.type !== 'hidden')
+      .map((s: Series) => ({
+        name: s.name as string,
+        metric: (s.metric ?? s.name) as string,
+        color: s.color as string | undefined,
+        type: (s.type === 'stack' ? 'stack' : s.type === 'area' ? 'area' : 'line') as PersesSeriesOverride['type']
+      }))
+
+    const palette: string[] = seriesOverrides.map(s => s.color).filter((c): c is string => Boolean(c))
+    const types = seriesOverrides.map(s => s.type)
+    const visualMode: 'line' | 'area' | 'stack' = types.includes('stack') ? 'stack' : types.includes('area') ? 'area' : 'line'
+
+    return {
+      title: this.model.title as string,
+      yAxisLabel: this.model.verticalLabel as string,
+      query: { batch: true, sources, expressions },
+      seriesOverrides,
+      palette,
+      visualMode,
+      printStatements: this.model.printStatements
     }
   }
 

@@ -78,19 +78,11 @@ export const useZenithConnectStore = defineStore('zenithConnectStore', () => {
     registerResponse.value = response
   }
 
-  // TODO: remove
-  const clearRegistrations = () => {
-    registrations.value = {
-      registrations: []
-    }
-  }
-
   return {
     currentRegistration,
     registerResponse,
     registrations,
     addRegistration,
-    clearRegistrations,
     fetchRegistrations,
     resetRegistration,
     setRegistrationResponse

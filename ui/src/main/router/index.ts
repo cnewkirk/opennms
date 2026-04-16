@@ -71,6 +71,15 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      redirect: '/dashboard'
+    },
+    {
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: () => import('@/containers/Dashboard.vue')
+    },
+    {
+      path: '/home',
       name: 'home',
       component: Home
     },
@@ -131,6 +140,38 @@ const router = createRouter({
       }
     },
     {
+      path: '/snmp-collections-config',
+      name: 'SnmpCollectionsConfig',
+      component: () => import('@/containers/SnmpCollectionsConfig.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'No role access to SNMP collections config.' })
+            router.push(from.path)
+          }
+        }
+
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
+      path: '/bsm-admin',
+      name: 'BusinessServicesAdmin',
+      component: () => import('@/containers/BusinessServicesAdmin.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'No role access to BSM admin.' })
+            router.push(from.path)
+          }
+        }
+
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/map',
       name: 'Map',
       component: () => import('@/containers/Map.vue'),
@@ -153,9 +194,34 @@ const router = createRouter({
       component: () => import('@/containers/Nodes.vue')
     },
     {
+      path: '/alarms',
+      name: 'Alarms',
+      component: () => import('@/containers/Alarms.vue')
+    },
+    {
       path: '/node/:id',
       name: 'Node Details',
       component: () => import('@/containers/NodeDetails.vue')
+    },
+    {
+      path: '/event/:id',
+      name: 'Event Detail',
+      component: () => import('@/containers/EventDetail.vue')
+    },
+    {
+      path: '/alarm/:id',
+      name: 'Alarm Detail',
+      component: () => import('@/containers/AlarmDetail.vue')
+    },
+    {
+      path: '/outages',
+      name: 'Outages',
+      component: () => import('@/containers/Outages.vue')
+    },
+    {
+      path: '/outage/:id',
+      name: 'Outage Detail',
+      component: () => import('@/containers/OutageDetail.vue')
     },
     {
       path: '/resource-graphs',
@@ -285,6 +351,58 @@ const router = createRouter({
       path: '/event-config/create',
       name: 'Event Configuration Create',
       component: () => import('@/containers/EventConfigEventCreate.vue')
+    },
+    {
+      path: '/topology',
+      name: 'Network Topology',
+      component: () => import('@/containers/Topology.vue')
+    },
+    {
+      path: '/jmx-config-generator',
+      name: 'JMX Config Generator',
+      component: () => import('@/containers/JmxConfigGenerator.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access JMX Config Generator.' })
+            router.push(from.path)
+          }
+        }
+
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
+      path: '/surveillance-views-config',
+      name: 'Surveillance Views Config',
+      component: () => import('@/containers/SurveillanceViewsConfig.vue')
+    },
+    {
+      path: '/wallboard-config',
+      name: 'Wallboard Config',
+      component: () => import('@/containers/WallboardConfig.vue')
+    },
+    {
+      path: '/surveillance-dashboard',
+      name: 'Surveillance Dashboard',
+      component: () => import('@/containers/SurveillanceDashboard.vue')
+    },
+    {
+      path: '/mib-compiler',
+      name: 'SNMP MIB Compiler',
+      component: () => import('@/containers/MibCompiler.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access SNMP MIB Compiler.' })
+            router.push(from.path)
+          }
+        }
+
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
     },
     {
       path: '/:pathMatch(.*)*', // catch other paths and redirect

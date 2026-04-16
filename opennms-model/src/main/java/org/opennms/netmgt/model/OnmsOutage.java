@@ -442,6 +442,12 @@ public class OnmsOutage implements Serializable {
     	return getMonitoredService().getServiceId();
     }
 
+    @Transient
+    @XmlElement(name="serviceName")
+    public String getServiceName() {
+        return getMonitoredService().getServiceType().getName();
+    }
+
     /**
      * This method is necessary for CXF to be able to introspect
      * the type of {@link OnmsNode} parameters.

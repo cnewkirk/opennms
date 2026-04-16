@@ -162,7 +162,21 @@ export interface MapNode {
   alarm: Alarm[]
 }
 
+export interface AlarmMemo {
+  body: string | null
+  author: string | null
+  created: number | null
+  updated: number | null
+}
+
+export interface AlarmAcknowledgment {
+  ackUser: string
+  ackAction: string
+  ackTime: number
+}
+
 export interface Alarm {
+  // existing fields (used by list views, dashboard widget, map)
   id: string
   severity: string
   nodeId: number
@@ -171,6 +185,28 @@ export interface Alarm {
   count: number
   lastEventTime: number
   logMessage: string
+  // detail-page fields
+  firstEventTime?: number
+  ipAddress?: string
+  serviceType?: { id: number; name: string }
+  ackTime?: number
+  ackUser?: string
+  description?: string
+  operatorInstructions?: string
+  reductionKey?: string
+  managedObjectType?: string
+  managedObjectInstance?: string
+  troubleTicket?: string
+  troubleTicketState?: string
+  isSituation?: boolean
+  isPartOfSituation?: boolean
+  relatedAlarms?: Alarm[]       // populated when isSituation=true
+  relatedSituations?: Alarm[]   // populated when isPartOfSituation=true
+  lastEvent?: { id: number }
+  stickyMemo?: AlarmMemo
+  reductionKeyMemo?: AlarmMemo
+  location?: string
+  nodeLocation?: string
 }
 
 export interface Event {
@@ -184,11 +220,19 @@ export interface Event {
   logMessage: string
   nodeId: number
   nodeLabel: string
-  parameters: Array<any>
+  parameters: Array<{ name: string; value: string; type?: string }>
   severity: string
   source: string
   time: number
   uei: string
+  // Fields used by event detail page
+  ipAddress?: string
+  serviceName?: string
+  serviceId?: number
+  alarmId?: number
+  operatorInstruction?: string
+  systemId?: string
+  nodeLocation?: string
 }
 
 export interface MonitoringLocation {
@@ -249,14 +293,30 @@ export interface IpInterface {
 }
 
 export interface Outage {
+  id: number
   nodeId: number
   ipAddress: string
-  serviceIs: number
+  serviceId: number
   nodeLabel: string
   location: string
   hostname: string
-  serviceName: string
-  outageId: number
+  serviceName?: string
+  /** v2 API outage ID field */
+  outageId?: number
+  ifLostService?: number        // ms timestamp — present in v2 API responses
+  ifRegainedService?: number | null  // null means still active
+  monitoredService?: {
+    serviceType?: { name: string; id: number }
+    [key: string]: unknown
+  }
+  /** ID of the event that caused the outage (lost service event) */
+  lostServiceEventId?: number
+  /** ID of the event that resolved the outage (regained service event) */
+  regainedServiceEventId?: number | null
+  /** Location from which the outage was detected (perspective monitoring) */
+  perspectiveLocation?: string | null
+  /** Requisition (foreign source) the node belongs to */
+  foreignSource?: string | null
 }
 
 export interface IfService {
@@ -523,6 +583,33 @@ export interface Expression {
   metricName: string
 }
 
+/** Visual config for a single series rendered by PersesPanel */
+export interface PersesSeriesOverride {
+  /** Display name (from graph legend) */
+  name: string
+  /** Metric/label name matching the API response label */
+  metric: string
+  color?: string
+  type?: 'line' | 'area' | 'stack'
+}
+
+/**
+ * Output of RrdGraphConverter.toPersesGraphSpec().
+ * Contains a single batch query (all DEFs + CDEFs) and per-series visual overrides.
+ */
+export interface PersesGraphSpec {
+  title: string
+  yAxisLabel: string
+  /** Single batched query — all sources and expressions for this graph */
+  query: import('@/datasource/opennms').OpenNMSBatchQuerySpec
+  seriesOverrides: PersesSeriesOverride[]
+  /** Ordered color palette matching the expected API series order (non-transient sources, then expressions) */
+  palette: string[]
+  /** Dominant visual mode derived from the graph definition's series types */
+  visualMode: 'line' | 'area' | 'stack'
+  printStatements: PrintStatement[]
+}
+
 export interface Plugin {
   extensionClass?: string
   extensionId: string
@@ -586,8 +673,13 @@ export interface NodePreferences {
   nodeFilter?: NodeQueryFilter
 }
 
+export interface AlarmPreferences {
+  visibleColumns?: string[]
+}
+
 export interface OpenNmsPreferences {
   nodePreferences: NodePreferences
+  alarmPreferences?: AlarmPreferences
   isSideMenuExpanded?: boolean
 }
 

@@ -1,5 +1,6 @@
 @use "@featherds/styles/mixins/_typography.scss" as typo;
 @use "@featherds/styles/themes/variables";
+@use '@/styles/vars' as vars;
 
 /**
 * Add some additional base styles that weren't included in the base Feather typography.
@@ -26,7 +27,14 @@ th {
   line-height: 1.3rem;
 }
 
-// Do not want the Feather behavior of changing the color of links when visited.
+// Override browser default purple/pink for visited links.
+// !important required: scoped component styles (a[data-v-xxx]) match with equal
+// specificity, so load-order can let the browser default win without it.
 a:visited {
-  color: var(--feather-clickable-normal);
+  color: var(--feather-clickable-normal) !important;
+}
+
+// Normalize surface containers to consistent rounded corners.
+.card {
+  border-radius: vars.$border-radius-surface;
 }

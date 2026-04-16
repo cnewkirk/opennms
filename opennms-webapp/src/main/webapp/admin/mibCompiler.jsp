@@ -25,15 +25,7 @@
 	contentType="text/html"
 	session="true"
 %>
-
-<%@ page import="org.opennms.web.utils.Bootstrap" %>
-<% Bootstrap.with(pageContext)
-          .headTitle("SNMP MIB Compiler")
-          .breadcrumb("Admin", "admin/index.jsp")
-          .breadcrumb("SNMP MIB Compiler")
-          .build(request);
+<%
+  // Redirect to Vue SPA MIB Compiler
+  response.sendRedirect(request.getContextPath() + "/ui/index.html#/mib-compiler");
 %>
-<jsp:directive.include file="/includes/bootstrap.jsp" />
-
-<iframe name="mib-compiler" src="mib-compiler" class="vaadin-fullscreen" frameborder="0"></iframe>
-<jsp:include page="/includes/bootstrap-footer.jsp" flush="true"/>

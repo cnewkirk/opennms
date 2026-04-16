@@ -21,19 +21,5 @@
     License.
 
 --%>
-<%@page language="java"
-        contentType="text/html"
-        session="true"
-        %>
-
-<%@ page import="org.opennms.web.utils.Bootstrap" %>
-<% Bootstrap.with(pageContext)
-          .headTitle("Surveillance Views Config Web UI")
-          .breadcrumb("Admin", "admin/index.jsp")
-          .breadcrumb("Surveillance Views Config Web UI")
-          .build(request);
-%>
-<jsp:directive.include file="/includes/bootstrap.jsp" />
-
-<iframe name="surveillance-views-config" src="admin/vaadin-surveillance-views-config" class="vaadin-fullscreen" frameborder="0"></iframe>
-<jsp:include page="/includes/bootstrap-footer.jsp" flush="true"/>
+<%@page language="java" contentType="text/html" session="true" %>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/surveillance-views-config"); %>

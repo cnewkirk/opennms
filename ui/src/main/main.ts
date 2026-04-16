@@ -36,6 +36,16 @@ import * as VueRouter from 'vue-router'
 
 import '@featherds/styles'
 import '@featherds/styles/themes/open-light.css'
+import '@featherds/styles/themes/open-dark.css'
+
+// Apply saved theme and watch for changes from the menu toggle
+const applyTheme = (theme: string | null) => {
+  document.documentElement.classList.toggle('open-dark', theme === 'open-dark')
+}
+applyTheme(localStorage.getItem('theme'))
+window.addEventListener('storage', (e) => {
+  if (e.key === 'theme') applyTheme(e.newValue)
+})
 
 import 'vue-diff/dist/index.css'
 

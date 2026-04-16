@@ -21,19 +21,5 @@
     License.
 
 --%>
-<%@page language="java"
-	contentType="text/html"
-	session="true"
-%>
-
-<%@ page import="org.opennms.web.utils.Bootstrap" %>
-<% Bootstrap.with(pageContext)
-          .headTitle("JMX Configuration Generator")
-          .breadcrumb("Admin", "admin/index.jsp")
-          .breadcrumb("JMX Configuration Generator")
-          .build(request);
-%>
-<jsp:directive.include file="/includes/bootstrap.jsp" />
-
-<iframe id="vaadin-content" name="jmx-config-ui" src="admin/jmx-config-tool" frameborder="0" class="vaadin-fullscreen"></iframe>
-<jsp:include page="/includes/bootstrap-footer.jsp" flush="true"/>
+<%@page language="java" contentType="text/html" session="true" %>
+<% response.sendRedirect(request.getContextPath() + "/ui/index.html#/jmx-config-generator"); %>

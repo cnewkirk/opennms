@@ -76,6 +76,7 @@ const gotoViewTab = async () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/vars' as vars;
 @use "@featherds/styles/themes/variables";
 
 .text-danger {
@@ -87,7 +88,7 @@ const gotoViewTab = async () => {
   overflow-y: auto;
   padding: 10px;
   margin-top: 8px;
-  border-radius: 8px;
+  border-radius: vars.$border-radius-sm;
   border: 1px solid var(variables.$border-on-surface);
 }
 

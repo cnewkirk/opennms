@@ -162,7 +162,7 @@
         {
           "id": "outages",
           "name": "Outages",
-          "url": "outage/index.jsp",
+          "url": "ui/index.html#/outages",
           "locationMatch": "outage",
           "roles": null
         },
@@ -195,7 +195,7 @@
     {
       "id": "topologiesMenu",
       "name": "Topology Map",
-      "url": "topology",
+      "url": "ui/index.html#/topology",
       "action": "link",
       "locationMatch": "topology",
       "icon": "network/Instances",

@@ -183,22 +183,10 @@
                   :key="column.id"
                 >
                   <td v-if="isSelectedColumn(column, 'id')">
-                    <a
-                      :href="computeNodeLink(node.id)"
-                      @click="onNodeLinkClick(node.id)"
-                      target="_blank"
-                    >
-                      {{ node.id }}
-                    </a>
+                    <router-link :to="`/node/${node.id}`">{{ node.id }}</router-link>
                   </td>
                   <td v-if="isSelectedColumn(column, 'label')">
-                    <a
-                      :href="computeNodeLink(node.id)"
-                      @click="onNodeLinkClick(node.id)"
-                      target="_blank"
-                    >
-                      {{ node.label }}
-                    </a>
+                    <router-link :to="`/node/${node.id}`">{{ node.label }}</router-link>
                   </td>
 
                   <ManagementIPTooltipCell
@@ -244,7 +232,7 @@
                   <FeatherButton
                     icon="Edit"
                     class="edit-icon"
-                    @click="() => onNodeLinkClick(node.id)"
+                    @click="() => $router.push(`/node/${node.id}`)"
                   >
                     <FeatherIcon
                       :icon="Edit"
@@ -485,9 +473,6 @@ const computeNodeIpInterfaceLink = (nodeId: number | string, ipAddress: string) 
   return `${mainMenu.value.baseHref}element/interface.jsp?node=${nodeId}&intf=${ipAddress}`
 }
 
-const onNodeLinkClick = (nodeId: number | string) => {
-  window.location.assign(computeNodeLink(nodeId))
-}
 
 const hasExtendedSearchParams = computed(() => {
   return hasAnyExtendedSearchValues(nodeStructureStore.queryFilter.extendedSearch)
@@ -548,6 +533,7 @@ watch([() => nodeStructureStore.queryFilter], () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/vars' as vars;
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
@@ -609,7 +595,7 @@ table {
 
   .btn.btn-icon{
     border: 2px solid var($border-on-surface);
-    border-radius: 3px;
+    border-radius: vars.$border-radius-xs;
     padding: 0 0.5rem;
     height: 3rem;
     width: 3rem;
@@ -664,7 +650,7 @@ table {
   .btn.btn-icon-table {
     width: 2.25rem;
     height: 2.25rem;
-    border-radius: 100%;
+    border-radius: vars.$border-radius-round;
   }
 }
 </style>

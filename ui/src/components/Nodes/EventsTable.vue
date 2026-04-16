@@ -27,7 +27,7 @@
                 <router-link :to="`/event/${event.id}`">{{ event.id }}</router-link>
               </td>
               <td v-date>{{ event.createTime }}</td>
-              <td>{{ event.severity }}</td>
+              <td><SeverityBadge :severity="event.severity" /></td>
               <td>
                 <span
                   v-html="event.logMessage"
@@ -53,12 +53,14 @@
   lang="ts"
 >
 import Pagination from '../Common/Pagination.vue'
+import SeverityBadge from '../Common/SeverityBadge.vue'
 import { useEventStore } from '@/stores/eventStore'
 import useQueryParameters from '@/composables/useQueryParams'
 import { Event, QueryParameters } from '@/types'
 
+const props = defineProps<{ nodeId: string }>()
+
 const eventStore = useEventStore()
-const route = useRoute()
 
 const getEvents = async (payload: QueryParameters) => {
   eventStore.getEvents(payload)
@@ -71,23 +73,27 @@ const getEventsTotalCount = () => {
 const { queryParameters, updateQueryParameters } = useQueryParameters({
   limit: 5,
   offset: 0,
-  _s: `node.id==${route.params.id}`
+  _s: `node.id==${props.nodeId}`
 }, getEvents)
 
 const events = computed(() => eventStore.events)
-const getRowClass = (data: Event) => data.severity.toLowerCase()
+const getRowClass = (data: Event) => `row--${data.severity.toLowerCase()}`
 </script>
 
 <style
   lang="scss"
   scoped
 >
+@use '@/styles/vars' as vars;
+@use '@featherds/styles/themes/variables' as fvars;
+@use '@featherds/styles/themes/utils';
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
 .card {
   @include elevation(2);
   padding: 15px;
   margin-bottom: 15px;
+  border-radius: vars.$border-radius-surface;
 }
 table {
   @include table;
@@ -97,12 +103,16 @@ table {
     margin: 0px;
   }
 }
-.warning {
-  background: rgba(255, 175, 34, 0.5);
-  color: var($state-color-on-surface);
-}
-.normal {
-  background: rgba(133, 217, 165, 0.5);
-  color: var($state-color-on-surface);
+// border-left on <tr> is ignored in border-separate mode; target first td instead
+$row-opacity: 0.15;
+.row {
+  &--critical      { background: utils.alpha(fvars.$error,         $row-opacity); td:first-child { border-left: 3px solid var(--feather-error); } }
+  &--major         { background: utils.alpha(fvars.$major,         $row-opacity); td:first-child { border-left: 3px solid var(--feather-major); } }
+  &--minor         { background: utils.alpha(fvars.$minor,         $row-opacity); td:first-child { border-left: 3px solid var(--feather-minor); } }
+  &--warning       { background: utils.alpha(fvars.$warning,       $row-opacity); td:first-child { border-left: 3px solid var(--feather-warning); } }
+  &--normal        { background: utils.alpha(fvars.$success,       $row-opacity); td:first-child { border-left: 3px solid var(--feather-success); } }
+  &--cleared,
+  &--unacknowledged { background: utils.alpha(fvars.$cleared,      $row-opacity); td:first-child { border-left: 3px solid var(--feather-cleared); } }
+  &--indeterminate { background: utils.alpha(fvars.$indeterminate, $row-opacity); td:first-child { border-left: 3px solid var(--feather-indeterminate); } }
 }
 </style>

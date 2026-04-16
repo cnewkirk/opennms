@@ -110,7 +110,6 @@ export const useScvStore = defineStore('scvStore', () => {
   }
 
   const updateAttribute = (attribute: { key: string; keyVal: { key: string; value: string } }) => {
-    // TODO: Do we need to replace entire credential.values object, or can we just modify credentials.value.attributes?
     const attributes = { ...credentials.value.attributes }
 
     // updating the value

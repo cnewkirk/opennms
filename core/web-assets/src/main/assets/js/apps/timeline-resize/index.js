@@ -29,18 +29,23 @@ const getSize = function(element) {
   const td = element.closest('td')[0];
 
   if (td !== undefined) {
-    // get the td's padding
-    const s = getComputedStyle(td).padding;
-    // remove 'px' from string like '4.8px' and convert to float
-    const p = parseFloat(s.substr(0, s.length - 2));
-    // subtract the padding twice
-    return Math.round(td.offsetWidth - 2 * p);
+    // Use individual longhand properties — getComputedStyle().padding (shorthand)
+    // returns '' in modern Chrome/Safari regardless of the CSS value, while
+    // paddingLeft/paddingRight always return a computed pixel value.
+    const style = getComputedStyle(td);
+    const pl = parseFloat(style.paddingLeft) || 0;
+    const pr = parseFloat(style.paddingRight) || 0;
+    const w = Math.round(td.offsetWidth - pl - pr);
+    if (w > 0) { return w; }
+    // offsetWidth was 0 — layout not yet complete; fall through to container fallback
   }
 
-  // otherwise, fall back to the old way of calculating
-  const container = element.closest('div'); // This is the panel, not the cell that contains the IMG
-  if (container !== undefined) {
-    return Math.round(container.width() * RELATIVE_SIZE);
+  // Fall back to a portion of the nearest containing div's width.
+  // This handles the case where the td hasn't been laid out yet.
+  const container = element.closest('div');
+  if (container && container.length > 0) {
+    const cw = Math.round(container.innerWidth() * RELATIVE_SIZE);
+    if (cw > 0) { return cw; }
   }
 
   return NaN;
@@ -53,7 +58,7 @@ const recalculateBox = debounce(() => {
   for (let i=0; i < imgs.length; i++) {
     const img = $(imgs[i]);
     const w = getSize(img);
-    if (w) {
+    if (w > 0) {
       const imgsrc = img.data('imgsrc') + w;
       img.attr('src', imgsrc);
     }
@@ -63,12 +68,15 @@ const recalculateBox = debounce(() => {
   for (let i=0; i < spans.length; i++) {
     const span = $(spans[i]);
     const w = getSize(span);
-    if (w && span.data('src')) {
+    if (w > 0 && span.data('src')) {
       const htmlsrc = span.data('src') + w;
       span.load(String(htmlsrc));
     }
   }
 }, DEBOUNCE_RATE);
 
+// Fire on document ready (layout may still be pending for complex pages)
 $(document).ready(recalculateBox);
+// Fire again on window load (after all resources and layout are fully complete)
+$(window).on('load', recalculateBox);
 window.addEventListener('resize', recalculateBox);

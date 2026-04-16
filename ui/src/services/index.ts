@@ -55,7 +55,8 @@ import { getFileNames, getFile, getSnippets, postFile, deleteFile, getFileExtens
 import { getAliases, getCredentialsByAlias, addCredentials, updateCredentials } from './scvService'
 
 import { getAlarms, modifyAlarm } from './alarmService'
-import { getEvents } from './eventService'
+import { getOutages, getActiveOutages, getActiveOutageCount } from './outageService'
+import { getEvents, getEventById } from './eventService'
 import { getNodeIfServices } from './ifService'
 import { getIpInterfaces, getNodeIpInterfaceQuery } from './ipInterfaceService'
 import { search } from './searchService'
@@ -83,7 +84,11 @@ export default {
   getNodes,
   getAlarms,
   getEvents,
+  getEventById,
   modifyAlarm,
+  getOutages,
+  getActiveOutages,
+  getActiveOutageCount,
   getNodeById,
   getNodeOutages,
   getNodeIfServices,

@@ -211,6 +211,7 @@
     },
     "scripts": {
         "preinstall": "npx only-allow pnpm",
+        "postinstall": "node scripts/patch-flot-legend.js",
         "webpack": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096 --openssl-legacy-provider\" webpack --colors --display-error-details --env=development",
         "webpack-release": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096 --openssl-legacy-provider\" webpack --colors --display-error-details --env=production",
         "check-git": "node check-git.js",
