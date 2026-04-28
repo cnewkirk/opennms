@@ -22,6 +22,7 @@
 package org.opennms.web.servlet;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -31,31 +32,41 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 
 @WebFilter(asyncSupported = true, urlPatterns = "/*")
 public class SpaRoutingFilter implements Filter {
+
+    public static final String UI_VERSION_PROPERTY = "org.opennms.web.ui.version";
+    public static final String DEFAULT_VERSION = "default";
+
+    private static final Pattern SAFE_VERSION = Pattern.compile("[A-Za-z0-9._-]+");
 
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         final String uri = httpServletRequest.getRequestURI().substring(httpServletRequest.getContextPath().length());
-        if (isClientPath(uri)) {
-            chain.doFilter(new HttpServletRequestWrapper(httpServletRequest) {
-                @Override
-                public String getServletPath() {
-                    return "/ui/index.html";
-                }
-            }, response);
+
+        if (!uri.equals("/ui") && !uri.startsWith("/ui/")) {
+            chain.doFilter(request, response);
             return;
         }
-        chain.doFilter(request, response);
+
+        final String version = activeVersion();
+        final String suffix = isAsset(uri) ? uri.substring("/ui".length()) : "/index.html";
+        final String target = "/ui-versions/" + version + suffix;
+        request.getRequestDispatcher(target).forward(request, response);
     }
 
-    private boolean isClientPath(final String uri) {
-        return uri.startsWith("/ui/")
-                && !uri.startsWith("/ui/assets/")
-                && !uri.endsWith(".svg");
+    private String activeVersion() {
+        final String value = System.getProperty(UI_VERSION_PROPERTY, DEFAULT_VERSION);
+        if (value.contains("..") || !SAFE_VERSION.matcher(value).matches()) {
+            return DEFAULT_VERSION;
+        }
+        return value;
+    }
+
+    private boolean isAsset(final String uri) {
+        return uri.startsWith("/ui/assets/") || uri.endsWith(".svg");
     }
 
     @Override
