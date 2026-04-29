@@ -24,6 +24,13 @@ podman ps --filter name=test-opennms --format '{{.Status}} {{.Image}}'
 ```
 And read MEMORY.md. Every session starts blind — these steps give you context.
 
+Also check whether the topology lab is running if you'll be testing the topology view:
+```bash
+podman ps --filter name=topo- --format '{{.Names}}'
+# If empty: ./start-topology-lab.sh
+```
+The edge tooltip bandwidth chart requires the topology lab SNMP agents to be up so collectd can create `interfaceSnmp` RRD files. A freshly rebuilt container will always show a blank chart until the lab is started and collectd runs at least one 30s poll cycle.
+
 **Container freshness is NOT optional.** Compare the image `Created` date against `git log -1 --format='%ci' HEAD`. **If the image is more than 24 hours older than HEAD and the fix touches ANYTHING outside `ui/src/`** (JSPs, REST, Karaf features, backend jars, config XML, etc.), you **MUST** rebuild before trusting the container:
 ```bash
 ./build-dark-mode-overlay.sh                 # ~3-5 min
@@ -35,21 +42,29 @@ podman rm -f test-opennms && podman run -d --name test-opennms --privileged \
   localhost/opennms/horizon:35.0.5-dark-mode -s
 # wait for /opennms/rest/info → 200, then set password to 'notdefault' via Jasypt
 # (see tail of build-dark-mode-overlay.sh output for the exact Jasypt command)
-cd ui && ./target/node/yarn/dist/bin/yarn build
+cd ui && ../target/node/pnpm build
 ./ui/deploy-to-container.sh test-opennms
 ```
 **Hot-deploying the Vue SPA via `deploy-to-container.sh` does NOT update JSPs, jars, features, or `applicationContext-*.xml`.** Those only land in the container through a full `build-dark-mode-overlay.sh` → image → container recreate cycle. Treating a stale container as current has caused multiple failed-fix loops that wasted hours and money. If in doubt, rebuild.
 
 **NEVER make sweeping "cleanup" commits** touching multiple unrelated files without understanding each one. The commit `c223dcdae54 ui redesign cleanup` (2026-04-10) wiped multiple prior fixes because the session didn't read context first. If something looks wrong, check `git log --oneline -5 -- <file>` before changing it.
 
-**`git reset --hard` is COMPLETELY BANNED. No exceptions. No "just this once". No "but there's nothing uncommitted".** There is no scenario where this command is acceptable. Use `git revert` to undo a commit. Use `git stash` to set aside work. If you think you need `git reset --hard`, you are wrong — ask the user instead. The April 10 incident lost 15 commits and caused menu regressions that took 4 sessions to fully fix because resets wiped uncommitted changes that were invisible to every subsequent session.
+**DESTRUCTIVE OPERATIONS ARE BANNED. Confirm before any of these:**
+- `git reset --hard` — completely banned, hook will block it. Use `git revert` or `git stash`.
+- `git branch -f` — same effect as reset --hard. Ask first.
+- `git push --force` / `git push -f` — requires explicit per-action user confirmation. Never assume "yes to the plan" means yes to a force push.
+- `podman rm -f` — ask before destroying a container.
+- `rm -rf` of any non-throwaway directory — ask first.
+- Deleting or overwriting untracked/uncommitted files.
+
+**Why:** A rogue Claude session used `git reset --hard` + force-push to destroy 498 commits of real work (shell redesign, topology Views, MapLibre map, dashboard widgets). The user had to rescue the work from a backup directory. This cost multiple sessions to recover. "Yes to the plan" is NOT permission for each destructive step within it.
 
 **Never reset to a remote branch** (`git reset --hard fork/feat/ui-refactor` or similar). If local and remote have diverged, that divergence is intentional. Never "sync" by overwriting local.
 
 ### Git Hygiene
 
-1. **NEVER commit to `master`, `develop`, or any upstream branch.** All work goes on `feature/*` or `feat/*` branches.
-2. **Push ONLY to `fork` remote** (cnewkirk/opennms). Never push to `origin`.
+1. **NEVER commit to `master`, `develop`, or any upstream branch.** All work goes on `feature/*` or `feat/*` branches. Current working branch: **`feat/ui-refactor-omnibus`**.
+2. **Push ONLY to the fork** (cnewkirk/opennms). In this repo `origin` IS the fork — `git remote -v` to confirm before pushing. Never push to a remote named `upstream` or pointing at `OpenNMS/opennms`.
 3. **NEVER open PRs against OpenNMS/opennms** without the user explicitly typing "OpenNMS/opennms" in their message. PRs are opened on `cnewkirk/opennms` (fork-to-fork). Unauthorized upstream PRs are irreversible and cause public embarrassment.
 4. **Never add Co-Authored-By Claude or credit Claude on commits/PRs.** Never commit Claude-specific files to the repo.
 5. **Squash iterative commits** into logical groups before pushing. Maintainers don't want to see the sausage being made.

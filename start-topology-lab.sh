@@ -757,7 +757,7 @@ fi
 echo ""
 echo "==> [+] Starting traffic generator..."
 
-LOADGEN="${SCRIPT_DIR}/.topology-lab/load-gen.py"
+LOADGEN="${SCRIPT_DIR}/topology-lab-load-gen.py"
 if [[ -f "${LOADGEN}" ]]; then
   nohup python3 -u "${LOADGEN}" --max-mbps 1000 --interval 30 \
     > "${SCRIPT_DIR}/.topology-lab/load-gen.log" 2>&1 &
