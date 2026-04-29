@@ -173,8 +173,10 @@ mkdir -p "${OVERLAY_DIR}/webapp-rest-lib"
 cp "${WEBAPP_REST_JAR}" "${OVERLAY_DIR}/webapp-rest-lib/${WEBAPP_REST_BASENAME}"
 zip -d "${OVERLAY_DIR}/webapp-rest-lib/${WEBAPP_REST_BASENAME}" \
   'org/opennms/web/rest/v2/DashboardRestService.class' \
-  'org/opennms/web/rest/v2/DashboardRestService$*.class' 2>/dev/null || true
-echo "    opennms-webapp-rest.jar: OK (DashboardRestService stripped)"
+  'org/opennms/web/rest/v2/DashboardRestService$*.class' \
+  'org/opennms/web/rest/v2/TopologyViewsRestService.class' \
+  'org/opennms/web/rest/v2/TopologyViewsRestService$*.class' 2>/dev/null || true
+echo "    opennms-webapp-rest.jar: OK (DashboardRestService + TopologyViewsRestService stripped)"
 
 # Spring context XML — base image doesn't have jmxconfig in component-scan
 mkdir -p "${OVERLAY_DIR}/spring-context"

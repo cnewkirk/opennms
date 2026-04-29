@@ -61,13 +61,13 @@ Every UI change MUST follow this exact sequence — no shortcuts, no skipping st
 
 **Bootstrap (fresh clone only):** `ui/target/node/` does not exist until Maven has run. Bootstrap once with:
 ```bash
-cd ui && mvn install -DskipTests -Prun-npm
+./compile.pl -DskipTests --projects :org.opennms.ui install
 ```
-This downloads the correct Node and Yarn versions into `ui/target/node/`.
+This downloads Node and pnpm into `ui/target/node/` (switched from yarn in NMS-19192, Dec 2025).
 
-1. `cd ui && ./target/node/yarn/dist/bin/yarn build`
+1. `cd ui && ../target/node/pnpm build` (or `./compile.pl -DskipTests --projects :org.opennms.ui install` which does the same via Maven)
    - **NEVER use `npm run build`** — it writes to `ui/dist/` which the deploy script does NOT read. Silent failure.
-   - Run from the repo root `ui/` directory. The yarn binary lives in `target/node/` (downloaded by Maven).
+   - The pnpm binary lives at `ui/target/node/pnpm` (symlink into `target/node/node_modules/pnpm/`).
 2. Verify `ui/src/main/dist/index.html` has `src="/opennms/ui/assets/index-*.js"` paths
 3. Verify built CSS has no bare `--feather-*` values (must be wrapped in `var()`)
 4. `./ui/deploy-to-container.sh test-opennms` (if container is stopped, START IT FIRST)
