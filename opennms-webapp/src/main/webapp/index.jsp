@@ -22,6 +22,18 @@
 
 --%>
 <%@page language="java" contentType="text/html" session="true"  %>
+<%
+/*
+ * UI opt-in gate. Set org.opennms.web.ui=next in
+ * etc/opennms.properties.d/ui.properties to activate the redesigned
+ * Vue-based interface. Restart OpenNMS after changing the property.
+ * Default is "classic" — this page renders the original interface.
+ */
+if ("next".equalsIgnoreCase(System.getProperty("org.opennms.web.ui", "classic"))) {
+    response.sendRedirect(request.getContextPath() + "/ui/");
+    return;
+}
+%>
 <%--
 /*******************************************************************************
  * This file is part of OpenNMS(R).

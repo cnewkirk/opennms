@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# opennms-ui — Switch the OpenNMS web interface between classic and next-generation.
+#
+# Usage:
+#   opennms-ui use <classic|next>   Configure the active UI (restart required)
+#   opennms-ui status               Show the currently configured UI
+#
+# A full restart of OpenNMS is required after "opennms-ui use".
+# Run: $OPENNMS_HOME/bin/opennms restart
+
+set -euo pipefail
+
+# shellcheck disable=SC2016
+if [ -d '${install.dir}' ]; then
+    OPENNMS_HOME='${install.dir}'
+fi
+
+if [ -z "${OPENNMS_HOME:-}" ]; then
+    echo "ERROR: OPENNMS_HOME is not set." >&2
+    exit 1
+fi
+
+PROPS_DIR="$OPENNMS_HOME/etc/opennms.properties.d"
+PROPS_FILE="$PROPS_DIR/ui.properties"
+PROP_KEY="org.opennms.web.ui"
+PROP_PATTERN="org\.opennms\.web\.ui"
+
+die() { echo "ERROR: $*" >&2; exit 1; }
+
+cmd="${1:-}"
+shift || true
+
+case "$cmd" in
+  use)
+    version="${1:?Usage: opennms-ui use <classic|next>}"
+    case "$version" in
+      classic|next) ;;
+      *) die "Unknown UI version '$version'. Valid values: classic, next" ;;
+    esac
+    mkdir -p "$PROPS_DIR"
+    # Remove any prior setting (commented or active), then append the new value.
+    if [ -f "$PROPS_FILE" ]; then
+      tmp_file=$(mktemp)
+      grep -v "^#*${PROP_PATTERN}=" "$PROPS_FILE" > "$tmp_file" || true
+      cat "$tmp_file" > "$PROPS_FILE"
+      rm -f "$tmp_file"
+    fi
+    printf '%s=%s\n' "$PROP_KEY" "$version" >> "$PROPS_FILE"
+    echo "UI set to: $version"
+    echo "Restart OpenNMS to apply: $OPENNMS_HOME/bin/opennms restart"
+    ;;
+  status)
+    if [ -f "$PROPS_FILE" ] && grep -q "^${PROP_PATTERN}=" "$PROPS_FILE" 2>/dev/null; then
+      val=$(grep "^${PROP_PATTERN}=" "$PROPS_FILE" | head -1 | cut -d= -f2)
+      echo "${PROP_KEY}=${val}"
+    else
+      echo "${PROP_KEY}=classic (default — not explicitly configured)"
+    fi
+    ;;
+  *)
+    echo "Usage: opennms-ui <use <classic|next>|status>"
+    exit 1
+    ;;
+esac
