@@ -2024,6 +2024,8 @@
     <frontendPluginVersion>1.14.2</frontendPluginVersion>
     <nodeVersion>v22.22.2</nodeVersion>
     <pnpmVersion>10.24.0</pnpmVersion>
+    <!-- UI version — override to ship a different UI without rebuilding the backend -->
+    <opennms.ui.version>${project.version}</opennms.ui.version>
 
     <!-- configuration manager -->
     <xmlschemaVersion>2.3.1</xmlschemaVersion>

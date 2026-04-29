@@ -50,10 +50,10 @@
                 <artifactItem>
                   <groupId>org.opennms</groupId>
                   <artifactId>org.opennms.ui</artifactId>
-                  <version>${project.version}</version>
+                  <version>${opennms.ui.version}</version>
                   <classifier>dist</classifier>
                   <overWrite>true</overWrite>
-                  <outputDirectory>target/opennms-webapp-${project.version}/ui</outputDirectory>
+                  <outputDirectory>target/opennms-webapp-${project.version}/ui-versions/default</outputDirectory>
                 </artifactItem>
               </artifactItems>
               <excludes>META-INF/**</excludes>
