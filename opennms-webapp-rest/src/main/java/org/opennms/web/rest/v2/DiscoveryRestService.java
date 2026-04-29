@@ -64,7 +64,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 @Path("discovery")
-@Transactional
 @Tag(name = "Discovery", description = "Discovery API")
 public class DiscoveryRestService {
 

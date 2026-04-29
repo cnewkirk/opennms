@@ -76,7 +76,7 @@ echo "==> [3/4] Building opennms-webapp-rest..."
 cd "${SCRIPT_DIR}"
 ./compile.pl -DskipTests -Ddisable.checkstyle --projects :opennms-webapp-rest install 2>&1 | tail -5
 # Find the built jar dynamically — version may differ from base image
-WEBAPP_REST_JAR=$(find "${SCRIPT_DIR}/opennms-webapp-rest/target" -path '*/WEB-INF/lib/opennms-webapp-rest-*.jar' -newer "${SCRIPT_DIR}/opennms-webapp-rest/pom.xml" | sort | tail -1)
+WEBAPP_REST_JAR=$(find "${SCRIPT_DIR}/opennms-webapp-rest/target" -path '*/WEB-INF/lib/opennms-webapp-rest-*.jar' -newer "${SCRIPT_DIR}/opennms-webapp-rest/pom.xml" -print0 | xargs -0 ls -t 2>/dev/null | head -1)
 if [[ -z "${WEBAPP_REST_JAR}" || ! -f "${WEBAPP_REST_JAR}" ]]; then
   echo "ERROR: opennms-webapp-rest jar not found in target/" >&2
   exit 1
