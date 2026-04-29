@@ -66,12 +66,12 @@ const adminCards = computed(() => {
       links: [
         { label: 'Manage Provisioning Requisitions', href: baseHref.value + 'admin/ng-requisitions/index.jsp' },
         { label: 'Import and Export Asset Information', href: baseHref.value + 'admin/asset/index.jsp' },
-        { label: 'Manage Surveillance Categories', href: baseHref.value + 'admin/categories.htm' },
+        { label: 'Manage Surveillance Categories', to: '/surveillance-categories' },
         { label: 'Configure Discovery', to: '/discovery-config' },
         { label: 'Run Single Discovery Scan', href: baseHref.value + 'admin/discovery/edit-scan.jsp' },
         { label: 'Configure SNMP Community Names by IP Address', to: '/snmp-config' },
         { label: 'Manually Add an Interface', href: baseHref.value + 'admin/newInterface.jsp' },
-        { label: 'Delete Nodes', href: baseHref.value + 'admin/delete.jsp' },
+        { label: 'Delete Nodes', to: '/delete-nodes' },
         { label: 'Configure External Requisitions', to: '/configuration' },
         { label: 'Configure Geocoder Service', href: baseHref.value + 'admin/geoservice/index.jsp' },
         { label: 'Secure Credentials Vault', to: '/scv' },
@@ -80,7 +80,7 @@ const adminCards = computed(() => {
     {
       title: 'Event Management',
       links: [
-        { label: 'Manually Send an Event', href: baseHref.value + 'admin/sendevent.htm' },
+        { label: 'Manually Send an Event', to: '/send-event' },
         { label: 'Configure Notifications', to: '/notification-config' },
         { label: 'Configure Destination Paths', to: '/notification-config/paths' },
         { label: 'Manage Event Configurations', to: '/event-config' },

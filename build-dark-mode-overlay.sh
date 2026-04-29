@@ -69,10 +69,25 @@ fi
 echo "    index.js: OK"
 
 # ---------------------------------------------------------------------------
-# 3. Build opennms-webapp-rest (needed for JMX Config Generator backend)
+# 3a. Build opennms-webapp (Spring MVC controllers: CategoryController, SendEventController, etc.)
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [3/4] Building opennms-webapp-rest..."
+echo "==> [3a/4] Building opennms-webapp..."
+cd "${SCRIPT_DIR}"
+./compile.pl -DskipTests -Ddisable.checkstyle --projects :opennms-webapp install 2>&1 | tail -5
+# JAR artifact is inside the exploded WAR directory (same pattern as opennms-webapp-rest)
+WEBAPP_JAR=$(find "${SCRIPT_DIR}/opennms-webapp/target" -path '*/WEB-INF/lib/opennms-webapp-*.jar' -newer "${SCRIPT_DIR}/opennms-webapp/pom.xml" -print0 | xargs -0 ls -t 2>/dev/null | head -1)
+if [[ -z "${WEBAPP_JAR}" || ! -f "${WEBAPP_JAR}" ]]; then
+  echo "ERROR: opennms-webapp jar not found in target/" >&2
+  exit 1
+fi
+echo "    opennms-webapp.jar: OK ($(basename "${WEBAPP_JAR}"))"
+
+# ---------------------------------------------------------------------------
+# 3b. Build opennms-webapp-rest (needed for JMX Config Generator backend)
+# ---------------------------------------------------------------------------
+echo ""
+echo "==> [3b/4] Building opennms-webapp-rest..."
 cd "${SCRIPT_DIR}"
 ./compile.pl -DskipTests -Ddisable.checkstyle --projects :opennms-webapp-rest install 2>&1 | tail -5
 # Find the built jar dynamically — version may differ from base image
@@ -136,10 +151,13 @@ cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/includes/bootstrap.jsp" \
    "${OVERLAY_DIR}/includes/bootstrap.jsp"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/index.jsp" \
    "${OVERLAY_DIR}/index.jsp"
-# mibCompiler.jsp — redirect to Vue SPA
+# admin JSPs — redirects to Vue SPA
 mkdir -p "${OVERLAY_DIR}/admin"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/mibCompiler.jsp" \
    "${OVERLAY_DIR}/admin/mibCompiler.jsp"
+# delete.jsp — redirect to Vue /delete-nodes
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/delete.jsp" \
+   "${OVERLAY_DIR}/admin/delete.jsp"
 # node.jsp — redirect to Vue SPA at /#/node/:id
 mkdir -p "${OVERLAY_DIR}/element"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/element/node.jsp" \
@@ -162,6 +180,14 @@ cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/dashboard.jsp" \
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/surveillance-view.jsp" \
    "${OVERLAY_DIR}/surveillance-view.jsp"
 
+
+# opennms-webapp jar — rename to match base image version so COPY replaces it
+# Contains updated Spring MVC controllers (CategoryController → /ui/surveillance-categories,
+# SendEventController → /ui/send-event).
+WEBAPP_BASENAME="opennms-webapp-35.0.4.jar"
+mkdir -p "${OVERLAY_DIR}/webapp-lib"
+cp "${WEBAPP_JAR}" "${OVERLAY_DIR}/webapp-lib/${WEBAPP_BASENAME}"
+echo "    opennms-webapp.jar: staged ($(basename "${WEBAPP_JAR}") → ${WEBAPP_BASENAME})"
 
 # opennms-webapp-rest jar — rename to match base image version so COPY replaces it
 # DashboardRestService references OnmsDashboard (not in 35.0.4 base model jar), and the
@@ -320,6 +346,9 @@ COPY --chown=10001:10001 index.jsp /opt/opennms/jetty-webapps/opennms/index.jsp
 # mibCompiler.jsp — redirect from Vaadin iframe to Vue SPA
 COPY --chown=10001:10001 admin/mibCompiler.jsp /opt/opennms/jetty-webapps/opennms/admin/mibCompiler.jsp
 
+# delete.jsp — redirect to Vue SPA /delete-nodes
+COPY --chown=10001:10001 admin/delete.jsp /opt/opennms/jetty-webapps/opennms/admin/delete.jsp
+
 # node.jsp — redirect to Vue SPA at /#/node/:id
 COPY --chown=10001:10001 element/node.jsp /opt/opennms/jetty-webapps/opennms/element/node.jsp
 
@@ -355,6 +384,9 @@ RUN cp /opt/opennms/system/org/opennms/features/org.opennms.features.mib-compile
     cd /tmp && unzip -o /opt/opennms/system/org/opennms/features/org.opennms.features.mib-compiler/35.0.4/org.opennms.features.mib-compiler-35.0.4.jar jsmiparser-api-0.14.jar jsmiparser-util-0.14.jar && \
     mv /tmp/jsmiparser-api-0.14.jar /opt/opennms/lib/ && \
     mv /tmp/jsmiparser-util-0.14.jar /opt/opennms/lib/
+
+# Updated opennms-webapp with patched Spring MVC controllers (categories/sendevent redirects)
+COPY --chown=10001:10001 webapp-lib/${WEBAPP_BASENAME} /opt/opennms/jetty-webapps/opennms/WEB-INF/lib/opennms-webapp-35.0.4.jar
 
 # Updated opennms-webapp-rest with JMX Config + MIB Compiler REST endpoints
 COPY --chown=10001:10001 webapp-rest-lib/${WEBAPP_REST_BASENAME} /opt/opennms/jetty-webapps/opennms/WEB-INF/lib/opennms-webapp-rest-35.0.4.jar

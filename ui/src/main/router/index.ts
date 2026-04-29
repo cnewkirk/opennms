@@ -709,6 +709,51 @@ const router = createRouter({
       }
     },
     {
+      path: '/surveillance-categories',
+      name: 'Surveillance Categories',
+      component: () => import('@/containers/SurveillanceCategories.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access Surveillance Categories.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
+      path: '/send-event',
+      name: 'Send Event',
+      component: () => import('@/containers/SendEvent.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to send events.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
+      path: '/delete-nodes',
+      name: 'Delete Nodes',
+      component: () => import('@/containers/DeleteNodes.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to delete nodes.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }

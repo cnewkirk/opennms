@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.collect.Maps;
 
@@ -61,7 +62,7 @@ public class SendEventController extends AbstractController {
     @Override
     protected ModelAndView handleRequestInternal(HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        return new ModelAndView("/admin/sendevent", "model", createModel());
+        return new ModelAndView(new RedirectView(request.getContextPath() + "/ui/send-event", false));
     }
 
     private Map<String, Object> createModel() throws FileNotFoundException, IOException {

@@ -42,6 +42,31 @@ const getCategories = async (): Promise<CategoryApiResponse | false> => {
   }
 }
 
+const createCategory = async (name: string): Promise<boolean> => {
+  try {
+    await rest.post(endpoint, `<category name="${name}"/>`, {
+      headers: { 'Content-Type': 'application/xml' }
+    })
+    return true
+  } catch { return false }
+}
+
+const updateCategory = async (id: number, name: string): Promise<boolean> => {
+  try {
+    await rest.put(`${endpoint}/${id}`, `<category name="${name}"/>`, {
+      headers: { 'Content-Type': 'application/xml' }
+    })
+    return true
+  } catch { return false }
+}
+
+const deleteCategory = async (id: number): Promise<boolean> => {
+  try {
+    await rest.delete(`${endpoint}/${id}`)
+    return true
+  } catch { return false }
+}
+
 export {
-  getCategories
+  getCategories, createCategory, updateCategory, deleteCategory
 }
