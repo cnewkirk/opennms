@@ -927,3 +927,33 @@ export interface SnmpInfo {
   contextName: string | null
   enterpriseId: string | null
 }
+
+export interface ClassificationGroup {
+  id: number
+  position: number
+  name: string
+  description: string
+  enabled: boolean
+  readOnly: boolean
+  ruleCount: number
+}
+
+export interface ClassificationRule {
+  id: number
+  name: string
+  dstAddress: string | null
+  dstPort: string | null
+  srcAddress: string | null
+  srcPort: string | null
+  exporterFilter: string | null
+  omnidirectional: boolean
+  group: ClassificationGroup
+  position: number
+  protocols: string[]
+}
+
+export interface Protocol {
+  decimal: number
+  keyword: string
+  description: string
+}

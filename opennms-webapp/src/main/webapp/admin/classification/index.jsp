@@ -21,23 +21,7 @@
     License.
 
 --%>
-<%@ page import="org.opennms.web.utils.Bootstrap" %>
-<% Bootstrap.with(pageContext)
-          .headTitle("Flow Classification")
-          .breadcrumb("Admin", "admin/index.jsp")
-          .breadcrumb("Flow Classification")
-          .ngApp("onms.classifications")
-          .includeLogoutForm()
-          .build(request);
+<%@ page contentType="text/html" %>
+<%
+  response.sendRedirect(request.getContextPath() + "/ui/flow-classification");
 %>
-<jsp:directive.include file="/includes/bootstrap.jsp" />
-
-<jsp:include page="/assets/load-assets.jsp" flush="false">
-  <jsp:param name="asset" value="onms-classifications" />
-</jsp:include>
-
-<div ui-view>
-
-</div>
-
-<jsp:include page="/includes/bootstrap-footer.jsp" flush="false"/>

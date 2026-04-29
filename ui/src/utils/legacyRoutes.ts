@@ -18,7 +18,8 @@ export const legacyToVueRoutes: Record<string, string> = {
   'vaadin-wallboard':                  '/wallboard-config',
   'admin/bsm/adminpage.jsp':           '/bsm-admin',
   'admin/manageEvents.jsp':            '/event-config',
-  'admin/index.jsp':                   '/admin'
+  'admin/index.jsp':                   '/admin',
+  'admin/classification/index.jsp':    '/flow-classification'
 }
 
 /**

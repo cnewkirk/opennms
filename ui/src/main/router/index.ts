@@ -694,6 +694,21 @@ const router = createRouter({
       }
     },
     {
+      path: '/flow-classification',
+      name: 'Flow Classification',
+      component: () => import('@/containers/FlowClassification.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access Flow Classification.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }

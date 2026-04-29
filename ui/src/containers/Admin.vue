@@ -90,7 +90,7 @@ const adminCards = computed(() => {
     {
       title: 'Flow Management',
       links: [
-        { label: 'Manage Flow Classification', href: baseHref.value + 'admin/classification/index.jsp' },
+        { label: 'Manage Flow Classification', to: '/flow-classification' },
       ]
     },
     {

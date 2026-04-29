@@ -231,17 +231,16 @@ export interface Protocol {
 - Breadcrumbs last item: `{ label: 'Flow Classification', to: '#', position: 'last' }`
 - Router guard: copy the `adminRole` + `whenever(rolesAreLoaded, ...)` pattern exactly
 - Snackbar: `import useSnackbar from '@/composables/useSnackbar'` (default import)
-- FeatherDialog for modals: `import { FeatherDialog } from '@featherds/dialog'`
+- PrimeVue Dialog for modals: `import Dialog from 'primevue/dialog'`
 
-## Critical Feather DS rules
+## SCSS rules (Feather tokens remain source of truth)
 - `--feather-success-subtle` / `--feather-error-subtle` do NOT exist — use `rgba(var(--feather-success), 0.12)` pattern
 - SCSS vars: always `var($surface)` not `$surface` (bare breaks dark mode)
 - Import at top of every `<style lang="scss">`: `@import "@featherds/styles/themes/variables"`
-- Only `body-large` and `body-small` typography mixins (NOT `body1`/`body2`)
 
 ## Build + deploy sequence
 ```bash
-cd ui && ./target/node/yarn/dist/bin/yarn build
+cd ui && ../target/node/pnpm build
 # verify ui/src/main/dist/index.html has correct src paths
 ./ui/deploy-to-container.sh test-opennms
 # verify hash matches: podman exec test-opennms grep -o 'assets/index-[^"]*\.js' /opt/opennms/jetty-webapps/opennms/ui/index.html
