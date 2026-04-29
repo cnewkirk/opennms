@@ -90,6 +90,30 @@ for (const plugin of plugins) {
   }
 }
 
+// The backend major version this UI build is compatible with.
+// Bump when a REST API shape change would break this UI.
+const UI_COMPATIBLE_API = '35'
+
+async function checkApiCompatibility(): Promise<string | null> {
+  try {
+    const res = await fetch('/opennms/rest/info', {
+      headers: { Accept: 'application/json' }
+    })
+    if (!res.ok) return null
+    const info = await res.json()
+    const backendVersion: string = info.version ?? ''
+    const backendMajor = backendVersion.split('.')[0]
+    if (backendMajor && backendMajor !== UI_COMPATIBLE_API) {
+      return `This UI was built for OpenNMS ${UI_COMPATIBLE_API}.x but the backend is ${backendVersion}. Some features may not work correctly.`
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+const apiCompatibilityWarning = await checkApiCompatibility()
+
 const app = createApp({
   render: () => h(App)
 })
@@ -104,4 +128,5 @@ app
 
 useAppStore().initTheme()
 
+app.provide('apiCompatibilityWarning', apiCompatibilityWarning)
 app.mount('#app')

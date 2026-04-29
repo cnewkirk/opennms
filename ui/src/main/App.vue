@@ -20,6 +20,10 @@
       <Footer />
     </template>
   </FeatherAppLayout>
+  <div v-if="apiWarning" class="api-compat-banner">
+    <span>{{ apiWarning }}</span>
+    <button @click="apiWarning = null" class="api-compat-banner__dismiss" aria-label="Dismiss">×</button>
+  </div>
 </template>
 
 <script
@@ -32,12 +36,16 @@ import Menubar from '@/components/Menu/Menubar.vue'
 import SideMenu from '@/components/Menu/SideMenu.vue'
 import Spinner from '@/components/Common/Spinner.vue'
 import Snackbar from '@/components/Common/Snackbar.vue'
+import { inject, ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useInfoStore } from '@/stores/infoStore'
 import { usePluginStore } from '@/stores/pluginStore'
 import { useMenuStore } from '@/stores/menuStore'
 import { useMonitoringSystemStore } from '@/stores/monitoringSystemStore'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
+
+const rawWarning = inject<string | null>('apiCompatibilityWarning', null)
+const apiWarning = ref(rawWarning)
 
 const authStore = useAuthStore()
 const infoStore = useInfoStore()
@@ -93,5 +101,32 @@ a {
 }
 .subtitle2 {
   @include subtitle2;
+}
+
+.api-compat-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--p-yellow-500, #eab308);
+  color: #000;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  &__dismiss {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: #000;
+    padding: 0 0.25rem;
+    flex-shrink: 0;
+  }
 }
 </style>
