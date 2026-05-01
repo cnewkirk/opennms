@@ -1,10 +1,11 @@
 <template>
-  <FeatherDialog v-model="open" :labels="dialogLabels" @hidden="handleCancel">
+  <Dialog v-model:visible="open" :header="dialogLabels.title" modal :style="{ width: '560px' }" @hide="handleCancel">
     <div class="user-edit-dialog">
       <!-- User ID -->
       <div class="user-edit-dialog__field">
         <template v-if="isNew">
-          <FeatherInput label="User ID" v-model="form.userId" :disabled="saving" />
+          <label class="p-label">User ID</label>
+          <InputText v-model="form.userId" :disabled="saving" class="w-full" />
         </template>
         <template v-else>
           <p class="body2 user-edit-dialog__readonly-label">User ID</p>
@@ -13,40 +14,46 @@
       </div>
 
       <div class="user-edit-dialog__field">
-        <FeatherInput label="Full Name" v-model="form.fullName" :disabled="saving" />
+        <label class="p-label">Full Name</label>
+        <InputText v-model="form.fullName" :disabled="saving" class="w-full" />
       </div>
 
       <div class="user-edit-dialog__field">
-        <FeatherInput label="Email" v-model="form.email" type="email" :disabled="saving" />
+        <label class="p-label">Email</label>
+        <InputText v-model="form.email" type="email" :disabled="saving" class="w-full" />
       </div>
 
       <div class="user-edit-dialog__field">
-        <FeatherInput label="Comments" v-model="form.comments" :disabled="saving" />
+        <label class="p-label">Comments</label>
+        <InputText v-model="form.comments" :disabled="saving" class="w-full" />
       </div>
 
       <!-- Password section -->
       <template v-if="isNew">
         <div class="user-edit-dialog__field">
-          <FeatherInput label="Password" v-model="form.password" type="password" :disabled="saving" />
+          <label class="p-label">Password</label>
+          <InputText v-model="form.password" type="password" :disabled="saving" class="w-full" />
         </div>
         <div class="user-edit-dialog__field">
-          <FeatherInput label="Confirm Password" v-model="form.confirmPassword" type="password" :disabled="saving" />
+          <label class="p-label">Confirm Password</label>
+          <InputText v-model="form.confirmPassword" type="password" :disabled="saving" class="w-full" />
         </div>
       </template>
       <template v-else>
         <div class="user-edit-dialog__section">
           <div class="user-edit-dialog__section-header">
             <span class="subtitle2">Password</span>
-            <FeatherButton text @click="showChangePassword = !showChangePassword" :disabled="saving">
-              {{ showChangePassword ? 'Cancel' : 'Change Password' }}
-            </FeatherButton>
+            <Button text @click="showChangePassword = !showChangePassword" :disabled="saving"
+              :label="showChangePassword ? 'Cancel' : 'Change Password'" />
           </div>
           <template v-if="showChangePassword">
             <div class="user-edit-dialog__field">
-              <FeatherInput label="New Password" v-model="form.password" type="password" :disabled="saving" />
+              <label class="p-label">New Password</label>
+              <InputText v-model="form.password" type="password" :disabled="saving" class="w-full" />
             </div>
             <div class="user-edit-dialog__field">
-              <FeatherInput label="Confirm New Password" v-model="form.confirmPassword" type="password" :disabled="saving" />
+              <label class="p-label">Confirm New Password</label>
+              <InputText v-model="form.confirmPassword" type="password" :disabled="saving" class="w-full" />
             </div>
           </template>
         </div>
@@ -77,26 +84,24 @@
               <option value="">— Add a role —</option>
               <option v-for="r in availableRolesToAdd" :key="r" :value="r">{{ r }}</option>
             </select>
-            <FeatherButton text @click="addRole" :disabled="saving || !selectedRoleToAdd">Add</FeatherButton>
+            <Button label="Add" text @click="addRole" :disabled="saving || !selectedRoleToAdd" />
           </div>
         </div>
       </template>
     </div>
 
-    <template v-slot:footer>
-      <FeatherButton text @click="handleCancel" :disabled="saving">Cancel</FeatherButton>
-      <FeatherButton primary @click="handleSave" :disabled="saving">
-        {{ saving ? 'Saving…' : 'Save' }}
-      </FeatherButton>
+    <template #footer>
+      <Button label="Cancel" text @click="handleCancel" :disabled="saving" />
+      <Button :label="saving ? 'Saving…' : 'Save'" @click="handleSave" :disabled="saving" />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 import { OnmsUser } from '@/types'
 import { createUser, updateUser, changePassword, addUserRole, removeUserRole } from '@/services/userGroupService'
 import useSnackbar from '@/composables/useSnackbar'

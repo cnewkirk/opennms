@@ -22,24 +22,22 @@
 
 <template>
   <div v-if="adminRole" class="admin-bar">
-    <FeatherButton primary :disabled="rescanning" @click="rescan">
-      {{ rescanning ? 'Rescanning…' : 'Rescan' }}
-    </FeatherButton>
+    <Button :label="rescanning ? 'Rescanning…' : 'Rescan'" :disabled="rescanning" @click="rescan" />
 
-    <FeatherButton v-if="resolvedSnmpIp" secondary as-anchor :href="updateSnmpUrl">
+    <a v-if="resolvedSnmpIp" :href="updateSnmpUrl" class="p-button p-button-outlined admin-bar__link-btn">
       Update SNMP
-    </FeatherButton>
-    <FeatherButton secondary as-anchor :href="scheduleOutageUrl">
+    </a>
+    <a :href="scheduleOutageUrl" class="p-button p-button-outlined admin-bar__link-btn">
       Schedule Outage
-    </FeatherButton>
-    <FeatherButton v-if="foreignSource" secondary as-anchor :href="editRequisitionUrl">
+    </a>
+    <a v-if="foreignSource" :href="editRequisitionUrl" class="p-button p-button-outlined admin-bar__link-btn">
       Edit in Requisition
-    </FeatherButton>
+    </a>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useRole from '@/composables/useRole'
 import useSnackbar from '@/composables/useSnackbar'
 import { v2 } from '@/services/axiosInstances'

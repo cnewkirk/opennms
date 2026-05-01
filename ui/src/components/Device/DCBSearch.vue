@@ -1,19 +1,16 @@
 <template>
-  <FeatherInput
-    :modelValue="searchVal"
-    @update:modelValue="searchFilterHandler"
-    label="Search device"
-  >
-    <template v-slot:post>
-      <FeatherIcon :icon="SearchIcon" />
-    </template>
-  </FeatherInput>
+  <span class="p-input-icon-right">
+    <InputText
+      :modelValue="searchVal ?? ''"
+      @update:modelValue="searchFilterHandler"
+      placeholder="Search device"
+    />
+    <i class="pi pi-search" />
+  </span>
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
-import { FeatherIcon } from '@featherds/icon'
-import SearchIcon from '@featherds/icon/action/Search'
+import InputText from 'primevue/inputtext'
 import { useDebounceFn } from '@vueuse/core'
 import { useDeviceStore } from '@/stores/deviceStore'
 import { DeviceConfigQueryParams } from '@/types/deviceConfig'

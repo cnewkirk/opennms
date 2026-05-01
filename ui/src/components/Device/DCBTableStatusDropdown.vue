@@ -1,31 +1,32 @@
 <template>
-  <FeatherDropdown class="pointer dcb-table-status-dropdown">
-    <template v-slot:trigger>
-      <span secondary link href="#" menu-trigger>
-        Backup Status
-        <FeatherIcon :icon="ArrowDown" aria-hidden="true" focusable="false" />
-      </span>
-    </template>
-    <FeatherDropdownItem
-      v-for="option of deviceStore.backupStatusOptions"
-      :key="option"
-      @click="filterByStatus(option)"
-    >
-      <div class="option" :class="option.toLowerCase()">
-      {{ option === 'NONE' ? 'No Backup' : option.toLowerCase() }}
-      </div>
-    </FeatherDropdownItem>
-  </FeatherDropdown>
+  <span class="pointer dcb-table-status-dropdown">
+    <Button
+      label="Backup Status"
+      icon="pi pi-chevron-down"
+      iconPos="right"
+      text
+      @click="(e) => menu?.toggle(e)"
+    />
+    <Menu ref="menu" :model="menuItems" :popup="true" />
+  </span>
 </template>
 
 <script setup lang="ts">
-import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
-import { FeatherIcon } from '@featherds/icon'
-import ArrowDown from '@featherds/icon/navigation/ArrowDropDown'
+import Button from 'primevue/button'
+import Menu from 'primevue/menu'
 import { useDeviceStore } from '@/stores/deviceStore'
 import { DeviceConfigQueryParams, status } from '@/types/deviceConfig'
 
+const menu = ref<InstanceType<typeof Menu> | null>(null)
+
 const deviceStore = useDeviceStore()
+
+const menuItems = computed(() =>
+  deviceStore.backupStatusOptions.map((option: string) => ({
+    label: option === 'NONE' ? 'No Backup' : option.toLowerCase(),
+    command: () => filterByStatus(option as status)
+  }))
+)
 
 const filterByStatus = (value: status) => {
   const newQueryParams: DeviceConfigQueryParams = {

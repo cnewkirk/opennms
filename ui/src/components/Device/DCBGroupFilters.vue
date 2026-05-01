@@ -2,67 +2,74 @@
   <div class="group-filters-container">
     <p class="title">Group By</p>
 
-    <FeatherDropdown class="dropdown">
-      <template v-slot:trigger>
-        <FeatherButton secondary link href="#" menu-trigger>
-          <template v-slot:icon>
-            Vendor
-            <FeatherIcon :icon="ArrowDown" aria-hidden="true" focusable="false" />
-          </template>
-        </FeatherButton>
-      </template>
-      <FeatherDropdownItem
-        v-for="option of deviceStore.vendorOptions"
-        :key="option"
-        @click="onGroupByOptionClick('vendor', option)"
-      >{{ option }}</FeatherDropdownItem>
-    </FeatherDropdown>
+    <div class="dropdown">
+      <Button
+        label="Vendor"
+        icon="pi pi-chevron-down"
+        iconPos="right"
+        outlined
+        class="w-full"
+        @click="(e) => vendorMenu?.toggle(e)"
+      />
+      <Menu ref="vendorMenu" :model="vendorMenuItems" :popup="true" />
+    </div>
 
-    <FeatherDropdown class="dropdown dcb-group-filters-status-dropdown">
-      <template v-slot:trigger>
-        <FeatherButton secondary link href="#" menu-trigger>
-          <template v-slot:icon>
-            Backup Status
-            <FeatherIcon :icon="ArrowDown" aria-hidden="true" focusable="false" />
-          </template>
-        </FeatherButton>
-      </template>
-      <FeatherDropdownItem
-        v-for="option of deviceStore.backupStatusOptions"
-        :key="option"
-        @click="onGroupByOptionClick('status', option)"
-      >
-        <div class="option" :class="option.replace(' ', '').toLowerCase()">{{ option }}</div>
-      </FeatherDropdownItem>
-    </FeatherDropdown>
+    <div class="dropdown dcb-group-filters-status-dropdown">
+      <Button
+        label="Backup Status"
+        icon="pi pi-chevron-down"
+        iconPos="right"
+        outlined
+        class="w-full"
+        @click="(e) => statusMenu?.toggle(e)"
+      />
+      <Menu ref="statusMenu" :model="statusMenuItems" :popup="true" />
+    </div>
 
-    <FeatherDropdown class="dropdown">
-      <template v-slot:trigger>
-        <FeatherButton secondary link href="#" menu-trigger>
-          <template v-slot:icon>
-            OS Image
-            <FeatherIcon :icon="ArrowDown" aria-hidden="true" focusable="false" />
-          </template>
-        </FeatherButton>
-      </template>
-      <FeatherDropdownItem
-        v-for="option of deviceStore.osImageOptions"
-        :key="option"
-        @click="onGroupByOptionClick('osImage', option)"
-      >{{ option }}</FeatherDropdownItem>
-    </FeatherDropdown>
+    <div class="dropdown">
+      <Button
+        label="OS Image"
+        icon="pi pi-chevron-down"
+        iconPos="right"
+        outlined
+        class="w-full"
+        @click="(e) => osMenu?.toggle(e)"
+      />
+      <Menu ref="osMenu" :model="osMenuItems" :popup="true" />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import ArrowDown from '@featherds/icon/navigation/ArrowDropDown'
+import Button from 'primevue/button'
+import Menu from 'primevue/menu'
 import { useDeviceStore } from '@/stores/deviceStore'
 import { DeviceConfigQueryParams } from '@/types/deviceConfig'
 
+const vendorMenu = ref<InstanceType<typeof Menu> | null>(null)
+const statusMenu = ref<InstanceType<typeof Menu> | null>(null)
+const osMenu = ref<InstanceType<typeof Menu> | null>(null)
+
 const deviceStore = useDeviceStore()
+
+const vendorMenuItems = computed(() =>
+  deviceStore.vendorOptions.map((option: string) => ({
+    label: option,
+    command: () => onGroupByOptionClick('vendor', option)
+  }))
+)
+const statusMenuItems = computed(() =>
+  deviceStore.backupStatusOptions.map((option: string) => ({
+    label: option,
+    command: () => onGroupByOptionClick('status', option)
+  }))
+)
+const osMenuItems = computed(() =>
+  deviceStore.osImageOptions.map((option: string) => ({
+    label: option,
+    command: () => onGroupByOptionClick('osImage', option)
+  }))
+)
 
 const onGroupByOptionClick = (groupBy: string, value: string) => {
   const newQueryParams: DeviceConfigQueryParams = {

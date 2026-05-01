@@ -1,14 +1,13 @@
 <template>
-  <!-- eslint-disable-next-line vue/no-mutating-props -->
-  <FeatherDialog :modelValue="visible" relative :labels="labels" @update:modelValue="$emit('close')">
+  <Dialog :visible="visible" :header="dialogTitle" modal :style="{ minWidth: '550px' }" @update:visible="(v) => !v && $emit('close')">
     <div class="content">
       <slot name="content" />
     </div>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { FeatherDialog } from '@featherds/dialog'
+import Dialog from 'primevue/dialog'
 import { useDeviceStore } from '@/stores/deviceStore'
 
 const deviceStore = useDeviceStore()
@@ -20,12 +19,9 @@ defineProps({
   }
 })
 
-const labels = reactive({
-  title: 'DCB',
-  close: 'Close'
-})
+defineEmits(['close'])
 
-watchEffect(() => labels.title = `Device Name: ${deviceStore.modalDeviceConfigBackup.deviceName}`)
+const dialogTitle = computed(() => `Device Name: ${deviceStore.modalDeviceConfigBackup.deviceName}`)
 </script>
 
 <style scoped lang="scss">

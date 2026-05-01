@@ -14,53 +14,41 @@
       <div class="config-column">
         <div>Configurations:</div>
         <div class="btn-container">
-          <FeatherButton
+          <Button
             data-test="view-history-btn"
+            icon="pi pi-history"
+            label="View History"
             @click="onViewHistory"
             :disabled="!singleConfigSelected"
             text
-          >
-            <template v-slot:icon>
-              <FeatherIcon :icon="History" />
-            </template>
-            View History
-          </FeatherButton>
+          />
 
-          <FeatherButton
+          <Button
             data-test="download-btn"
+            icon="pi pi-download"
+            label="Download"
             @click="onDownload"
             :disabled="noConfigsSelected"
             text
-          >
-            <template v-slot:icon>
-              <FeatherIcon :icon="Download" />
-            </template>
-            Download
-          </FeatherButton>
+          />
 
-          <FeatherButton
+          <Button
             data-test="backup-now-btn"
+            icon="pi pi-save"
+            label="Backup"
             @click="onBackupNow"
             :disabled="noConfigsSelected || singleConfigSelectedHasNoServiceName"
             text
-          >
-            <template v-slot:icon>
-              <FeatherIcon :icon="Backup" />
-            </template>
-            Backup
-          </FeatherButton>
+          />
 
-          <FeatherButton
+          <Button
             data-test="compare-btn"
+            icon="pi pi-code"
+            label="Compare"
             @click="onCompare"
             :disabled="!singleConfigSelected"
             text
-          >
-            <template v-slot:icon>
-              <FeatherIcon :icon="Compare" />
-            </template>
-            Compare
-          </FeatherButton>
+          />
         </div>
       </div>
     </div>
@@ -75,52 +63,29 @@
       <thead>
         <tr>
           <th>
-            <FeatherCheckbox
+            <Checkbox
               v-model="all"
+              :binary="true"
               @update:modelValue="selectAll"
               data-test="all-checkbox"
               class="dcb-all-checkbox"
             />
           </th>
-          <FeatherSortHeader
-            scope="col"
-            property="deviceName"
-            :sort="sortStates.deviceName"
-            v-on:sort-changed="sortByColumnHandler"
-            >Node Name</FeatherSortHeader
-          >
-
-          <FeatherSortHeader
-            scope="col"
-            property="ipAddress"
-            :sort="sortStates.ipAddress"
-            v-on:sort-changed="sortByColumnHandler"
-            >IP Address</FeatherSortHeader
-          >
-
-          <FeatherSortHeader
-            scope="col"
-            property="location"
-            :sort="sortStates.location"
-            v-on:sort-changed="sortByColumnHandler"
-            >Location</FeatherSortHeader
-          >
-
-          <FeatherSortHeader
-            scope="col"
-            property="lastBackup"
-            :sort="sortStates.lastBackup"
-            v-on:sort-changed="sortByColumnHandler"
-            >Last Backup Date</FeatherSortHeader
-          >
-
-          <FeatherSortHeader
-            scope="col"
-            property="lastUpdated"
-            :sort="sortStates.lastUpdated"
-            v-on:sort-changed="sortByColumnHandler"
-            >Last Attempted</FeatherSortHeader
-          >
+          <th scope="col" class="sortable-header" @click="sortByColumnHandler({ property: 'deviceName', value: nextSortValue('deviceName') })">
+            Node Name<span>{{ colSortIndicator('deviceName') }}</span>
+          </th>
+          <th scope="col" class="sortable-header" @click="sortByColumnHandler({ property: 'ipAddress', value: nextSortValue('ipAddress') })">
+            IP Address<span>{{ colSortIndicator('ipAddress') }}</span>
+          </th>
+          <th scope="col" class="sortable-header" @click="sortByColumnHandler({ property: 'location', value: nextSortValue('location') })">
+            Location<span>{{ colSortIndicator('location') }}</span>
+          </th>
+          <th scope="col" class="sortable-header" @click="sortByColumnHandler({ property: 'lastBackup', value: nextSortValue('lastBackup') })">
+            Last Backup Date<span>{{ colSortIndicator('lastBackup') }}</span>
+          </th>
+          <th scope="col" class="sortable-header" @click="sortByColumnHandler({ property: 'lastUpdated', value: nextSortValue('lastUpdated') })">
+            Last Attempted<span>{{ colSortIndicator('lastUpdated') }}</span>
+          </th>
 
           <th>
             <DCBTableStatusDropdown />
@@ -136,10 +101,11 @@
           :key="config.id"
         >
           <td>
-            <FeatherCheckbox
+            <Checkbox
               class="dcb-config-checkbox"
+              :binary="true"
               @update:modelValue="selectCheckbox(config)"
-              :modelValue="all || selectedDeviceConfigBackups[config.id]"
+              :modelValue="all || !!selectedDeviceConfigBackups[config.id]"
             />
           </td>
           <td>
@@ -147,22 +113,12 @@
               :href="computeNodeLink(config.nodeId)"
               @click="onNodeLinkClick(config.nodeId)"
               target="_blank">
-            <!--
-            <router-link
-              :to="`/node/${config.nodeId}`"
-              target="_blank"
-            >
-            -->
               {{ config.deviceName }}
-              <FeatherTooltip
-                :title="config.configName"
-                v-slot="{ attrs, on }">
-                <FeatherIcon
-                  v-bind="attrs" v-on="on"
-                  v-if="config.configType !== 'default'"
-                  :icon="Speed"
-                />
-              </FeatherTooltip>
+              <i
+                v-if="config.configType !== 'default'"
+                class="pi pi-bolt"
+                v-tooltip.top="config.configName"
+              />
             </a>
           </td>
           <td>{{ config.ipAddress }}</td>
@@ -171,16 +127,7 @@
             class="last-backup-date pointer"
             @click="onLastBackupDateClick(config)"
           >
-            <FeatherTooltip
-              title="View config"
-              v-slot="{ attrs, on }">
-              <span
-                v-bind="attrs" 
-                v-on="on"
-                v-date
-                >{{ config.lastBackupDate }}
-              </span>
-            </FeatherTooltip>
+            <span v-tooltip.top="'View config'" v-date>{{ config.lastBackupDate }}</span>
           </td>
           <td v-date>{{ config.lastUpdatedDate }}</td>
           <td>
@@ -220,17 +167,11 @@
   setup
   lang="ts"
 >
-import { FeatherSortHeader, SORT } from '@featherds/table'
 import { FeatherSortObject } from '@/types'
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { FeatherTooltip } from '@featherds/tooltip'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import History from '@featherds/icon/action/Restore'
-import Download from '@featherds/icon/action/DownloadFile'
-import Backup from '@/assets/Backup.vue'
-import Compare from '@/assets/Compare.vue'
-import Speed from '@/assets/Speed.vue'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import Tooltip from 'primevue/tooltip'
+const vTooltip = Tooltip
 import DCBModal from './DCBModal.vue'
 import DCBModalLastBackupContent from './DCBModalLastBackupContent.vue'
 import DCBModalViewHistoryContentVue from './DCBModalViewHistoryContent.vue'
@@ -256,13 +197,19 @@ const all = ref(false)
 const tableWrap = ref<HTMLElement | null>(null)
 const defaultQuerySize = 20
 const selectedDeviceConfigBackups = ref<Record<string, boolean>>({})
-const sortStates: Record<string, SORT> = reactive({
-  deviceName: SORT.ASCENDING,
-  ipAddress: SORT.NONE,
-  location: SORT.NONE,
-  lastBackup: SORT.NONE,
-  lastUpdated: SORT.NONE
-})
+type SortDir = 'asc' | 'desc' | undefined
+const sortField = ref<string>('deviceName')
+const sortDir = ref<SortDir>('asc')
+
+const nextSortValue = (field: string): 'asc' | 'desc' => {
+  if (sortField.value !== field || sortDir.value === undefined) return 'asc'
+  return sortDir.value === 'asc' ? 'desc' : 'asc'
+}
+
+const colSortIndicator = (field: string) => {
+  if (sortField.value !== field) return ''
+  return sortDir.value === 'asc' ? ' ▲' : ' ▼'
+}
 const { arrivedState, directions } = useScroll(tableWrap.value as HTMLElement, {
   offset: { bottom: 300 }
 })
@@ -302,11 +249,8 @@ const singleConfigSelectedHasNoServiceName = computed<boolean>(() => singleConfi
 const getDeviceConfigBackupById = (id: number) => deviceStore.deviceConfigBackups.filter((backup) => backup.id === id)[0]
 
 const sortByColumnHandler = (sortObj: FeatherSortObject) => {
-  for (const key in sortStates) {
-    sortStates[key] = SORT.NONE
-  }
-
-  sortStates[`${sortObj.property}`] = sortObj.value
+  sortField.value = sortObj.property
+  sortDir.value = sortObj.value as SortDir
 
   const newQueryParams: DeviceConfigQueryParams = {
     limit: defaultQuerySize,

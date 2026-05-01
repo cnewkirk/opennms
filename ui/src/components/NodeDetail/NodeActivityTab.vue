@@ -1,41 +1,44 @@
 <template>
-  <FeatherTabContainer v-model="activeSubTab">
-    <template v-slot:tabs>
-      <FeatherTab>Alarms</FeatherTab>
-      <FeatherTab>Events</FeatherTab>
-      <FeatherTab>Outages</FeatherTab>
-      <FeatherTab>Links</FeatherTab>
-    </template>
-
-    <FeatherTabPanel>
-      <AlarmsTable
-        v-if="visited[0]"
-        :nodeId="nodeId"
-        :nodeLabel="nodeLabel"
-        :extraFiql="perspectiveStore.isProblems ? 'severity!=CLEARED;ackTime==null' : undefined"
-      />
-    </FeatherTabPanel>
-
-    <FeatherTabPanel>
-      <EventsTable v-if="visited[1]" :nodeId="nodeId" />
-    </FeatherTabPanel>
-
-    <FeatherTabPanel>
-      <OutagesTable
-        v-if="visited[2]"
-        :nodeId="nodeId"
-        :filterFiql="perspectiveStore.isProblems ? 'ifRegainedService==null' : undefined"
-      />
-    </FeatherTabPanel>
-
-    <FeatherTabPanel>
-      <EnlinkdLinksTab v-if="visited[3]" :nodeId="nodeId" />
-    </FeatherTabPanel>
-  </FeatherTabContainer>
+  <Tabs v-model:value="activeTabKey">
+    <TabList>
+      <Tab value="alarms">Alarms</Tab>
+      <Tab value="events">Events</Tab>
+      <Tab value="outages">Outages</Tab>
+      <Tab value="links">Links</Tab>
+    </TabList>
+    <TabPanels>
+      <TabPanel value="alarms">
+        <AlarmsTable
+          v-if="visited[0]"
+          :nodeId="nodeId"
+          :nodeLabel="nodeLabel"
+          :extraFiql="perspectiveStore.isProblems ? 'severity!=CLEARED;ackTime==null' : undefined"
+        />
+      </TabPanel>
+      <TabPanel value="events">
+        <EventsTable v-if="visited[1]" :nodeId="nodeId" />
+      </TabPanel>
+      <TabPanel value="outages">
+        <OutagesTable
+          v-if="visited[2]"
+          :nodeId="nodeId"
+          :filterFiql="perspectiveStore.isProblems ? 'ifRegainedService==null' : undefined"
+        />
+      </TabPanel>
+      <TabPanel value="links">
+        <EnlinkdLinksTab v-if="visited[3]" :nodeId="nodeId" />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
 </template>
 
 <script setup lang="ts">
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
+import { computed } from 'vue'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 import AlarmsTable from '@/components/Nodes/AlarmsTable.vue'
 import EventsTable from '@/components/Nodes/EventsTable.vue'
 import OutagesTable from '@/components/Nodes/OutagesTable.vue'
@@ -50,16 +53,19 @@ const perspectiveStore = usePerspectiveStore()
 const route = useRoute()
 const router = useRouter()
 
-const initialTab = props.defaultSubTab
-  ? Math.max(0, TAB_NAMES.indexOf(props.defaultSubTab as typeof TAB_NAMES[number]))
-  : 0
-const activeSubTab = ref(initialTab)
+const initialTabKey = (props.defaultSubTab && TAB_NAMES.includes(props.defaultSubTab as any))
+  ? props.defaultSubTab
+  : 'alarms'
+
+const activeTabKey = ref(initialTabKey)
 
 const visited = reactive([false, false, false, false])
-visited[initialTab] = true
+const initialIdx = TAB_NAMES.indexOf(initialTabKey as typeof TAB_NAMES[number])
+visited[Math.max(0, initialIdx)] = true
 
-watch(activeSubTab, (idx) => {
-  visited[idx] = true
-  router.replace({ query: { ...route.query, subtab: TAB_NAMES[idx] } })
+watch(activeTabKey, (key) => {
+  const idx = TAB_NAMES.indexOf(key as typeof TAB_NAMES[number])
+  if (idx >= 0) visited[idx] = true
+  router.replace({ query: { ...route.query, subtab: key } })
 })
 </script>

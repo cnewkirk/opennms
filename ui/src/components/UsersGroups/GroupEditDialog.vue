@@ -1,10 +1,11 @@
 <template>
-  <FeatherDialog v-model="open" :labels="dialogLabels" @hidden="handleCancel">
+  <Dialog v-model:visible="open" :header="dialogLabels.title" modal :style="{ width: '560px' }" @hide="handleCancel">
     <div class="group-edit-dialog">
       <!-- Name -->
       <div class="group-edit-dialog__field">
         <template v-if="isNew">
-          <FeatherInput label="Group Name" v-model="form.name" :disabled="saving" />
+          <label class="p-label">Group Name</label>
+          <InputText v-model="form.name" :disabled="saving" class="w-full" />
         </template>
         <template v-else>
           <p class="body2 group-edit-dialog__readonly-label">Group Name</p>
@@ -13,7 +14,8 @@
       </div>
 
       <div class="group-edit-dialog__field">
-        <FeatherInput label="Comments" v-model="form.comments" :disabled="saving" />
+        <label class="p-label">Comments</label>
+        <InputText v-model="form.comments" :disabled="saving" class="w-full" />
       </div>
 
       <!-- Members section (edit mode only) -->
@@ -29,7 +31,7 @@
             class="group-edit-dialog__item-row"
           >
             <span class="body2">{{ member }}</span>
-            <FeatherButton text @click="removeMember(member)" :disabled="saving">Remove</FeatherButton>
+            <Button label="Remove" text @click="removeMember(member)" :disabled="saving" />
           </div>
           <p v-if="!form.members.length" class="body2 group-edit-dialog__empty">No members.</p>
 
@@ -38,26 +40,24 @@
               <option value="">— Add a user —</option>
               <option v-for="u in availableUsersToAdd" :key="u" :value="u">{{ u }}</option>
             </select>
-            <FeatherButton text @click="addMember" :disabled="saving || !selectedUserToAdd">Add</FeatherButton>
+            <Button label="Add" text @click="addMember" :disabled="saving || !selectedUserToAdd" />
           </div>
         </div>
       </template>
     </div>
 
-    <template v-slot:footer>
-      <FeatherButton text @click="handleCancel" :disabled="saving">Cancel</FeatherButton>
-      <FeatherButton primary @click="handleSave" :disabled="saving">
-        {{ saving ? 'Saving…' : 'Save' }}
-      </FeatherButton>
+    <template #footer>
+      <Button label="Cancel" text @click="handleCancel" :disabled="saving" />
+      <Button :label="saving ? 'Saving…' : 'Save'" @click="handleSave" :disabled="saving" />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 import { OnmsGroup, OnmsUser } from '@/types'
 import { createGroup, updateGroup, addGroupUser, removeGroupUser } from '@/services/userGroupService'
 import useSnackbar from '@/composables/useSnackbar'

@@ -1,11 +1,6 @@
 <template>
-  <FeatherButton class="compare-btn" icon="Compare configs" @click="emit('onCompare')">
-    <FeatherIcon :icon="Compare" />
-  </FeatherButton>
-
-  <FeatherButton class="dwnld-btn" icon="Download config" @click="onDownload">
-    <FeatherIcon :icon="Download" />
-  </FeatherButton>
+  <Button class="compare-btn" icon="pi pi-code" text aria-label="Compare configs" @click="emit('onCompare')" />
+  <Button class="dwnld-btn" icon="pi pi-download" text aria-label="Download config" @click="onDownload" />
 
   <span class="title">
     {{ selectedConfig?.configName }}
@@ -33,10 +28,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import Download from '@featherds/icon/action/DownloadFile'
-import Compare from '@/assets/Compare.vue'
+import Button from 'primevue/button'
 import DCBDiff from './DCBDiff.vue'
 import { DeviceConfigBackup } from '@/types/deviceConfig'
 import { useDeviceStore } from '@/stores/deviceStore'
