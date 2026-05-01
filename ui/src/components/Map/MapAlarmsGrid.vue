@@ -1,81 +1,55 @@
 <template>
-  <FeatherSelect
+  <Select
     class="select-ack"
-    name="alarmOptions"
-    id="alarmOptions"
     v-model="alarmOption"
     :disabled="disableAckSelect"
     :options="alarmOptions"
-    text-prop="option"
+    optionLabel="option"
     @update:modelValue="selectAlarmAck"
-    label="Alarm Action"
+    placeholder="Alarm Action"
   />
   <div id="wrap">
     <table class="tl1 tl2 tl3" summary="Alarms">
       <thead>
         <tr>
           <th class="first-th">
-            <FeatherCheckbox v-model="all" label="All" />
+            <label class="checkbox-label">
+              <Checkbox v-model="all" binary label="All" />
+            </label>
           </th>
-
-          <FeatherSortHeader
-            scope="col"
-            property="id"
-            :sort="sortStates.id"
-            @sort-changed="sortChanged"
-          >ID</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="severity"
-            :sort="sortStates.severity"
-            @sort-changed="sortChanged"
-          >SEVERITY</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="nodeLabel"
-            :sort="sortStates.nodeLabel"
-            @sort-changed="sortChanged"
-          >NODE LABEL</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="uei"
-            :sort="sortStates.uei"
-            @sort-changed="sortChanged"
-          >UEI</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="count"
-            :sort="sortStates.count"
-            @sort-changed="sortChanged"
-          >COUNT</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="lastEvent"
-            :sort="sortStates.lastEventTime"
-            @sort-changed="sortChanged"
-          >LAST EVENT</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="logMessage"
-            :sort="sortStates.logMessage"
-            @sort-changed="sortChanged"
-          >LOG MESSAGE</FeatherSortHeader>
+          <th scope="col" class="sortable-th" @click="nextSort('id')">
+            ID <i :class="sortIndicator('id')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('severity')">
+            SEVERITY <i :class="sortIndicator('severity')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('nodeLabel')">
+            NODE LABEL <i :class="sortIndicator('nodeLabel')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('uei')">
+            UEI <i :class="sortIndicator('uei')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('count')">
+            COUNT <i :class="sortIndicator('count')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('lastEventTime')">
+            LAST EVENT <i :class="sortIndicator('lastEventTime')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('logMessage')">
+            LOG MESSAGE <i :class="sortIndicator('logMessage')" />
+          </th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="alarm in alarms" :key="alarm.id">
           <td :class="alarm.severity" class="first-td">
-            <FeatherCheckbox
-              @update:modelValue="selectCheckbox(alarm)"
-              :modelValue="all || alarmCheckboxes[alarm.id]"
-              label="Alarm"
-            />
+            <label class="checkbox-label">
+              <Checkbox
+                :modelValue="all || alarmCheckboxes[alarm.id]"
+                binary
+                @change="selectCheckbox(alarm)"
+              />
+            </label>
           </td>
           <td><router-link :to="`/alarm/${alarm.id}`">{{ alarm.id }}</router-link></td>
           <td>{{ alarm.severity }}</td>
@@ -90,10 +64,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Alarm, AlarmQueryParameters, FeatherSortObject } from '@/types'
-import { FeatherSelect } from '@featherds/select'
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { FeatherSortHeader, SORT } from '@featherds/table'
+import { Alarm, AlarmQueryParameters } from '@/types'
+import Select from 'primevue/select'
+import Checkbox from 'primevue/checkbox'
 import { useMapStore } from '@/stores/mapStore'
 
 const mapStore = useMapStore()
@@ -177,23 +150,29 @@ const selectAlarmAck = async () => {
   alarmCheckboxes.value = {}
 }
 
-const sortStates: any = reactive({
-  id: SORT.DESCENDING,
-  severity: SORT.NONE,
-  nodeLabel: SORT.NONE,
-  uei: SORT.NONE,
-  count: SORT.NONE,
-  lastEventTime: SORT.NONE,
-  logMessage: SORT.NONE
+type SortDir = 'asc' | 'desc' | 'none'
+const sortStates = reactive<Record<string, SortDir>>({
+  id: 'desc',
+  severity: 'none',
+  nodeLabel: 'none',
+  uei: 'none',
+  count: 'none',
+  lastEventTime: 'none',
+  logMessage: 'none'
 })
 
-const sortChanged = (sortObj: FeatherSortObject) => {
-  for (const key in sortStates) {
-    sortStates[key] = SORT.NONE
-  }
+const nextSort = (property: string) => {
+  const cur = sortStates[property]
+  for (const key in sortStates) sortStates[key] = 'none'
+  sortStates[property] = cur === 'asc' ? 'desc' : 'asc'
+  mapStore.setAlarmSortObject({ property, value: sortStates[property] })
+}
 
-  sortStates[`${sortObj.property}`] = sortObj.value
-  mapStore.setAlarmSortObject(sortObj)
+const sortIndicator = (property: string) => {
+  const s = sortStates[property]
+  if (s === 'asc') return 'pi pi-sort-alpha-down'
+  if (s === 'desc') return 'pi pi-sort-alpha-up-alt'
+  return 'pi pi-sort-alt sort-inactive'
 }
 
 onMounted(() => {
@@ -239,6 +218,20 @@ thead {
 }
 .first-th {
   padding-left: 20px;
+}
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover { background: var($surface-dark); }
+
+  .sort-inactive { opacity: 0.3; }
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 .first-td {
   border-left: 4px solid var($success);

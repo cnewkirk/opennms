@@ -3,89 +3,42 @@
     <table class="tl1 tl2 tl3" summary="Nodes">
       <thead>
         <tr>
-          <FeatherSortHeader
-            scope="col"
-            property="id"
-            :sort="sortStates.id"
-            @sort-changed="sortChanged"
-          >ID</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="foreignSource"
-            :sort="sortStates.foreignSource"
-            @sort-changed="sortChanged"
-          >FOREIGN SOURCE</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="foreignId"
-            :sort="sortStates.foreignId"
-            @sort-changed="sortChanged"
-          >FOREIGN ID</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="label"
-            :sort="sortStates.label"
-            @sort-changed="sortChanged"
-          >LABEL</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="labelSource"
-            :sort="sortStates.labelSource"
-            @sort-changed="sortChanged"
-          >LABEL SOURCE</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="lastCapabilitiesScan"
-            :sort="sortStates.lastCapabilitiesScan"
-            @sort-changed="sortChanged"
-          >LAST CAP SCAN</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="primaryInterface"
-            :sort="sortStates.primaryInterface"
-            @sort-changed="sortChanged"
-          >PRIMARY INTERFACE</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="sysObjectId"
-            :sort="sortStates.sysObjectId"
-            @sort-changed="sortChanged"
-          >SYSOBJECTID</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="sysName"
-            :sort="sortStates.sysName"
-            @sort-changed="sortChanged"
-          >SYSNAME</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="sysDescription"
-            :sort="sortStates.sysDescription"
-            @sort-changed="sortChanged"
-          >SYSDESCRIPTION</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="sysContact"
-            :sort="sortStates.sysContact"
-            @sort-changed="sortChanged"
-          >SYSCONTACT</FeatherSortHeader>
-
-          <FeatherSortHeader
-            scope="col"
-            property="sysLocation"
-            :sort="sortStates.sysLocation"
-            @sort-changed="sortChanged"
-          >SYSLOCATION</FeatherSortHeader>
+          <th scope="col" class="sortable-th" @click="nextSort('id')">
+            ID <i :class="sortIndicator('id')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('foreignSource')">
+            FOREIGN SOURCE <i :class="sortIndicator('foreignSource')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('foreignId')">
+            FOREIGN ID <i :class="sortIndicator('foreignId')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('label')">
+            LABEL <i :class="sortIndicator('label')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('labelSource')">
+            LABEL SOURCE <i :class="sortIndicator('labelSource')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('lastCapabilitiesScan')">
+            LAST CAP SCAN <i :class="sortIndicator('lastCapabilitiesScan')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('primaryInterface')">
+            PRIMARY INTERFACE <i :class="sortIndicator('primaryInterface')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('sysObjectId')">
+            SYSOBJECTID <i :class="sortIndicator('sysObjectId')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('sysName')">
+            SYSNAME <i :class="sortIndicator('sysName')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('sysDescription')">
+            SYSDESCRIPTION <i :class="sortIndicator('sysDescription')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('sysContact')">
+            SYSCONTACT <i :class="sortIndicator('sysContact')" />
+          </th>
+          <th scope="col" class="sortable-th" @click="nextSort('sysLocation')">
+            SYSLOCATION <i :class="sortIndicator('sysLocation')" />
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -113,8 +66,7 @@
 </template>
 <script setup lang="ts">
 import { useMapStore } from '@/stores/mapStore'
-import { Coordinates, Node, FeatherSortObject } from '@/types'
-import { FeatherSortHeader, SORT } from '@featherds/table'
+import { Coordinates, Node } from '@/types'
 
 const mapStore = useMapStore()
 const nodes = computed<Node[]>(() => mapStore.getNodes())
@@ -125,28 +77,34 @@ const doubleClickHandler = (node: Node) => {
   mapStore.setMapCenter(coordinate)
 }
 
-const sortStates: any = reactive({
-  label: SORT.ASCENDING,
-  id: SORT.NONE,
-  foreignSource: SORT.NONE,
-  foreignId: SORT.NONE,
-  labelSource: SORT.NONE,
-  lastCapabilitiesScan: SORT.NONE,
-  primaryInterface: SORT.NONE,
-  sysObjectId: SORT.NONE,
-  sysName: SORT.NONE,
-  sysDescription: SORT.NONE,
-  sysContact: SORT.NONE,
-  sysLocation: SORT.NONE
+type SortDir = 'asc' | 'desc' | 'none'
+const sortStates = reactive<Record<string, SortDir>>({
+  label: 'asc',
+  id: 'none',
+  foreignSource: 'none',
+  foreignId: 'none',
+  labelSource: 'none',
+  lastCapabilitiesScan: 'none',
+  primaryInterface: 'none',
+  sysObjectId: 'none',
+  sysName: 'none',
+  sysDescription: 'none',
+  sysContact: 'none',
+  sysLocation: 'none'
 })
 
-const sortChanged = (sortObj: FeatherSortObject) => {
-  for (const key in sortStates) {
-    sortStates[key] = SORT.NONE
-  }
+const nextSort = (property: string) => {
+  const cur = sortStates[property]
+  for (const key in sortStates) sortStates[key] = 'none'
+  sortStates[property] = cur === 'asc' ? 'desc' : 'asc'
+  mapStore.setNodeSortObject({ property, value: sortStates[property] })
+}
 
-  sortStates[`${sortObj.property}`] = sortObj.value
-  mapStore.setNodeSortObject(sortObj)
+const sortIndicator = (property: string) => {
+  const s = sortStates[property]
+  if (s === 'asc') return 'pi pi-sort-alpha-down'
+  if (s === 'desc') return 'pi pi-sort-alpha-up-alt'
+  return 'pi pi-sort-alt sort-inactive'
 }
 
 onMounted(() => {
@@ -183,6 +141,15 @@ thead {
   z-index: 2;
   position: relative;
   background: var($surface);
+}
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover { background: var($surface-dark); }
+
+  .sort-inactive { opacity: 0.3; }
 }
 .first-td {
   padding-left: 12px;

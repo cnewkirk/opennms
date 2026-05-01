@@ -1,15 +1,17 @@
 <template>
-  <FeatherTabContainer class="tabs">
-    <template v-slot:tabs>
-      <FeatherTab ref="alarmTab" @click="goToAlarms">Alarms({{ alarms.length }})</FeatherTab>
-      <FeatherTab ref="nodesTab" @click="goToNodes">Nodes({{ nodes.length }})</FeatherTab>
-    </template>
-  </FeatherTabContainer>
+  <Tabs :value="activeTab" class="tabs">
+    <TabList>
+      <Tab value="alarms" @click="goToAlarms">Alarms({{ alarms.length }})</Tab>
+      <Tab value="nodes" @click="goToNodes">Nodes({{ nodes.length }})</Tab>
+    </TabList>
+  </Tabs>
   <router-view />
 </template>
 <script setup lang="ts">
 import { useMapStore } from '@/stores/mapStore'
-import { FeatherTab, FeatherTabContainer } from '@featherds/tabs'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
 import { Alarm, Node } from '@/types'
 
 const mapStore = useMapStore()
@@ -17,19 +19,13 @@ const router = useRouter()
 const route = useRoute()
 const nodes = computed<Node[]>(() => mapStore.getNodes())
 const alarms = computed<Alarm[]>(() => mapStore.getAlarms())
-const alarmTab = ref()
-const nodesTab = ref()
+
+const activeTab = computed(() =>
+  router.currentRoute.value.name === 'MapAlarms' ? 'alarms' : 'nodes'
+)
 
 const goToAlarms = () => router.push(`/map${route.query.nodeid ? '?nodeid=' + route.query.nodeid : ''}`)
 const goToNodes = () => router.push('/map/nodes')
-
-onActivated(() => {
-  if (router.currentRoute.value.name === 'MapAlarms') {
-    alarmTab.value.tab.click()
-  } else {
-    nodesTab.value.tab.click()
-  }
-})
 </script>
 
 <style scoped lang="scss">

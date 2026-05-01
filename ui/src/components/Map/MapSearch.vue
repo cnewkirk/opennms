@@ -1,17 +1,16 @@
 <template>
-  <FeatherAutocomplete
+  <AutoComplete
     v-model="searchStr"
-    type="multi"
-    :results="results"
-    label="Search"
+    :suggestions="results"
+    option-label="label"
+    multiple
+    placeholder="Search"
     class="map-search"
-    @search="resetLabelsAndSearch"
+    @complete="(e) => resetLabelsAndSearch(e.query)"
     :loading="loading"
-    :hideLabel="true"
-    text-prop="label"
     @update:modelValue="selectItem"
-    :labels="labels"
-  ></FeatherAutocomplete>
+    :delay="0"
+  />
 </template>
 
 <script
@@ -19,7 +18,7 @@
   lang="ts"
 >
 import { debounce } from 'lodash'
-import { FeatherAutocomplete } from '@featherds/autocomplete'
+import AutoComplete from 'primevue/autocomplete'
 import { useMapStore } from '@/stores/mapStore'
 import { useSearchStore } from '@/stores/searchStore'
 
@@ -30,8 +29,6 @@ const searchStore = useSearchStore()
 const searchStr = ref()
 const loading = ref(false)
 const outsideSearch = ref(false)
-const defaultLabels = { noResults: 'Searching...' }
-const labels = ref(defaultLabels)
 
 const selectItem: any = (items: { label: string }[]) => {
   const nodeLabels = items.map((item) => item.label)
@@ -49,7 +46,6 @@ const selectItem: any = (items: { label: string }[]) => {
 }
 
 const resetLabelsAndSearch = (value: string) => {
-  labels.value = defaultLabels
   search(value)
 }
 
@@ -62,7 +58,6 @@ const search = debounce(async (value: string) => {
 
   await searchStore.search(value)
 
-  labels.value = { noResults: 'No results found' }
   loading.value = false
 }, 1000)
 
@@ -96,13 +91,11 @@ const selectItemFromOutsideSearch = (searchResults: any) => {
 // when results are received and outsideSearch is true, this will trigger watch(results)
 watchEffect(async () => {
   if (nodeSearchTerm.value) {
-    labels.value = defaultLabels
     searchStr.value = [{ label: nodeSearchTerm.value }]
 
     loading.value = true
     outsideSearch.value = true
     await searchStore.search(nodeSearchTerm.value)
-    labels.value = { noResults: 'No results found' }
     loading.value = false
   }
 })
@@ -121,8 +114,5 @@ watch(results, (newResults) => {
 .map-search {
   z-index: 1000;
   width: 290px !important;
-  :deep(.feather-input-border) {
-    background: var($surface);
-  }
 }
 </style>

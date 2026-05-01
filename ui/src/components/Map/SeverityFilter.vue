@@ -1,16 +1,18 @@
 <template>
-  <FeatherSelect
-    class="severity-select"
-    v-model="selectedSeverity"
-    :options="options"
-    text-prop="option"
-    @update:modelValue="onSeveritySelect"
-    label="Show Severity >="
-  />
+  <div class="severity-select">
+    <label class="severity-label">Show Severity &gt;=</label>
+    <Select
+      v-model="selectedSeverity"
+      :options="options"
+      optionLabel="option"
+      @update:modelValue="onSeveritySelect"
+      class="severity-dropdown"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherSelect } from '@featherds/select'
+import Select from 'primevue/select'
 import { useMapStore } from '@/stores/mapStore'
 
 const mapStore = useMapStore()
@@ -27,7 +29,7 @@ const selectedSeverity = ref(options[0])
 const onSeveritySelect = () => mapStore.setSelectedSeverity(selectedSeverity.value.id)
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "@featherds/styles/themes/variables";
 
 .severity-select {
@@ -35,22 +37,19 @@ const onSeveritySelect = () => mapStore.setSelectedSeverity(selectedSeverity.val
   width: 250px;
   right: 60px;
   top: 80px;
-  /* z-index needs to be below $zindex-fixed (1030) which is the z-index of the FeatherAppBar component */
   z-index: var($zindex-sticky);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-  .feather-input-wrapper {
-    background: var($primary-text-on-color);
-    border: 2px solid var($secondary);
-  }
+.severity-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var($secondary-text-on-surface);
+}
 
-  .feather-input-label {
-    border: 2px solid var($secondary);
-    border-bottom: none;
-
-    // fix placement of severity dropdown label
-    // so it is aligned over top left of select dropdown
-    left: -0.025rem !important;
-    top: -1.25rem !important;
-  }
+.severity-dropdown {
+  width: 100%;
 }
 </style>
