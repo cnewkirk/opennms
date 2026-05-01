@@ -31,7 +31,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   MINOR:         '#eab308',
   WARNING:       '#f59e0b',
   NORMAL:        '#f59e0b',
-  INDETERMINATE: '#6b7280',
+  INDETERMINATE: '#9ca3af',
 }
 const DEFAULT_COLOR = '#06b6d4'
 

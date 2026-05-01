@@ -117,9 +117,9 @@ describe('useNodeIconResolver', () => {
     expect(resolveIconDataUri(makeVertex('spine-01'), 'NORMAL')).toContain('#f59e0b')
   })
 
-  test('INDETERMINATE severity maps to gray (#6b7280)', () => {
+  test('INDETERMINATE severity maps to gray (#9ca3af)', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('spine-01'), 'INDETERMINATE')).toContain('#6b7280')
+    expect(resolveIconDataUri(makeVertex('spine-01'), 'INDETERMINATE')).toContain('#9ca3af')
   })
 
   test('null severity falls back to default cyan (#06b6d4)', () => {
