@@ -70,7 +70,6 @@ const snmpInterfaces = computed(() => nodeStore.snmpInterfaces)
 </script>
 
 <style lang="scss">
-@import "@featherds/table/scss/table";
 table {
   @include table;
 }

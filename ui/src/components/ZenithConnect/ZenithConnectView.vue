@@ -170,9 +170,9 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
+@use "@/styles/table" as *;
 @import "@/styles/typography";
 @import "@/styles/tokens";
-@import "@featherds/table/scss/table";
 
 .card {
   background: var($surface);

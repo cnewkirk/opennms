@@ -66,7 +66,6 @@ const ipInterfaces = computed(() => nodeStore.ipInterfaces)
 </script>
 
 <style lang="scss">
-@import "@featherds/table/scss/table";
 table {
   @include table;
 }

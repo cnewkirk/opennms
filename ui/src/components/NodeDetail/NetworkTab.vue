@@ -307,8 +307,8 @@ onMounted(async () => {
 @use '@/styles/vars' as vars;
 @use "@/styles/tokens" as fvars;
 @use "@/styles/utils";
+@use "@/styles/table" as *;
 @import "@/styles/tokens";
-@import "@featherds/table/scss/table";
 
 .network-tab {
   padding: 8px 0;

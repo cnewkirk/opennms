@@ -1,0 +1,38 @@
+@mixin table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+}
+
+@mixin table-condensed {
+  th, td {
+    padding: 4px 8px;
+  }
+}
+
+@mixin row-hover {
+  tr:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+@mixin row-select {
+  tr.selected {
+    background: rgba(0, 0, 0, 0.08);
+  }
+}
+
+@mixin row-striped {
+  tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+@mixin status-bar($color) {
+  border-left: 4px solid #{$color};
+}

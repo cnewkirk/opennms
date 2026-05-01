@@ -194,7 +194,7 @@ const rescanToEnglish = (rescanVal: string) => {
 }
 </script>
 <style lang="scss">
-@import "@featherds/table/scss/table";
+@use "@/styles/table" as *;
 
 table {
   @include table();
@@ -205,7 +205,7 @@ table {
   lang="scss"
   scoped
 >
-@import "@featherds/table/scss/table";
+@use "@/styles/table" as *;
 @import "@/styles/tokens";
 
 .main-wrapper {

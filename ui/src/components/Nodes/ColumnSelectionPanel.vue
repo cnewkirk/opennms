@@ -93,7 +93,6 @@ const resetToDefault = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/table/scss/table";
 
 .col-checkbox-row {
   display: flex;

@@ -218,8 +218,8 @@ onMounted(async () => {
 @use '@/styles/vars' as vars;
 @use "@/styles/tokens" as variables;
 @use "@/styles/typography";
-@use '@featherds/table/scss/table';
 @use '@/styles/_transitionDataTable';
+@use "@/styles/table";
 
 .sortable-header {
   cursor: pointer;
