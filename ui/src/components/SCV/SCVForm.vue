@@ -141,7 +141,7 @@ const addAttribute = () => scvStore.addAttribute()
 <style lang="scss" scoped>
 @import "@/styles/tokens";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .form-container {
   @include elevation(1);

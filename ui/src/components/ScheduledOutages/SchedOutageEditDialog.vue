@@ -262,7 +262,7 @@ const handleCancel = () => {
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .sched-outage-dialog {
   min-width: 480px;

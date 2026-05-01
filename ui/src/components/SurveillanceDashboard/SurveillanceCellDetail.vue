@@ -98,7 +98,7 @@ const nodeClass = (nodeId: number): string => {
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .cell-detail {
   margin-top: 1.5rem;

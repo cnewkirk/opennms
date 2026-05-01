@@ -257,7 +257,7 @@ const pollUntilDone = async (
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@/styles/tokens";
 
 .mib-compiler {

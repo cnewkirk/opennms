@@ -184,7 +184,7 @@ const search = (searchVal: string, type: string, subType: string, index: number)
 </script>
 
 <style lang="scss">
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@/styles/tokens";
 
 #advanced-panel {

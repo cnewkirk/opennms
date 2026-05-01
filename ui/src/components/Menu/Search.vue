@@ -262,7 +262,7 @@ const onKeyDown = async (event: KeyboardEvent) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@featherds/styles/mixins/elevation";
 @import "@/styles/tokens";
 @import "@/styles/vars";

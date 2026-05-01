@@ -242,7 +242,7 @@ function submit() {
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@use "@featherds/styles/mixins/typography" as typo;
+@use "@/styles/typography" as typo;
 @import "@/styles/tokens";
 
 .add-edge-form {

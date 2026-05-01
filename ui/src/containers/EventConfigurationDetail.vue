@@ -110,7 +110,7 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@/styles/tokens";
 
 .event-config-container {

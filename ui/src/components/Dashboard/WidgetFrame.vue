@@ -95,7 +95,7 @@ defineEmits<{
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .widget-frame {
   background: var($surface);

@@ -145,7 +145,7 @@ defineExpose({ refresh: load })
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .nodes-widget {
   padding: 0 4px;

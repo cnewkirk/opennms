@@ -87,7 +87,7 @@ defineExpose({ refresh })
 
 <style scoped lang="scss">
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .graph-widget {
   height: 100%;

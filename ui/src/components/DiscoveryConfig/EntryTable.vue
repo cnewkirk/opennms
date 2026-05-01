@@ -47,7 +47,7 @@ defineEmits<{
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .entry-table-card {
   background: var($surface);

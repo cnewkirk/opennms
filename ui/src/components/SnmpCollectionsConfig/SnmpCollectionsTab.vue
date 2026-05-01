@@ -135,7 +135,7 @@ const onFormSave = async (entry: SnmpCollectionEntry) => {
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .snmp-collections-tab {
   padding: 1.5rem;

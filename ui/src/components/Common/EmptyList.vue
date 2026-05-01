@@ -41,7 +41,7 @@ const msg = computed(() => props.content.msg || '')
 
 <style lang="scss" scoped>
 @use "@/styles/tokens" as variables;
-@use '@featherds/styles/mixins/typography';
+@use "@/styles/typography";
 @use '@/styles/vars.scss';
 
 .empty-list {

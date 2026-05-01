@@ -188,7 +188,7 @@ onMounted(() => getHistoryBackups())
 
 <style scoped lang="scss">
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 .flex-container {
   display: flex;
   max-width: 1000px;

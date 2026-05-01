@@ -299,7 +299,7 @@ onMounted(() => load())
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .discovery-page {
   padding: 0 20px 40px;

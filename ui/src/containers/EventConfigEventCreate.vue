@@ -34,7 +34,7 @@ const goBack = () => {
 
 <style lang="scss" scoped>
 @use "@/styles/tokens";
-@use '@featherds/styles/mixins/typography';
+@use "@/styles/typography";
 
 .not-found-container {
   display: flex;

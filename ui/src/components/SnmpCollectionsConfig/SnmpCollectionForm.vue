@@ -182,7 +182,7 @@ const onSave = () => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .snmp-collection-form {
   padding: 1.5rem;

@@ -31,7 +31,7 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@/styles/tokens";
 
 .admin-card {

@@ -132,7 +132,7 @@ const onDelete = () => {
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .group-file-editor {
   display: flex;

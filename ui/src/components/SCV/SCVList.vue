@@ -30,7 +30,7 @@ const onAliasClick = (alias: string) => {
 <style lang="scss" scoped>
 @import "@/styles/tokens";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .scv-list {
   @include elevation(2);

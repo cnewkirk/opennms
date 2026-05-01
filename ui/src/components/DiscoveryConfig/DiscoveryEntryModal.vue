@@ -89,7 +89,7 @@ const submit = () => {
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .dem-overlay {
   position: fixed;

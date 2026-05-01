@@ -559,7 +559,7 @@ const deleteMemo = async (type: 'sticky' | 'journal') => {
 @use "@/styles/tokens" as fvars;
 @import "@/styles/tokens";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@/styles/severities";
 
 .card {

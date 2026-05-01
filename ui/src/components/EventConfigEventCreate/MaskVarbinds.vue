@@ -122,7 +122,7 @@ watch(maskElements, () => {
 
 <style scoped lang="scss">
 @use "@/styles/tokens";
-@use '@featherds/styles/mixins/typography';
+@use "@/styles/typography";
 
 .mask-varbinds {
   .mask-varbinds-header {

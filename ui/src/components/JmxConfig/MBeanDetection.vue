@@ -95,7 +95,7 @@ onUnmounted(() => stopPolling())
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/mixins/typography" as typo;
+@use "@/styles/typography" as typo;
 @import "@/styles/tokens";
 
 .mbean-detection {

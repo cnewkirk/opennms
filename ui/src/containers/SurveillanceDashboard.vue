@@ -217,7 +217,7 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .surveillance-dashboard {
   padding: 1.5rem 2rem;

@@ -232,7 +232,7 @@ const getError = (key: string) => {
   lang="scss"
   scoped
 >
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .expansion-panel{
   :deep(.feather-expansion-header-button) {

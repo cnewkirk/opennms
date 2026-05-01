@@ -67,7 +67,7 @@ const filteredFiles = computed(() => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .group-file-list {
   display: flex;

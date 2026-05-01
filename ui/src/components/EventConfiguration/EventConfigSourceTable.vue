@@ -217,7 +217,7 @@ onMounted(async () => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @use "@/styles/tokens" as variables;
-@use '@featherds/styles/mixins/typography';
+@use "@/styles/typography";
 @use '@featherds/table/scss/table';
 @use '@/styles/_transitionDataTable';
 

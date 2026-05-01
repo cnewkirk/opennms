@@ -162,7 +162,7 @@ onMounted(async () => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@featherds/styles/mixins/elevation";
 
 .card {

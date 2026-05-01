@@ -97,7 +97,7 @@ defineExpose({ refresh: load })
 
 <style scoped lang="scss">
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .availability-widget {
   display: flex;

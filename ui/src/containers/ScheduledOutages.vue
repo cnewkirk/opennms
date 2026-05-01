@@ -131,7 +131,7 @@ const onSaved = async () => {
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .sched-outages-page {
   padding: 0 20px 20px;

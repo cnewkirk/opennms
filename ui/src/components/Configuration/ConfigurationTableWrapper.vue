@@ -293,7 +293,7 @@ const advanceActiveUpdate = (newVal: boolean) => {
   scoped
 >
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@featherds/styles/mixins/elevation";
 
 .title {

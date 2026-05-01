@@ -42,7 +42,7 @@ const breadcrumbs: BreadCrumb[] = [
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .snmp-collections-config {
   padding: 1.5rem;

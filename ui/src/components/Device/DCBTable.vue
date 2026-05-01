@@ -329,7 +329,7 @@ onMounted(() => {
 >
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@/styles/tokens";
 
 #wrap {

@@ -201,7 +201,7 @@ watch(localSeries, () => {
 
 <style scoped lang="scss">
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .series-builder { display: flex; flex-direction: column; gap: 12px; }
 

@@ -415,7 +415,7 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .snmp-page {
   padding: 0 20px 40px;

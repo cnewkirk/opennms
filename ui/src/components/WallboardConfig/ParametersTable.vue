@@ -75,7 +75,7 @@ const removeRow = (i: number) => { rows.value.splice(i, 1); emitUpdate() }
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/mixins/typography" as typo;
+@use "@/styles/typography" as typo;
 @import "@/styles/tokens";
 
 .parameters-table {

@@ -89,7 +89,7 @@ const updateStatus = () => {
 
 <style lang="scss" scoped>
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@/styles/tokens";
 
 .usage-stats-header {

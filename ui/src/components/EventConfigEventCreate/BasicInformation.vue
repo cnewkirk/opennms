@@ -773,7 +773,7 @@ onMounted(async () => {
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
 @use "@/styles/tokens" as variables;
-@use '@featherds/styles/mixins/typography';
+@use "@/styles/typography";
 
 .main-content {
   padding: 30px;

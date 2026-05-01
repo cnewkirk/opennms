@@ -469,7 +469,7 @@ onMounted(() => {
 @use "@/styles/tokens" as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .alarms-list {
   &__filters {

@@ -8,7 +8,7 @@
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 @import "@/styles/tokens";
 
 .card {

@@ -94,7 +94,7 @@ const cellClass = (severity: Severity): string => {
 
 <style scoped lang="scss">
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .surveillance-grid-wrapper {
   overflow-x: auto;

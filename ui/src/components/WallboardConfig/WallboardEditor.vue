@@ -103,7 +103,7 @@ const moveDashlet = (i: number, direction: -1 | 1) => {
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/mixins/typography" as typo;
+@use "@/styles/typography" as typo;
 @import "@/styles/tokens";
 
 .wallboard-editor {

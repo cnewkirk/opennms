@@ -58,7 +58,7 @@ onMounted(() => deviceStore.getHistoryByIpInterface())
 
 <style scoped lang="scss">
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .title {
   @include subtitle1;

@@ -212,7 +212,7 @@ const onGroupSaved = async () => {
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .users-groups-page {
   padding: 0 20px 20px;

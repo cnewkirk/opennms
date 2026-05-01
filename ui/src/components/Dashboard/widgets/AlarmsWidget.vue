@@ -171,7 +171,7 @@ defineExpose({ refresh: load })
 
 <style scoped lang="scss">
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .alarms-widget {
   padding: 0 4px;

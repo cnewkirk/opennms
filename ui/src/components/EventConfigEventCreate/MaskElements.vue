@@ -95,7 +95,7 @@ watch(() => props, () => {
 
 <style scoped lang="scss">
 @use "@/styles/tokens";
-@use '@featherds/styles/mixins/typography';
+@use "@/styles/typography";
 
 .mask-elements {
   .mask-elements-header {

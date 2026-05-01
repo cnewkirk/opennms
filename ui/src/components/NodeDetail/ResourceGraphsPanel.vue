@@ -161,7 +161,7 @@ const editSavedChart = (chart: SavedChart) => {
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/mixins/typography";
+@import "@/styles/typography";
 
 .card {
   @include elevation(2);
