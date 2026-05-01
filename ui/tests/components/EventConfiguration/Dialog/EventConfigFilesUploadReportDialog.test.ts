@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { useEventConfigStore } from '@/stores/eventConfigStore'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import EventConfigFilesUploadReportDialog from '@/components/EventConfiguration/Dialog/EventConfigFilesUploadReportDialog.vue'
 import { EventConfigFilesUploadResponse } from '@/types/eventConfig'
 
-vi.mock('@featherds/dialog', () => ({
-  FeatherDialog: {
-    name: 'FeatherDialog',
+vi.mock('primevue/dialog', () => ({
+  default: {
+    name: 'Dialog',
     template: '<div><slot></slot><slot name="footer"></slot></div>',
     props: ['labels', 'modelValue']
   }
@@ -59,8 +59,8 @@ describe('EventConfigFilesUploadReportDialog', () => {
       global: {
         plugins: [pinia],
         components: {
-          FeatherButton,
-          FeatherDialog
+          Button,
+          Dialog
         }
       }
     })
@@ -69,8 +69,8 @@ describe('EventConfigFilesUploadReportDialog', () => {
   })
 
   it('renders the dialog when visible is true', () => {
-    expect(wrapper.findComponent(FeatherDialog).exists()).toBe(true)
-    expect(wrapper.findComponent(FeatherDialog).props('labels')).toEqual({
+    expect(wrapper.findComponent(Dialog).exists()).toBe(true)
+    expect(wrapper.findComponent(Dialog).props('labels')).toEqual({
       title: 'Upload Report',
       close: 'Close'
     })
@@ -132,7 +132,7 @@ describe('EventConfigFilesUploadReportDialog', () => {
   })
 
   it('calls fetchEventConfigs and closes dialog when Close button is clicked', async () => {
-    const closeButton = wrapper.findAllComponents(FeatherButton).at(0)
+    const closeButton = wrapper.findAllComponents(Button).at(0)
     expect(closeButton.exists()).toBe(true)
     await closeButton.trigger('click')
     await flushPromises()
@@ -141,7 +141,7 @@ describe('EventConfigFilesUploadReportDialog', () => {
   })
 
   it('calls fetchEventConfigs, resets active tab, and closes dialog when View Uploaded Files button is clicked', async () => {
-    const viewButton = wrapper.findAllComponents(FeatherButton).at(1)
+    const viewButton = wrapper.findAllComponents(Button).at(1)
     expect(viewButton.exists()).toBe(true)
     await viewButton.trigger('click')
     await flushPromises()
@@ -153,6 +153,6 @@ describe('EventConfigFilesUploadReportDialog', () => {
   it('hides the dialog when visible is false', async () => {
     store.$state.uploadedEventConfigFilesReportDialogState.visible = false
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(FeatherDialog).props('modelValue')).toBe(false)
+    expect(wrapper.findComponent(Dialog).props('modelValue')).toBe(false)
   })
 })

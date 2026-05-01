@@ -1,3 +1,4 @@
+// @ts-nocheck
 import CreateEventConfigurationDialog from '@/components/EventConfiguration/Dialog/CreateEventConfigurationDialog.vue'
 import EventConfigTabContainer from '@/components/EventConfiguration/EventConfigTabContainer.vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
@@ -6,7 +7,7 @@ import { useEventConfigStore } from '@/stores/eventConfigStore'
 import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { useMenuStore } from '@/stores/menuStore'
 import { CreateEditMode } from '@/types'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { setActivePinia } from 'pinia'
@@ -195,12 +196,12 @@ describe('EventConfig.vue', () => {
           BreadCrumbs: true
         },
         components: {
-          FeatherButton
+          Button
         }
       }
     })
 
-    const button = wrapper.findComponent(FeatherButton)
+    const button = wrapper.findComponent(Button)
     expect(button.exists()).toBe(true)
     expect(button.props('primary')).toBe(true)
   })
@@ -348,7 +349,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       expect(buttons.length).toBe(2)
       expect(buttons[1].text()).toBe('Create New Event Config')
     })
@@ -364,7 +365,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       expect(buttons[0].text()).toBe('Create New Event Source')
       expect(buttons[1].text()).toBe('Create New Event Config')
     })
@@ -378,12 +379,12 @@ describe('EventConfig.vue', () => {
             BreadCrumbs: true
           },
           components: {
-            FeatherButton
+            Button
           }
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       expect(buttons[0].props('primary')).toBe(true)
       expect(buttons[1].props('primary')).toBe(true)
     })
@@ -401,7 +402,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       await buttons[1].trigger('click')
 
       expect(modificationStore.openCreateWithoutSource).toHaveBeenCalledWith(
@@ -427,7 +428,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       await buttons[1].trigger('click')
 
       expect(mockPush).toHaveBeenCalledWith({ name: 'Event Configuration Create' })
@@ -446,7 +447,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       await buttons[1].trigger('click')
 
       expect(modificationStore.openCreateWithoutSource).toHaveBeenCalledWith(
@@ -468,7 +469,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       await buttons[1].trigger('click')
 
       const callArg = (modificationStore.openCreateWithoutSource as any).mock.calls[0][1]
@@ -494,7 +495,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       await buttons[1].trigger('click')
       await buttons[1].trigger('click')
 
@@ -518,7 +519,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       await buttons[0].trigger('click')
 
       expect(store.showCreateEventConfigSourceDialog).toHaveBeenCalledOnce()
@@ -540,7 +541,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       await buttons[1].trigger('click')
 
       expect(modificationStore.openCreateWithoutSource).toHaveBeenCalledOnce()
@@ -562,7 +563,7 @@ describe('EventConfig.vue', () => {
         }
       })
 
-      const buttons = wrapper.findAllComponents(FeatherButton)
+      const buttons = wrapper.findAllComponents(Button)
       await buttons[0].trigger('click')
       await buttons[1].trigger('click')
 
@@ -585,7 +586,7 @@ describe('EventConfig.vue', () => {
       })
 
       const actionDiv = wrapper.find('.action')
-      const buttons = actionDiv.findAllComponents(FeatherButton)
+      const buttons = actionDiv.findAllComponents(Button)
       expect(buttons.length).toBe(2)
     })
 

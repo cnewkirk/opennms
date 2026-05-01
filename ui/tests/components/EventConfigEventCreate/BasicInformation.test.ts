@@ -2,9 +2,9 @@ import BasicInformation from '@/components/EventConfigEventCreate/BasicInformati
 import { createEventConfigEvent, updateEventConfigEventById } from '@/services/eventConfigService'
 import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { CreateEditMode } from '@/types'
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect } from '@featherds/select'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
 import { FeatherTextarea } from '@featherds/textarea'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
@@ -165,10 +165,10 @@ describe('BasicInformation Component', () => {
       global: {
         plugins: [router],
         components: {
-          FeatherInput,
+          InputText,
           FeatherTextarea,
-          FeatherSelect,
-          FeatherButton
+          Select,
+          Button
         }
       }
     })
@@ -349,7 +349,7 @@ describe('BasicInformation Component', () => {
     expect(wrapper.vm.isValid).toBe(false)
 
     const saveButton = wrapper.find('[data-test="save-event-button"]')
-    const buttonComponent = saveButton.findComponent(FeatherButton)
+    const buttonComponent = saveButton.findComponent(Button)
     expect(buttonComponent.props('disabled')).toBe(true)
   })
 
@@ -1088,7 +1088,7 @@ describe('BasicInformation Component', () => {
       await wrapper.vm.$nextTick()
 
       const button = wrapper.find('[data-test="create-new-event-source-button"]')
-      const buttonComponent = button.findComponent(FeatherButton)
+      const buttonComponent = button.findComponent(Button)
       expect(buttonComponent.props('disabled')).toBe(true)
     })
 
@@ -1097,7 +1097,7 @@ describe('BasicInformation Component', () => {
       await wrapper.vm.$nextTick()
 
       const button = wrapper.find('[data-test="create-new-event-source-button"]')
-      const buttonComponent = button.findComponent(FeatherButton)
+      const buttonComponent = button.findComponent(Button)
       expect(buttonComponent.props('disabled')).toBe(false)
     })
 
@@ -1458,10 +1458,10 @@ describe('BasicInformation Component', () => {
         global: {
           plugins: [router],
           components: {
-            FeatherInput,
+            InputText,
             FeatherTextarea,
-            FeatherSelect,
-            FeatherButton
+            Select,
+            Button
           }
         }
       })
@@ -1482,10 +1482,10 @@ describe('BasicInformation Component', () => {
         global: {
           plugins: [router],
           components: {
-            FeatherInput,
+            InputText,
             FeatherTextarea,
-            FeatherSelect,
-            FeatherButton
+            Select,
+            Button
           }
         }
       })
@@ -1517,10 +1517,10 @@ describe('BasicInformation Component', () => {
         global: {
           plugins: [router],
           components: {
-            FeatherInput,
+            InputText,
             FeatherTextarea,
-            FeatherSelect,
-            FeatherButton
+            Select,
+            Button
           }
         }
       })
@@ -1544,10 +1544,10 @@ describe('BasicInformation Component', () => {
         global: {
           plugins: [router],
           components: {
-            FeatherInput,
+            InputText,
             FeatherTextarea,
-            FeatherSelect,
-            FeatherButton
+            Select,
+            Button
           }
         }
       })
@@ -1604,10 +1604,10 @@ describe('BasicInformation Component', () => {
         global: {
           plugins: [router],
           components: {
-            FeatherInput,
+            InputText,
             FeatherTextarea,
-            FeatherSelect,
-            FeatherButton
+            Select,
+            Button
           }
         }
       })

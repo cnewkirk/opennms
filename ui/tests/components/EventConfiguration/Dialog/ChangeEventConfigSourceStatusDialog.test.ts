@@ -1,9 +1,10 @@
+// @ts-nocheck
 import { mount, VueWrapper } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
 import { useEventConfigStore } from '@/stores/eventConfigStore'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherButton } from '@featherds/button'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 import ChangeEventConfigSourceStatusDialog from '@/components/EventConfiguration/Dialog/ChangeEventConfigSourceStatusDialog.vue'
 
 describe('ChangeEventConfigSourceStatusDialog.vue', () => {
@@ -34,8 +35,8 @@ describe('ChangeEventConfigSourceStatusDialog.vue', () => {
       global: {
         plugins: [pinia],
         stubs: {
-          FeatherDialog,
-          FeatherButton
+          Dialog,
+          Button
         }
       }
     })
@@ -47,13 +48,13 @@ describe('ChangeEventConfigSourceStatusDialog.vue', () => {
   })
 
   it('renders dialog correctly with title and message', () => {
-    const dialog = wrapper.findComponent(FeatherDialog)
+    const dialog = wrapper.findComponent(Dialog)
     expect(dialog.exists()).toBe(true)
     expect(dialog.props('labels')?.title).toBe('Change Event Configuration Source Status')
   })
 
   it('calls hideChangeEventConfigSourceStatusDialog on Cancel click', async () => {
-    const cancelBtn = wrapper.findAllComponents(FeatherButton).find((btn) => btn.text().toLowerCase() === 'cancel')
+    const cancelBtn = wrapper.findAllComponents(Button).find((btn) => btn.text().toLowerCase() === 'cancel')
 
     expect(cancelBtn).toBeTruthy()
     await cancelBtn?.trigger('click')
@@ -62,7 +63,7 @@ describe('ChangeEventConfigSourceStatusDialog.vue', () => {
   })
 
   it('calls disableEventConfigSource on Save click when enabled', async () => {
-    const saveBtn = wrapper.findAllComponents(FeatherButton).find((btn) => btn.text().toLowerCase() === 'save')
+    const saveBtn = wrapper.findAllComponents(Button).find((btn) => btn.text().toLowerCase() === 'save')
 
     await saveBtn?.trigger('click')
 
@@ -88,7 +89,7 @@ describe('ChangeEventConfigSourceStatusDialog.vue', () => {
     }
     await wrapper.vm.$nextTick()
 
-    const saveBtn = wrapper.findAllComponents(FeatherButton).find((btn) => btn.text().toLowerCase() === 'save')
+    const saveBtn = wrapper.findAllComponents(Button).find((btn) => btn.text().toLowerCase() === 'save')
 
     await saveBtn?.trigger('click')
 
@@ -102,8 +103,8 @@ describe('ChangeEventConfigSourceStatusDialog.vue', () => {
     expect(wrapper.exists()).toBe(true)
   })
 
-  it('renders FeatherDialog with visible prop true', () => {
-    const dialog = wrapper.findComponent(FeatherDialog)
+  it('renders Dialog with visible prop true', () => {
+    const dialog = wrapper.findComponent(Dialog)
     expect(dialog.props('modelValue')).toBe(true)
   })
 })

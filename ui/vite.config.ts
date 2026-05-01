@@ -35,7 +35,8 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         api: 'modern',
-        silenceDeprecations: ['color-functions', 'global-builtin', 'legacy-js-api', 'import']
+        silenceDeprecations: ['color-functions', 'global-builtin', 'legacy-js-api', 'import'],
+        loadPaths: ['node_modules', 'src/stubs']
       }
     }
   },

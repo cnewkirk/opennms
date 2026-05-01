@@ -1,8 +1,8 @@
 import UploadedFileRenameDialog from '@/components/EventConfiguration/Dialog/UploadedFileRenameDialog.vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherCheckbox, FeatherCheckboxGroup } from '@featherds/checkbox'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherInput } from '@featherds/input'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 import { flushPromises, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -38,11 +38,10 @@ describe('UploadedFileRenameDialog.vue', () => {
       },
       global: {
         components: {
-          FeatherDialog,
-          FeatherButton,
-          FeatherCheckbox,
-          FeatherCheckboxGroup,
-          FeatherInput
+          Dialog,
+          Button,
+          Checkbox,
+          InputText
         }
       },
       attachTo: document.body
@@ -70,7 +69,7 @@ describe('UploadedFileRenameDialog.vue', () => {
 
   it('renders both checkbox options', async () => {
     await flushPromises()
-    const checkboxes = wrapper.findAllComponents(FeatherCheckbox)
+    const checkboxes = wrapper.findAllComponents(Checkbox)
     expect(checkboxes.length).toBe(2)
   })
 
@@ -88,7 +87,7 @@ describe('UploadedFileRenameDialog.vue', () => {
 
   it('renders Save Changes and Cancel buttons', async () => {
     await flushPromises()
-    const buttons = wrapper.findAllComponents(FeatherButton)
+    const buttons = wrapper.findAllComponents(Button)
     expect(buttons.length).toBe(2)
     expect(buttons[0].text()).toBe('Cancel')
     expect(buttons[1].text()).toBe('Save Changes')
@@ -291,7 +290,7 @@ describe('UploadedFileRenameDialog.vue', () => {
 
   // Dialog Close Tests
   it('emits close event when Cancel button clicked', async () => {
-    const cancelButton = wrapper.findAllComponents(FeatherButton)[0]
+    const cancelButton = wrapper.findAllComponents(Button)[0]
     await cancelButton.trigger('click')
     await flushPromises()
     

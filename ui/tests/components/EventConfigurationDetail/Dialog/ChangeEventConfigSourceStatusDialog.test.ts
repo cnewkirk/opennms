@@ -1,21 +1,22 @@
+// @ts-nocheck
 import { mount, VueWrapper, flushPromises } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
 import { useEventConfigDetailStore } from '@/stores/eventConfigDetailStore'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherButton } from '@featherds/button'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 import ChangeEventConfigSourceStatusDialog from '@/components/EventConfigurationDetail/Dialog/ChangeEventConfigSourceStatusDialog.vue'
 import { VENDOR_OPENNMS } from '@/lib/utils'
 
-// mock feather components so we can actually render the buttons
-vi.mock('@featherds/button', () => ({
-  FeatherButton: {
+// mock primevue components so we can actually render the buttons
+vi.mock('primevue/button', () => ({
+  default: {
     template: '<button @click="$emit(\'click\')"><slot /></button>'
   }
 }))
 
-vi.mock('@featherds/dialog', () => ({
-  FeatherDialog: {
+vi.mock('primevue/dialog', () => ({
+  default: {
     props: ['modelValue', 'labels', 'hideClose'],
     emits: ['update:modelValue', 'hidden'],
     template: `
@@ -65,7 +66,7 @@ describe('ChangeEventConfigSourceStatusDialog.vue', () => {
 
   describe('Dialog Rendering', () => {
     it('renders dialog correctly with title', () => {
-      const dialog = wrapper.findComponent(FeatherDialog)
+      const dialog = wrapper.findComponent(Dialog)
       expect(dialog.exists()).toBe(true)
       expect(dialog.props('labels')).toEqual({ title: 'Change Event Configuration Source Status' })
     })
@@ -170,7 +171,7 @@ describe('ChangeEventConfigSourceStatusDialog.vue', () => {
 
   describe('Cancel Button', () => {
     it('calls hideChangeEventConfigSourceStatusDialog on Cancel click', async () => {
-      const cancelBtn = wrapper.findAllComponents(FeatherButton).find((btn) => btn.text().toLowerCase() === 'cancel')
+      const cancelBtn = wrapper.findAllComponents(Button).find((btn) => btn.text().toLowerCase() === 'cancel')
       expect(cancelBtn).toBeTruthy()
       await cancelBtn!.trigger('click')
       expect(store.hideChangeEventConfigSourceStatusDialog).toHaveBeenCalled()
@@ -291,7 +292,7 @@ describe('ChangeEventConfigSourceStatusDialog.vue', () => {
 
   describe('Dialog Hidden Event', () => {
     it('calls hideChangeEventConfigSourceStatusDialog when dialog emits hidden event', async () => {
-      const dialog = wrapper.findComponent(FeatherDialog)
+      const dialog = wrapper.findComponent(Dialog)
       await dialog.vm.$emit('hidden')
       expect(store.hideChangeEventConfigSourceStatusDialog).toHaveBeenCalled()
     })

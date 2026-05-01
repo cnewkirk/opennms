@@ -9,16 +9,11 @@ import {
 import useSnackbar from '@/composables/useSnackbar'
 import { uploadEventConfigFiles } from '@/services/eventConfigService'
 import { useEventConfigStore } from '@/stores/eventConfigStore'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import CheckCircle from '@featherds/icon/action/CheckCircle'
-import Delete from '@featherds/icon/action/Delete'
-import Text from '@featherds/icon/file/Text'
-import Apps from '@featherds/icon/navigation/Apps'
-import Error from '@featherds/icon/notification/Error'
-import Warning from '@featherds/icon/notification/Warning'
-import { FeatherSpinner } from '@featherds/progress'
-import { FeatherTooltip } from '@featherds/tooltip'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
+
+// Tooltip stub for tests that check .vm.title on tooltip components
+const Tooltip = { name: 'Tooltip', template: '<span><slot /></span>', props: ['title'] }
 import { flushPromises, mount, VueWrapper } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Draggable from 'vuedraggable'
@@ -57,20 +52,10 @@ describe('EventConfigUploadFilesTab', () => {
       global: {
         components: {
           Draggable,
-          FeatherButton,
-          FeatherIcon,
-          FeatherSpinner,
-          FeatherTooltip,
+          Button,
+          ProgressSpinner,
           EventConfigFilesUploadReportDialog,
           UploadedFileRenameDialog
-        },
-        provide: {
-          CheckCircle,
-          Delete,
-          Text,
-          Apps,
-          Error,
-          Warning
         }
       }
     })
@@ -147,7 +132,7 @@ describe('EventConfigUploadFilesTab', () => {
   it('triggers file input click when "Choose files to upload" button is clicked', async () => {
     const input = wrapper.find('input[type="file"]')
     const spy = vi.spyOn(input.element as HTMLElement, 'click')
-    await wrapper.findComponent(FeatherButton).trigger('click')
+    await wrapper.findComponent(Button).trigger('click')
     expect(spy).toHaveBeenCalled()
   })
 
@@ -320,7 +305,7 @@ describe('EventConfigUploadFilesTab', () => {
     })
     wrapper.vm.isLoading = true
     await wrapper.vm.$nextTick()
-    expect(wrapper.findComponent(FeatherSpinner).exists()).toBe(true)
+    expect(wrapper.findComponent(ProgressSpinner).exists()).toBe(true)
   })
 
   it('displays error snackbar on upload failure', async () => {
@@ -475,7 +460,7 @@ describe('EventConfigUploadFilesTab', () => {
       })
     )
     expect(wrapper.find('.error-icon').exists()).toBe(true)
-    expect(wrapper.findComponent(FeatherTooltip).vm.title).toContain('Invalid XML format - file contains syntax errors')
+    expect(wrapper.findComponent(Tooltip).vm.title).toContain('Invalid XML format - file contains syntax errors')
     expect(snackbar.showSnackBar).toHaveBeenCalledWith({
       msg: 'Error processing file invalid.events.xml.',
       error: true
@@ -509,7 +494,7 @@ describe('EventConfigUploadFilesTab', () => {
       })
     )
     expect(wrapper.find('.error-icon').exists()).toBe(true)
-    expect(wrapper.findComponent(FeatherTooltip).vm.title).toContain('Missing <events> root element')
+    expect(wrapper.findComponent(Tooltip).vm.title).toContain('Missing <events> root element')
     expect(snackbar.showSnackBar).toHaveBeenCalledWith({
       msg: 'Error processing file noevents.events.xml.',
       error: true
@@ -542,7 +527,7 @@ describe('EventConfigUploadFilesTab', () => {
       })
     )
     expect(wrapper.find('.error-icon').exists()).toBe(true)
-    expect(wrapper.findComponent(FeatherTooltip).vm.title).toContain('Missing or invalid OpenNMS namespace')
+    expect(wrapper.findComponent(Tooltip).vm.title).toContain('Missing or invalid OpenNMS namespace')
     expect(snackbar.showSnackBar).toHaveBeenCalledWith({
       msg: 'Error processing file wrongns.events.xml.',
       error: true
@@ -585,7 +570,7 @@ describe('EventConfigUploadFilesTab', () => {
       })
     )
     expect(wrapper.find('.error-icon').exists()).toBe(true)
-    expect(wrapper.findComponent(FeatherTooltip).vm.title).toContain('No <event> entries found')
+    expect(wrapper.findComponent(Tooltip).vm.title).toContain('No <event> entries found')
     expect(snackbar.showSnackBar).toHaveBeenCalledWith({
       msg: 'Error processing file noevent.events.xml.',
       error: true
@@ -622,7 +607,7 @@ describe('EventConfigUploadFilesTab', () => {
       })
     )
     expect(wrapper.find('.error-icon').exists()).toBe(true)
-    expect(wrapper.findComponent(FeatherTooltip).vm.title).toContain(
+    expect(wrapper.findComponent(Tooltip).vm.title).toContain(
       'Event 1: missing <event-label>, missing <severity>'
     )
     expect(snackbar.showSnackBar).toHaveBeenCalledWith({
@@ -915,7 +900,7 @@ describe('EventConfigUploadFilesTab', () => {
     await input.trigger('change')
     await flushPromises()
     await wrapper.vm.$nextTick()
-    const tooltip = wrapper.findComponent(FeatherTooltip)
+    const tooltip = wrapper.findComponent(Tooltip)
     expect(tooltip.vm.title).toContain(
       'Event 1: missing <uei>. \nEvent 1: missing <event-label>. \nEvent 1: missing <severity>. '
     )
@@ -1057,13 +1042,13 @@ describe('EventConfigUploadFilesTab', () => {
       error: true
     })
     // There should be two tooltips - one for warning, one for error
-    expect(wrapper.findAllComponents(FeatherTooltip).length).toBe(2)
+    expect(wrapper.findAllComponents(Tooltip).length).toBe(2)
     // The warning tooltip should show the duplicate message
-    expect(wrapper.findAllComponents(FeatherTooltip)[0].vm.title).toContain(
+    expect(wrapper.findAllComponents(Tooltip)[0].vm.title).toContain(
       'File is a duplicate of another file that has been already uploaded.'
     )
     // The error tooltip should show the error message
-    expect(wrapper.findAllComponents(FeatherTooltip)[1].vm.title).toContain(
+    expect(wrapper.findAllComponents(Tooltip)[1].vm.title).toContain(
       'No <event> entries found within <events> element'
     )
     expect(snackbar.showSnackBar).toHaveBeenCalled()
@@ -1079,7 +1064,7 @@ describe('EventConfigUploadFilesTab', () => {
     expect(wrapper.vm.eventFiles[0].isValid).toBe(false)
     expect(wrapper.find('.warning-icon').exists()).toBe(false)
     expect(wrapper.find('.error-icon').exists()).toBe(true)
-    expect(wrapper.findComponent(FeatherTooltip).vm.title).toContain('No <event> entries found within <events> element')
+    expect(wrapper.findComponent(Tooltip).vm.title).toContain('No <event> entries found within <events> element')
     expect(snackbar.showSnackBar).toHaveBeenCalledTimes(1) // only one error
   })
 
@@ -1159,7 +1144,7 @@ describe('EventConfigUploadFilesTab', () => {
     })
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.error-icon').exists()).toBe(true)
-    const tooltip = wrapper.findComponent(FeatherTooltip)
+    const tooltip = wrapper.findComponent(Tooltip)
     expect(tooltip.vm.title).toBe('') // Joins empty → blank; could enhance code to 'Validation failed' if needed
   })
 
@@ -1178,7 +1163,7 @@ describe('EventConfigUploadFilesTab', () => {
   it('triggers folder input click when "Choose folder to upload" button is clicked', async () => {
     const folderInput = wrapper.findAll('input[type="file"]')[1] // Second input is folder
     const spy = vi.spyOn(folderInput.element as HTMLElement, 'click')
-    const buttons = wrapper.findAllComponents(FeatherButton)
+    const buttons = wrapper.findAllComponents(Button)
     await buttons[1].trigger('click') // Second button is folder upload
     expect(spy).toHaveBeenCalled()
   })
@@ -1349,7 +1334,7 @@ describe('EventConfigUploadFilesTab', () => {
     wrapper.vm.isLoading = true
     await wrapper.vm.$nextTick()
 
-    const buttons = wrapper.findAllComponents(FeatherButton)
+    const buttons = wrapper.findAllComponents(Button)
     // First two buttons are Choose files/folder, third is upload
     expect(buttons[0].props('disabled')).toBe(true)
     expect(buttons[1].props('disabled')).toBe(true)

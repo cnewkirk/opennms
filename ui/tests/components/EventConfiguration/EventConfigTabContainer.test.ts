@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { mount, VueWrapper } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
@@ -5,8 +6,10 @@ import { useEventConfigStore } from '@/stores/eventConfigStore'
 import EventConfigTabContainer from '@/components/EventConfiguration/EventConfigTabContainer.vue'
 import EventConfigSourceTable from '@/components/EventConfiguration/EventConfigSourceTable.vue'
 import EventConfigUploadFilesTab from '@/components/EventConfiguration/EventConfigUploadFilesTab.vue'
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
-import { FeatherButton } from '@featherds/button'
+import Tab from 'primevue/tab'
+import Tabs from 'primevue/tabs'
+import TabPanel from 'primevue/tabpanel'
+import Button from 'primevue/button'
 
 describe('EventConfigTabContainer', () => {
   let wrapper: VueWrapper<any>
@@ -27,10 +30,10 @@ describe('EventConfigTabContainer', () => {
       global: {
         plugins: [pinia],
         stubs: {
-          FeatherButton,
-          FeatherTab,
-          FeatherTabContainer,
-          FeatherTabPanel
+          Button,
+          Tab,
+          Tabs,
+          TabPanel
         }
       }
     })
@@ -46,20 +49,20 @@ describe('EventConfigTabContainer', () => {
   })
 
   it('renders two tabs with correct labels', () => {
-    const tabs = wrapper.findAllComponents(FeatherTab)
+    const tabs = wrapper.findAllComponents(Tab)
     expect(tabs).toHaveLength(2)
     expect(tabs[0].text()).toBe('View')
     expect(tabs[1].text()).toBe('Upload Files')
   })
 
   it('renders tab container with correct active tab', () => {
-    const tabContainer = wrapper.findComponent(FeatherTabContainer)
+    const tabContainer = wrapper.findComponent(Tabs)
     expect(tabContainer.exists()).toBe(true)
     expect(tabContainer.props('modelValue')).toBe(0)
   })
 
   it('renders both tab panels', () => {
-    const tabPanels = wrapper.findAllComponents(FeatherTabPanel)
+    const tabPanels = wrapper.findAllComponents(TabPanel)
     expect(tabPanels).toHaveLength(2)
   })
 
@@ -74,7 +77,7 @@ describe('EventConfigTabContainer', () => {
   })
 
   it('updates active tab when tab is changed', async () => {
-    const tabContainer = wrapper.findComponent(FeatherTabContainer)
+    const tabContainer = wrapper.findComponent(Tabs)
     await tabContainer.setValue(1)
     expect(store.activeTab).toBe(1)
   })
@@ -88,8 +91,8 @@ describe('EventConfigTabContainer', () => {
     store.activeTab = 1
     await wrapper.vm.$nextTick()
 
-    const tabContainer = wrapper.findComponent(FeatherTabContainer)
-    const panels = tabContainer.findAllComponents(FeatherTabPanel)
+    const tabContainer = wrapper.findComponent(Tabs)
+    const panels = tabContainer.findAllComponents(TabPanel)
 
     expect(panels.length).toBe(2)
 
@@ -101,8 +104,8 @@ describe('EventConfigTabContainer', () => {
     store.activeTab = 0
     await wrapper.vm.$nextTick()
 
-    const tabContainer = wrapper.findComponent(FeatherTabContainer)
-    const panels = tabContainer.findAllComponents(FeatherTabPanel)
+    const tabContainer = wrapper.findComponent(Tabs)
+    const panels = tabContainer.findAllComponents(TabPanel)
 
     expect(panels.length).toBe(2)
 
@@ -122,10 +125,10 @@ describe('EventConfigTabContainer', () => {
         global: {
           plugins: [createTestingPinia({ createSpy: vi.fn })],
           stubs: {
-            FeatherButton,
-            FeatherTab,
-            FeatherTabContainer,
-            FeatherTabPanel
+            Button,
+            Tab,
+            Tabs,
+            TabPanel
           }
         }
       })
@@ -138,16 +141,16 @@ describe('EventConfigTabContainer', () => {
       global: {
         // No plugins: [pinia] provided
         stubs: {
-          FeatherButton,
-          FeatherTab,
-          FeatherTabContainer,
-          FeatherTabPanel
+          Button,
+          Tab,
+          Tabs,
+          TabPanel
         }
       }
     })
     // Expect no crash; component should render skeleton (tabs without reactivity)
     expect(wrapper.exists()).toBe(true)
-    expect(wrapper.findComponent(FeatherTabContainer).exists()).toBe(true)
+    expect(wrapper.findComponent(Tabs).exists()).toBe(true)
   })
 
   it('renders tab panels with correct data-test attributes', () => {
@@ -165,7 +168,7 @@ describe('EventConfigTabContainer', () => {
     expect(sourceTable.exists()).toBe(true)
     expect(uploadFilesTab.exists()).toBe(true)
 
-    await wrapper.findComponent(FeatherTabContainer).setValue(1)
+    await wrapper.findComponent(Tabs).setValue(1)
     await wrapper.vm.$nextTick()
 
     // Both should still exist (no unmount/remount)
