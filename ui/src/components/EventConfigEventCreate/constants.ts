@@ -1,4 +1,8 @@
-import { ISelectItemType } from '@featherds/select'
+export interface ISelectItemType {
+  _text: string
+  _value: string | number
+  [key: string]: unknown
+}
 
 export const MAX_MASK_ELEMENTS = 12
 

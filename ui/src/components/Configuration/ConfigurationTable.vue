@@ -3,36 +3,21 @@
     <table class="condensed">
       <thead>
         <tr class="tr">
-          <FeatherSortHeader
-            scope="col"
-            class="onms-sort-header"
-            :property="RequisitionData.ImportName"
-            :sort="sorts[RequisitionData.ImportName]"
-            v-on:sort-changed="sortChanged"
-            >Name</FeatherSortHeader
-          >
-          <FeatherSortHeader
-            scope="col"
-            class="onms-sort-header"
-            :property="RequisitionData.ImportURL"
-            :sort="sorts[RequisitionData.ImportURL]"
-            v-on:sort-changed="sortChanged"
-            >URL</FeatherSortHeader
-          >
+          <th scope="col" class="onms-sort-header sortable" @click="nextSort(RequisitionData.ImportName)">
+            Name<span class="sort-icon">{{ sortIndicator(RequisitionData.ImportName) }}</span>
+          </th>
+          <th scope="col" class="onms-sort-header sortable" @click="nextSort(RequisitionData.ImportURL)">
+            URL<span class="sort-icon">{{ sortIndicator(RequisitionData.ImportURL) }}</span>
+          </th>
           <th
             scope="col"
             class="onms-sort-header"
           >
             Schedule Frequency
           </th>
-          <FeatherSortHeader
-            scope="col"
-            class="onms-sort-header"
-            :property="RequisitionData.RescanExisting"
-            :sort="sorts[RequisitionData.RescanExisting]"
-            v-on:sort-changed="sortChanged"
-            >Rescan Behavior</FeatherSortHeader
-          >
+          <th scope="col" class="onms-sort-header sortable" @click="nextSort(RequisitionData.RescanExisting)">
+            Rescan Behavior<span class="sort-icon">{{ sortIndicator(RequisitionData.RescanExisting) }}</span>
+          </th>
           <th />
         </tr>
       </thead>
@@ -58,24 +43,22 @@
           </td>
           <td>
             <div class="flex">
-              <FeatherButton
-                primary
-                icon="Edit"
+              <Button
+                text
                 @click="() => props.editClicked(item.originalIndex)"
                 :disabled="Boolean(item[RequisitionData.ImportURL].startsWith('requisition://'))"
                 data-test="edit-btn"
+                aria-label="Edit"
               >
-                <FeatherIcon :icon="Edit" />
-              </FeatherButton>
-              <FeatherButton
-                icon="Delete"
+                <i class="pi pi-pencil" />
+              </Button>
+              <Button
+                text
                 @click="() => props.deleteClicked(item.originalIndex)"
+                aria-label="Delete"
               >
-                <FeatherIcon
-                  class="delete-icon"
-                  :icon="Delete"
-                />
-              </FeatherButton>
+                <i class="pi pi-trash delete-icon" />
+              </Button>
             </div>
           </td>
         </tr>
@@ -96,18 +79,13 @@
   lang="ts"
 >
 import { ComputedRef, PropType } from 'vue'
-import { FeatherSortHeader, SORT } from '@featherds/table'
 import { FeatherPagination } from '@featherds/pagination'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-
-import Edit from '@featherds/icon/action/Edit'
-import Delete from '@featherds/icon/action/Delete'
+import Button from 'primevue/button'
 
 import { RequisitionData } from './copy/requisitionTypes'
 import { ConfigurationHelper } from './ConfigurationHelper'
 import ConfigurationCopyPasteDisplay from './ConfigurationCopyPasteDisplay.vue'
-import { ConfigurationPageVals, ConfigurationTableSort, ProvisionDServerConfiguration } from './configuration.types'
+import { ConfigurationPageVals, ProvisionDServerConfiguration } from './configuration.types'
 import { rescanCopy } from './copy/rescanItems'
 
 /**
@@ -123,13 +101,26 @@ const props = defineProps({
 /**
  * Local State
  */
-const sorts = reactive<ProvisionDServerConfiguration>({
-  [RequisitionData.ImportName]: SORT.NONE,
-  [RequisitionData.ImportURL]: SORT.NONE,
-  [RequisitionData.RescanExisting]: SORT.NONE,
-  currentSort: { property: RequisitionData.ImportName, value: SORT.NONE },
-  originalIndex: 0
-})
+type SortDir = 'asc' | 'desc' | undefined
+const sortField = ref<string | undefined>(undefined)
+const sortDir = ref<SortDir>(undefined)
+
+const nextSort = (field: string) => {
+  if (sortField.value !== field) {
+    sortField.value = field
+    sortDir.value = 'asc'
+  } else if (sortDir.value === 'asc') {
+    sortDir.value = 'desc'
+  } else {
+    sortField.value = undefined
+    sortDir.value = undefined
+  }
+}
+
+const sortIndicator = (field: string) => {
+  if (sortField.value !== field) return ''
+  return sortDir.value === 'asc' ? ' ▲' : ' ▼'
+}
 
 const itemList = computed(() => props.itemList)
 
@@ -146,7 +137,7 @@ const pageVals: ComputedRef<ConfigurationPageVals> = computed(() => {
  */
 const filteredItems = computed(() => {
   const currentTablePage = pageVals.value.pageSize * (pageVals.value.page - 1)
-  const currentSortKey = sorts.currentSort?.property || ''
+  const currentSortKey = sortField.value || ''
 
   let myItems: Array<ProvisionDServerConfiguration> = [...itemList.value]
 
@@ -158,9 +149,9 @@ const filteredItems = computed(() => {
 
   // Determine Sort Order
   let sortOrderValues = [0, 0]
-  if (sorts.currentSort?.value === SORT.ASCENDING) {
+  if (sortDir.value === 'asc') {
     sortOrderValues = [-1, 1]
-  } else if (sorts.currentSort?.value === SORT.DESCENDING) {
+  } else if (sortDir.value === 'desc') {
     sortOrderValues = [1, -1]
   }
 
@@ -178,14 +169,6 @@ const filteredItems = computed(() => {
   // Keep only the current page.
   return sortedItemsTotal?.slice(currentTablePage, currentTablePage + pageVals.value.pageSize)
 })
-
-/**
- * When the user changes which column is sorted.
- */
-const sortChanged = (sortVal: ConfigurationTableSort) => {
-  sorts.currentSort = sortVal
-  sorts[sortVal.property] = sortVal.value
-}
 
 /**
  * When the user changes the page number.
@@ -228,12 +211,17 @@ table {
 
 .main-wrapper {
   table.condensed {
-    :deep(.onms-sort-header) {
-      > .header-flex-container {
-        justify-content: flex-start;
-      }
+    .onms-sort-header {
+      text-align: left;
     }
   }
+}
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.sort-icon {
+  margin-left: 4px;
 }
 .flex {
   display: flex;

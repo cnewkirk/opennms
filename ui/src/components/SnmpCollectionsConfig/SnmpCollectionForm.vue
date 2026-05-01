@@ -3,26 +3,35 @@
     <h3 class="form-title">{{ isNew ? 'New SNMP Collection' : `Edit: ${localEntry.name}` }}</h3>
 
     <div class="form-grid">
-      <FeatherInput
-        v-model="localEntry.name"
-        label="Name"
-        :error="nameError"
-        required
-      />
+      <div class="p-float-label">
+        <InputText
+          id="snmp-col-name"
+          v-model="localEntry.name"
+          :invalid="!!nameError"
+          required
+        />
+        <label for="snmp-col-name">Name</label>
+        <small v-if="nameError" class="p-error">{{ nameError }}</small>
+      </div>
 
-      <FeatherSelect
-        v-model="storageOption"
-        :options="storageOptions"
-        label="SNMP Storage Flag"
-        text-prop="title"
-      />
+      <div class="p-float-label">
+        <Select
+          inputId="snmp-storage-flag"
+          v-model="storageOption"
+          :options="storageOptions"
+          optionLabel="title"
+        />
+        <label for="snmp-storage-flag">SNMP Storage Flag</label>
+      </div>
 
-      <FeatherInput
-        v-model.number="localEntry.rrdStep"
-        label="RRD Step (seconds)"
-        type="number"
-        min="1"
-      />
+      <div class="p-float-label">
+        <InputNumber
+          inputId="snmp-rrd-step"
+          v-model="localEntry.rrdStep"
+          :min="1"
+        />
+        <label for="snmp-rrd-step">RRD Step (seconds)</label>
+      </div>
     </div>
 
     <!-- RRAs -->
@@ -33,15 +42,16 @@
         :key="i"
         class="rra-row"
       >
-        <FeatherInput
+        <InputText
           :model-value="rra"
-          :label="`RRA ${i + 1}`"
-          :hide-label="true"
+          :placeholder="`RRA ${i + 1}`"
           @update:model-value="updateRra(i, $event as string)"
         />
-        <FeatherButton icon="Cancel" text @click="removeRra(i)" :aria-label="`Remove RRA ${i + 1}`" />
+        <Button text @click="removeRra(i)" :aria-label="`Remove RRA ${i + 1}`">
+          <i class="pi pi-times" />
+        </Button>
       </div>
-      <FeatherButton text @click="addRra">+ Add RRA</FeatherButton>
+      <Button text label="+ Add RRA" @click="addRra" />
     </div>
 
     <!-- Include Collections -->
@@ -57,30 +67,37 @@
           <button class="chip-remove" @click="removeInclude(groupName)" :aria-label="`Remove ${groupName}`">×</button>
         </div>
       </div>
-      <FeatherSelect
-        v-model="selectedGroupToAdd"
-        :options="availableGroups"
-        label="Add include collection"
-        text-prop="title"
-        @update:model-value="onAddInclude"
-      />
+      <div class="p-float-label">
+        <Select
+          inputId="add-include-collection"
+          v-model="selectedGroupToAdd"
+          :options="availableGroups"
+          optionLabel="title"
+          @update:model-value="onAddInclude"
+        />
+        <label for="add-include-collection">Add include collection</label>
+      </div>
     </div>
 
     <!-- Actions -->
     <div class="form-actions">
-      <FeatherButton text @click="emit('cancel')">Cancel</FeatherButton>
-      <FeatherButton primary :disabled="!!nameError" @click="onSave">Save</FeatherButton>
+      <Button text label="Cancel" @click="emit('cancel')" />
+      <Button label="Save" :disabled="!!nameError" @click="onSave" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect, ISelectItemType } from '@featherds/select'
-import { FeatherButton } from '@featherds/button'
+import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
+import Select from 'primevue/select'
+import Button from 'primevue/button'
 import type { SnmpCollectionEntry, GroupFileMeta } from '@/services/snmpCollectionsService'
 
-type SelectOption = ISelectItemType
+interface SelectOption {
+  title: string
+  value: string
+}
 
 const props = defineProps<{
   entry: SnmpCollectionEntry
@@ -100,7 +117,7 @@ const localEntry = ref<SnmpCollectionEntry>({
   rras: [...props.entry.rras],
   includeCollections: [...props.entry.includeCollections]
 })
-const selectedGroupToAdd = ref<ISelectItemType | undefined>(undefined)
+const selectedGroupToAdd = ref<SelectOption | undefined>(undefined)
 
 const storageOptions: SelectOption[] = [
   { title: 'primary', value: 'primary' },
@@ -110,9 +127,9 @@ const storageOptions: SelectOption[] = [
 ]
 
 const storageOption = computed({
-  get: (): SelectOption | undefined => storageOptions.find(o => o['value'] === localEntry.value.snmpStorageFlag) ?? storageOptions[2],
-  set: (opt: ISelectItemType | undefined) => {
-    if (opt) localEntry.value.snmpStorageFlag = String(opt['value'])
+  get: (): SelectOption | undefined => storageOptions.find(o => o.value === localEntry.value.snmpStorageFlag) ?? storageOptions[2],
+  set: (opt: SelectOption | undefined) => {
+    if (opt) localEntry.value.snmpStorageFlag = opt.value
   }
 })
 
@@ -143,9 +160,9 @@ const removeRra = (i: number) => {
   localEntry.value.rras = localEntry.value.rras.filter((_, idx) => idx !== i)
 }
 
-const onAddInclude = (opt: ISelectItemType | undefined) => {
+const onAddInclude = (opt: SelectOption | undefined) => {
   if (!opt) return
-  const val = String(opt['value'])
+  const val = opt.value
   if (!localEntry.value.includeCollections.includes(val)) {
     localEntry.value.includeCollections = [...localEntry.value.includeCollections, val]
   }

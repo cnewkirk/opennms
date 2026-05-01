@@ -9,12 +9,12 @@
         class="flex button-wrapper"
         v-if="provisionDList?.length > 0"
       >
-        <FeatherButton
+        <Button
           class="button"
           text
+          label="Add External Requisition"
           @click="addNew"
-          >Add External Requisition</FeatherButton
-        >
+        />
       </div>
     </div>
     <ConfigurationTable
@@ -56,7 +56,7 @@
 >
 import { useConfigurationStore } from '@/stores/configurationStore'
 
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 
 import { putProvisionDService } from '@/services/configurationService'
 import { useProvisionD } from './hooks'

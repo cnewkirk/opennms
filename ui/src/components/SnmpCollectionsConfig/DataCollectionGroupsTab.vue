@@ -24,23 +24,27 @@
     </div>
 
     <!-- New file name prompt -->
-    <FeatherDialog
-      v-model="showNewFileDialog"
-      :labels="{ title: 'New group file' }"
+    <Dialog
+      v-model:visible="showNewFileDialog"
+      header="New group file"
+      modal
     >
-      <FeatherInput v-model="newFilename" label="Filename (e.g. mygroup.xml)" />
+      <div class="p-float-label">
+        <InputText id="new-filename" v-model="newFilename" />
+        <label for="new-filename">Filename (e.g. mygroup.xml)</label>
+      </div>
       <template #footer>
-        <FeatherButton text @click="showNewFileDialog = false">Cancel</FeatherButton>
-        <FeatherButton primary :disabled="!newFilename.trim()" @click="onConfirmNewFile">Create</FeatherButton>
+        <Button text label="Cancel" @click="showNewFileDialog = false" />
+        <Button label="Create" :disabled="!newFilename.trim()" @click="onConfirmNewFile" />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherInput } from '@featherds/input'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 import useSnackbar from '@/composables/useSnackbar'
 import GroupFileList from './GroupFileList.vue'
 import GroupFileEditor from './GroupFileEditor.vue'

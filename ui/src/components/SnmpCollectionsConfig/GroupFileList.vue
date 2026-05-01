@@ -1,15 +1,14 @@
 <template>
   <div class="group-file-list">
     <div class="search-row">
-      <FeatherInput
-        v-model="searchQuery"
-        label="Search files"
-        hide-label
-        :background="true"
-        class="search-input"
-      >
-        <template #pre><FeatherIcon :icon="SearchIcon" /></template>
-      </FeatherInput>
+      <span class="p-input-icon-left search-input">
+        <i class="pi pi-search" />
+        <InputText
+          v-model="searchQuery"
+          placeholder="Search files"
+          class="search-input-field"
+        />
+      </span>
     </div>
 
     <ul class="file-list" role="listbox">
@@ -32,16 +31,14 @@
     </ul>
 
     <div class="list-footer">
-      <FeatherButton text @click="emit('new-file')">+ New File</FeatherButton>
+      <Button text label="+ New File" @click="emit('new-file')" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import SearchIcon from '@featherds/icon/action/Search'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 import type { GroupFileMeta } from '@/services/snmpCollectionsService'
 
 const props = defineProps<{

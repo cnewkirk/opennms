@@ -3,74 +3,85 @@
     <div class="section-content">
       <div class="mask-varbinds-header">
         <h3>Mask Varbinds</h3>
-        <FeatherButton
-          secondary
+        <Button
+          severity="secondary"
           @click="$emit('setVarbinds', 'addVarbindRow', null, -1)"
           data-test="add-varbind-row-button"
           :disabled="!hasMaskElements"
         >
-          <FeatherIcon :icon="Add" />
+          <i class="pi pi-plus" />
           Add
-        </FeatherButton>
+        </Button>
       </div>
       <div
         v-for="(row, index) in maskVarbinds"
         :key="index"
         class="form-row"
       >
-        <div class="dropdown">
-          <FeatherSelect
-            label="Varbind Type"
+        <div class="dropdown p-float-label">
+          <Select
+            :inputId="`varbind-type-${index}`"
             :options="MaskVarbindsTypeOptions"
+            optionLabel="_text"
             :modelValue="MaskVarbindsTypeOptions.find(
-            (o: ISelectItemType) => o._value === row.type._value
-          )"
+              (o: ISelectItemType) => o._value === row.type._value
+            )"
             @update:modelValue="$emit('setVarbinds', 'setVarbindType', $event, index)"
-            :error="errors.varbinds?.[index]?.type"
+            :invalid="!!errors.varbinds?.[index]?.type"
             data-test="varbind-type-select"
           />
+          <label :for="`varbind-type-${index}`">Varbind Type</label>
+          <small v-if="errors.varbinds?.[index]?.type" class="p-error">{{ errors.varbinds[index].type }}</small>
         </div>
         <div
           v-if="row.type._value === MaskVarbindsTypeValue.vbNumber"
-          class="dropdown"
+          class="dropdown p-float-label"
         >
-          <FeatherInput
+          <InputText
+            :id="`varbind-number-${index}`"
             type="number"
-            label="Varbind Number"
             min="0"
             :model-value="row.index"
             @update:model-value="$emit('setVarbinds', 'setVarbindNumber', $event, index)"
             data-test="varbind-number-input"
-            :error="errors.varbinds?.[index]?.index"
+            :invalid="!!errors.varbinds?.[index]?.index"
           />
+          <label :for="`varbind-number-${index}`">Varbind Number</label>
+          <small v-if="errors.varbinds?.[index]?.index" class="p-error">{{ errors.varbinds[index].index }}</small>
         </div>
         <div
           v-if="row.type._value === MaskVarbindsTypeValue.vbOid"
-          class="dropdown"
+          class="dropdown p-float-label"
         >
-          <FeatherInput
-            label="Varbind OID"
+          <InputText
+            :id="`varbind-oid-${index}`"
             :model-value="row.index"
             @update:model-value="$emit('setVarbinds', 'setVarbindOid', $event, index)"
             data-test="varbind-oid-input"
-            :error="errors.varbinds?.[index]?.index"
+            :invalid="!!errors.varbinds?.[index]?.index"
           />
+          <label :for="`varbind-oid-${index}`">Varbind OID</label>
+          <small v-if="errors.varbinds?.[index]?.index" class="p-error">{{ errors.varbinds[index].index }}</small>
         </div>
         <div class="input-field">
-          <FeatherInput
-            label="Varbind Value"
-            :model-value="row.value"
-            @update:model-value="$emit('setVarbinds', 'setValue', $event, index)"
-            data-test="varbind-value-input"
-            :error="errors.varbinds?.[index]?.value"
-          />
-          <FeatherButton
-            secondary
+          <div class="p-float-label">
+            <InputText
+              :id="`varbind-value-${index}`"
+              :model-value="row.value"
+              @update:model-value="$emit('setVarbinds', 'setValue', $event, index)"
+              data-test="varbind-value-input"
+              :invalid="!!errors.varbinds?.[index]?.value"
+            />
+            <label :for="`varbind-value-${index}`">Varbind Value</label>
+            <small v-if="errors.varbinds?.[index]?.value" class="p-error">{{ errors.varbinds[index].value }}</small>
+          </div>
+          <Button
+            severity="secondary"
             data-test="remove-varbind-row-button"
             @click="$emit('setVarbinds', 'removeVarbindRow', null, index)"
           >
-            <FeatherIcon :icon="Delete" />
-          </FeatherButton>
+            <i class="pi pi-trash" style="color: #a5021f" />
+          </Button>
         </div>
       </div>
     </div>
@@ -79,13 +90,10 @@
 
 <script setup lang="ts">
 import { EventFormErrors } from '@/types/eventConfig'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import Add from '@featherds/icon/action/Add'
-import Delete from '@featherds/icon/action/Delete'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect, ISelectItemType } from '@featherds/select'
-import { MaskVarbindsTypeOptions, MaskVarbindsTypeValue } from './constants'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import { ISelectItemType, MaskVarbindsTypeOptions, MaskVarbindsTypeValue } from './constants'
 
 const emit = defineEmits<{
   (e: 'setVarbinds', key: string, value: any, index: number): void

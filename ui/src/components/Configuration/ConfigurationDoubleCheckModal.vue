@@ -1,31 +1,31 @@
 <template>
-  <FeatherDialog
-    v-model="visible"
-    :labels="labels"
-    :hide-close="true"
+  <Dialog
+    :visible="visible"
+    :header="labels.title"
+    :closable="false"
+    modal
   >
     <p class="my-content">This will delete the definition titled: {{ title }}</p>
-    <template v-slot:footer>
-      <FeatherButton
-        primary
+    <template #footer>
+      <Button
+        label="No"
         @click="props?.doubleCheckSelected(false)"
-        >No</FeatherButton
-      >
-      <FeatherButton
-        error
+      />
+      <Button
+        label="Yes"
+        severity="danger"
         @click="props?.doubleCheckSelected(true)"
-        >Yes</FeatherButton
-      >
+      />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script
   lang="ts"
   setup
 >
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherButton } from '@featherds/button'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 
 /**
  * Props

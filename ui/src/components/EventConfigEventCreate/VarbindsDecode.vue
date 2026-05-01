@@ -9,14 +9,14 @@
             event description:
           </p>
         </div>
-        <FeatherButton
-          secondary
+        <Button
+          severity="secondary"
           @click="$emit('setVarbindsDecode', 'addVarbindDecodeRow', null, -1, -1)"
           data-test="add-varbind-row-button"
         >
-          <FeatherIcon :icon="Add" />
+          <i class="pi pi-plus" />
           Add
-        </FeatherButton>
+        </Button>
       </div>
       <div
         v-for="(row, index) in varbindsDecodeElements"
@@ -24,32 +24,34 @@
         class="form-row"
       >
         <div class="parm-field">
-          <div class="input-field">
-            <FeatherInput
-              label="Parm ID"
+          <div class="input-field p-float-label">
+            <InputText
+              :id="`parm-id-${index}`"
               :model-value="row.parmId"
               @update:model-value="$emit('setVarbindsDecode', 'setParmId', $event, index, -1)"
               data-test="varbind-index-input"
-              :error="errors.varbindsDecode?.[index]?.parmId"
+              :invalid="!!errors.varbindsDecode?.[index]?.parmId"
             />
+            <label :for="`parm-id-${index}`">Parm ID</label>
+            <small v-if="errors.varbindsDecode?.[index]?.parmId" class="p-error">{{ errors.varbindsDecode[index].parmId }}</small>
           </div>
           <div class="action-btns">
-            <FeatherButton
+            <Button
               class="remove"
-              secondary
+              severity="secondary"
               data-test="remove-varbind-row-button"
               @click="$emit('setVarbindsDecode', 'removeVarbindDecodeRow', null, index, -1)"
             >
-              <FeatherIcon :icon="Delete" />
-            </FeatherButton>
-            <FeatherButton
-              secondary
+              <i class="pi pi-trash" style="color: #a5021f" />
+            </Button>
+            <Button
+              severity="secondary"
               data-test="add-varbind-row-button"
               @click="$emit('setVarbindsDecode', 'addDecodeRow', null, index, -1)"
             >
-              <FeatherIcon :icon="Add" />
+              <i class="pi pi-plus" />
               Add Decode
-            </FeatherButton>
+            </Button>
           </div>
         </div>
         <div
@@ -57,35 +59,39 @@
           :key="decodeIndex"
           class="decode-field"
         >
-          <div class="input-field">
-            <FeatherInput
-              label="Varbind Value"
+          <div class="input-field p-float-label">
+            <InputText
+              :id="`decode-value-${index}-${decodeIndex}`"
               type="number"
               min="0"
               :model-value="decodeRow.value"
               @update:model-value="$emit('setVarbindsDecode', 'setDecodeValue', $event, index, decodeIndex)"
               data-test="varbind-value-input"
-              :error="errors.varbindsDecode?.[index]?.decode?.[decodeIndex]?.value"
+              :invalid="!!errors.varbindsDecode?.[index]?.decode?.[decodeIndex]?.value"
             />
+            <label :for="`decode-value-${index}-${decodeIndex}`">Varbind Value</label>
+            <small v-if="errors.varbindsDecode?.[index]?.decode?.[decodeIndex]?.value" class="p-error">{{ errors.varbindsDecode?.[index]?.decode?.[decodeIndex]?.value }}</small>
           </div>
           <div class="value-field">
-            <div class="input-field">
-              <FeatherInput
-                label="Decoded String"
+            <div class="input-field p-float-label">
+              <InputText
+                :id="`decode-key-${index}-${decodeIndex}`"
                 :model-value="decodeRow.key"
                 @update:model-value="$emit('setVarbindsDecode', 'setDecodeKey', $event, index, decodeIndex)"
                 data-test="varbind-value-input"
-                :error="errors.varbindsDecode?.[index]?.decode?.[decodeIndex]?.key"
+                :invalid="!!errors.varbindsDecode?.[index]?.decode?.[decodeIndex]?.key"
               />
+              <label :for="`decode-key-${index}-${decodeIndex}`">Decoded String</label>
+              <small v-if="errors.varbindsDecode?.[index]?.decode?.[decodeIndex]?.key" class="p-error">{{ errors.varbindsDecode?.[index]?.decode?.[decodeIndex]?.key }}</small>
             </div>
-            <FeatherButton
+            <Button
               class="remove"
-              secondary
+              severity="secondary"
               data-test="remove-varbind-row-button"
               @click="$emit('setVarbindsDecode', 'removeDecodeRow', null, index, decodeIndex)"
             >
-              <FeatherIcon :icon="Delete" />
-            </FeatherButton>
+              <i class="pi pi-trash" style="color: #a5021f" />
+            </Button>
           </div>
         </div>
       </div>
@@ -95,11 +101,8 @@
 
 <script setup lang="ts">
 import { EventFormErrors } from '@/types/eventConfig'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import Add from '@featherds/icon/action/Add'
-import Delete from '@featherds/icon/action/Delete'
-import { FeatherInput } from '@featherds/input'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 
 const props = defineProps<{
   varbindsDecode: Array<{ parmId: string; decode: Array<{ key: string; value: string }> }>

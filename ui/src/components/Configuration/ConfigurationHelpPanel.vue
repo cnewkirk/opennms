@@ -4,17 +4,14 @@
     :class="props?.active ? 'config-help-panel-open' : ''"
   >
     <div class="config-help-close">
-      <FeatherButton
+      <Button
         class="button"
         text
-        icon=""
         @click="onClose"
+        aria-label="Close help panel"
       >
-        <FeatherIcon
-          class="buttonIcon"
-          :icon="chevronRight"
-        />
-      </FeatherButton>
+        <i class="pi pi-chevron-right buttonIcon" />
+      </Button>
     </div>
     <div class="config-help-header">
       <div class="config-help-title">
@@ -50,10 +47,8 @@
 >
 import { PropType } from 'vue'
 
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 
-import ChevronRight from '@featherds/icon/navigation/ChevronRight'
 import { RequisitionPluginSubTypes, RequisitionTypes } from './copy/requisitionTypes'
 import { LocalConfiguration } from './configuration.types'
 
@@ -72,7 +67,6 @@ const props = defineProps({
 /**
  * Local State
  */
-const chevronRight = computed(() => ChevronRight)
 const footerVals = reactive({ yes: false, no: false })
 
 /**

@@ -4,13 +4,12 @@
       <div class="title">No external requisition configured.</div>
       <div class="paragraph">Add an external requisition to synchronize inventory.</div>
       <div class="flex button-wrapper">
-        <FeatherButton
+        <Button
           data-test="external-req-btn"
           class="button"
-          primary
+          label="Add External Requisition"
           @click="newDefinition"
-          >Add External Requisition</FeatherButton
-        >
+        />
       </div>
     </div>
   </div>
@@ -21,7 +20,7 @@
   setup
 >
 import { PropType } from 'vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 
 /**
  * Props

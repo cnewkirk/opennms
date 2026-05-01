@@ -1,118 +1,144 @@
 <template>
   <div>
-    <FeatherInput
-      ref="firstInput"
-      class="side-input mb-m"
-      label="Name"
-      hint="Human-friendly name. Must be unique."
-      :error="errors.name"
-      :modelValue="config.name"
-      @update:modelValue="(val: any) => updateFormValue('name', val)"
-    />
-    <div class="flex-center">
-      <FeatherSelect
-        data-test="external-source-select"
-        class="side-input full-width mb-m"
-        textProp="name"
-        label="External Source"
-        :options="requisitionTypeList"
-        :error="errors.type"
-        :modelValue="config.type"
-        @update:modelValue="updateExternalSource"
+    <div class="p-float-label side-input mb-m">
+      <InputText
+        ref="firstInput"
+        id="req-name"
+        :invalid="!!errors.name"
+        :modelValue="config.name"
+        @update:modelValue="(val: any) => updateFormValue('name', val)"
       />
+      <label for="req-name">Name</label>
+      <small v-if="errors.name" class="p-error">{{ errors.name }}</small>
+      <small v-else class="p-hint">Human-friendly name. Must be unique.</small>
+    </div>
+    <div class="flex-center">
+      <div class="side-input full-width mb-m p-float-label">
+        <Select
+          data-test="external-source-select"
+          optionLabel="name"
+          :options="requisitionTypeList"
+          :invalid="!!errors.type"
+          :modelValue="config.type"
+          @update:modelValue="updateExternalSource"
+          inputId="external-source-select"
+        />
+        <label for="external-source-select">External Source</label>
+        <small v-if="errors.type" class="p-error">{{ errors.type }}</small>
+      </div>
       <div class="icon">
-        <FeatherButton
-          icon="Help"
+        <Button
+          text
           @click="() => props.toggleHelp()"
+          aria-label="Help"
         >
-          <FeatherIcon
-            class="help-icon"
-            :icon="Help"
-          ></FeatherIcon>
-        </FeatherButton>
+          <i class="pi pi-question-circle help-icon" />
+        </Button>
       </div>
     </div>
     <div v-if="RequsitionTypesUsingHost.includes(config.type.name)">
-      <FeatherInput
-        label="Host"
-        class="side-input host-update mb-m"
-        :error="errors.host"
-        :modelValue="config.host"
-        @update:modelValue="(val: any) => updateFormValue('host', val)"
-        :hint="hostHint || 'vCenter server host or IP address'"
-      />
+      <div class="p-float-label side-input host-update mb-m">
+        <InputText
+          id="req-host"
+          :invalid="!!errors.host"
+          :modelValue="config.host"
+          @update:modelValue="(val: any) => updateFormValue('host', val)"
+        />
+        <label for="req-host">Host</label>
+        <small v-if="errors.host" class="p-error">{{ errors.host }}</small>
+        <small v-else class="p-hint">{{ hostHint || 'vCenter server host or IP address' }}</small>
+      </div>
     </div>
     <div v-if="RequisitionHTTPTypes.includes(config.type.name)">
-      <FeatherInput
-        label="Path"
-        class="side-input mb-m"
-        :error="errors.urlPath"
-        :modelValue="config.urlPath"
-        @update:modelValue="(val: any) => updateFormValue('urlPath', val)"
-        hint="URL path starting with a /"
-      />
+      <div class="p-float-label side-input mb-m">
+        <InputText
+          id="req-url-path"
+          :invalid="!!errors.urlPath"
+          :modelValue="config.urlPath"
+          @update:modelValue="(val: any) => updateFormValue('urlPath', val)"
+        />
+        <label for="req-url-path">Path</label>
+        <small v-if="errors.urlPath" class="p-error">{{ errors.urlPath }}</small>
+        <small v-else class="p-hint">URL path starting with a /</small>
+      </div>
     </div>
     <div v-if="[RequisitionTypes.RequisitionPlugin].includes(config.type.name)">
-      <FeatherSelect
-        class="side-input mb-m"
-        textProp="name"
-        hint=""
-        label="Requisition Plugin"
-        :options="requisitionSubTypes"
-        @update:modelValue="(val: any) => updateFormValue('subType', val)"
-        :modelValue="config.subType"
-      />
+      <div class="p-float-label side-input mb-m">
+        <Select
+          optionLabel="name"
+          :options="requisitionSubTypes"
+          @update:modelValue="(val: any) => updateFormValue('subType', val)"
+          :modelValue="config.subType"
+          inputId="req-plugin"
+        />
+        <label for="req-plugin">Requisition Plugin</label>
+      </div>
     </div>
     <div v-if="[RequisitionTypes.DNS].includes(config.type.name)">
-      <FeatherInput
-        label="Zone"
-        class="side-input mb-m"
-        :error="errors.zone"
-        :modelValue="config.zone"
-        @update:modelValue="(val: any) => updateFormValue('zone', val)"
-        hint="DNS zone to use as basis for this definition"
-      />
+      <div class="p-float-label side-input mb-m">
+        <InputText
+          id="req-zone"
+          :invalid="!!errors.zone"
+          :modelValue="config.zone"
+          @update:modelValue="(val: any) => updateFormValue('zone', val)"
+        />
+        <label for="req-zone">Zone</label>
+        <small v-if="errors.zone" class="p-error">{{ errors.zone }}</small>
+        <small v-else class="p-hint">DNS zone to use as basis for this definition</small>
+      </div>
     </div>
     <div v-if="[RequisitionTypes.DNS].includes(config.type.name) || [RequisitionTypes.VMWare].includes(config.type.name)">
-      <FeatherInput
-        label="Requisition Name"
-        class="side-input mb-m"
-        :error="errors.foreignSource"
-        :modelValue="config.foreignSource"
-        @update:modelValue="(val: any) => updateFormValue('foreignSource', val)"
-        hint="Name to use for resulting requisition"
-      />
+      <div class="p-float-label side-input mb-m">
+        <InputText
+          id="req-foreign-source"
+          :invalid="!!errors.foreignSource"
+          :modelValue="config.foreignSource"
+          @update:modelValue="(val: any) => updateFormValue('foreignSource', val)"
+        />
+        <label for="req-foreign-source">Requisition Name</label>
+        <small v-if="errors.foreignSource" class="p-error">{{ errors.foreignSource }}</small>
+        <small v-else class="p-hint">Name to use for resulting requisition</small>
+      </div>
     </div>
     <div v-if="[RequisitionTypes.VMWare].includes(config.type.name)">
       <div class="flex-center side-input">
-        <FeatherInput
-          label="Username"
-          class="side-input full-width mr-m mb-m"
-          :error="errors.username"
-          :modelValue="config.username"
-          @update:modelValue="(val: any) => updateFormValue('username', val)"
-          hint="vSphere username (optional)"
-        />
-        <FeatherInput
-          type="password"
-          label="Password"
-          class="side-input full-width mb-m"
-          :error="errors.password"
-          :modelValue="config.password"
-          @update:modelValue="(val: any) => updateFormValue('password', val)"
-          hint="vSphere password (optional)"
-        />
+        <div class="p-float-label side-input full-width mr-m mb-m">
+          <InputText
+            id="req-username"
+            :invalid="!!errors.username"
+            :modelValue="config.username"
+            @update:modelValue="(val: any) => updateFormValue('username', val)"
+          />
+          <label for="req-username">Username</label>
+          <small v-if="errors.username" class="p-error">{{ errors.username }}</small>
+          <small v-else class="p-hint">vSphere username (optional)</small>
+        </div>
+        <div class="p-float-label side-input full-width mb-m">
+          <InputText
+            id="req-password"
+            type="password"
+            :invalid="!!errors.password"
+            :modelValue="config.password"
+            @update:modelValue="(val: any) => updateFormValue('password', val)"
+          />
+          <label for="req-password">Password</label>
+          <small v-if="errors.password" class="p-error">{{ errors.password }}</small>
+          <small v-else class="p-hint">vSphere password (optional)</small>
+        </div>
       </div>
     </div>
     <div v-if="[RequisitionTypes.File].includes(config.type.name)">
-      <FeatherInput
-        label="Path"
-        class="side-input mb-m"
-        :error="errors.path"
-        :modelValue="config.path"
-        @update:modelValue="(val: any) => updateFormValue('path', val)"
-        hint="File path starting with a /"
-      />
+      <div class="p-float-label side-input mb-m">
+        <InputText
+          id="req-file-path"
+          :invalid="!!errors.path"
+          :modelValue="config.path"
+          @update:modelValue="(val: any) => updateFormValue('path', val)"
+        />
+        <label for="req-file-path">Path</label>
+        <small v-if="errors.path" class="p-error">{{ errors.path }}</small>
+        <small v-else class="p-hint">File path starting with a /</small>
+      </div>
     </div>
     <ConfigurationCronSelector
       :config="config"
@@ -140,15 +166,13 @@
   lang="ts"
   setup
 >
-import { FeatherSelect } from '@featherds/select'
+import Select from 'primevue/select'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
+import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
 import { requisitionSubTypes, RequsitionTypesUsingHost, RequisitionTypes, requisitionTypeList, RequisitionHTTPTypes } from './copy/requisitionTypes'
 import { rescanItems } from './copy/rescanItems'
-import { FeatherInput } from '@featherds/input'
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherButton } from '@featherds/button'
-import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
 import { PropType } from 'vue'
-import Help from '@featherds/icon/action/Help'
 import { LocalConfigurationWrapper } from './configuration.types'
 import { ConfigurationHelper } from './ConfigurationHelper'
 import ConfigurationCronSelector from './ConfigurationCronSelector.vue'

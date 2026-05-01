@@ -8,24 +8,12 @@
       <div class="title-flex">
         <div class="title">Thread Pools</div>
         <div v-if="!threadPoolsActive">
-          <FeatherChipList label="">
-            <FeatherChip v-if="unTouchedThreadPoolData.importThreads">
-              <template v-slot:icon>{{ unTouchedThreadPoolData.importThreads }}</template
-              >Import Threads
-            </FeatherChip>
-            <FeatherChip v-if="unTouchedThreadPoolData.scanThreads">
-              <template v-slot:icon>{{ unTouchedThreadPoolData.scanThreads }}</template
-              >Scan Threads
-            </FeatherChip>
-            <FeatherChip v-if="unTouchedThreadPoolData.rescanThreads">
-              <template v-slot:icon>{{ unTouchedThreadPoolData.rescanThreads }}</template
-              >Rescan Threads
-            </FeatherChip>
-            <FeatherChip v-if="unTouchedThreadPoolData.writeThreads">
-              <template v-slot:icon>{{ unTouchedThreadPoolData.writeThreads }}</template
-              >Write Threads
-            </FeatherChip>
-          </FeatherChipList>
+          <div class="chip-list">
+            <Chip v-if="unTouchedThreadPoolData.importThreads" :label="`${unTouchedThreadPoolData.importThreads} Import Threads`" />
+            <Chip v-if="unTouchedThreadPoolData.scanThreads" :label="`${unTouchedThreadPoolData.scanThreads} Scan Threads`" />
+            <Chip v-if="unTouchedThreadPoolData.rescanThreads" :label="`${unTouchedThreadPoolData.rescanThreads} Rescan Threads`" />
+            <Chip v-if="unTouchedThreadPoolData.writeThreads" :label="`${unTouchedThreadPoolData.writeThreads} Write Threads`" />
+          </div>
         </div>
       </div>
     </template>
@@ -34,50 +22,60 @@
         Thread pool sizes impact the performance of the provisioning subsystem. Larger systems may require larger
         values. To adjust them, type a new number in the field or use the up/down arrows to select a value.
       </p>
-      <FeatherInput
-        :error="getError('importThreads')"
-        type="number"
-        label="Import"
-        hint="Number of threads to allocate for requisition import tasks."
-        v-model="threadPoolData.importThreads"
-        @keypress="enterCheck"
-      />
-      <FeatherInput
-        :error="getError('scanThreads')"
-        type="number"
-        label="Scan"
-        hint="Number of threads to allocate for manual scanning tasks."
-        v-model="threadPoolData.scanThreads"
-        @keypress="enterCheck"
-      />
-      <FeatherInput
-        :error="getError('rescanThreads')"
-        type="number"
-        label="Rescan"
-        hint="Number of threads to allocate for scheduled rescanning tasks."
-        v-model="threadPoolData.rescanThreads"
-        @keypress="enterCheck"
-      />
-      <FeatherInput
-        class="last-input"
-        :error="getError('writeThreads')"
-        type="number"
-        label="Write"
-        hint="Number of threads to allocate for writing to the database."
-        v-model="threadPoolData.writeThreads"
-        @keypress="enterCheck"
-      />
-      <FeatherButton
-        primary
+      <div class="p-float-label mb-m">
+        <InputText
+          id="import-threads"
+          :invalid="!!getError('importThreads')"
+          type="number"
+          v-model="threadPoolData.importThreads"
+          @keypress="enterCheck"
+        />
+        <label for="import-threads">Import</label>
+        <small v-if="getError('importThreads')" class="p-error">{{ getError('importThreads') }}</small>
+        <small v-else class="p-hint">Number of threads to allocate for requisition import tasks.</small>
+      </div>
+      <div class="p-float-label mb-m">
+        <InputText
+          id="scan-threads"
+          :invalid="!!getError('scanThreads')"
+          type="number"
+          v-model="threadPoolData.scanThreads"
+          @keypress="enterCheck"
+        />
+        <label for="scan-threads">Scan</label>
+        <small v-if="getError('scanThreads')" class="p-error">{{ getError('scanThreads') }}</small>
+        <small v-else class="p-hint">Number of threads to allocate for manual scanning tasks.</small>
+      </div>
+      <div class="p-float-label mb-m">
+        <InputText
+          id="rescan-threads"
+          :invalid="!!getError('rescanThreads')"
+          type="number"
+          v-model="threadPoolData.rescanThreads"
+          @keypress="enterCheck"
+        />
+        <label for="rescan-threads">Rescan</label>
+        <small v-if="getError('rescanThreads')" class="p-error">{{ getError('rescanThreads') }}</small>
+        <small v-else class="p-hint">Number of threads to allocate for scheduled rescanning tasks.</small>
+      </div>
+      <div class="p-float-label last-input mb-m">
+        <InputText
+          id="write-threads"
+          :invalid="!!getError('writeThreads')"
+          type="number"
+          v-model="threadPoolData.writeThreads"
+          @keypress="enterCheck"
+        />
+        <label for="write-threads">Write</label>
+        <small v-if="getError('writeThreads')" class="p-error">{{ getError('writeThreads') }}</small>
+        <small v-else class="p-hint">Number of threads to allocate for writing to the database.</small>
+      </div>
+      <Button
         @click="updateThreadpools"
         :disabled="loading"
-      >
-        <FeatherSpinner
-          v-if="loading"
-          class="spinner-button"
-        />
-        <span v-if="!loading">Update Thread Pools</span>
-      </FeatherButton>
+        :loading="loading"
+        label="Update Thread Pools"
+      />
     </div>
   </FeatherExpansionPanel>
 </template>
@@ -88,11 +86,10 @@
 >
 import { useConfigurationStore } from '@/stores/configurationStore'
 
-import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
+import Chip from 'primevue/chip'
 import { FeatherExpansionPanel } from '@featherds/expansion'
-import { FeatherChip, FeatherChipList } from '@featherds/chips'
-import { FeatherSpinner } from '@featherds/progress'
 import { isEqual as _isEqual } from 'lodash'
 
 import { putProvisionDService } from '@/services/configurationService'
@@ -244,5 +241,13 @@ const getError = (key: string) => {
 }
 .last-input {
   margin-bottom: 10px;
+}
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.mb-m {
+  margin-bottom: 1rem;
 }
 </style>

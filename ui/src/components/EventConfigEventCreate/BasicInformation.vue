@@ -3,12 +3,14 @@
     <div class="title">
       <div class="header">
         <div>
-          <FeatherBackButton
+          <Button
+            text
             data-test="back-button"
             @click="handleCancel(store.selectedSource?.id)"
           >
+            <i class="pi pi-arrow-left" />
             Go Back
-          </FeatherBackButton>
+          </Button>
         </div>
         <div>
           <h3>
@@ -18,31 +20,33 @@
         </div>
       </div>
       <div class="action">
-        <FeatherButton
-          primary
+        <Button
+          label="Create New Event Source"
           @click="showSourceCreationDialog"
           data-test="create-new-event-source-button"
           :disabled="store.selectedSource?.name && store.selectedSource?.id ? true : false"
-        >
-          Create New Event Source
-        </FeatherButton>
+        />
       </div>
     </div>
     <div class="spacer"></div>
     <div class="spacer"></div>
     <div class="spacer"></div>
     <div class="spacer"></div>
-    <FeatherAutocomplete
-      class="my-autocomplete"
-      :disabled="store.selectedSource?.name && store.selectedSource?.id ? true : false"
-      :model-value="selectedSource"
-      @update:model-value="(item: any) => setSelectedSource(item)"
-      label="Source Name"
-      data-test="source-name"
-      :results="results"
-      type="single"
-      @search="search"
-    ></FeatherAutocomplete>
+    <div class="p-float-label my-autocomplete">
+      <AutoComplete
+        inputId="source-name-autocomplete"
+        class="w-full"
+        :disabled="store.selectedSource?.name && store.selectedSource?.id ? true : false"
+        :model-value="selectedSource"
+        @update:model-value="(item: any) => setSelectedSource(item)"
+        data-test="source-name"
+        :suggestions="results"
+        optionLabel="_text"
+        @complete="(e) => search(e.query)"
+        forceSelection
+      />
+      <label for="source-name-autocomplete">Source Name</label>
+    </div>
     <div class="spacer"></div>
     <div class="spacer"></div>
     <div class="basic-info">
@@ -53,95 +57,101 @@
         <div class="spacer"></div>
         <label class="label">Event UEI:</label>
         <div class="spacer"></div>
-        <FeatherInput
-          label=""
-          data-test="event-uei"
-          :error="errors.uei"
-          v-model.trim="eventUei"
-          hint="e.g., 'uei.opennms.org/vendor/application/eventname'"
-        >
-        </FeatherInput>
+        <div class="p-float-label">
+          <InputText
+            id="event-uei"
+            data-test="event-uei"
+            :invalid="!!errors.uei"
+            v-model.trim="eventUei"
+            class="w-full"
+          />
+          <label for="event-uei">Event UEI</label>
+          <small v-if="errors.uei" class="p-error">{{ errors.uei }}</small>
+          <small v-else class="p-hint">e.g., 'uei.opennms.org/vendor/application/eventname'</small>
+        </div>
         <div class="spacer"></div>
         <label class="label">Event Label:</label>
         <div class="spacer"></div>
-        <FeatherInput
-          label=""
-          data-test="event-label"
-          :error="errors.eventLabel"
-          v-model.trim="eventLabel"
-          hint="e.g., 'Vendor Application Event Name'"
-        >
-        </FeatherInput>
+        <div class="p-float-label">
+          <InputText
+            id="event-label"
+            data-test="event-label"
+            :invalid="!!errors.eventLabel"
+            v-model.trim="eventLabel"
+            class="w-full"
+          />
+          <label for="event-label">Event Label</label>
+          <small v-if="errors.eventLabel" class="p-error">{{ errors.eventLabel }}</small>
+          <small v-else class="p-hint">e.g., 'Vendor Application Event Name'</small>
+        </div>
         <div class="spacer"></div>
         <label class="label">Event Description:</label>
         <div class="spacer"></div>
-        <FeatherTextarea
+        <Textarea
           v-model.trim="eventDescription"
-          :error="errors.description"
+          :invalid="!!errors.description"
           data-test="event-description"
-          label=""
-          hint="Provide a detailed description of the event."
+          placeholder="Provide a detailed description of the event."
           rows="10"
-          auto
-          clear
-        >
-        </FeatherTextarea>
+          autoResize
+          class="w-full"
+        />
+        <small v-if="errors.description" class="p-error">{{ errors.description }}</small>
         <div class="spacer"></div>
         <label class="label">Operator Instructions:</label>
         <div class="spacer"></div>
-        <FeatherTextarea
+        <Textarea
           v-model.trim="operatorInstructions"
           data-test="operator-instructions"
-          label=""
-          hint="Instructions for operators when this event occurs."
+          placeholder="Instructions for operators when this event occurs."
           rows="5"
-          auto
-          clear
-        >
-        </FeatherTextarea>
+          autoResize
+          class="w-full"
+        />
         <div class="spacer"></div>
         <label class="label">Log Message Destination:</label>
         <div class="spacer"></div>
-        <div class="dropdown">
-          <FeatherSelect
-            label="Destination"
+        <div class="dropdown p-float-label">
+          <Select
+            inputId="event-destination"
             data-test="event-destination"
-            :error="errors.dest"
-            hint="Select the destination for the log message."
+            :invalid="!!errors.dest"
             :options="DestinationOptions"
+            optionLabel="_text"
             v-model="destination"
-          >
-            <FeatherIcon :icon="MoreVert" />
-          </FeatherSelect>
+          />
+          <label for="event-destination">Destination</label>
+          <small v-if="errors.dest" class="p-error">{{ errors.dest }}</small>
+          <small v-else class="p-hint">Select the destination for the log message.</small>
         </div>
         <div class="spacer"></div>
         <label class="label">Log Message:</label>
         <div class="spacer"></div>
-        <FeatherTextarea
+        <Textarea
           v-model.trim="logMessage"
-          :error="errors.logmsg"
+          :invalid="!!errors.logmsg"
           data-test="log-message"
-          label=""
-          hint="Provide the log message for this event."
+          placeholder="Provide the log message for this event."
           rows="5"
-          auto
-          clear
-        >
-        </FeatherTextarea>
+          autoResize
+          class="w-full"
+        />
+        <small v-if="errors.logmsg" class="p-error">{{ errors.logmsg }}</small>
         <div class="spacer"></div>
         <label class="label">Severity:</label>
         <div class="spacer"></div>
-        <div class="dropdown">
-          <FeatherSelect
-            label="Severity"
+        <div class="dropdown p-float-label">
+          <Select
+            inputId="event-severity"
             data-test="event-severity"
-            hint="Select the severity of the event."
-            :error="errors.severity"
+            :invalid="!!errors.severity"
             :options="SeverityOptions"
+            optionLabel="_text"
             v-model="severity"
-          >
-            <FeatherIcon :icon="MoreVert" />
-          </FeatherSelect>
+          />
+          <label for="event-severity">Severity</label>
+          <small v-if="errors.severity" class="p-error">{{ errors.severity }}</small>
+          <small v-else class="p-hint">Select the severity of the event.</small>
         </div>
         <div class="spacer"></div>
         <div>
@@ -186,65 +196,67 @@
         </div>
         <div class="spacer"></div>
         <div class="action-container">
-          <FeatherButton
-            secondary
+          <Button
+            severity="secondary"
+            label="Cancel"
             @click="handleCancel(store.selectedSource?.id)"
             data-test="cancel-event-button"
-          >
-            Cancel
-          </FeatherButton>
-          <FeatherButton
-            primary
+          />
+          <Button
+            :label="store.eventModificationState.isEditMode === CreateEditMode.Create ? 'Create Event' : 'Save Changes'"
             @click="handleSaveEvent"
             data-test="save-event-button"
             :disabled="!isValid"
-          >
-            {{ store.eventModificationState.isEditMode === CreateEditMode.Create ? 'Create Event' : 'Save Changes' }}
-          </FeatherButton>
+          />
         </div>
       </div>
     </div>
-    <FeatherDialog
-      v-model="sourceCreationDialogState"
-      :labels="labels"
-      hide-close
-      @hidden="handleSourceCreationCancel"
+    <Dialog
+      v-model:visible="sourceCreationDialogState"
+      :header="labels.title"
+      :closable="false"
+      modal
+      @hide="handleSourceCreationCancel"
     >
       <div class="modal-body-form">
-        <div>
-          <FeatherInput
-            label="Event Configuration Source Name"
+        <div class="p-float-label mb-m">
+          <InputText
+            id="source-name-input"
             v-model="configName"
-            :error="sourceCreationErrors?.name"
+            :invalid="!!sourceCreationErrors?.name"
             data-test="source-name"
+            class="w-full"
           />
+          <label for="source-name-input">Event Configuration Source Name</label>
+          <small v-if="sourceCreationErrors?.name" class="p-error">{{ sourceCreationErrors.name }}</small>
         </div>
-        <div>
-          <FeatherInput
-            label="Vendor"
+        <div class="p-float-label">
+          <InputText
+            id="vendor-input"
             v-model="vendor"
-            :error="sourceCreationErrors?.vendor"
+            :invalid="!!sourceCreationErrors?.vendor"
             data-test="vendor"
+            class="w-full"
           />
+          <label for="vendor-input">Vendor</label>
+          <small v-if="sourceCreationErrors?.vendor" class="p-error">{{ sourceCreationErrors.vendor }}</small>
         </div>
       </div>
-      <template v-slot:footer>
-        <FeatherButton
+      <template #footer>
+        <Button
+          text
+          label="Cancel"
           @click="handleSourceCreationCancel"
           data-test="cancel-source-button"
-        >
-          Cancel
-        </FeatherButton>
-        <FeatherButton
-          primary
+        />
+        <Button
+          label="Create Source"
           @click="handleSourceCreationSave"
           :disabled="Object.keys(sourceCreationErrors || {}).length > 0"
           data-test="create-source-button"
-        >
-          Create Source
-        </FeatherButton>
+        />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
@@ -255,18 +267,15 @@ import { useEventConfigStore } from '@/stores/eventConfigStore'
 import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { CreateEditMode } from '@/types'
 import { EventConfigEvent, EventFormErrors } from '@/types/eventConfig'
-import { FeatherAutocomplete, IAutocompleteItemType } from '@featherds/autocomplete'
-import { FeatherBackButton } from '@featherds/back-button'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherIcon } from '@featherds/icon'
-import MoreVert from '@featherds/icon/navigation/MoreVert'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect, ISelectItemType } from '@featherds/select'
-import { FeatherTextarea } from '@featherds/textarea'
+import AutoComplete from 'primevue/autocomplete'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import Textarea from 'primevue/textarea'
 import vkbeautify from 'vkbeautify'
 import AlarmDataInfo from './AlarmDataInfo.vue'
-import { AlarmTypeName, AlarmTypeValue, DestinationOptions, MaskVarbindsTypeText, MaskVarbindsTypeValue, MAX_MASK_ELEMENTS, SeverityOptions } from './constants'
+import { AlarmTypeName, AlarmTypeValue, DestinationOptions, ISelectItemType, MaskVarbindsTypeText, MaskVarbindsTypeValue, MAX_MASK_ELEMENTS, SeverityOptions } from './constants'
 import { validateEvent } from './eventValidator'
 import MaskElements from './MaskElements.vue'
 import MaskVarbinds from './MaskVarbinds.vue'
@@ -274,8 +283,8 @@ import VarbindsDecode from './VarbindsDecode.vue'
 
 const loading = ref(false)
 const timeout = ref<number>(-1)
-const results = ref<Array<IAutocompleteItemType>>([])
-const selectedSource = ref<IAutocompleteItemType>()
+const results = ref<Array<ISelectItemType>>([])
+const selectedSource = ref<ISelectItemType | undefined>()
 const createSourceDialog = ref(false)
 const router = useRouter()
 const store = useEventModificationStore()
@@ -380,7 +389,7 @@ const resetValues = () => {
 const loadInitialValues = (val: EventConfigEvent | null) => {
   if (store.selectedSource) {
     const source = eventConfigStore.uploadedSources?.find((s) => s.id === store.selectedSource?.id)
-    selectedSource.value = { _text: source?.name, _value: source?.id }
+    selectedSource.value = { _text: source?.name ?? '', _value: source?.id ?? -1 }
   } else {
     selectedSource.value = { _text: '', _value: -1 }
   }
@@ -728,8 +737,8 @@ watchEffect(() => {
     alarmType.value._value as string,
     autoClean.value,
     clearKey.value,
-    maskElements.value,
-    varbinds.value,
+    maskElements.value as any,
+    varbinds.value as any,
     varbindsDecode.value
   )
   isValid.value = Object.keys(currentErrors).length === 0

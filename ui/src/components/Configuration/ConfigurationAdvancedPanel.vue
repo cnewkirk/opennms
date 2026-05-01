@@ -12,42 +12,40 @@
         v-for="(item, index) in props.items"
         class="item-wrapper"
       >
-        <FeatherAutocomplete
-          type="single"
-          label="Key"
-          textProp="name"
-          @search="(query: string) => search(query, props.type, props.subType, index)"
-          v-model="item.key"
-          @update:modelValue="updateKey(item.key, index)"
-          :results="results.list[index]"
-          :labels="labels"
-        ></FeatherAutocomplete>
-        <!-- Blank space ' ' below is part of forceSetHint() workaround for FeatherInput.
-            If item.hint is blank on initial load, it will not render the internal element we need for forced update. So when item.hint is empty, we supply an empty space which is enough to force FeatherInput to render the help label.
-        -->
-        <FeatherInput
-          class="hint-label"
-          label="Value"
-          :hint="item.hint || ' '"
-          v-model="item.value"
-        />
-        <FeatherButton
-          icon="Delete"
+        <div class="p-float-label">
+          <AutoComplete
+            :id="`adv-key-${index}`"
+            v-model="item.key"
+            :suggestions="results.list[index]"
+            optionLabel="name"
+            @complete="(e) => search(e.query, props.type, props.subType, index)"
+            @update:modelValue="updateKey(item.key, index)"
+            forceSelection
+          />
+          <label :for="`adv-key-${index}`">Key</label>
+        </div>
+        <div class="p-float-label hint-label">
+          <InputText
+            :id="`adv-val-${index}`"
+            v-model="item.value"
+          />
+          <label :for="`adv-val-${index}`">Value</label>
+          <small v-if="item.hint" class="p-hint">{{ item.hint }}</small>
+        </div>
+        <Button
+          text
           @click="() => deleteAdvancedOption(index)"
+          aria-label="Delete"
         >
-          <FeatherIcon
-            class="delete-icon"
-            :icon="Delete"
-          ></FeatherIcon>
-        </FeatherButton>
+          <i class="pi pi-trash delete-icon" />
+        </Button>
       </div>
       <div class="button-wrapper">
-        <FeatherButton
+        <Button
           :disabled="buttonAddDisabled"
           @click="addAdvancedOption"
-          primary
-          >Add</FeatherButton
-        >
+          label="Add"
+        />
       </div>
     </div>
   </FeatherExpansionPanel>
@@ -60,16 +58,14 @@
 import { PropType } from 'vue'
 
 import { FeatherExpansionPanel } from '@featherds/expansion'
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
-import { FeatherAutocomplete } from '@featherds/autocomplete'
-import Delete from '@featherds/icon/action/Delete'
+import AutoComplete from 'primevue/autocomplete'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 
 import { orderBy } from 'lodash'
 
 import { advancedKeys, dnsKeys, openDaylightKeys, aciKeys, zabbixKeys, prisKeys } from './copy/advancedKeys'
-import { RequisitionPluginSubTypes, RequisitionTypes, VMWareFields, LabelStrings } from './copy/requisitionTypes'
+import { RequisitionPluginSubTypes, RequisitionTypes, VMWareFields } from './copy/requisitionTypes'
 import { AdvancedKey, AdvancedOption } from './configuration.types'
 import { ConfigurationHelper } from './ConfigurationHelper'
 
@@ -94,8 +90,6 @@ const props = defineProps({
 const results = reactive({
   list: [[{}]]
 })
-const defaultLabels = { noResults: LabelStrings.duplicateKey }
-const labels = ref(defaultLabels)
 
 /**
  * Disabled when last item (key.name and value) is null,
@@ -152,7 +146,7 @@ const search = (searchVal: string, type: string, subType: string, index: number)
   // prevent username/Username/password/Password key, using Advanced Options section, from adding to the URL, since they can be set in their respective input field of the form
   const vmWareFields = Object.entries(VMWareFields).map(e => e[1])
   if(vmWareFields.includes(searchVal)) {
-    labels.value = { noResults: LabelStrings.optionNotAvailable }
+    results.list[index] = []
     return
   }
 
@@ -177,40 +171,9 @@ const search = (searchVal: string, type: string, subType: string, index: number)
     return includeInResults
   })
 
-  labels.value = defaultLabels
-
   results.list[index] = [...newResu]
 }
 
-/**
- * Fills in the <textarea> within the FeatherAutocomplete.
- * This is currently a gap with the component and may be removed in the future
- * if this gap is filled.
- */
-const fillAutoComplete = () => {
-  if (props.items) {
-    const inputs = document.querySelectorAll('#advanced-panel .feather-autocomplete-input')
-    props.items.forEach((item: any, index) => {
-      if (inputs[index]) {
-        inputs[index].textContent = item?.key.name
-      }
-    })
-  }
-}
-
-/**
- * When you activate the advanced section, our code waits
- * for 150 milliseconds to give FeatherExpansion panel a chance to populate the DOM
- * If FeatherAutoComplete ever includes the option to set a single value
- * by default to the textarea, then this can be removed.
- */
-watch(props, () => {
-  if (props.active) {
-    setTimeout(() => {
-      fillAutoComplete()
-    }, 150)
-  }
-})
 </script>
 
 <style lang="scss">

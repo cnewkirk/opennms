@@ -4,60 +4,75 @@
       <h3>Alarm Information</h3>
     </div>
     <div class="spacer"></div>
-    <div class="alarm-check">
-      <FeatherCheckbox
+    <div class="alarm-check flex align-items-center gap-2">
+      <Checkbox
         :model-value="enableAlarmData"
         @update:model-value="$emit('setAlarmData', 'addAlarmData', $event)"
-      >
-        Add Alarm Data
-      </FeatherCheckbox>
+        binary
+        inputId="add-alarm-data"
+      />
+      <label for="add-alarm-data">Add Alarm Data</label>
     </div>
     <div class="spacer"></div>
     <div v-if="enableAlarmData">
       <div class="dropdown">
         <label class="label">Alarm Type:</label>
         <div class="spacer"></div>
-        <FeatherSelect
-          label="Alarm Type"
-          hint="Select the alarm type."
-          data-test="alarm-type"
-          :error="errors.alarmType"
-          :options="AlarmTypeOptions"
-          :model-value="selectedEventAlarmType"
-          @update:model-value="$emit('setAlarmData', 'alarmType', $event)"
-        >
-          <FeatherIcon :icon="MoreVert" />
-        </FeatherSelect>
+        <div class="p-float-label">
+          <Select
+            inputId="alarm-type-select"
+            data-test="alarm-type"
+            :invalid="!!errors.alarmType"
+            :options="AlarmTypeOptions"
+            optionLabel="_text"
+            :model-value="selectedEventAlarmType"
+            @update:model-value="$emit('setAlarmData', 'alarmType', $event)"
+          />
+          <label for="alarm-type-select">Alarm Type</label>
+          <small v-if="errors.alarmType" class="p-error">{{ errors.alarmType }}</small>
+          <small v-else class="p-hint">Select the alarm type.</small>
+        </div>
       </div>
       <div class="spacer"></div>
-      <FeatherCheckbox
-        :model-value="autoClean"
-        @update:model-value="$emit('setAlarmData', 'autoClean', $event)"
-      >
-        Auto Clean
-      </FeatherCheckbox>
+      <div class="flex align-items-center gap-2">
+        <Checkbox
+          :model-value="autoClean"
+          @update:model-value="$emit('setAlarmData', 'autoClean', $event)"
+          binary
+          inputId="auto-clean"
+        />
+        <label for="auto-clean">Auto Clean</label>
+      </div>
       <div class="spacer"></div>
       <div class="label">Alarm Reduction Key:</div>
       <div class="spacer"></div>
-      <FeatherInput
-        label=""
-        hint="Provide the reduction key for the alarm."
-        :model-value="alarmReductionKey"
-        data-test="alarm-reduction-key"
-        @update:model-value="$emit('setAlarmData', 'reductionKey', $event)"
-        :error="errors?.reductionKey"
-      />
+      <div class="p-float-label">
+        <InputText
+          id="alarm-reduction-key"
+          data-test="alarm-reduction-key"
+          :model-value="alarmReductionKey"
+          :invalid="!!errors?.reductionKey"
+          @update:model-value="$emit('setAlarmData', 'reductionKey', $event)"
+        />
+        <label for="alarm-reduction-key">Alarm Reduction Key</label>
+        <small v-if="errors?.reductionKey" class="p-error">{{ errors.reductionKey }}</small>
+        <small v-else class="p-hint">Provide the reduction key for the alarm.</small>
+      </div>
       <div class="spacer"></div>
       <div class="label">Alarm Clear Key:</div>
       <div class="spacer"></div>
-      <FeatherInput
-        label=""
-        hint="Provide the clear key for the alarm."
-        :model-value="alarmClearKey"
-        data-test="alarm-clear-key"
-        @update:model-value="$emit('setAlarmData', 'clearKey', $event)"
-        :error="errors.clearKey"
-      />
+      <div class="p-float-label">
+        <InputText
+          id="alarm-clear-key"
+          data-test="alarm-clear-key"
+          :model-value="alarmClearKey"
+          :invalid="!!errors.clearKey"
+          @update:model-value="$emit('setAlarmData', 'clearKey', $event)"
+        />
+        <label for="alarm-clear-key">Alarm Clear Key</label>
+        <small v-if="errors.clearKey" class="p-error">{{ errors.clearKey }}</small>
+        <small v-else class="p-hint">Provide the clear key for the alarm.</small>
+      </div>
       <div class="spacer"></div>
     </div>
   </div>
@@ -65,12 +80,10 @@
 
 <script setup lang="ts">
 import { EventFormErrors } from '@/types/eventConfig'
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { FeatherIcon } from '@featherds/icon'
-import MoreVert from '@featherds/icon/navigation/MoreVert'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect, ISelectItemType } from '@featherds/select'
-import { AlarmTypeOptions } from './constants'
+import Checkbox from 'primevue/checkbox'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import { AlarmTypeOptions, ISelectItemType } from './constants'
 
 defineEmits<{ (e: 'setAlarmData', key: string, value: any): void }>()
 const props = defineProps<{

@@ -4,21 +4,19 @@
     <div class="editor-toolbar">
       <h3 class="file-title">{{ filename ?? 'No file selected' }}</h3>
       <div class="toolbar-actions">
-        <FeatherButton
-          primary
+        <Button
           :disabled="!filename || !isDirty || isSaving"
+          :loading="isSaving"
+          :label="isSaving ? 'Saving…' : 'Save'"
           @click="onSave"
-        >
-          {{ isSaving ? 'Saving…' : 'Save' }}
-        </FeatherButton>
-        <FeatherButton
+        />
+        <Button
           v-if="filename"
           text
           class="delete-btn"
+          label="Delete"
           @click="showDeleteConfirm = true"
-        >
-          Delete
-        </FeatherButton>
+        />
       </div>
     </div>
 
@@ -45,17 +43,18 @@
     </div>
 
     <!-- Delete confirm dialog -->
-    <FeatherDialog
-      v-model="showDeleteConfirm"
-      :labels="{ title: 'Delete group file?' }"
+    <Dialog
+      v-model:visible="showDeleteConfirm"
+      header="Delete group file?"
+      modal
     >
       <p>Delete <strong>{{ filename }}</strong>?</p>
       <p>This will also remove all <code>include-collection</code> references to this group from the root config.</p>
       <template #footer>
-        <FeatherButton text @click="showDeleteConfirm = false">Cancel</FeatherButton>
-        <FeatherButton primary @click="onDelete">Delete</FeatherButton>
+        <Button text label="Cancel" @click="showDeleteConfirm = false" />
+        <Button label="Delete" @click="onDelete" />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
@@ -67,8 +66,8 @@ import 'ace-builds/src-noconflict/theme-dracula'
 import 'ace-builds/src-noconflict/ext-searchbox'
 import ace from 'ace-builds'
 import workerXmlUrl from 'ace-builds/src-noconflict/worker-xml?url'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import { useAppStore } from '@/stores/appStore'
 
 ace.config.setModuleUrl('ace/mode/xml_worker', workerXmlUrl)

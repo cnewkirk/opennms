@@ -2,7 +2,7 @@
   <div class="snmp-collections-tab">
     <div class="tab-header">
       <h3 class="tab-title">SNMP Collections</h3>
-      <FeatherButton primary @click="onAdd">+ Add</FeatherButton>
+      <Button label="+ Add" @click="onAdd" />
     </div>
 
     <div v-if="loading" class="loading">Loading…</div>
@@ -25,8 +25,8 @@
             <td>{{ col.rrdStep }}s</td>
             <td class="includes-cell">{{ col.includeCollections.join(', ') || '—' }}</td>
             <td class="actions-cell">
-              <FeatherButton text @click="onEdit(col)">Edit</FeatherButton>
-              <FeatherButton text class="delete-btn" @click="onDelete(col)">Delete</FeatherButton>
+              <Button text label="Edit" @click="onEdit(col)" />
+              <Button text class="delete-btn" label="Delete" @click="onDelete(col)" />
             </td>
           </tr>
           <tr v-if="collections.length === 0">
@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import SnmpCollectionForm from './SnmpCollectionForm.vue'
 import {

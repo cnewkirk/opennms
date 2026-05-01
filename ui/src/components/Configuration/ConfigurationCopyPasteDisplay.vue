@@ -17,15 +17,13 @@
         class="button"
         v-if="showCopyBtn"
       >
-        <FeatherButton
-          icon="Copy to clipboard"
+        <Button
+          text
           @click="copyURLToClipboard"
+          aria-label="Copy to clipboard"
         >
-          <FeatherIcon
-            :icon="ContentCopy"
-            class="edit-icon"
-          ></FeatherIcon>
-        </FeatherButton>
+          <i class="pi pi-copy edit-icon" />
+        </Button>
       </div>
     </div>
   </div>
@@ -35,9 +33,7 @@
   setup
   lang="ts"
 >
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import ContentCopy from '@featherds/icon/action/ContentCopy'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import { ConfigurationHelper } from './ConfigurationHelper'
 

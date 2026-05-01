@@ -3,47 +3,54 @@
     <div class="section-content">
       <div class="mask-elements-header">
         <h3>Mask Elements</h3>
-        <FeatherButton
-          secondary
+        <Button
+          severity="secondary"
           @click="$emit('setMaskElements', 'addMaskRow', null, -1)"
           data-test="add-mask-row-button"
         >
-          <FeatherIcon :icon="Add" />
+          <i class="pi pi-plus" />
           Add
-        </FeatherButton>
+        </Button>
       </div>
       <div
         v-for="(row, index) in maskElements"
         :key="index"
         class="form-row"
       >
-        <div class="dropdown">
-          <FeatherSelect
-            label="Element Name"
+        <div class="dropdown p-float-label">
+          <Select
+            :inputId="`mask-element-name-${index}`"
             :options="availableMaskOptions(index)"
-            :error="errors.maskElements?.[index]?.name"
+            optionLabel="_text"
+            :invalid="!!errors.maskElements?.[index]?.name"
             :modelValue="MaskElementNameOptions.find(
               (o: ISelectItemType) => o._value === row.name._value
             )"
             @update:modelValue="$emit('setMaskElements', 'setName', $event, index)"
             data-test="mask-element-name"
           />
+          <label :for="`mask-element-name-${index}`">Element Name</label>
+          <small v-if="errors.maskElements?.[index]?.name" class="p-error">{{ errors.maskElements[index].name }}</small>
         </div>
         <div class="input-field">
-          <FeatherInput
-            label="Element Value"
-            :model-value="row.value"
-            :error="errors.maskElements?.[index]?.value"
-            @update:model-value="$emit('setMaskElements', 'setValue', $event, index)"
-            data-test="mask-element-value"
-          />
-          <FeatherButton
-            secondary
+          <div class="p-float-label">
+            <InputText
+              :id="`mask-element-value-${index}`"
+              :model-value="row.value"
+              :invalid="!!errors.maskElements?.[index]?.value"
+              @update:model-value="$emit('setMaskElements', 'setValue', $event, index)"
+              data-test="mask-element-value"
+            />
+            <label :for="`mask-element-value-${index}`">Element Value</label>
+            <small v-if="errors.maskElements?.[index]?.value" class="p-error">{{ errors.maskElements[index].value }}</small>
+          </div>
+          <Button
+            severity="secondary"
             data-test="remove-mask-row-button"
             @click="$emit('setMaskElements', 'removeMaskRow', null, index)"
           >
-            <FeatherIcon :icon="Delete" />
-          </FeatherButton>
+            <i class="pi pi-trash" style="color: #a5021f" />
+          </Button>
         </div>
       </div>
     </div>
@@ -52,13 +59,10 @@
 
 <script setup lang="ts">
 import { EventFormErrors } from '@/types/eventConfig'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import Add from '@featherds/icon/action/Add'
-import Delete from '@featherds/icon/action/Delete'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect, ISelectItemType } from '@featherds/select'
-import { MaskElementNameOptions } from './constants'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import { ISelectItemType, MaskElementNameOptions } from './constants'
 
 defineEmits<{
   (e: 'setMaskElements', key: string, value: any, index: number): void

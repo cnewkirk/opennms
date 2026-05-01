@@ -22,16 +22,13 @@
             Requisition
           </div>
           <div class="icon">
-            <FeatherButton
-              icon="Cancel"
+            <Button
               text
               @click="props.closePanel"
+              aria-label="Cancel"
             >
-              <FeatherIcon
-                class="close-icon"
-                :icon="cancelIcon"
-              />
-            </FeatherButton>
+              <i class="pi pi-times close-icon" />
+            </Button>
           </div>
         </div>
       </div>
@@ -64,14 +61,12 @@
         />
         <ConfigurationGeneratedUrl :item="props.item.config" />
         <div class="spinner-button flex button-align-right mt-20">
-          <FeatherButton
+          <Button
             @click="props.saveCurrentState"
-            primary
             :disabled="loading"
-          >
-            <FeatherSpinner v-if="loading" />
-            <span v-if="!loading">Save &amp; Close</span>
-          </FeatherButton>
+            :loading="loading"
+            label="Save & Close"
+          />
         </div>
       </div>
     </div>
@@ -84,11 +79,7 @@
 >
 import { PropType } from 'vue'
 
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherSpinner } from '@featherds/progress'
-
-import Cancel from '@featherds/icon/navigation/Cancel'
+import Button from 'primevue/button'
 
 import ConfigurationAdvancedPanel from './ConfigurationAdvancedPanel.vue'
 import ConfigurationGeneratedUrl from './ConfigurationGeneratedUrl.vue'
@@ -124,7 +115,6 @@ const bounceInTimeout = ref(-1)
 const initialWatchTimeout = ref(-1)
 
 const configurationDrawerActive = computed(() => props?.configurationDrawerActive)
-const cancelIcon = computed(() => Cancel)
 const helpState = computed(() => props.helpState)
 const editing = computed(() => props.edit)
 const errors = computed(() => props?.item?.errors)

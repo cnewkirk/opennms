@@ -4,56 +4,68 @@
       class="flex"
       v-if="!props.config.advancedCrontab"
     >
-      <FeatherSelect
-        data-test="schedule-type-select"
-        textProp="name"
-        label="Schedule Type"
-        :options="scheduleTypes"
-        :error="props.errors.occurance"
-        @update:modelValue="(val: unknown) => updateFormValue('occurance', val as string)"
-        :modelValue="props.config.occurance"
-        class="occurance"
-      />
-      <FeatherSelect
-        v-if="props.config.occurance.name === 'Monthly'"
-        textProp="name"
-        label="Day of Month"
-        :options="dayTypes"
-        :error="props.errors.occuranceDay"
-        @update:modelValue="(val: unknown) => updateFormValue('occuranceDay', val as string)"
-        :modelValue="props.config.occuranceDay"
-        class="occurance-day"
-      />
-      <FeatherSelect
-        v-if="props.config.occurance.name === 'Weekly'"
-        textProp="name"
-        label="Day of Week"
-        :options="weekTypes"
-        :error="props.errors.occuranceWeek"
-        @update:modelValue="(val: unknown) => updateFormValue('occuranceWeek', val as string)"
-        :modelValue="props.config.occuranceWeek"
-        class="occurance-week"
-      />
-      <FeatherInput
-        type="time"
-        class="time"
-        label="Schedule Time"
-        @update:modelValue="(val: unknown) => updateFormValue('time', val as string)"
-        :modelValue="props.config.time"
-      />
+      <div class="occurance p-float-label">
+        <Select
+          data-test="schedule-type-select"
+          optionLabel="name"
+          :options="scheduleTypes"
+          :invalid="!!props.errors.occurance"
+          @update:modelValue="(val: unknown) => updateFormValue('occurance', val as string)"
+          :modelValue="props.config.occurance"
+          inputId="schedule-type-select"
+        />
+        <label for="schedule-type-select">Schedule Type</label>
+        <small v-if="props.errors.occurance" class="p-error">{{ props.errors.occurance }}</small>
+      </div>
+      <div v-if="props.config.occurance.name === 'Monthly'" class="occurance-day p-float-label">
+        <Select
+          optionLabel="name"
+          :options="dayTypes"
+          :invalid="!!props.errors.occuranceDay"
+          @update:modelValue="(val: unknown) => updateFormValue('occuranceDay', val as string)"
+          :modelValue="props.config.occuranceDay"
+          inputId="day-of-month-select"
+        />
+        <label for="day-of-month-select">Day of Month</label>
+        <small v-if="props.errors.occuranceDay" class="p-error">{{ props.errors.occuranceDay }}</small>
+      </div>
+      <div v-if="props.config.occurance.name === 'Weekly'" class="occurance-week p-float-label">
+        <Select
+          optionLabel="name"
+          :options="weekTypes"
+          :invalid="!!props.errors.occuranceWeek"
+          @update:modelValue="(val: unknown) => updateFormValue('occuranceWeek', val as string)"
+          :modelValue="props.config.occuranceWeek"
+          inputId="day-of-week-select"
+        />
+        <label for="day-of-week-select">Day of Week</label>
+        <small v-if="props.errors.occuranceWeek" class="p-error">{{ props.errors.occuranceWeek }}</small>
+      </div>
+      <div class="time p-float-label">
+        <InputText
+          type="time"
+          @update:modelValue="(val: unknown) => updateFormValue('time', val as string)"
+          :modelValue="props.config.time"
+          inputId="schedule-time"
+        />
+        <label for="schedule-time">Schedule Time</label>
+      </div>
     </div>
 
     <div
       class="flex"
       v-if="props.config.advancedCrontab"
     >
-      <FeatherInput
-        class="advanced-entry"
-        :error="props.errors.occuranceAdvanced"
-        label="Advanced (Cron) Schedule"
-        @update:modelValue="(val: unknown) => updateFormValue('occuranceAdvanced', val as string)"
-        :modelValue="props.config.occuranceAdvanced"
-      />
+      <div class="advanced-entry p-float-label">
+        <InputText
+          :invalid="!!props.errors.occuranceAdvanced"
+          @update:modelValue="(val: unknown) => updateFormValue('occuranceAdvanced', val as string)"
+          :modelValue="props.config.occuranceAdvanced"
+          inputId="advanced-cron"
+        />
+        <label for="advanced-cron">Advanced (Cron) Schedule</label>
+        <small v-if="props.errors.occuranceAdvanced" class="p-error">{{ props.errors.occuranceAdvanced }}</small>
+      </div>
     </div>
     <div
       :class="`feather-input-hint-custom
@@ -63,11 +75,15 @@
     </div>
     <div class="flex">
       <div>
-        <FeatherCheckbox
-          :modelValue="props.config.advancedCrontab"
-          @update:modelValue="(val: unknown) => updateFormValue('advancedCrontab', val as string)"
-          >Advanced (Cron) Schedule</FeatherCheckbox
-        >
+        <div class="flex align-items-center gap-2">
+          <Checkbox
+            :modelValue="props.config.advancedCrontab"
+            @update:modelValue="(val: unknown) => updateFormValue('advancedCrontab', val as string)"
+            binary
+            inputId="advanced-crontab"
+          />
+          <label for="advanced-crontab">Advanced (Cron) Schedule</label>
+        </div>
       </div>
     </div>
     <div v-if="props.config.advancedCrontab">
@@ -84,9 +100,9 @@
   lang="ts"
   setup
 >
-import { FeatherSelect } from '@featherds/select'
-import { FeatherInput } from '@featherds/input'
-import { FeatherCheckbox } from '@featherds/checkbox'
+import Select from 'primevue/select'
+import InputText from 'primevue/inputtext'
+import Checkbox from 'primevue/checkbox'
 import { scheduleTypes, weekTypes, dayTypes } from './copy/scheduleTypes'
 import { PropType } from 'vue'
 import { LocalConfiguration, LocalErrors } from './configuration.types'
