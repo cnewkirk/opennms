@@ -11,7 +11,7 @@
         <h2 class="headline4">Monitoring Locations</h2>
       </div>
       <div class="feather-col-6 locations-page__actions">
-        <FeatherButton primary @click="openCreate">Add Location</FeatherButton>
+        <Button label="Add Location" @click="openCreate" />
       </div>
     </div>
 
@@ -40,17 +40,19 @@
           <td>{{ loc.priority }}</td>
           <td>{{ loc.geolocation || '—' }}</td>
           <td class="locations-table__actions">
-            <FeatherButton text @click="openEdit(loc)">Edit</FeatherButton>
-            <FeatherButton text class="locations-table__delete" @click="confirmDelete(loc)">Delete</FeatherButton>
+            <Button text label="Edit" @click="openEdit(loc)" />
+            <Button text label="Delete" class="locations-table__delete" @click="confirmDelete(loc)" />
           </td>
         </tr>
       </tbody>
     </table>
 
     <!-- Add / Edit dialog -->
-    <FeatherDialog
-      v-model="showForm"
-      :labels="{ title: editingName ? 'Edit Location' : 'Add Location', close: 'Cancel' }"
+    <Dialog
+      v-model:visible="showForm"
+      :header="editingName ? 'Edit Location' : 'Add Location'"
+      :modal="true"
+      :closable="true"
     >
       <div class="loc-form">
         <div class="loc-form__row">
@@ -88,33 +90,31 @@
         <div v-if="formError" class="loc-form__error">{{ formError }}</div>
       </div>
       <template #footer>
-        <FeatherButton primary @click="submitForm" :disabled="saving">
-          {{ saving ? 'Saving…' : editingName ? 'Update' : 'Create' }}
-        </FeatherButton>
-        <FeatherButton text @click="showForm = false">Cancel</FeatherButton>
+        <Button :label="saving ? 'Saving…' : editingName ? 'Update' : 'Create'" @click="submitForm" :disabled="saving" />
+        <Button text label="Cancel" @click="showForm = false" />
       </template>
-    </FeatherDialog>
+    </Dialog>
 
     <!-- Delete confirmation dialog -->
-    <FeatherDialog
-      v-model="showDeleteDialog"
-      :labels="{ title: `Delete: ${deletingName ?? ''}`, close: 'Cancel' }"
+    <Dialog
+      v-model:visible="showDeleteDialog"
+      :header="`Delete: ${deletingName ?? ''}`"
+      :modal="true"
+      :closable="true"
     >
       <p>Delete location <strong>{{ deletingName }}</strong>? Any nodes assigned to this location must be reassigned first.</p>
       <template #footer>
-        <FeatherButton primary class="locations-page__delete-confirm" @click="doDelete" :disabled="deleting">
-          {{ deleting ? 'Deleting…' : 'Delete' }}
-        </FeatherButton>
-        <FeatherButton text @click="showDeleteDialog = false">Cancel</FeatherButton>
+        <Button :label="deleting ? 'Deleting…' : 'Delete'" class="locations-page__delete-confirm" @click="doDelete" :disabled="deleting" />
+        <Button text label="Cancel" @click="showDeleteDialog = false" />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import {
   getMonitoringLocations,

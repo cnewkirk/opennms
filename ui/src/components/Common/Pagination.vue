@@ -1,17 +1,15 @@
 <template>
-  <FeatherPagination
+  <Paginator
     v-if="totalCount"
     class="pagination"
-    v-model="page"
-    :pageSize="pageSize"
-    :total="totalCount"
-    @update:pageSize="updatePageSize"
-    @update:modelValue="updatePage"
-  ></FeatherPagination>
+    :rows="pageSize"
+    :totalRecords="totalCount"
+    @page="onPage"
+  />
 </template>
-  
+
 <script setup lang="ts">
-import { FeatherPagination } from '@featherds/pagination'
+import Paginator from 'primevue/paginator'
 import { PropType } from 'vue'
 import { QueryParameters } from '@/types'
 
@@ -34,45 +32,28 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update-query-parameters'])
-const pageSize = ref(props.parameters.limit)
-const page = ref(1)
-
-onMounted(() => props.query(props.payload || props.parameters))
+const pageSize = computed(() => props.parameters.limit ?? 25)
 
 const totalCount = computed(() => {
-  const totalCount = props.getTotalCount()
-
-  if (totalCount && !isNaN(totalCount)) {
-    return totalCount
-  }
-
-  return 0
+  const count = props.getTotalCount()
+  return count && !isNaN(count) ? count : 0
 })
 
-const updatePage = () => {
-  const updatedParameters = { ...props.parameters, limit: pageSize.value, offset: (page.value - 1) * pageSize.value }
-  emit('update-query-parameters', updatedParameters)
-
+const onPage = (e: { first: number }) => {
+  const updatedParameters = { ...props.parameters, offset: e.first }
   if (props.payload) {
     props.query({ ...props.payload, queryParameters: updatedParameters })
     return
   }
-
   props.query(updatedParameters)
 }
 
-const updatePageSize = (v: number) => {
-  pageSize.value = v
-  updatePage()
-}
+onMounted(() => props.query(props.payload || props.parameters))
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
 .pagination {
-  @include body-small;
   background: var($surface);
   color: var($primary-text-on-surface);
 }

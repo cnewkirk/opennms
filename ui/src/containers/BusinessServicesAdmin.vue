@@ -26,22 +26,18 @@
     <h1 class="page-title">Business Service Management</h1>
 
     <div v-if="loading" class="loading-state">
-      <FeatherSpinner />
+      <ProgressSpinner />
     </div>
 
     <div v-else-if="loadError" class="error-state">
       <p class="error-text">{{ loadError }}</p>
-      <FeatherButton @click="loadData">Retry</FeatherButton>
+      <Button label="Retry" @click="loadData" />
     </div>
 
     <template v-else>
       <div class="toolbar">
-        <FeatherButton primary @click="openCreate">
-          <FeatherIcon :icon="AddIcon" /> New Service
-        </FeatherButton>
-        <FeatherButton text @click="doReload" :disabled="reloading">
-          {{ reloading ? 'Reloading…' : 'Reload Daemon' }}
-        </FeatherButton>
+        <Button icon="pi pi-plus" label="New Service" @click="openCreate" />
+        <Button text :label="reloading ? 'Reloading…' : 'Reload Daemon'" @click="doReload" :disabled="reloading" />
       </div>
 
       <div v-if="services.length === 0" class="empty-state">
@@ -69,8 +65,8 @@
             </td>
             <td>{{ edgeCount(svc) }}</td>
             <td class="actions-cell">
-              <FeatherButton text @click="openEdit(svc)">Edit</FeatherButton>
-              <FeatherButton text class="delete-btn" @click="confirmDelete(svc)">Delete</FeatherButton>
+              <Button text label="Edit" @click="openEdit(svc)" />
+              <Button text label="Delete" class="delete-btn" @click="confirmDelete(svc)" />
             </td>
           </tr>
         </tbody>
@@ -88,28 +84,26 @@
     />
 
     <!-- Delete confirmation dialog -->
-    <FeatherDialog
-      v-model="showDeleteDialog"
-      :labels="{ title: `Delete: ${deletingService?.name ?? ''}`, close: 'Cancel' }"
+    <Dialog
+      v-model:visible="showDeleteDialog"
+      :header="`Delete: ${deletingService?.name ?? ''}`"
+      :modal="true"
+      :closable="true"
     >
       <p>Delete <strong>{{ deletingService?.name }}</strong>? This cannot be undone.</p>
       <template #footer>
-        <FeatherButton primary @click="doDelete" :disabled="deleting">
-          {{ deleting ? 'Deleting…' : 'Delete' }}
-        </FeatherButton>
-        <FeatherButton text @click="showDeleteDialog = false">Cancel</FeatherButton>
+        <Button :label="deleting ? 'Deleting…' : 'Delete'" @click="doDelete" :disabled="deleting" />
+        <Button text label="Cancel" @click="showDeleteDialog = false" />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, markRaw } from 'vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherSpinner } from '@featherds/progress'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherIcon } from '@featherds/icon'
-import Add from '@featherds/icon/action/Add'
+import { ref, onMounted } from 'vue'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
+import Dialog from 'primevue/dialog'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import BusinessServiceEditor from '@/components/BSM/BusinessServiceEditor.vue'
 import {
@@ -119,7 +113,6 @@ import {
 } from '@/services/bsmService'
 import useSnackbar from '@/composables/useSnackbar'
 
-const AddIcon = markRaw(Add)
 const { showSnackBar } = useSnackbar()
 
 const breadcrumbs = [

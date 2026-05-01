@@ -26,20 +26,18 @@
     <h1 class="page-title">Surveillance Views Configuration</h1>
 
     <div v-if="loading" class="loading-state">
-      <FeatherSpinner />
+      <ProgressSpinner />
     </div>
 
     <div v-else-if="loadError" class="error-state">
       <p class="error-text">{{ loadError }}</p>
-      <FeatherButton @click="loadData">Retry</FeatherButton>
+      <Button label="Retry" @click="loadData" />
     </div>
 
     <template v-else>
       <div class="toolbar">
-        <FeatherButton primary @click="save" :disabled="saving || !isDirty">
-          {{ saving ? 'Saving…' : 'Save' }}
-        </FeatherButton>
-        <FeatherButton v-if="isDirty" text @click="resetChanges">Discard Changes</FeatherButton>
+        <Button :label="saving ? 'Saving…' : 'Save'" @click="save" :disabled="saving || !isDirty" />
+        <Button v-if="isDirty" text label="Discard Changes" @click="resetChanges" />
       </div>
 
       <div class="editor-layout">
@@ -72,8 +70,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherSpinner } from '@featherds/progress'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import SurveillanceViewList from '@/components/SurveillanceViewsConfig/SurveillanceViewList.vue'
 import SurveillanceViewEditor from '@/components/SurveillanceViewsConfig/SurveillanceViewEditor.vue'

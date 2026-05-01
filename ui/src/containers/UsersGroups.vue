@@ -6,16 +6,16 @@
       </div>
     </div>
 
-    <FeatherTabContainer v-model="activeTab">
-      <template v-slot:tabs>
-        <FeatherTab>Users</FeatherTab>
-        <FeatherTab>Groups</FeatherTab>
-      </template>
-
+    <Tabs v-model:value="activeTab">
+      <TabList>
+        <Tab value="users">Users</Tab>
+        <Tab value="groups">Groups</Tab>
+      </TabList>
+      <TabPanels>
       <!-- Users tab -->
-      <FeatherTabPanel>
+      <TabPanel value="users">
         <div class="users-groups-page__tab-header">
-          <FeatherButton primary @click="openCreateUser">New User</FeatherButton>
+          <Button label="New User" @click="openCreateUser" />
         </div>
         <div v-if="usersLoading" class="users-groups-page__status">Loading…</div>
         <div v-else-if="usersError" class="users-groups-page__status">Failed to load users.</div>
@@ -37,18 +37,18 @@
               <td>{{ user.email }}</td>
               <td>{{ (user.role ?? []).join(', ') }}</td>
               <td class="ug-table__actions">
-                <FeatherButton text @click="openEditUser(user)">Edit</FeatherButton>
-                <FeatherButton text @click="confirmDeleteUser(user['user-id'])">Delete</FeatherButton>
+                <Button text label="Edit" @click="openEditUser(user)" />
+                <Button text label="Delete" @click="confirmDeleteUser(user['user-id'])" />
               </td>
             </tr>
           </tbody>
         </table>
-      </FeatherTabPanel>
+      </TabPanel>
 
       <!-- Groups tab -->
-      <FeatherTabPanel>
+      <TabPanel value="groups">
         <div class="users-groups-page__tab-header">
-          <FeatherButton primary @click="openCreateGroup">New Group</FeatherButton>
+          <Button label="New Group" @click="openCreateGroup" />
         </div>
         <div v-if="groupsLoading" class="users-groups-page__status">Loading…</div>
         <div v-else-if="groupsError" class="users-groups-page__status">Failed to load groups.</div>
@@ -68,14 +68,15 @@
               <td>{{ group.comments }}</td>
               <td>{{ (group.user ?? []).join(', ') }}</td>
               <td class="ug-table__actions">
-                <FeatherButton text @click="openEditGroup(group)">Edit</FeatherButton>
-                <FeatherButton text @click="confirmDeleteGroup(group.name)">Delete</FeatherButton>
+                <Button text label="Edit" @click="openEditGroup(group)" />
+                <Button text label="Delete" @click="confirmDeleteGroup(group.name)" />
               </td>
             </tr>
           </tbody>
         </table>
-      </FeatherTabPanel>
-    </FeatherTabContainer>
+      </TabPanel>
+      </TabPanels>
+    </Tabs>
 
     <UserEditDialog v-model="userDialogVisible" :user="selectedUser" @saved="onUserSaved" />
     <GroupEditDialog v-model="groupDialogVisible" :group="selectedGroup" :allUsers="users" @saved="onGroupSaved" />
@@ -84,8 +85,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
-import { FeatherButton } from '@featherds/button'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
+import Button from 'primevue/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import UserEditDialog from '@/components/UsersGroups/UserEditDialog.vue'
 import GroupEditDialog from '@/components/UsersGroups/GroupEditDialog.vue'
@@ -105,7 +110,7 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
   { label: 'Users & Groups', to: '#', position: 'last' }
 ])
 
-const activeTab = ref(0)
+const activeTab = ref('users')
 
 // Users state
 const users = ref<OnmsUser[]>([])

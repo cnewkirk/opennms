@@ -27,11 +27,12 @@
       <h1 class="page-title">Surveillance Dashboard</h1>
       <div class="header-actions">
         <PerspectiveToggle />
-        <FeatherSelect
+        <Select
           v-if="allViews.length > 1"
           :options="viewOptions"
           :modelValue="selectedViewOption"
-          label="View"
+          optionLabel="label"
+          placeholder="View"
           class="view-picker"
           @update:modelValue="onViewChange"
         />
@@ -42,7 +43,7 @@
     </div>
 
     <div v-if="loading" class="loading-state">
-      <FeatherSpinner />
+      <ProgressSpinner />
     </div>
 
     <div v-else-if="error" class="error-state">
@@ -78,8 +79,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { FeatherSpinner } from '@featherds/progress'
-import { FeatherSelect, ISelectItemType } from '@featherds/select'
+import ProgressSpinner from 'primevue/progressspinner'
+import Select from 'primevue/select'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import SurveillanceGrid from '@/components/SurveillanceDashboard/SurveillanceGrid.vue'
 import SurveillanceCellDetail from '@/components/SurveillanceDashboard/SurveillanceCellDetail.vue'
@@ -122,11 +123,13 @@ let refreshTimer: ReturnType<typeof setInterval> | null = null
 
 // ─── Computed ────────────────────────────────────────────────────────────────
 
-const viewOptions = computed<ISelectItemType[]>(() =>
+interface ViewOption { value: string; label: string }
+
+const viewOptions = computed<ViewOption[]>(() =>
   allViews.value.map(name => ({ value: name, label: name }))
 )
 
-const selectedViewOption = computed<ISelectItemType | undefined>(() =>
+const selectedViewOption = computed<ViewOption | undefined>(() =>
   viewOptions.value.find(o => o.value === activeViewName.value)
 )
 
@@ -185,7 +188,7 @@ const clearSelection = () => {
   selectedCol.value = null
 }
 
-const onViewChange = (option: ISelectItemType | undefined) => {
+const onViewChange = (option: ViewOption | undefined) => {
   if (!option) return
   activeViewName.value = String(option.value)
   clearSelection()

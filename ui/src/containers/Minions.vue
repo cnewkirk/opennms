@@ -60,17 +60,19 @@
             <span v-else class="minions-table__none">—</span>
           </td>
           <td class="minions-table__actions">
-            <FeatherButton text @click="openEdit(m)">Edit</FeatherButton>
-            <FeatherButton text class="minions-table__delete" @click="confirmDelete(m)">Delete</FeatherButton>
+            <Button text label="Edit" @click="openEdit(m)" />
+            <Button text label="Delete" class="minions-table__delete" @click="confirmDelete(m)" />
           </td>
         </tr>
       </tbody>
     </table>
 
     <!-- Edit dialog -->
-    <FeatherDialog
-      v-model="showForm"
-      :labels="{ title: `Edit Minion: ${editingId ?? ''}`, close: 'Cancel' }"
+    <Dialog
+      v-model:visible="showForm"
+      :header="`Edit Minion: ${editingId ?? ''}`"
+      :modal="true"
+      :closable="true"
     >
       <div class="minion-form">
         <div class="minion-form__row">
@@ -86,34 +88,32 @@
         <div v-if="formError" class="minion-form__error">{{ formError }}</div>
       </div>
       <template #footer>
-        <FeatherButton primary @click="submitEdit" :disabled="saving">
-          {{ saving ? 'Saving…' : 'Update' }}
-        </FeatherButton>
-        <FeatherButton text @click="showForm = false">Cancel</FeatherButton>
+        <Button :label="saving ? 'Saving…' : 'Update'" @click="submitEdit" :disabled="saving" />
+        <Button text label="Cancel" @click="showForm = false" />
       </template>
-    </FeatherDialog>
+    </Dialog>
 
     <!-- Delete confirmation dialog -->
-    <FeatherDialog
-      v-model="showDeleteDialog"
-      :labels="{ title: `Delete: ${deletingId ?? ''}`, close: 'Cancel' }"
+    <Dialog
+      v-model:visible="showDeleteDialog"
+      :header="`Delete: ${deletingId ?? ''}`"
+      :modal="true"
+      :closable="true"
     >
       <p>Remove minion <strong>{{ deletingId }}</strong>? It will reappear if the minion reconnects.</p>
       <template #footer>
-        <FeatherButton primary class="minions-page__delete-confirm" @click="doDelete" :disabled="deleting">
-          {{ deleting ? 'Deleting…' : 'Delete' }}
-        </FeatherButton>
-        <FeatherButton text @click="showDeleteDialog = false">Cancel</FeatherButton>
+        <Button :label="deleting ? 'Deleting…' : 'Delete'" class="minions-page__delete-confirm" @click="doDelete" :disabled="deleting" />
+        <Button text label="Cancel" @click="showDeleteDialog = false" />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import { getMinions, updateMinion, deleteMinion, getMinionNodes } from '@/services/minionService'
 import { getMonitoringLocations } from '@/services/monitoringLocationService'
