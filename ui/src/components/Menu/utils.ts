@@ -85,7 +85,7 @@ const createFakePlugin = () => {
 // Vaadin servlets own these URL paths and intercept before any JSP runs.
 // Map them to the Vue SPA equivalents so the sidebar links bypass the servlets.
 const legacyToVueRoutes: Record<string, string> = {
-  topology: 'ui/index.html#/topology'
+  topology: 'ui/topology'
 }
 
 const getMenuLink = (menuItem: MenuItem, baseHref?: string | null) => {
