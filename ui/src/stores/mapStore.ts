@@ -21,7 +21,6 @@
 ///
 
 import { defineStore } from 'pinia'
-import { SORT } from '@featherds/table'
 /** Duck-typed bounds shape — compatible with both Leaflet and MapLibre adapted bounds. */
 interface MapBounds {
   getNorthEast(): { lat: number; lng: number }
@@ -49,8 +48,8 @@ export const useMapStore = defineStore('mapStore', () => {
   const mapBounds = ref<MapBounds | undefined>(undefined)
   const selectedSeverity = ref('NORMAL')
   const searchedNodeLabels = ref([] as string[])
-  const nodeSortObject = ref({ property: 'label', value: SORT.ASCENDING } as FeatherSortObject)
-  const alarmSortObject = ref({ property: 'id', value: SORT.DESCENDING } as FeatherSortObject)
+  const nodeSortObject = ref({ property: 'label', value: 'asc' } as FeatherSortObject)
+  const alarmSortObject = ref({ property: 'id', value: 'desc' } as FeatherSortObject)
   const nodeSearchTerm = ref('')
 
   const getNodeAlarmSeverityMap = () => {

@@ -33,7 +33,7 @@ import {
   NodeQueryFilter,
   SetOperator
 } from '@/types'
-import { IAutocompleteItemType } from '@featherds/autocomplete'
+type IAutocompleteItemType = { [k: string]: unknown }
 import { defineStore } from 'pinia'
 
 const {

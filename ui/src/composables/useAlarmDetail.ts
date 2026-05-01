@@ -20,7 +20,6 @@
 /// License.
 ///
 
-import { SORT } from '@featherds/table'
 import { getAlarmById, getAlarmAcknowledgments } from '@/services/alarmService'
 import { getEvents } from '@/services/eventService'
 import { Alarm, AlarmAcknowledgment, Event } from '@/types'
@@ -39,7 +38,7 @@ const useAlarmDetail = (id: string) => {
     const [alarmResult, acksResult, eventsResult] = await Promise.all([
       getAlarmById(id),
       getAlarmAcknowledgments(id),
-      getEvents({ _s: `alarm.id==${id}`, limit: 20, orderBy: 'id', order: SORT.DESCENDING })
+      getEvents({ _s: `alarm.id==${id}`, limit: 20, orderBy: 'id', order: 'desc' })
     ])
 
     if (!alarmResult) {
