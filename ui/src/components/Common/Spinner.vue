@@ -14,14 +14,13 @@ const { isActive } = useSpinner()
 
 <style scoped lang="scss">
 .spinner {
-  z-index: 2;
+  z-index: 10;
   position: absolute;
-  width: 95%;
-  height: 90%;
-  background: transparent;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
 }
 .fade-enter-active,
 .fade-leave-active {

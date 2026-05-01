@@ -89,6 +89,7 @@ html:not(.open-dark) {
     grid-row: 2;
     overflow-y: auto;
     overflow-x: hidden;
+    position: relative;
   }
 }
 
