@@ -117,7 +117,7 @@
           @page="(e) => { store.onEventsPageChange(e.page + 1); store.onEventsPageSizeChange(e.rows) }"
         />
       </div>
-      <div v-if="!store.events.length">
+      <div v-if="!store.isLoading && !store.events.length">
         <EmptyList
           :content="emptyListContent"
           data-test="empty-list"

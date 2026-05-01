@@ -25,7 +25,7 @@
       :setNewPage="setNewPage"
     />
     <ConfigurationEmptyTable
-      v-if="provisionDList?.length === 0"
+      v-if="configurationStore.provisionDService !== null && provisionDList?.length === 0"
       :newDefinition="addNew"
     />
     <ConfigurationDrawer

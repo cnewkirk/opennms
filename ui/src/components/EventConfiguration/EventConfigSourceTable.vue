@@ -105,7 +105,7 @@
           @page="(e) => { store.onSourcePageChange(e.page + 1); store.onSourcePageSizeChange(e.rows) }"
         />
       </div>
-      <div v-if="!store.sources.length">
+      <div v-if="!store.isLoading && !store.sources.length">
         <EmptyList
           :content="emptyListContent"
           data-test="empty-list"

@@ -37,21 +37,27 @@ export const useNodeStore = defineStore('nodeStore', () => {
   const outages = ref([] as Outage[])
   const outagesTotalCount = ref(0)
   const nodeQueryParameters = ref({ limit: 20, offset: 0, orderBy: 'label' } as QueryParameters)
+  const isLoading = ref(false)
 
   // map of nodeId to IpInterfaces associated with that node
   const nodeToIpInterfaceMap = ref<Map<string, IpInterface[]>>(new Map<string, IpInterface[]>())
 
   const getNodes = async (queryParameters?: QueryParameters, includeIpInterfaces?: boolean) => {
-    const resp = await API.getNodes(queryParameters)
+    isLoading.value = true
+    try {
+      const resp = await API.getNodes(queryParameters)
 
-    if (resp) {
-      totalCount.value = resp.totalCount
-      nodes.value = resp.node
+      if (resp) {
+        totalCount.value = resp.totalCount
+        nodes.value = resp.node
 
-      if (includeIpInterfaces === true) {
-        const nodeIds = resp.node.map(n => n.id)
-        getIpInterfacesForNodes(nodeIds, false)
+        if (includeIpInterfaces === true) {
+          const nodeIds = resp.node.map(n => n.id)
+          getIpInterfacesForNodes(nodeIds, false)
+        }
       }
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -140,6 +146,7 @@ export const useNodeStore = defineStore('nodeStore', () => {
     availability,
     nodeToIpInterfaceMap,
     nodeQueryParameters,
+    isLoading,
     outages,
     outagesTotalCount,
     getIpInterfacesForNodes,

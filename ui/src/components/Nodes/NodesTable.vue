@@ -237,7 +237,7 @@
             </tbody>
           </table>
           <EmptyList
-            v-else
+            v-else-if="!nodeStore.isLoading"
             :content="emptyListContent"
             data-test="empty-list"
           />
