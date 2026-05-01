@@ -99,7 +99,6 @@
 
 <script setup lang="ts">
 import { NodeAvailability, Outage } from '@/types'
-import { AvailabilityChartData, DownSegmentMeta } from '@/composables/useNodeAvailability'
 import ClearSummary from '@/components/Common/ClearSummary.vue'
 import ServiceGraphTooltip from './ServiceGraphTooltip.vue'
 import ServiceUptimeRow from './ServiceUptimeRow.vue'
@@ -108,8 +107,6 @@ const emit = defineEmits<{ 'go-graphs': [] }>()
 
 const props = defineProps<{
   availability: NodeAvailability | null
-  chartData: AvailabilityChartData | null
-  downSegmentMeta: DownSegmentMeta[]
   outages: Outage[]
   loading: boolean
   error: string | null

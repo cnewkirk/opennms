@@ -34,8 +34,6 @@
                 </CollapsibleSection>
                 <AvailabilityPanel
                   :availability="availability"
-                  :chartData="chartData"
-                  :downSegmentMeta="downSegmentMeta"
                   :outages="outages"
                   :loading="availLoading"
                   :error="availError"
