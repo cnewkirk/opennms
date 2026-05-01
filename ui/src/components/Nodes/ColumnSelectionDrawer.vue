@@ -144,7 +144,7 @@ watch(() => nodeStructureStore.columns, (newColumns) => {
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .drawer-content {
   padding: 20px;

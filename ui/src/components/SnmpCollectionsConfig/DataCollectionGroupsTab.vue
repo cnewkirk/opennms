@@ -150,7 +150,7 @@ const onDeleteFile = async (filename: string) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .dcg-tab {
   height: 100%;

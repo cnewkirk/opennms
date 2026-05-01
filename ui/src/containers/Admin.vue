@@ -134,7 +134,7 @@ const adminCards = computed(() => {
 
 <style lang="scss" scoped>
 @import "@featherds/styles/mixins/typography";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .admin-hub-page {
   padding: 0 20px 20px;

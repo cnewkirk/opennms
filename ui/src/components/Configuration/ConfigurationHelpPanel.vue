@@ -210,7 +210,7 @@ const footerNo = () => {
 </script>
 
 <style lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .config-help-header {
   a.config-help-link:visited {
@@ -223,7 +223,7 @@ const footerNo = () => {
   scoped
 >
 @import "@featherds/styles/mixins/typography";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .config-help-close {
   display: flex;

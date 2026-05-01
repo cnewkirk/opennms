@@ -14,7 +14,7 @@
   lang="scss"
 >
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 #card {
   @include elevation(2);

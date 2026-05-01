@@ -217,9 +217,9 @@ onUnmounted(() => chartInstance?.destroy())
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@use '@featherds/styles/themes/variables' as fvars;
+@use "@/styles/tokens" as fvars;
 @use '@featherds/styles/themes/utils';
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .card { background: var($surface); padding: 16px; margin-bottom: 16px; }
 .availability-panel {
   &__title   { margin-bottom: 12px; }

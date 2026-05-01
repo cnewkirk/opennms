@@ -125,7 +125,7 @@ const close = () => {
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .generate-dc-dialog {
   min-width: 600px;

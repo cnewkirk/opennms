@@ -68,7 +68,7 @@ const addSeries = (attr: string) => {
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .attribute-list {
   height: 100%;

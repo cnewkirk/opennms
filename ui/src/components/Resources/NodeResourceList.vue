@@ -80,7 +80,7 @@ const graphAll = async () => {
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .action-buttons {
   display: flex;

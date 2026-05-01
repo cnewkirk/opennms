@@ -102,7 +102,7 @@ const close = () => {
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .file-editor {
   min-height: 400px;

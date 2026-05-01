@@ -556,8 +556,8 @@ const deleteMemo = async (type: 'sticky' | 'journal') => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @use '@featherds/styles/themes/utils';
-@use '@featherds/styles/themes/variables' as fvars;
-@import "@featherds/styles/themes/variables";
+@use "@/styles/tokens" as fvars;
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
 @import "@/styles/severities";

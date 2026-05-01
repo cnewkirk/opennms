@@ -40,7 +40,7 @@ const msg = computed(() => props.content.msg || '')
 </script>
 
 <style lang="scss" scoped>
-@use '@featherds/styles/themes/variables';
+@use "@/styles/tokens" as variables;
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/vars.scss';
 

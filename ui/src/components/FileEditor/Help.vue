@@ -14,7 +14,7 @@ const triggerHelp = () => fileEditorStore.setIsHelpOpen(false)
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .help-bar {
   height: calc(100vh - 200px);
   border: 1px solid var($border-on-surface);

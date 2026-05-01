@@ -121,7 +121,7 @@ watch(maskElements, () => {
 </script>
 
 <style scoped lang="scss">
-@use '@featherds/styles/themes/variables';
+@use "@/styles/tokens";
 @use '@featherds/styles/mixins/typography';
 
 .mask-varbinds {

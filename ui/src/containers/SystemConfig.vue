@@ -150,7 +150,7 @@ const serviceRows = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .system-config-page {
   padding: 0 20px 20px;

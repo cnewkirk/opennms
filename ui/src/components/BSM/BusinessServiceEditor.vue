@@ -321,7 +321,7 @@ async function onRemoveEdge(edgeId: number) {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .editor-overlay {
   position: fixed;

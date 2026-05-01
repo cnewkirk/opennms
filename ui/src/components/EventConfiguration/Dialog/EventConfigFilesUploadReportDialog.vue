@@ -73,7 +73,7 @@ const gotoViewTab = async () => {
 
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
-@use "@featherds/styles/themes/variables";
+@use "@/styles/tokens" as variables;
 
 .text-danger {
   color: var(variables.$error);

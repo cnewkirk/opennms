@@ -27,7 +27,7 @@ const props = defineProps({
 <style lang="scss" scoped>
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .title {
   @include overline();

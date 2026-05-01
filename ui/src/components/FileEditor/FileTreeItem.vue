@@ -87,7 +87,7 @@ const openConfirmDeleteModal = (file: IFile) => fileEditorStore.setFileToDelete(
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 ul,
 li {
   list-style-type: none;

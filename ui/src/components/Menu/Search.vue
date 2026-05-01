@@ -264,7 +264,7 @@ const onKeyDown = async (event: KeyboardEvent) => {
 <style lang="scss" scoped>
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@/styles/vars";
 
 .onms-search-control-wrapper {

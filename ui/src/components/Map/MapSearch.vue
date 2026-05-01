@@ -109,7 +109,7 @@ watch(results, (newResults) => {
   lang="scss"
   scoped
 >
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .map-search {
   z-index: 1000;

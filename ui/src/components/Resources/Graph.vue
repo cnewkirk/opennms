@@ -254,7 +254,7 @@ onMounted(render)
 
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .graph-card {
   border: 1px solid var($border-light-on-surface);

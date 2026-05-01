@@ -104,7 +104,7 @@ const moveDashlet = (i: number, direction: -1 | 1) => {
 
 <style lang="scss" scoped>
 @use "@featherds/styles/mixins/typography" as typo;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .wallboard-editor {
   flex: 1;

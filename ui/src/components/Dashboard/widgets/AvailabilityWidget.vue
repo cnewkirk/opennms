@@ -96,7 +96,7 @@ defineExpose({ refresh: load })
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .availability-widget {

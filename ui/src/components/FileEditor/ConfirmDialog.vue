@@ -30,7 +30,7 @@ const cancel = () => fileEditorStore.setFileToDelete(null)
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .dialog {
   width: 300px;
 }

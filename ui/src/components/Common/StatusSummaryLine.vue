@@ -10,7 +10,7 @@ defineProps<{ shown: number; total: number; noun: string }>()
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .status-summary-line {
   color: var($secondary-text-on-surface);

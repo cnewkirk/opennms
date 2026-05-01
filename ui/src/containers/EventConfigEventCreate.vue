@@ -33,7 +33,7 @@ const goBack = () => {
 </script>
 
 <style lang="scss" scoped>
-@use '@featherds/styles/themes/variables';
+@use "@/styles/tokens";
 @use '@featherds/styles/mixins/typography';
 
 .not-found-container {

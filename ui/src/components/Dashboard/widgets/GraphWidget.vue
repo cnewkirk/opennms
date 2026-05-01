@@ -86,7 +86,7 @@ defineExpose({ refresh })
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .graph-widget {

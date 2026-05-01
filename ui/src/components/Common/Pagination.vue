@@ -52,7 +52,7 @@ onMounted(() => props.query(props.payload || props.parameters))
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .pagination {
   background: var($surface);
   color: var($primary-text-on-surface);

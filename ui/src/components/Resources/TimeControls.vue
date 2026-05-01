@@ -160,7 +160,7 @@ const applyCustomTime = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .wrapper {
   height: 70px;
   .graph-controls {

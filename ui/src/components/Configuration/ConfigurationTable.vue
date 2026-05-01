@@ -206,7 +206,7 @@ table {
   scoped
 >
 @import "@featherds/table/scss/table";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .main-wrapper {
   table.condensed {

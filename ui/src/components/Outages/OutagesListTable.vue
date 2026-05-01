@@ -249,7 +249,7 @@ onMounted(() => load())
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .outages-list {

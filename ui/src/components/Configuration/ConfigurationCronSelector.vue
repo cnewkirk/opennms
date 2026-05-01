@@ -164,7 +164,7 @@ const hasCronValidationError = computed(() => props.errors.occuranceAdvanced || 
   lang="scss"
   scoped
 >
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .feather-input-hint-custom {

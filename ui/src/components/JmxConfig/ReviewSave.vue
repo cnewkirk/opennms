@@ -134,7 +134,7 @@ const download = () => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .review-save {
   max-width: 800px;

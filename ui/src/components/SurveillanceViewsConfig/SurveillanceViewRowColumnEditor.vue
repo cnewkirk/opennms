@@ -119,7 +119,7 @@ const availableCategories = (itemIndex: number) =>
 
 <style lang="scss" scoped>
 @use "@featherds/styles/mixins/typography" as typo;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@/styles/vars";
 
 .rowcol-editor {

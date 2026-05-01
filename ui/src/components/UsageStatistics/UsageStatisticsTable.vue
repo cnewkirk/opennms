@@ -265,7 +265,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 #wrap {
   height: calc(100vh - 310px);

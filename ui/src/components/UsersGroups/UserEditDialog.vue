@@ -296,7 +296,7 @@ const handleCancel = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .user-edit-dialog {

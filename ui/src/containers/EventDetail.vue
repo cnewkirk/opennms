@@ -188,7 +188,7 @@ const severityClass = computed<string>(() =>
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/elevation";
 
 .card {

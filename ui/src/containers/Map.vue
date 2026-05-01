@@ -71,7 +71,7 @@ onMounted(async () => {
 </style>
 
 <style lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .default-theme {
   .splitpanes__splitter {
     height: 10px !important;

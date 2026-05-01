@@ -38,7 +38,7 @@ defineProps({
   scoped
 >
 @import "@featherds/styles/mixins/typography";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .wrapper {
   background-color: var($background);

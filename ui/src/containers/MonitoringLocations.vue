@@ -229,7 +229,7 @@ onMounted(load)
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .locations-page {
   padding: 0 24px 40px;

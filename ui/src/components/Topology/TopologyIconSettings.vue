@@ -98,7 +98,7 @@ const removePrefix = (i: number) => { lagPrefixes.value.splice(i, 1); emitPrefix
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .icon-settings {
   padding: 10px 12px;

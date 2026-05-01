@@ -41,7 +41,7 @@ const selectResource = (name: string) => {
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .search-input {
   width: 100%;

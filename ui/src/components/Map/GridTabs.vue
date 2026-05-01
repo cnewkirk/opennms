@@ -29,7 +29,7 @@ const goToNodes = () => router.push('/map/nodes')
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .tabs {
   z-index: 2;
   padding-bottom: 10px;

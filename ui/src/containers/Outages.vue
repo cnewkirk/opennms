@@ -57,7 +57,7 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .card { background: var($surface); padding: 0; margin-bottom: 16px; border-radius: vars.$border-radius-surface; }
 .outages-page__controls { padding: 8px 15px 8px; }
 </style>

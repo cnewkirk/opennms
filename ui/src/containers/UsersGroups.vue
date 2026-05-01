@@ -211,7 +211,7 @@ const onGroupSaved = async () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .users-groups-page {

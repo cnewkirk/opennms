@@ -150,7 +150,7 @@ onMounted(loadData)
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @use "@featherds/styles/mixins/typography" as typo;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .wallboard-config {
   padding: 1.5rem;

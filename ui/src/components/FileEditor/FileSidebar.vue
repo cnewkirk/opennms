@@ -64,7 +64,7 @@ const scrollToSelectedFile = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .sidebar-relative-container {
   position: relative;
 

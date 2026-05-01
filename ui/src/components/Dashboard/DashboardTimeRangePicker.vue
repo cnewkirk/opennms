@@ -89,7 +89,7 @@ watch([absoluteFrom, absoluteTo], () => {
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .time-range-picker {
   display: flex;

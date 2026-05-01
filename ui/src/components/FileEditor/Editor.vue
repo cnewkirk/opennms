@@ -113,7 +113,7 @@ const init = (editor: any) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .editor-with-console {
   height: 100%;
   display: flex;

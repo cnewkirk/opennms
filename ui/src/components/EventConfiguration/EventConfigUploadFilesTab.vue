@@ -387,7 +387,7 @@ watch(
 
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
-@use "@featherds/styles/themes/variables";
+@use "@/styles/tokens" as variables;
 
 .upload-files-tab {
   background: var(variables.$surface);

@@ -122,7 +122,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @import "@featherds/table/scss/table";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 #wrap {
   height: calc(100% - 29px);

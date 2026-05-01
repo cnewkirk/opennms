@@ -117,7 +117,7 @@ const timeoutIn = () => {
   scoped
 >
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .inner-short {
   cursor: pointer;

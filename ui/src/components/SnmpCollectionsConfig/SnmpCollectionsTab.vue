@@ -134,7 +134,7 @@ const onFormSave = async (entry: SnmpCollectionEntry) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .snmp-collections-tab {

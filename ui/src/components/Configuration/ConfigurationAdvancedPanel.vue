@@ -185,7 +185,7 @@ const search = (searchVal: string, type: string, subType: string, index: number)
 
 <style lang="scss">
 @import "@featherds/styles/mixins/typography";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 #advanced-panel {
   position: relative;
@@ -202,7 +202,7 @@ const search = (searchVal: string, type: string, subType: string, index: number)
   lang="scss"
   scoped
 >
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .icon {
   width: 40px;

@@ -93,7 +93,7 @@ defineExpose({ refresh: load })
 
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .summary-grid {

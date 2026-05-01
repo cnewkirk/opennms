@@ -211,7 +211,7 @@ const timeRange = computed<AbsoluteTimeRange>(() => ({
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .edge-tooltip {
   position: absolute;

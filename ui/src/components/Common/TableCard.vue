@@ -5,7 +5,7 @@
 </template>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/themes/variables";
+@use "@/styles/tokens" as variables;
 @use '@/styles/vars' as vars;
 
 .table-card {

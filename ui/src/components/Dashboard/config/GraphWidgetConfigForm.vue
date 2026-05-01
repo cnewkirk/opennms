@@ -90,7 +90,7 @@ const refreshOptions = [
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/typography";
 
 .config-form { display: flex; flex-direction: column; gap: 16px; }

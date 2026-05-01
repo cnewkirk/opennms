@@ -29,7 +29,7 @@ const store = usePerspectiveStore()
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .perspective-toggle-wrap {
   display: inline-flex;

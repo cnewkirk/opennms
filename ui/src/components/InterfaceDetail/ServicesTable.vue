@@ -52,7 +52,7 @@ const formatTime = (ts: number | null) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .services-table {
   padding: 16px 20px;

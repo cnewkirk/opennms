@@ -305,9 +305,9 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@use '@featherds/styles/themes/variables' as fvars;
+@use "@/styles/tokens" as fvars;
 @use '@featherds/styles/themes/utils';
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/table/scss/table";
 
 .network-tab {

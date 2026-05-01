@@ -20,7 +20,7 @@ const { hideSnackbar, isDisplayed, isCentered, hasError, message } = useSnackbar
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .snackbar {
   position: fixed;

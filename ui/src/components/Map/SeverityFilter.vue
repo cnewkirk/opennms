@@ -30,7 +30,7 @@ const onSeveritySelect = () => mapStore.setSelectedSeverity(selectedSeverity.val
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .severity-select {
   position: absolute;

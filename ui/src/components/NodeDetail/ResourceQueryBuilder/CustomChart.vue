@@ -177,7 +177,7 @@ const doSave = () => {
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import "@featherds/styles/mixins/elevation";
 
 .custom-chart {

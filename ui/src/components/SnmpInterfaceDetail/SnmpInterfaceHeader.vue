@@ -86,7 +86,7 @@ const graphsRoute = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .snmp-interface-header {
   padding: 16px 20px;

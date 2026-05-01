@@ -89,7 +89,7 @@ const getRowClass = (data: Event) => `row--${data.severity.toLowerCase()}`
   scoped
 >
 @use '@/styles/vars' as vars;
-@use '@featherds/styles/themes/variables' as fvars;
+@use "@/styles/tokens" as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@featherds/table/scss/table";
 @import "@featherds/styles/mixins/elevation";

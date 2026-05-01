@@ -41,7 +41,7 @@ const filterByStatus = (value: status) => {
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .option {
   height: 36px;

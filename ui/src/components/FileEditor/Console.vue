@@ -57,7 +57,7 @@ const clear = () => fileEditorStore.clearLogs()
   scoped
   lang="scss"
 >
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap");
 
 @mixin console {

@@ -9,7 +9,7 @@ import Compare from './Compare.svg'
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 .compare {
   width: 24px;
   height: 24px;

@@ -53,7 +53,7 @@ const groupedEntries = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .node-metadata-panel {
   padding: 16px 0;

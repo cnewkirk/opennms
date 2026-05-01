@@ -142,7 +142,7 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @import "@featherds/styles/mixins/typography";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .mib-tree {
   flex: 1;

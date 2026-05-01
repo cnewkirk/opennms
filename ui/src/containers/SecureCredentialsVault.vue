@@ -34,7 +34,7 @@ onMounted(() => scvStore.getAliases())
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .scv-container {
   padding: 2px;

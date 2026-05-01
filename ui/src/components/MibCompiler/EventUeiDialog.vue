@@ -72,7 +72,7 @@ const close = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .uei-dialog {
   min-width: 400px;

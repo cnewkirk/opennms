@@ -47,7 +47,7 @@ const statusClass = computed(() => props.node.type === 'A' ? 'status-badge--up' 
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .node-header {
   padding: 12px 16px;

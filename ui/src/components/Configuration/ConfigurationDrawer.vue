@@ -172,7 +172,7 @@ const toggleHelp = () => {
 </script>
 
 <style lang="scss">
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .side-label {
   .group-label {
@@ -212,7 +212,7 @@ const toggleHelp = () => {
 >
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/mixins/elevation";
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .flex {
   display: flex;

@@ -54,7 +54,7 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .links-loading {
   display: flex;

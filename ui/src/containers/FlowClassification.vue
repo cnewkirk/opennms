@@ -408,7 +408,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .flow-classification-page {
   padding: 16px 20px;

@@ -110,7 +110,7 @@ defineExpose({ saveLayout, resetLayout, toggleGrid, alignToGrid, getPositions })
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/themes/variables";
+@import "@/styles/tokens";
 
 .topology-graph {
   flex: 1;
