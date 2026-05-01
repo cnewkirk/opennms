@@ -1,0 +1,15 @@
+// src/styles/_utils.scss
+//
+// Local replacement for @featherds/styles/themes/utils.
+// Only alpha() is used in our source; all other Feather util functions are omitted.
+
+// alpha($color, $alpha)
+// $color — a Feather SCSS variable that resolves to --feather-<name>
+// The Feather theme provides companion -r/-g/-b custom properties for each colour token.
+// Example: alpha(variables.$error, 0.2) → rgba(var(--feather-error-r), var(--feather-error-g), var(--feather-error-b), 0.2)
+@function alpha($color, $alpha) {
+  $r: var(#{$color + "-r"});
+  $g: var(#{$color + "-g"});
+  $b: var(#{$color + "-b"});
+  @return rgba($r, $g, $b, $alpha);
+}
