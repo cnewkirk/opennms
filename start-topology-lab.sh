@@ -318,6 +318,7 @@ router isis FABRIC
 router bgp 65000
  bgp router-id 10.255.0.11
  neighbor 10.101.3.2 remote-as 65003
+ neighbor 10.101.3.2 timers connect 10
  !
  address-family l2vpn evpn
   neighbor 10.101.3.2 activate
@@ -380,6 +381,7 @@ router isis FABRIC
 router bgp 65000
  bgp router-id 10.255.0.12
  neighbor 10.101.6.2 remote-as 65003
+ neighbor 10.101.6.2 timers connect 10
  !
  address-family l2vpn evpn
   neighbor 10.101.6.2 activate
@@ -513,7 +515,9 @@ interface vxlan100
 router bgp 65003
  bgp router-id 10.255.0.23
  neighbor 10.101.3.1 remote-as 65000
+ neighbor 10.101.3.1 timers connect 10
  neighbor 10.101.6.1 remote-as 65000
+ neighbor 10.101.6.1 timers connect 10
  !
  address-family ipv4 unicast
   network 10.255.0.23/32
