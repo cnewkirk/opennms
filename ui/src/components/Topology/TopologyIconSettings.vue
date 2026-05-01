@@ -43,6 +43,39 @@
     <div class="icon-settings__divider"></div>
 
     <div class="icon-settings__section">
+      <div class="icon-settings__heading">Name Pattern → Icon</div>
+      <div class="icon-settings__hint">
+        Regex matched against node label (case-insensitive). Evaluated top-to-bottom — first match wins.
+        Takes priority over category and built-in patterns.
+      </div>
+      <div
+        v-for="(row, i) in patternRows"
+        :key="i"
+        class="icon-settings__row"
+        draggable="true"
+        @dragstart="dragStart(i)"
+        @dragover.prevent
+        @drop="dragDrop(i)"
+      >
+        <span class="icon-settings__drag-handle">⠿</span>
+        <input
+          v-model="row.pattern"
+          class="icon-settings__input"
+          placeholder="Regex (e.g. opennms.*)"
+          @change="emitPatternRules"
+        />
+        <select v-model="row.iconKey" class="icon-settings__select" @change="emitPatternRules">
+          <option value="">— none —</option>
+          <option v-for="k in ICON_KEYS" :key="k" :value="k">{{ k }}</option>
+        </select>
+        <button class="icon-settings__del" @click="removePattern(i)">✕</button>
+      </div>
+      <button class="icon-settings__add" @click="addPattern">+ Add pattern</button>
+    </div>
+
+    <div class="icon-settings__divider"></div>
+
+    <div class="icon-settings__section">
       <div class="icon-settings__heading">LAG Prefix Fallbacks</div>
       <div class="icon-settings__hint">Interface name prefixes used as LAG fallback (ifType=161 and LLDP are checked first).</div>
       <div class="icon-settings__tags">
@@ -70,6 +103,9 @@ interface Row { key: string; iconKey: string }
 
 const categoryRows = ref<Row[]>(viewStore.categoryIconMap.map(m => ({ ...m })))
 const oidRows      = ref<Row[]>(viewStore.oidIconMap.map(m => ({ ...m })))
+const patternRows  = ref<Array<{ pattern: string; iconKey: string }>>(
+  viewStore.namePatternRules.map(r => ({ ...r }))
+)
 const lagPrefixes  = ref<string[]>([...viewStore.lagPrefixPatterns])
 const newPrefix    = ref('')
 
@@ -84,6 +120,32 @@ const addCategory    = () => { categoryRows.value.push({ key: '', iconKey: '' })
 const removeCategory = (i: number) => { categoryRows.value.splice(i, 1); emitCategoryMap() }
 const addOid         = () => { oidRows.value.push({ key: '', iconKey: '' }) }
 const removeOid      = (i: number) => { oidRows.value.splice(i, 1); emitOidMap() }
+
+let dragIndex = -1
+const dragStart = (i: number) => { dragIndex = i }
+const dragDrop = (i: number) => {
+  if (dragIndex < 0 || dragIndex === i) return
+  const moved = patternRows.value.splice(dragIndex, 1)[0]
+  patternRows.value.splice(i, 0, moved)
+  dragIndex = -1
+  emitPatternRules()
+}
+
+const emitPatternRules = () => {
+  viewStore.namePatternRules = patternRows.value
+    .filter(r => r.pattern.trim() && r.iconKey)
+    .map(r => ({ pattern: r.pattern.trim(), iconKey: r.iconKey }))
+  viewStore.markDirty()
+}
+
+const addPattern = () => {
+  patternRows.value.unshift({ pattern: '', iconKey: '' })
+}
+
+const removePattern = (i: number) => {
+  patternRows.value.splice(i, 1)
+  emitPatternRules()
+}
 
 const addPrefix    = () => {
   const p = newPrefix.value.trim()
@@ -169,6 +231,14 @@ const removePrefix = (i: number) => { lagPrefixes.value.splice(i, 1); emitPrefix
     cursor: pointer;
     padding: 2px 0;
     &:hover { text-decoration: underline; }
+  }
+
+  &__drag-handle {
+    cursor: grab;
+    color: var($secondary-text-on-surface);
+    font-size: 0.8rem;
+    padding: 0 2px;
+    user-select: none;
   }
 
   &__divider {
