@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opennms.core.utils.WebSecurityUtils;
-import org.opennms.web.outage.Outage;
 import org.opennms.web.outage.OutageIdNotFoundException;
 import org.opennms.web.outage.WebOutageRepository;
 import org.opennms.web.servlet.MissingParameterException;
@@ -49,31 +48,18 @@ public class OutageDetailController extends AbstractController implements Initia
     /** {@inheritDoc} */
     @Override
     protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        int outageId = -1;
-
         String outageIdString = request.getParameter("id");
         if (outageIdString == null) {
             throw new MissingParameterException("id");
         }
 
         try {
-            outageId = WebSecurityUtils.safeParseInt(WebSecurityUtils.sanitizeString(outageIdString, false));
-        }
-        catch( NumberFormatException e ) {
+            int outageId = WebSecurityUtils.safeParseInt(WebSecurityUtils.sanitizeString(outageIdString, false));
+            response.sendRedirect(request.getContextPath() + "/ui/outage/" + outageId);
+            return null;
+        } catch (NumberFormatException e) {
             throw new OutageIdNotFoundException("The outage id must be an integer.", WebSecurityUtils.sanitizeString(outageIdString));
-        }        
-
-        Outage outage = m_webOutageRepository.getOutage(outageId);
-        WebOutageRepository.AlarmIdInfo alarmIdInfo = m_webOutageRepository.getAlarmIdAndExistsForOutageLostServiceEvent(outage);
-
-        long lostServiceAlarmId = alarmIdInfo.alarmId();
-        boolean hasActiveLostServiceAlarmId = alarmIdInfo.alarmExists();
-
-        ModelAndView modelAndView = new ModelAndView(getSuccessView());
-        modelAndView.addObject("outage", outage);
-        modelAndView.addObject("lostServiceAlarmId", lostServiceAlarmId);
-        modelAndView.addObject("hasActiveLostServiceAlarmId", hasActiveLostServiceAlarmId);
-        return modelAndView;
+        }
     }
 
     /**
