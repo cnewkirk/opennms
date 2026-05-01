@@ -646,11 +646,11 @@ podman exec test-opennms sed -i \
   /opt/opennms/etc/datacollection-config.xml
 echo "    datacollection-config.xml: rrd step -> 30s"
 
-# Purge any stale Topology-Lab RRD data from a prior run so files are
-# (re)created from scratch with the new 30s step on this run's first poll.
-podman exec test-opennms rm -rf \
-  /opt/opennms/share/rrd/snmp/fs/Topology-Lab 2>/dev/null || true
-echo "    purged stale Topology-Lab RRD data"
+# RRD data at fs/Topology-Lab/<foreign-id>/ is intentionally preserved across
+# lab churns. Foreign-ids are stable (hardcoded in the requisition) and postgres
+# keeps the same node IDs, so existing RRD files are found and extended rather
+# than recreated. The 30s step patch above runs before first collection, so any
+# files created on this run will have the correct step.
 
 # Reload collectd to pick up both config changes
 curl -s -u admin:notdefault \
