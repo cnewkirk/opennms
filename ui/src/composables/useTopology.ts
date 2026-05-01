@@ -84,7 +84,11 @@ const buildStylesheet = (canvasEl?: HTMLElement | null): any[] => {
     {
       selector: 'node',
       css: {
-        'background-color': defaultNodeColor || '#1f78c1',
+        'background-color': '#1f2937',
+        'background-image': 'data(iconDataUri)',
+        'background-fit': 'contain',
+        'background-clip': 'none' as unknown as undefined,
+        'background-image-opacity': 1,
         'label': 'data(label)',
         'color': labelTextColor,
         'font-size': 11,
@@ -113,7 +117,7 @@ const buildStylesheet = (canvasEl?: HTMLElement | null): any[] => {
     },
     ...Object.entries(SEVERITY_CSS_VARS).map(([sev, varName]) => ({
       selector: `node.severity-${sev.toLowerCase()}`,
-      css: { 'background-color': cssVar(varName) || varName }
+      css: { 'border-color': cssVar(varName) || '#f59e0b', 'border-width': 2.5 }
     })),
     {
       selector: 'edge',
