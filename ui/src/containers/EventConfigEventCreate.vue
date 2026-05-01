@@ -10,12 +10,7 @@
     class="not-found-container"
   >
     <p>No event configuration found.</p>
-    <FeatherButton
-      primary
-      @click="goBack()"
-    >
-      Go Back
-    </FeatherButton>
+    <Button label="Go Back" @click="goBack()" />
   </div>
 </template>
 
@@ -23,7 +18,7 @@
 import BasicInformation from '@/components/EventConfigEventCreate/BasicInformation.vue'
 import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { CreateEditMode } from '@/types'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 
 const router = useRouter()
 const store = useEventModificationStore()

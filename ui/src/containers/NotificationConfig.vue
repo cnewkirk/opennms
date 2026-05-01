@@ -27,9 +27,7 @@
                 </span>
               </div>
               <div class="notif-card__actions">
-                <FeatherButton secondary :disabled="toggling" @click="toggleStatus">
-                  {{ toggling ? 'Updating…' : (status === 'on' ? 'Turn Off' : 'Turn On') }}
-                </FeatherButton>
+                <Button severity="secondary" :disabled="toggling" @click="toggleStatus" :label="toggling ? 'Updating…' : (status === 'on' ? 'Turn Off' : 'Turn On')" />
               </div>
             </template>
           </div>
@@ -41,12 +39,8 @@
         <div class="notif-card">
           <div class="notif-card__header">Manage</div>
           <div class="notif-card__body notif-card__body--nav">
-            <FeatherButton primary @click="router.push('/notification-config/rules')">
-              Manage Notification Rules
-            </FeatherButton>
-            <FeatherButton primary @click="router.push('/notification-config/paths')">
-              Manage Destination Paths
-            </FeatherButton>
+            <Button label="Manage Notification Rules" @click="router.push('/notification-config/rules')" />
+            <Button label="Manage Destination Paths" @click="router.push('/notification-config/paths')" />
             <a :href="baseHref + 'admin/notification/noticeWizard/buildPathOutage.jsp'" class="notif-legacy-link">
               Path Outage (legacy)
             </a>
@@ -61,7 +55,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import notifdConfigService from '@/services/notifdConfigService'
 import { BreadCrumb } from '@/types'

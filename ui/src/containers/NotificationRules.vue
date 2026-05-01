@@ -11,12 +11,8 @@
         <h2 class="headline4">Notification Rules</h2>
       </div>
       <div class="feather-col-4 notif-rules-page__header-actions">
-        <FeatherButton secondary :disabled="reloading" @click="reloadNotifd">
-          {{ reloading ? 'Reloading…' : 'Reload Notifd' }}
-        </FeatherButton>
-        <FeatherButton primary @click="router.push('/notification-config/rules/new')">
-          + New Rule
-        </FeatherButton>
+        <Button severity="secondary" :disabled="reloading" @click="reloadNotifd" :label="reloading ? 'Reloading…' : 'Reload Notifd'" />
+        <Button label="+ New Rule" @click="router.push('/notification-config/rules/new')" />
       </div>
     </div>
 
@@ -50,13 +46,9 @@
                   </span>
                 </td>
                 <td class="notif-table__actions">
-                  <FeatherButton text @click="toggleRule(rule)">
-                    {{ rule.status === 'on' ? 'Disable' : 'Enable' }}
-                  </FeatherButton>
-                  <FeatherButton text @click="router.push(`/notification-config/rules/${encodeURIComponent(rule.name)}`)">
-                    Edit
-                  </FeatherButton>
-                  <FeatherButton text @click="deleteRule(rule.name)">Delete</FeatherButton>
+                  <Button text :label="rule.status === 'on' ? 'Disable' : 'Enable'" @click="toggleRule(rule)" />
+                  <Button text label="Edit" @click="router.push(`/notification-config/rules/${encodeURIComponent(rule.name)}`)" />
+                  <Button text label="Delete" @click="deleteRule(rule.name)" />
                 </td>
               </tr>
               <tr v-if="rules.length === 0">
@@ -74,7 +66,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import notificationConfigService, { NotificationConfigDTO } from '@/services/notificationConfigService'
 import { BreadCrumb } from '@/types'

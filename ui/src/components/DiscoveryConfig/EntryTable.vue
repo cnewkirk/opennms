@@ -15,20 +15,20 @@
             <em v-else class="entry-table__default">Use Default</em>
           </td>
           <td class="entry-table__actions">
-            <FeatherButton text @click="$emit('remove', i)">Delete</FeatherButton>
+            <Button text label="Delete" @click="$emit('remove', i)" />
           </td>
         </tr>
       </tbody>
     </table>
     <div v-else class="entry-table-card__empty">No entries configured.</div>
     <div class="entry-table-card__footer">
-      <FeatherButton secondary @click="$emit('add', fields)">{{ addLabel }}</FeatherButton>
+      <Button severity="secondary" :label="addLabel" @click="$emit('add', fields)" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 
 defineProps<{
   title: string

@@ -48,25 +48,13 @@
                 <div>
                   Click to save values. You will then be redirected back to /zenith-connect to view your existing connections.
                 </div>
-                <FeatherButton
-                  primary
-                  :disabled="savedSuccess"
-                  @click="onSaveValues"
-                >
-                    Save Values
-                </FeatherButton>
+                <Button label="Save Values" :disabled="savedSuccess" @click="onSaveValues" />
               </div>
               <div v-if="savedSuccess">
                 <div>
                   Click to return to view connections. Eventually this will be automatic.
                 </div>
-                <FeatherButton
-                  primary 
-                  :disabled="!savedSuccess"
-                  @click="onViewConnections"
-                >
-                    View Connections
-                </FeatherButton>
+                <Button label="View Connections" :disabled="!savedSuccess" @click="onViewConnections" />
               </div>
              </div>
           </div>
@@ -81,7 +69,7 @@ import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import { v2 } from '@/services/axiosInstances'
 import { useMenuStore } from '@/stores/menuStore'
 import { BreadCrumb } from '@/types'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import { useRoute } from 'vue-router'
 
 const menuStore = useMenuStore()

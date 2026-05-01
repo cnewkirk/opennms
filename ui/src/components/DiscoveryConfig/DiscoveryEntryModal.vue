@@ -28,8 +28,8 @@
           </div>
         </div>
         <div class="dem-modal__footer">
-          <FeatherButton text @click="$emit('close')">Cancel</FeatherButton>
-          <FeatherButton primary @click="submit">Add</FeatherButton>
+          <Button text label="Cancel" @click="$emit('close')" />
+          <Button label="Add" @click="submit" />
         </div>
       </div>
     </div>
@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 
 const props = defineProps<{
   title: string

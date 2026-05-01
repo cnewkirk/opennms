@@ -11,9 +11,7 @@
         <h2 class="headline4">Threshold Configuration</h2>
       </div>
       <div class="feather-col-4 threshold-page__header-actions">
-        <FeatherButton secondary :disabled="reloading" @click="reloadThresholds">
-          {{ reloading ? 'Reloading…' : 'Reload Thresholds' }}
-        </FeatherButton>
+        <Button severity="secondary" :disabled="reloading" @click="reloadThresholds" :label="reloading ? 'Reloading…' : 'Reload Thresholds'" />
       </div>
     </div>
 
@@ -39,7 +37,7 @@
                 <td>{{ group.name }}</td>
                 <td class="threshold-rrd">{{ group.rrdRepository }}</td>
                 <td>
-                  <FeatherButton text @click="editGroup(group.name)">Edit</FeatherButton>
+                  <Button text label="Edit" @click="editGroup(group.name)" />
                 </td>
               </tr>
             </tbody>
@@ -54,7 +52,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import { v2 } from '@/services/axiosInstances'
 import { BreadCrumb } from '@/types'

@@ -10,18 +10,8 @@
         <h1>Manage Event Configurations</h1>
       </div>
       <div class="action">
-        <FeatherButton
-          primary
-          @click="store.showCreateEventConfigSourceDialog"
-        >
-          Create New Event Source
-        </FeatherButton>
-        <FeatherButton
-          primary
-          @click="goToCreateEventConfig()"
-        >
-          Create New Event Config
-        </FeatherButton>
+        <Button label="Create New Event Source" @click="store.showCreateEventConfigSourceDialog" />
+        <Button label="Create New Event Config" @click="goToCreateEventConfig()" />
       </div>
     </div>
     <div class="tabs">
@@ -40,7 +30,7 @@ import { useEventConfigStore } from '@/stores/eventConfigStore'
 import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { useMenuStore } from '@/stores/menuStore'
 import { BreadCrumb, CreateEditMode } from '@/types'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 
 const store = useEventConfigStore()
 const router = useRouter()

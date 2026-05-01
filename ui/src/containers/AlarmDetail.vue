@@ -146,25 +146,13 @@
     <div v-if="!readOnlyRole" class="feather-row">
       <div class="feather-col-12">
         <div class="card alarm-detail__actions">
-          <FeatherButton secondary :disabled="actionInFlight" @click="toggleAck">
-            {{ isAcknowledged ? 'Unacknowledge' : 'Acknowledge' }}
-          </FeatherButton>
-          <FeatherButton v-if="showEscalate" secondary :disabled="actionInFlight" @click="doEscalate">
-            Escalate
-          </FeatherButton>
-          <FeatherButton v-if="showClear" secondary :disabled="actionInFlight" @click="doClear">
-            Clear
-          </FeatherButton>
+          <Button severity="secondary" :disabled="actionInFlight" @click="toggleAck" :label="isAcknowledged ? 'Unacknowledge' : 'Acknowledge'" />
+          <Button v-if="showEscalate" severity="secondary" :disabled="actionInFlight" @click="doEscalate" label="Escalate" />
+          <Button v-if="showClear" severity="secondary" :disabled="actionInFlight" @click="doClear" label="Clear" />
           <template v-if="ticketerEnabled">
-            <FeatherButton secondary :disabled="!canCreateTicket" @click="ticketAction('create')">
-              Create Ticket
-            </FeatherButton>
-            <FeatherButton secondary :disabled="!canUpdateTicket" @click="ticketAction('update')">
-              Update Ticket
-            </FeatherButton>
-            <FeatherButton secondary :disabled="!canCloseTicket" @click="ticketAction('close')">
-              Close Ticket
-            </FeatherButton>
+            <Button severity="secondary" :disabled="!canCreateTicket" @click="ticketAction('create')" label="Create Ticket" />
+            <Button severity="secondary" :disabled="!canUpdateTicket" @click="ticketAction('update')" label="Update Ticket" />
+            <Button severity="secondary" :disabled="!canCloseTicket" @click="ticketAction('close')" label="Close Ticket" />
           </template>
         </div>
       </div>
@@ -336,16 +324,8 @@
             rows="5"
           ></textarea>
           <div class="alarm-detail__memo-actions">
-            <FeatherButton secondary :disabled="readOnlyRole || memoInFlight" @click="saveMemo('sticky')">
-              Save
-            </FeatherButton>
-            <FeatherButton
-              secondary
-              :disabled="readOnlyRole || memoInFlight || !alarm.stickyMemo?.body"
-              @click="deleteMemo('sticky')"
-            >
-              Delete
-            </FeatherButton>
+            <Button severity="secondary" :disabled="readOnlyRole || memoInFlight" @click="saveMemo('sticky')" label="Save" />
+            <Button severity="secondary" :disabled="readOnlyRole || memoInFlight || !alarm.stickyMemo?.body" @click="deleteMemo('sticky')" label="Delete" />
           </div>
           <div v-if="alarm.stickyMemo" class="alarm-detail__memo-meta">
             <span v-if="alarm.stickyMemo.author"><strong>Author:</strong> {{ alarm.stickyMemo.author }}</span>
@@ -365,16 +345,8 @@
             rows="5"
           ></textarea>
           <div class="alarm-detail__memo-actions">
-            <FeatherButton secondary :disabled="readOnlyRole || memoInFlight" @click="saveMemo('journal')">
-              Save
-            </FeatherButton>
-            <FeatherButton
-              secondary
-              :disabled="readOnlyRole || memoInFlight || !alarm.reductionKeyMemo?.body"
-              @click="deleteMemo('journal')"
-            >
-              Delete
-            </FeatherButton>
+            <Button severity="secondary" :disabled="readOnlyRole || memoInFlight" @click="saveMemo('journal')" label="Save" />
+            <Button severity="secondary" :disabled="readOnlyRole || memoInFlight || !alarm.reductionKeyMemo?.body" @click="deleteMemo('journal')" label="Delete" />
           </div>
           <div v-if="alarm.reductionKeyMemo" class="alarm-detail__memo-meta">
             <span v-if="alarm.reductionKeyMemo.author"><strong>Author:</strong> {{ alarm.reductionKeyMemo.author }}</span>
@@ -388,7 +360,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import useAlarmDetail from '@/composables/useAlarmDetail'

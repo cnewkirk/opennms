@@ -6,40 +6,16 @@
     <div class="header">
       <div class="title-container">
         <div>
-          <FeatherBackButton
-            data-test="back-button"
-            @click="router.push({ name: 'Event Configuration' })"
-          >
-            Go Back
-          </FeatherBackButton>
+          <Button icon="pi pi-arrow-left" text label="Go Back" data-test="back-button" @click="router.push({ name: 'Event Configuration' })" />
         </div>
         <div>
           <h1>Manage Event Config for a Source</h1>
         </div>
       </div>
       <div class="action-container">
-        <FeatherButton
-          primary
-          data-test="add-event-config"
-          @click="onAddEventClick(store.selectedSource)"
-        >
-          Add Event Config
-        </FeatherButton>
-        <FeatherButton
-          primary
-          @click="store.showChangeEventConfigSourceStatusDialog(store.selectedSource)"
-          data-test="enable-disable-source"
-        >
-          {{ store.selectedSource.enabled ? 'Disable Source' : 'Enable Source' }}
-        </FeatherButton>
-        <FeatherButton
-          primary
-          @click="store.showDeleteEventConfigSourceDialog(store.selectedSource)"
-          data-test="delete-source"
-          v-if="store.selectedSource.vendor !== VENDOR_OPENNMS"
-        >
-          Delete Source
-        </FeatherButton>
+        <Button label="Add Event Config" data-test="add-event-config" @click="onAddEventClick(store.selectedSource)" />
+        <Button :label="store.selectedSource.enabled ? 'Disable Source' : 'Enable Source'" @click="store.showChangeEventConfigSourceStatusDialog(store.selectedSource)" data-test="enable-disable-source" />
+        <Button v-if="store.selectedSource.vendor !== VENDOR_OPENNMS" label="Delete Source" @click="store.showDeleteEventConfigSourceDialog(store.selectedSource)" data-test="delete-source" />
       </div>
     </div>
 
@@ -93,12 +69,7 @@
     class="not-found-container"
   >
     <p>No event configuration found.</p>
-    <FeatherButton
-      primary
-      @click="router.push({ name: 'Event Configuration' })"
-    >
-      Go Back
-    </FeatherButton>
+    <Button label="Go Back" @click="router.push({ name: 'Event Configuration' })" />
   </div>
 </template>
 
@@ -111,8 +82,7 @@ import { getDefaultEventConfigEvent, useEventConfigDetailStore } from '@/stores/
 import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { CreateEditMode } from '@/types'
 import { EventConfigSource } from '@/types/eventConfig'
-import { FeatherBackButton } from '@featherds/back-button'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import { format } from 'date-fns-tz'
 
 const store = useEventConfigDetailStore()

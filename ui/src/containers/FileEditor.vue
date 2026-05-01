@@ -26,13 +26,13 @@
             </div>
           </transition>
 
-          <FeatherButton
+          <Button
             v-if="!isHelpOpen && snippets"
             class="help-btn"
             text
-            @click="triggerHelp">
-            Help
-          </FeatherButton>
+            label="Help"
+            @click="triggerHelp"
+          />
         </div>
       </div>
     </div>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import Editor from '@/components/FileEditor/Editor.vue'
 import FileSidebar from '@/components/FileEditor/FileSidebar.vue'
 import Help from '@/components/FileEditor/Help.vue'

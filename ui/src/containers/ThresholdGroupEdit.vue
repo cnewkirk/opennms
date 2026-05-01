@@ -11,10 +11,8 @@
         <h2 class="headline4">Edit Threshold Group: {{ groupName }}</h2>
       </div>
       <div class="feather-col-4 tge-page__header-actions">
-        <FeatherButton secondary @click="router.push('/threshold-config')">Back</FeatherButton>
-        <FeatherButton primary :disabled="saving || loading" @click="saveGroup">
-          {{ saving ? 'Saving…' : 'Save Group' }}
-        </FeatherButton>
+        <Button severity="secondary" label="Back" @click="router.push('/threshold-config')" />
+        <Button :disabled="saving || loading" @click="saveGroup" :label="saving ? 'Saving…' : 'Save Group'" />
       </div>
     </div>
 
@@ -37,14 +35,14 @@
       <div class="tge-card">
         <div class="tge-card__header tge-card__header--with-action">
           <span>Thresholds</span>
-          <FeatherButton primary @click="addThreshold">+ Add Threshold</FeatherButton>
+          <Button label="+ Add Threshold" @click="addThreshold" />
         </div>
         <div class="tge-card__body">
           <div v-if="group.thresholds.length === 0" class="tge-empty">No thresholds defined.</div>
           <div v-for="(t, idx) in group.thresholds" :key="idx" class="tge-entry">
             <div class="tge-entry__header">
               <span class="tge-entry__title">Threshold {{ idx + 1 }}: {{ t.dsName || '(unnamed)' }}</span>
-              <FeatherButton text @click="removeThreshold(idx)">Remove</FeatherButton>
+              <Button text label="Remove" @click="removeThreshold(idx)" />
             </div>
             <div class="tge-entry__body">
               <div class="tge-grid">
@@ -106,12 +104,12 @@
               <div class="tge-filters">
                 <div class="tge-filters__header">
                   <span>Resource Filters</span>
-                  <FeatherButton text @click="addFilter(t)">+ Add Filter</FeatherButton>
+                  <Button text label="+ Add Filter" @click="addFilter(t)" />
                 </div>
                 <div v-for="(rf, fi) in t.resourceFilters" :key="fi" class="tge-filter-row">
                   <input v-model="rf.field" class="tge-input tge-input--sm" type="text" placeholder="Field" />
                   <input v-model="rf.filter" class="tge-input tge-input--lg" type="text" placeholder="Regex" />
-                  <FeatherButton text @click="t.resourceFilters.splice(fi, 1)">×</FeatherButton>
+                  <Button text label="×" @click="t.resourceFilters.splice(fi, 1)" />
                 </div>
               </div>
             </div>
@@ -123,14 +121,14 @@
       <div class="tge-card">
         <div class="tge-card__header tge-card__header--with-action">
           <span>Expressions</span>
-          <FeatherButton primary @click="addExpression">+ Add Expression</FeatherButton>
+          <Button label="+ Add Expression" @click="addExpression" />
         </div>
         <div class="tge-card__body">
           <div v-if="group.expressions.length === 0" class="tge-empty">No expressions defined.</div>
           <div v-for="(e, idx) in group.expressions" :key="idx" class="tge-entry">
             <div class="tge-entry__header">
               <span class="tge-entry__title">Expression {{ idx + 1 }}: {{ e.exprLabel || e.expression || '(unnamed)' }}</span>
-              <FeatherButton text @click="removeExpression(idx)">Remove</FeatherButton>
+              <Button text label="Remove" @click="removeExpression(idx)" />
             </div>
             <div class="tge-entry__body">
               <div class="tge-grid">
@@ -196,12 +194,12 @@
               <div class="tge-filters">
                 <div class="tge-filters__header">
                   <span>Resource Filters</span>
-                  <FeatherButton text @click="addFilter(e)">+ Add Filter</FeatherButton>
+                  <Button text label="+ Add Filter" @click="addFilter(e)" />
                 </div>
                 <div v-for="(rf, fi) in e.resourceFilters" :key="fi" class="tge-filter-row">
                   <input v-model="rf.field" class="tge-input tge-input--sm" type="text" placeholder="Field" />
                   <input v-model="rf.filter" class="tge-input tge-input--lg" type="text" placeholder="Regex" />
-                  <FeatherButton text @click="e.resourceFilters.splice(fi, 1)">×</FeatherButton>
+                  <Button text label="×" @click="e.resourceFilters.splice(fi, 1)" />
                 </div>
               </div>
             </div>
@@ -221,7 +219,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import { v2, rest } from '@/services/axiosInstances'
 import { BreadCrumb } from '@/types'

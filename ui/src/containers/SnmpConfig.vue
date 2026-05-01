@@ -29,9 +29,7 @@
               </select>
             </div>
             <div class="snmp-form-row snmp-form-row--actions">
-              <FeatherButton secondary :disabled="!lookup.ip || lookingUp" @click="doLookup">
-                {{ lookingUp ? 'Looking up…' : 'Look up' }}
-              </FeatherButton>
+              <Button severity="secondary" :disabled="!lookup.ip || lookingUp" @click="doLookup" :label="lookingUp ? 'Looking up…' : 'Look up'" />
             </div>
             <div v-if="lookupError" class="snmp-message snmp-message--error">
               Could not look up SNMP config for {{ lookup.ip }}.
@@ -233,17 +231,15 @@
 
     <!-- Save button row -->
     <div class="snmp-page__footer feather-row">
-      <FeatherButton primary :disabled="!form.firstIp || saving" @click="doSave">
-        {{ saving ? 'Saving…' : 'Save Config' }}
-      </FeatherButton>
-      <FeatherButton text @click="resetForm">Cancel</FeatherButton>
+      <Button :disabled="!form.firstIp || saving" @click="doSave" :label="saving ? 'Saving…' : 'Save Config'" />
+      <Button text label="Cancel" @click="resetForm" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import { getSnmpConfig, saveSnmpConfig } from '@/services/snmpConfigService'
 import { getLocations } from '@/services/discoveryConfigService'

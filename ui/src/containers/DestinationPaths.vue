@@ -11,9 +11,7 @@
         <h2 class="headline4">Destination Paths</h2>
       </div>
       <div class="feather-col-4 dest-paths-page__header-actions">
-        <FeatherButton primary @click="router.push('/notification-config/paths/new')">
-          + New Path
-        </FeatherButton>
+        <Button label="+ New Path" @click="router.push('/notification-config/paths/new')" />
       </div>
     </div>
 
@@ -43,10 +41,8 @@
                 <td>{{ path.targets.length }}</td>
                 <td>{{ (path.escalates ?? []).length }}</td>
                 <td class="notif-table__actions">
-                  <FeatherButton text @click="router.push(`/notification-config/paths/${encodeURIComponent(path.name)}`)">
-                    Edit
-                  </FeatherButton>
-                  <FeatherButton text @click="deletePath(path.name)">Delete</FeatherButton>
+                  <Button text label="Edit" @click="router.push(`/notification-config/paths/${encodeURIComponent(path.name)}`)" />
+                  <Button text label="Delete" @click="deletePath(path.name)" />
                 </td>
               </tr>
               <tr v-if="paths.length === 0">
@@ -64,7 +60,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import destinationPathService, { DestinationPathDTO } from '@/services/destinationPathService'
 import { BreadCrumb } from '@/types'

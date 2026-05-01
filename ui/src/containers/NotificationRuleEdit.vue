@@ -11,10 +11,8 @@
         <h2 class="headline4">{{ isNew ? 'New Notification Rule' : `Edit: ${ruleName}` }}</h2>
       </div>
       <div class="feather-col-4 rule-edit-page__header-actions">
-        <FeatherButton secondary @click="router.push('/notification-config/rules')">Cancel</FeatherButton>
-        <FeatherButton primary :disabled="saving" @click="save">
-          {{ saving ? 'Saving…' : 'Save' }}
-        </FeatherButton>
+        <Button severity="secondary" label="Cancel" @click="router.push('/notification-config/rules')" />
+        <Button :disabled="saving" @click="save" :label="saving ? 'Saving…' : 'Save'" />
       </div>
     </div>
 
@@ -62,9 +60,7 @@
             <textarea v-model="rule.rule" class="form-textarea" rows="3" placeholder="IPADDR != '0.0.0.0'" />
           </div>
           <div class="form-row form-row--inline">
-            <FeatherButton secondary :disabled="validating" @click="validateRule">
-              {{ validating ? 'Validating…' : 'Validate Rule' }}
-            </FeatherButton>
+            <Button severity="secondary" :disabled="validating" @click="validateRule" :label="validating ? 'Validating…' : 'Validate Rule'" />
             <span v-if="validateResult === 'ok'" class="validate-ok">Rule is valid.</span>
             <span v-else-if="validateResult" class="validate-error">{{ validateResult }}</span>
           </div>
@@ -132,7 +128,7 @@
             <input v-model="param.value" class="form-input form-input--half" placeholder="Value" />
             <button class="btn-remove" @click="rule.parameters!.splice(idx, 1)">✕</button>
           </div>
-          <FeatherButton text @click="addParam">+ Add Parameter</FeatherButton>
+          <Button text label="+ Add Parameter" @click="addParam" />
         </div>
       </div>
     </template>
@@ -143,7 +139,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import notificationConfigService, { NotificationConfigDTO, ParameterDTO } from '@/services/notificationConfigService'
 import destinationPathService, { DestinationPathDTO } from '@/services/destinationPathService'

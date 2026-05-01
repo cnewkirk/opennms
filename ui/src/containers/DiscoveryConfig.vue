@@ -11,9 +11,7 @@
         <h2 class="headline4">Discovery Configuration</h2>
       </div>
       <div class="feather-col-6 discovery-page__header-actions">
-        <FeatherButton primary :disabled="saving || loading" @click="saveConfig">
-          {{ saving ? 'Saving…' : 'Save and Restart Discovery' }}
-        </FeatherButton>
+        <Button :disabled="saving || loading" @click="saveConfig" :label="saving ? 'Saving…' : 'Save and Restart Discovery'" />
       </div>
     </div>
 
@@ -143,9 +141,7 @@
       />
 
       <div class="discovery-page__footer">
-        <FeatherButton primary :disabled="saving" @click="saveConfig">
-          {{ saving ? 'Saving…' : 'Save and Restart Discovery' }}
-        </FeatherButton>
+        <Button :disabled="saving" @click="saveConfig" :label="saving ? 'Saving…' : 'Save and Restart Discovery'" />
       </div>
     </template>
 
@@ -165,7 +161,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import EntryTable from '@/components/DiscoveryConfig/EntryTable.vue'
 import DiscoveryEntryModal from '@/components/DiscoveryConfig/DiscoveryEntryModal.vue'

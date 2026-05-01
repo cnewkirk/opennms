@@ -11,7 +11,7 @@
         <h2 class="headline4">Scheduled Outages</h2>
       </div>
       <div class="feather-col-6 sched-outages-page__actions">
-        <FeatherButton primary @click="openCreate">New Outage</FeatherButton>
+        <Button label="New Outage" @click="openCreate" />
       </div>
     </div>
 
@@ -50,8 +50,8 @@
             <span v-if="!outage.node.length && !outage.interface.length" class="sched-outages-table__none">—</span>
           </td>
           <td class="sched-outages-table__actions">
-            <FeatherButton text @click="openEdit(outage)">Edit</FeatherButton>
-            <FeatherButton text @click="confirmDelete(outage.name)">Delete</FeatherButton>
+            <Button text label="Edit" @click="openEdit(outage)" />
+            <Button text label="Delete" @click="confirmDelete(outage.name)" />
           </td>
         </tr>
       </tbody>
@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import SchedOutageEditDialog from '@/components/ScheduledOutages/SchedOutageEditDialog.vue'
 import { listSchedOutages, deleteSchedOutage } from '@/services/schedOutageService'

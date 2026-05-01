@@ -23,7 +23,7 @@
       <div class="sched-outage-dialog__section">
         <div class="sched-outage-dialog__section-header">
           <span class="subtitle2">Time Windows</span>
-          <FeatherButton text @click="addTime">Add Time</FeatherButton>
+          <Button text label="Add Time" @click="addTime" />
         </div>
 
         <div
@@ -70,7 +70,7 @@
             />
           </div>
 
-          <FeatherButton text @click="removeTime(i)">Remove</FeatherButton>
+          <Button text label="Remove" @click="removeTime(i)" />
         </div>
 
         <p v-if="!form.time.length" class="body2 sched-outage-dialog__empty">No time windows defined.</p>
@@ -83,7 +83,7 @@
         </div>
         <div class="sched-outage-dialog__add-row">
           <FeatherInput label="Node ID" v-model="newNodeId" type="text" />
-          <FeatherButton text @click="addNode">Add</FeatherButton>
+          <Button text label="Add" @click="addNode" />
         </div>
         <div
           v-for="(n, i) in form.node"
@@ -91,7 +91,7 @@
           class="sched-outage-dialog__item-row"
         >
           <span class="body2">Node {{ n.id }}</span>
-          <FeatherButton text @click="removeNode(i)">Remove</FeatherButton>
+          <Button text label="Remove" @click="removeNode(i)" />
         </div>
         <p v-if="!form.node.length" class="body2 sched-outage-dialog__empty">No nodes assigned.</p>
       </div>
@@ -103,7 +103,7 @@
         </div>
         <div class="sched-outage-dialog__add-row">
           <FeatherInput label="IP Address or match-any" v-model="newIfaceAddress" type="text" />
-          <FeatherButton text @click="addInterface">Add</FeatherButton>
+          <Button text label="Add" @click="addInterface" />
         </div>
         <div
           v-for="(iface, i) in form.interface"
@@ -111,17 +111,15 @@
           class="sched-outage-dialog__item-row"
         >
           <span class="body2">{{ iface.address }}</span>
-          <FeatherButton text @click="removeInterface(i)">Remove</FeatherButton>
+          <Button text label="Remove" @click="removeInterface(i)" />
         </div>
         <p v-if="!form.interface.length" class="body2 sched-outage-dialog__empty">No interfaces assigned.</p>
       </div>
     </div>
 
     <template v-slot:footer>
-      <FeatherButton text @click="handleCancel">Cancel</FeatherButton>
-      <FeatherButton primary @click="handleSave" :disabled="saving">
-        {{ saving ? 'Saving…' : 'Save' }}
-      </FeatherButton>
+      <Button text label="Cancel" @click="handleCancel" />
+      <Button :disabled="saving" @click="handleSave" :label="saving ? 'Saving…' : 'Save'" />
     </template>
   </FeatherDialog>
 </template>
@@ -130,7 +128,7 @@
 import { ref, watch, computed } from 'vue'
 import { FeatherDialog } from '@featherds/dialog'
 import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import { SchedOutage, SchedOutageTime } from '@/types'
 import { saveSchedOutage } from '@/services/schedOutageService'
 import useSnackbar from '@/composables/useSnackbar'

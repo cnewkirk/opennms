@@ -11,10 +11,8 @@
         <h2 class="headline4">{{ isNew ? 'New Destination Path' : `Edit: ${pathName}` }}</h2>
       </div>
       <div class="feather-col-4 path-edit-page__header-actions">
-        <FeatherButton secondary @click="router.push('/notification-config/paths')">Cancel</FeatherButton>
-        <FeatherButton primary :disabled="saving" @click="save">
-          {{ saving ? 'Saving…' : 'Save' }}
-        </FeatherButton>
+        <Button severity="secondary" label="Cancel" @click="router.push('/notification-config/paths')" />
+        <Button :disabled="saving" @click="save" :label="saving ? 'Saving…' : 'Save'" />
       </div>
     </div>
 
@@ -43,7 +41,7 @@
       <div class="notif-card">
         <div class="notif-card__header">
           Initial Targets
-          <FeatherButton text class="notif-card__header-btn" @click="addTarget(path.targets)">+ Add Target</FeatherButton>
+          <Button text label="+ Add Target" class="notif-card__header-btn" @click="addTarget(path.targets)" />
         </div>
         <div class="notif-card__body">
           <div v-if="path.targets.length === 0" class="notif-empty">No targets defined.</div>
@@ -94,7 +92,7 @@
         <div class="notif-card__header">
           Escalation Level {{ ei + 1 }}
           <div class="notif-card__header-actions">
-            <FeatherButton text class="notif-card__header-btn" @click="addTarget(esc.targets)">+ Add Target</FeatherButton>
+            <Button text label="+ Add Target" class="notif-card__header-btn" @click="addTarget(esc.targets)" />
             <button class="btn-remove" @click="path.escalates!.splice(ei, 1)">✕ Remove Escalation</button>
           </div>
         </div>
@@ -147,7 +145,7 @@
       </div>
 
       <div class="notif-add-escalation">
-        <FeatherButton secondary @click="addEscalation">+ Add Escalation Level</FeatherButton>
+        <Button severity="secondary" label="+ Add Escalation Level" @click="addEscalation" />
       </div>
     </template>
   </div>
@@ -157,7 +155,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import useSnackbar from '@/composables/useSnackbar'
 import destinationPathService, { DestinationPathDTO, TargetDTO, EscalateDTO } from '@/services/destinationPathService'
 import { v2 } from '@/services/axiosInstances'
