@@ -33,6 +33,9 @@ import { useWeathermapStore, EdgeLabelData } from '@/stores/weathermapStore'
 import { useEdgeLabelStore } from '@/stores/edgeLabelStore'
 import { useTopologyViewStore } from '@/stores/topologyViewStore'
 import { useAppStore } from '@/stores/appStore'
+import { useNodeIconResolver } from '@/composables/useNodeIconResolver'
+import { getNodeById } from '@/services/nodeService'
+import type { Category } from '@/types/index'
 
 cytoscape.use(cxtmenu)
 cytoscape.use(fcose)
@@ -226,6 +229,16 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
   const elStore = useEdgeLabelStore()
   const viewStore = useTopologyViewStore()
   const appStore = useAppStore()
+  const { resolveIconDataUri } = useNodeIconResolver()
+  const nodeCategoryCache = new Map<string, Category[]>()
+
+  const getSeverityForVertex = (vertexId: string): string | null => {
+    const numericId = parseInt(vertexId, 10)
+    return (!isNaN(numericId) && store.alarmSeverity[numericId])
+      ? store.alarmSeverity[numericId]
+      : null
+  }
+
   let cy: Core | null = null
 
   interface EdgeTooltipState {
@@ -548,16 +561,21 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
     cy.elements().remove()
 
-    const nodeElements = store.vertices.map(v => ({
-      data: {
-        id: v.id,
-        label: v.label ?? v.id,
-        baseLabel: v.label ?? v.id,   // preserved for down-node label mutation
-        nodeID: v.nodeID ?? v.id,
-        ipAddress: v.ipAddress,
-        namespace: v.namespace
+    const nodeElements = store.vertices.map(v => {
+      const severity = getSeverityForVertex(v.id)
+      const categories = v.nodeID ? nodeCategoryCache.get(v.nodeID) : undefined
+      return {
+        data: {
+          id: v.id,
+          label: v.label ?? v.id,
+          baseLabel: v.label ?? v.id,   // preserved for down-node label mutation
+          nodeID: v.nodeID ?? v.id,
+          ipAddress: v.ipAddress,
+          namespace: v.namespace,
+          iconDataUri: resolveIconDataUri(v, severity, categories),
+        }
       }
-    }))
+    })
 
     // Collapse all protocol edges for a node pair into one Cytoscape edge.
     // All protocols between a pair are stored as an array on the edge data;
@@ -618,6 +636,26 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
     } else {
       updateSuppressionClasses()
     }
+
+    // Async enrichment: fetch node categories and re-apply icons where a category
+    // mapping produces a better result than the name-pattern fallback.
+    const verticesWithNodeId = store.vertices.filter(v => v.nodeID)
+    Promise.all(
+      verticesWithNodeId.map(async v => {
+        if (!v.nodeID || nodeCategoryCache.has(v.nodeID)) return
+        try {
+          const node = await getNodeById(v.nodeID)
+          if (node?.categories?.length) {
+            nodeCategoryCache.set(v.nodeID, node.categories)
+            const el = cy?.getElementById(v.id)
+            if (el) {
+              const severity = getSeverityForVertex(v.id)
+              el.data('iconDataUri', resolveIconDataUri(v, severity, node.categories))
+            }
+          }
+        } catch { /* non-critical — name-pattern icon already applied */ }
+      })
+    )
   }
 
   const applySeverityClasses = () => {
@@ -627,6 +665,13 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
       Object.keys(SEVERITY_CSS_VARS).forEach(sev => node.removeClass(`severity-${sev.toLowerCase()}`))
       if (!isNaN(numericId) && store.alarmSeverity[numericId]) {
         node.addClass(`severity-${store.alarmSeverity[numericId].toLowerCase()}`)
+      }
+      // Re-color icon to match new severity
+      const vertex = store.vertices.find(v => v.id === node.id())
+      if (vertex) {
+        const severity = getSeverityForVertex(node.id())
+        const categories = vertex.nodeID ? nodeCategoryCache.get(vertex.nodeID) : undefined
+        node.data('iconDataUri', resolveIconDataUri(vertex, severity, categories))
       }
     })
   }
