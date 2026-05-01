@@ -134,7 +134,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import "@featherds/table/scss/table";
+@use "@/styles/table" as *;
 @import "@/styles/typography";
 @import "@/styles/tokens";
 

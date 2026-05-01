@@ -91,7 +91,7 @@ const getRowClass = (data: Event) => `row--${data.severity.toLowerCase()}`
 @use '@/styles/vars' as vars;
 @use "@/styles/tokens" as fvars;
 @use "@/styles/utils";
-@import "@featherds/table/scss/table";
+@use "@/styles/table" as *;
 @import "@/styles/elevation";
 .card {
   @include elevation(2);

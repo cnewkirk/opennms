@@ -76,7 +76,7 @@ const outages = computed(() => nodeStore.outages)
   scoped
 >
 @use '@/styles/vars' as vars;
-@import "@featherds/table/scss/table";
+@use "@/styles/table" as *;
 @import "@/styles/elevation";
 .card {
   @include elevation(2);

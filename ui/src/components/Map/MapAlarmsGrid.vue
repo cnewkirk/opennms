@@ -189,7 +189,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/table/scss/table";
+@use "@/styles/table" as *;
 @import "@/styles/tokens";
 #wrap {
   height: calc(100% - 29px);

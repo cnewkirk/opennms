@@ -205,7 +205,7 @@ function highlightTableText() {
   lang="scss"
 >
 @use '@/styles/vars' as vars;
-@import "@featherds/table/scss/table";
+@use "@/styles/table" as *;
 #wrap {
   height: calc(100% - 29px);
   overflow: auto;
