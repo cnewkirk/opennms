@@ -411,6 +411,11 @@ const router = createRouter({
       component: () => import('@/containers/GrafanaEndpoints.vue')
     },
     {
+      path: '/geocoder-config',
+      name: 'Geocoder Configuration',
+      component: () => import('@/containers/GeocoderConfig.vue')
+    },
+    {
       path: '/surveillance-dashboard',
       name: 'Surveillance Dashboard',
       component: () => import('@/containers/SurveillanceDashboard.vue')

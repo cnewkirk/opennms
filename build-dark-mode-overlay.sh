@@ -184,6 +184,10 @@ cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/endpoint/index.jsp" \
 mkdir -p "${OVERLAY_DIR}/admin/discovery"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/discovery/edit-scan.jsp" \
    "${OVERLAY_DIR}/admin/discovery/edit-scan.jsp"
+# geoservice/index.jsp — redirect to Vue /geocoder-config
+mkdir -p "${OVERLAY_DIR}/admin/geoservice"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/geoservice/index.jsp" \
+   "${OVERLAY_DIR}/admin/geoservice/index.jsp"
 # node.jsp — redirect to Vue SPA at /#/node/:id
 mkdir -p "${OVERLAY_DIR}/element"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/element/node.jsp" \
@@ -386,6 +390,9 @@ COPY --chown=10001:10001 admin/endpoint/index.jsp /opt/opennms/jetty-webapps/ope
 
 # discovery/edit-scan.jsp — redirect to Vue SPA /discovery-scan
 COPY --chown=10001:10001 admin/discovery/edit-scan.jsp /opt/opennms/jetty-webapps/opennms/admin/discovery/edit-scan.jsp
+
+# geoservice/index.jsp — redirect to Vue SPA /geocoder-config
+COPY --chown=10001:10001 admin/geoservice/index.jsp /opt/opennms/jetty-webapps/opennms/admin/geoservice/index.jsp
 
 # node.jsp — redirect to Vue SPA at /#/node/:id
 COPY --chown=10001:10001 element/node.jsp /opt/opennms/jetty-webapps/opennms/element/node.jsp

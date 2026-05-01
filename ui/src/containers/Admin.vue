@@ -73,7 +73,7 @@ const adminCards = computed(() => {
         { label: 'Manually Add an Interface', to: '/add-interface' },
         { label: 'Delete Nodes', to: '/delete-nodes' },
         { label: 'Configure External Requisitions', to: '/configuration' },
-        { label: 'Configure Geocoder Service', href: baseHref.value + 'admin/geoservice/index.jsp' },
+        { label: 'Configure Geocoder Service', to: '/geocoder-config' },
         { label: 'Secure Credentials Vault', to: '/scv' },
       ]
     },
