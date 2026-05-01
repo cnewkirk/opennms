@@ -68,7 +68,7 @@ const adminCards = computed(() => {
         { label: 'Import and Export Asset Information', href: baseHref.value + 'admin/asset/index.jsp' },
         { label: 'Manage Surveillance Categories', to: '/surveillance-categories' },
         { label: 'Configure Discovery', to: '/discovery-config' },
-        { label: 'Run Single Discovery Scan', href: baseHref.value + 'admin/discovery/edit-scan.jsp' },
+        { label: 'Run Single Discovery Scan', to: '/discovery-scan' },
         { label: 'Configure SNMP Community Names by IP Address', to: '/snmp-config' },
         { label: 'Manually Add an Interface', to: '/add-interface' },
         { label: 'Delete Nodes', to: '/delete-nodes' },
@@ -119,7 +119,7 @@ const adminCards = computed(() => {
     {
       title: 'Additional Tools',
       links: [
-        { label: 'Configure Grafana Endpoints (Reports only)', href: baseHref.value + 'admin/endpoint/index.jsp' },
+        { label: 'Configure Grafana Endpoints (Reports only)', to: '/grafana-endpoints' },
         { label: 'Instrumentation Log Reader', href: baseHref.value + 'admin/nodemanagement/instrumentationLogReader.jsp' },
         { label: 'JMX Config Generator', to: '/jmx-config-generator' },
         { label: 'SNMP MIB Compiler', to: '/mib-compiler' },

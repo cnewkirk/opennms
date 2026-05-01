@@ -406,6 +406,11 @@ const router = createRouter({
       component: () => import('@/containers/WallboardConfig.vue')
     },
     {
+      path: '/grafana-endpoints',
+      name: 'Grafana Endpoints',
+      component: () => import('@/containers/GrafanaEndpoints.vue')
+    },
+    {
       path: '/surveillance-dashboard',
       name: 'Surveillance Dashboard',
       component: () => import('@/containers/SurveillanceDashboard.vue')
@@ -497,6 +502,11 @@ const router = createRouter({
         if (rolesAreLoaded.value) checkRoles()
         else whenever(rolesAreLoaded, () => checkRoles())
       }
+    },
+    {
+      path: '/discovery-scan',
+      name: 'Run Single Discovery Scan',
+      component: () => import('@/containers/DiscoveryScan.vue')
     },
     {
       path: '/snmp-config',

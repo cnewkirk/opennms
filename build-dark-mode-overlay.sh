@@ -176,6 +176,14 @@ cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/classification/index.jsp"
 # newInterface.jsp — redirect to Vue /add-interface
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/newInterface.jsp" \
    "${OVERLAY_DIR}/admin/newInterface.jsp"
+# endpoint/index.jsp — redirect to Vue /grafana-endpoints
+mkdir -p "${OVERLAY_DIR}/admin/endpoint"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/endpoint/index.jsp" \
+   "${OVERLAY_DIR}/admin/endpoint/index.jsp"
+# discovery/edit-scan.jsp — redirect to Vue /discovery-scan
+mkdir -p "${OVERLAY_DIR}/admin/discovery"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/discovery/edit-scan.jsp" \
+   "${OVERLAY_DIR}/admin/discovery/edit-scan.jsp"
 # node.jsp — redirect to Vue SPA at /#/node/:id
 mkdir -p "${OVERLAY_DIR}/element"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/element/node.jsp" \
@@ -372,6 +380,12 @@ COPY --chown=10001:10001 admin/classification/index.jsp /opt/opennms/jetty-webap
 
 # newInterface.jsp — redirect to Vue SPA /add-interface
 COPY --chown=10001:10001 admin/newInterface.jsp /opt/opennms/jetty-webapps/opennms/admin/newInterface.jsp
+
+# endpoint/index.jsp — redirect to Vue SPA /grafana-endpoints
+COPY --chown=10001:10001 admin/endpoint/index.jsp /opt/opennms/jetty-webapps/opennms/admin/endpoint/index.jsp
+
+# discovery/edit-scan.jsp — redirect to Vue SPA /discovery-scan
+COPY --chown=10001:10001 admin/discovery/edit-scan.jsp /opt/opennms/jetty-webapps/opennms/admin/discovery/edit-scan.jsp
 
 # node.jsp — redirect to Vue SPA at /#/node/:id
 COPY --chown=10001:10001 element/node.jsp /opt/opennms/jetty-webapps/opennms/element/node.jsp

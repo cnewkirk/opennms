@@ -52,4 +52,22 @@ function normalizeList<T>(val: T[] | T | undefined | null): T[] {
   return [val]
 }
 
-export { getDiscoveryConfig, saveDiscoveryConfig, getLocations, getForeignSources }
+export interface DiscoveryScanConfig {
+  location?: string
+  foreignSource?: string
+  timeout?: number
+  retries?: number
+  chunkSize?: number
+  specifics?: { content: string; location?: string; timeout?: number; retries?: number; foreignSource?: string }[]
+  includeRanges?: { begin: string; end: string; location?: string }[]
+  excludeRanges?: { begin: string; end: string; location?: string }[]
+}
+
+const runDiscoveryScan = async (config: DiscoveryScanConfig): Promise<boolean> => {
+  try {
+    await v2.post('/discovery', config, { headers: { 'Content-Type': 'application/json' } })
+    return true
+  } catch { return false }
+}
+
+export { getDiscoveryConfig, saveDiscoveryConfig, getLocations, getForeignSources, runDiscoveryScan }
