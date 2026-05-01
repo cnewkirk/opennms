@@ -115,7 +115,7 @@ const buildStylesheet = (canvasEl?: HTMLElement | null): any[] => {
       css: {
         'border-width': 3,
         'border-color': selectedColor || '#005eb8',
-        'background-color': selectedColor || '#005eb8'
+        'background-color': '#1f2937'
       }
     },
     ...Object.entries(SEVERITY_CSS_VARS).map(([sev, varName]) => ({
@@ -198,7 +198,7 @@ const buildStylesheet = (canvasEl?: HTMLElement | null): any[] => {
     {
       selector: 'node.node-down',
       css: {
-        'background-color': '#FC8181',
+        'background-color': '#1f2937',
         'border-color': '#E53E3E',
         'border-width': 3
       }
@@ -648,7 +648,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
           if (node?.categories?.length) {
             nodeCategoryCache.set(v.nodeID, node.categories)
             const el = cy?.getElementById(v.id)
-            if (el) {
+            if (el?.length) {
               const severity = getSeverityForVertex(v.id)
               el.data('iconDataUri', resolveIconDataUri(v, severity, node.categories))
             }
@@ -660,6 +660,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
 
   const applySeverityClasses = () => {
     if (!cy) return
+    const vertexById = new Map(store.vertices.map(v => [v.id, v]))
     cy.nodes().forEach(node => {
       const numericId = parseInt(node.id(), 10)
       Object.keys(SEVERITY_CSS_VARS).forEach(sev => node.removeClass(`severity-${sev.toLowerCase()}`))
@@ -667,7 +668,7 @@ const useTopology = (containerRef: Ref<HTMLElement | null>) => {
         node.addClass(`severity-${store.alarmSeverity[numericId].toLowerCase()}`)
       }
       // Re-color icon to match new severity
-      const vertex = store.vertices.find(v => v.id === node.id())
+      const vertex = vertexById.get(node.id())
       if (vertex) {
         const severity = getSeverityForVertex(node.id())
         const categories = vertex.nodeID ? nodeCategoryCache.get(vertex.nodeID) : undefined
