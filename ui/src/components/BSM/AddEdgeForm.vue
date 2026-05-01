@@ -24,22 +24,25 @@
   <div class="add-edge-form">
     <h4 class="form-section-title">Add Edge</h4>
 
-    <FeatherSelect
-      label="Edge Type"
+    <Select
       :options="EDGE_TYPE_OPTIONS"
-      textProp="label"
+      optionLabel="label"
       :modelValue="(selectedTypeOption as any)"
       @update:modelValue="(v: any) => onTypeChange(v)"
+      placeholder="Edge Type"
+      class="full-width"
     />
 
     <!-- IP Service fields -->
     <template v-if="form.type === 'ip-service'">
-      <FeatherInput
-        v-model="ipQuery"
-        label="Search IP Services"
-        placeholder="Start typing node label…"
-        @input="onIpSearch"
-      />
+      <span class="p-float-label">
+        <InputText
+          v-model="ipQuery"
+          placeholder="Search IP Services"
+          @input="onIpSearch"
+          class="full-width"
+        />
+      </span>
       <div v-if="ipResults.length" class="picker-results">
         <div
           v-for="item in ipResults"
@@ -52,70 +55,74 @@
       <p v-if="selectedIpService" class="selection-display">
         Selected: <strong>{{ selectedIpService.label }}</strong>
       </p>
-      <FeatherInput v-model="form.friendlyName" label="Friendly Name (optional)" />
+      <InputText v-model="form.friendlyName" placeholder="Friendly Name (optional)" class="full-width" />
     </template>
 
     <!-- Reduction Key fields -->
     <template v-else-if="form.type === 'reduction-key'">
-      <FeatherInput v-model="form.reductionKey" label="Reduction Key" />
-      <FeatherInput v-model="form.friendlyName" label="Friendly Name (optional)" />
+      <InputText v-model="form.reductionKey" placeholder="Reduction Key" class="full-width" />
+      <InputText v-model="form.friendlyName" placeholder="Friendly Name (optional)" class="full-width" />
     </template>
 
     <!-- Child Service fields -->
     <template v-else-if="form.type === 'child'">
-      <FeatherSelect
-        label="Child Business Service"
+      <Select
         :options="(childOptions as any)"
-        textProp="name"
+        optionLabel="name"
         :modelValue="(selectedChildOption as any)"
         @update:modelValue="(v: any) => { form.childId = v?.id ?? undefined; selectedChildOption = v }"
+        placeholder="Child Business Service"
+        class="full-width"
       />
     </template>
 
     <!-- Application fields -->
     <template v-else-if="form.type === 'application'">
-      <FeatherSelect
-        label="Application"
+      <Select
         :options="appOptions"
-        textProp="applicationName"
+        optionLabel="applicationName"
         :modelValue="(selectedAppOption as any)"
         @update:modelValue="(v: any) => { form.applicationId = v?.id ?? undefined; selectedAppOption = v }"
+        placeholder="Application"
+        class="full-width"
       />
     </template>
 
     <!-- Shared: Map Function + Weight -->
-    <FeatherSelect
-      label="Map Function"
+    <Select
       :options="mapFnOptions"
-      textProp="name"
+      optionLabel="name"
       :modelValue="(selectedMapFn as any)"
       @update:modelValue="(v: any) => onMapFnChange(v)"
+      placeholder="Map Function"
+      class="full-width"
     />
 
     <!-- SetTo status parameter -->
-    <FeatherSelect
+    <Select
       v-if="form.mapFunction.type === 'SetTo'"
-      label="Set To Status"
       :options="STATUS_OPTIONS"
-      textProp="label"
+      optionLabel="label"
       :modelValue="(selectedSetToStatus as any)"
       @update:modelValue="(v: any) => { form.mapFunction.properties['status'] = v?.value; selectedSetToStatus = v }"
+      placeholder="Set To Status"
+      class="full-width"
     />
 
-    <FeatherInput v-model.number="form.weight" label="Weight" type="number" />
+    <InputText :modelValue="String(form.weight)" @update:modelValue="(v: any) => form.weight = Number(v)" placeholder="Weight" type="number" class="full-width" />
 
     <div class="form-actions">
-      <FeatherButton primary @click="submit" :disabled="!isValid">Add Edge</FeatherButton>
-      <FeatherButton text @click="$emit('cancel')">Cancel</FeatherButton>
+      <Button label="Add Edge" @click="submit" :disabled="!isValid" />
+      <Button text label="Cancel" @click="$emit('cancel')" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, markRaw } from 'vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect } from '@featherds/select'
+import { ref, computed, onMounted } from 'vue'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
 import {
   searchIpServices, listApplications, getMapFunctions,
   defaultMapFunction, BSM_STATUSES,
@@ -280,5 +287,9 @@ function submit() {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.25rem;
+}
+
+.full-width {
+  width: 100%;
 }
 </style>

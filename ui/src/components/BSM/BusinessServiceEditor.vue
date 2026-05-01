@@ -25,49 +25,53 @@
     <div class="editor-panel">
       <div class="editor-header">
         <h2 class="editor-title">{{ isNew ? 'New Business Service' : 'Edit: ' + form.name }}</h2>
-        <FeatherButton text @click="$emit('close')">
-          <FeatherIcon :icon="CloseIcon" />
-        </FeatherButton>
+        <Button text icon="pi pi-times" @click="$emit('close')" />
       </div>
 
-      <div v-if="loading" class="loading-state"><FeatherSpinner /></div>
+      <div v-if="loading" class="loading-state"><ProgressSpinner /></div>
 
       <template v-else>
         <!-- Name -->
         <section class="editor-section">
-          <FeatherInput v-model="form.name" label="Service Name" :error="nameError" />
+          <label class="field-label">Service Name</label>
+          <InputText v-model="form.name" class="full-width" :class="{ 'p-invalid': nameError }" />
+          <small v-if="nameError" class="p-error">{{ nameError }}</small>
         </section>
 
         <!-- Reduce Function -->
         <section class="editor-section">
           <h3 class="section-title">Reduce Function</h3>
-          <FeatherSelect
-            label="Type"
+          <Select
             :options="reduceFnOptions"
-            textProp="name"
+            optionLabel="name"
             :modelValue="(selectedReduceFn as any)"
             @update:modelValue="(v: any) => onReduceFnChange(v)"
+            placeholder="Type"
+            class="full-width"
           />
-          <FeatherInput
+          <InputText
             v-if="form['reduce-function'].type === 'Threshold'"
-            v-model.number="thresholdValue"
-            label="Threshold (0.0 – 1.0)"
+            v-model="thresholdValue"
+            placeholder="Threshold (0.0 – 1.0)"
             type="number"
+            class="full-width"
             @update:modelValue="(v: any) => form['reduce-function'].properties['threshold'] = String(v)"
           />
-          <FeatherSelect
+          <Select
             v-if="form['reduce-function'].type === 'HighestSeverityAbove'"
-            label="Threshold Status"
             :options="STATUS_OPTIONS"
-            textProp="label"
+            optionLabel="label"
             :modelValue="(selectedThresholdStatus as any)"
             @update:modelValue="(v: any) => { form['reduce-function'].properties['threshold'] = v?.value; selectedThresholdStatus = v }"
+            placeholder="Threshold Status"
+            class="full-width"
           />
-          <FeatherInput
+          <InputText
             v-if="form['reduce-function'].type === 'ExponentialPropagation'"
-            v-model.number="expBase"
-            label="Base"
+            v-model="expBase"
+            placeholder="Base"
             type="number"
+            class="full-width"
             @update:modelValue="(v: any) => form['reduce-function'].properties['base'] = String(v)"
           />
         </section>
@@ -76,16 +80,12 @@
         <section class="editor-section">
           <div class="section-header">
             <h3 class="section-title">Attributes</h3>
-            <FeatherButton text @click="addAttribute">
-              <FeatherIcon :icon="AddIcon" />
-            </FeatherButton>
+            <Button text icon="pi pi-plus" @click="addAttribute" />
           </div>
           <div v-for="(attr, i) in attributeRows" :key="i" class="attr-row">
-            <FeatherInput v-model="attr.key" label="Key" class="attr-input" />
-            <FeatherInput v-model="attr.value" label="Value" class="attr-input" />
-            <FeatherButton text @click="removeAttribute(i)">
-              <FeatherIcon :icon="DeleteIcon" />
-            </FeatherButton>
+            <InputText v-model="attr.key" placeholder="Key" class="attr-input" />
+            <InputText v-model="attr.value" placeholder="Value" class="attr-input" />
+            <Button text icon="pi pi-trash" @click="removeAttribute(i)" />
           </div>
           <p v-if="attributeRows.length === 0" class="empty-hint">No attributes.</p>
         </section>
@@ -94,9 +94,7 @@
         <section v-if="!isNew" class="editor-section">
           <div class="section-header">
             <h3 class="section-title">Edges ({{ edges.length }})</h3>
-            <FeatherButton text @click="showAddEdge = !showAddEdge">
-              <FeatherIcon :icon="AddIcon" />
-            </FeatherButton>
+            <Button text icon="pi pi-plus" @click="showAddEdge = !showAddEdge" />
           </div>
 
           <AddEdgeForm
@@ -128,9 +126,7 @@
                 <td>{{ edge.weight }}</td>
                 <td><span :class="['status-chip', statusColor(edge.operationalStatus)]">{{ edge.operationalStatus }}</span></td>
                 <td>
-                  <FeatherButton text @click="onRemoveEdge(edge.id)" :disabled="removingEdge === edge.id">
-                    <FeatherIcon :icon="DeleteIcon" />
-                  </FeatherButton>
+                  <Button text icon="pi pi-trash" @click="onRemoveEdge(edge.id)" :disabled="removingEdge === edge.id" />
                 </td>
               </tr>
             </tbody>
@@ -141,10 +137,8 @@
 
         <!-- Footer -->
         <div class="editor-footer">
-          <FeatherButton primary @click="save" :disabled="saving || !form.name.trim()">
-            {{ saving ? 'Saving…' : 'Save' }}
-          </FeatherButton>
-          <FeatherButton text @click="$emit('close')">Cancel</FeatherButton>
+          <Button :label="saving ? 'Saving…' : 'Save'" @click="save" :disabled="saving || !form.name.trim()" />
+          <Button text label="Cancel" @click="$emit('close')" />
         </div>
       </template>
     </div>
@@ -152,15 +146,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, markRaw } from 'vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect } from '@featherds/select'
-import { FeatherSpinner } from '@featherds/progress'
-import { FeatherIcon } from '@featherds/icon'
-import Close from '@featherds/icon/navigation/Cancel'
-import Add from '@featherds/icon/action/Add'
-import Delete from '@featherds/icon/action/Delete'
+import { ref, computed, onMounted } from 'vue'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import ProgressSpinner from 'primevue/progressspinner'
 import AddEdgeForm from './AddEdgeForm.vue'
 import type { AddEdgePayload } from './AddEdgeForm.vue'
 import {
@@ -170,10 +160,6 @@ import {
   type BusinessService, type BsmEdge, type BsmFunctionMetadata, type FunctionDTO
 } from '@/services/bsmService'
 import useSnackbar from '@/composables/useSnackbar'
-
-const CloseIcon = markRaw(Close)
-const AddIcon   = markRaw(Add)
-const DeleteIcon = markRaw(Delete)
 
 const props = defineProps<{
   service: BusinessService | null
@@ -198,8 +184,8 @@ const removingEdge = ref<number | null>(null)
 const reduceFnOptions = ref<BsmFunctionMetadata[]>([])
 const selectedReduceFn = ref<BsmFunctionMetadata | null>(null)
 const selectedThresholdStatus = ref<{ value: string; label: string } | null>(null)
-const thresholdValue = ref(0.5)
-const expBase = ref(2.0)
+const thresholdValue = ref('0.5')
+const expBase = ref('2.0')
 
 const STATUS_OPTIONS = BSM_STATUSES.map(s => ({ value: s, label: s[0] + s.slice(1).toLowerCase() }))
 
@@ -231,8 +217,8 @@ onMounted(async () => {
     attributeRows.value = Object.entries(attrs).map(([key, value]) => ({ key, value }))
     const rfType = form.value['reduce-function'].type
     selectedReduceFn.value = reduceFnOptions.value.find(f => f.name === rfType) ?? null
-    if (rfType === 'Threshold') thresholdValue.value = parseFloat(form.value['reduce-function'].properties['threshold'] ?? '0.5')
-    if (rfType === 'ExponentialPropagation') expBase.value = parseFloat(form.value['reduce-function'].properties['base'] ?? '2.0')
+    if (rfType === 'Threshold') thresholdValue.value = form.value['reduce-function'].properties['threshold'] ?? '0.5'
+    if (rfType === 'ExponentialPropagation') expBase.value = form.value['reduce-function'].properties['base'] ?? '2.0'
     if (rfType === 'HighestSeverityAbove') {
       const v = form.value['reduce-function'].properties['threshold']
       selectedThresholdStatus.value = STATUS_OPTIONS.find(s => s.value === v) ?? null
@@ -460,6 +446,17 @@ async function onRemoveEdge(edgeId: number) {
   display: flex;
   justify-content: center;
   padding: 2rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var($secondary-text-on-surface);
+  margin-bottom: 2px;
 }
 
 .editor-footer {
