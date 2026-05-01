@@ -3,23 +3,31 @@
     <BreadCrumbs :items="breadcrumbs" />
     <h2 class="page-title">SNMP Collections Configuration</h2>
 
-    <FeatherTabContainer class="tabs">
-      <template #tabs>
-        <FeatherTab>Data Collection Groups</FeatherTab>
-        <FeatherTab>SNMP Collections</FeatherTab>
-      </template>
-      <FeatherTabPanel class="tab-panel">
-        <DataCollectionGroupsTab />
-      </FeatherTabPanel>
-      <FeatherTabPanel class="tab-panel">
-        <SnmpCollectionsTab />
-      </FeatherTabPanel>
-    </FeatherTabContainer>
+    <div class="tabs">
+      <Tabs value="groups">
+        <TabList>
+          <Tab value="groups">Data Collection Groups</Tab>
+          <Tab value="collections">SNMP Collections</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="groups" class="tab-panel">
+            <DataCollectionGroupsTab />
+          </TabPanel>
+          <TabPanel value="collections" class="tab-panel">
+            <SnmpCollectionsTab />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import DataCollectionGroupsTab from '@/components/SnmpCollectionsConfig/DataCollectionGroupsTab.vue'
 import SnmpCollectionsTab from '@/components/SnmpCollectionsConfig/SnmpCollectionsTab.vue'

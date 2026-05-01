@@ -1,103 +1,89 @@
 <template>
-  <div class="feather-row">
-    <div class="feather-col-12">
-      <BreadCrumbs :items="breadcrumbs" />
-    </div>
-  </div>
+  <div class="node-detail-page">
+    <BreadCrumbs :items="breadcrumbs" />
 
-  <div v-if="nodeError && !nodeLoading" class="feather-row">
-    <div class="feather-col-12 node-detail__error">
+    <div v-if="nodeError && !nodeLoading" class="node-detail__error">
       <p class="headline4">Node not found</p>
       <p class="subtitle1">{{ nodeError }}</p>
     </div>
-  </div>
 
-  <template v-else>
-    <div class="feather-row">
-      <div class="feather-col-12">
-        <div v-if="nodeLoading" class="node-detail__skeleton headline3">Loading node…</div>
-        <template v-else-if="node">
-          <NodeHeader :node="node" />
-          <AdminActionsBar :nodeId="id" :foreignSource="node.foreignSource" />
-        </template>
-      </div>
-    </div>
+    <template v-else>
+      <div v-if="nodeLoading" class="node-detail__skeleton headline3">Loading node…</div>
+      <template v-else-if="node">
+        <NodeHeader :node="node" />
+        <AdminActionsBar :nodeId="id" :foreignSource="node.foreignSource" />
+      </template>
 
-    <div v-if="node" class="feather-row">
-      <div class="feather-col-12 node-detail__tab-wrap">
+      <div v-if="node" class="node-detail__tab-wrap">
         <div class="node-detail__tab-header-row">
-          <FeatherTabContainer v-model="activeTab">
-            <template #tabs>
-              <FeatherTab>Overview</FeatherTab>
-              <FeatherTab>Activity</FeatherTab>
-              <FeatherTab>Resource Graphs</FeatherTab>
-              <FeatherTab>Network</FeatherTab>
-              <FeatherTab>Metadata</FeatherTab>
-            </template>
-
-            <!-- Overview -->
-            <FeatherTabPanel>
-              <CollapsibleSection :title="infoSummary" :collapsed="perspectiveStore.isProblems">
-                <div class="node-detail__info-row">
-                  <NodeInfoPanel :node="node" />
-                  <CategoryPanel :node="node" :isAdmin="adminRole" />
-                </div>
-              </CollapsibleSection>
-              <AvailabilityPanel
-                :availability="availability"
-                :chartData="chartData"
-                :downSegmentMeta="downSegmentMeta"
-                :loading="availLoading"
-                :error="availError"
-                :problemsOnly="perspectiveStore.isProblems"
-                :nodeId="nodeResourceKey"
-                @go-graphs="goToTab('graphs')"
-              />
-            </FeatherTabPanel>
-
-            <!-- Activity -->
-            <FeatherTabPanel>
-              <NodeActivityTab
-                v-if="tabVisited[1]"
-                :nodeId="node.id"
-                :nodeLabel="node.label"
-                :defaultSubTab="activitySubTab"
-              />
-            </FeatherTabPanel>
-
-            <!-- Resource Graphs -->
-            <FeatherTabPanel>
-              <ResourceGraphsPanel v-if="tabVisited[2]" :nodeId="node.id" />
-            </FeatherTabPanel>
-
-            <!-- Network -->
-            <FeatherTabPanel>
-              <NetworkTab
-                v-if="tabVisited[3]"
-                :nodeId="id"
-                :nodeResourceKey="nodeResourceKey"
-                @go-graphs="goToTab('graphs')"
-                @go-activity="goToTab('activity')"
-              />
-            </FeatherTabPanel>
-
-            <!-- Metadata -->
-            <FeatherTabPanel>
-              <NodeMetadataPanel v-if="tabVisited[4]" :nodeId="id" />
-            </FeatherTabPanel>
-          </FeatherTabContainer>
+          <Tabs v-model:value="activeTab">
+            <TabList>
+              <Tab value="overview">Overview</Tab>
+              <Tab value="activity">Activity</Tab>
+              <Tab value="graphs">Resource Graphs</Tab>
+              <Tab value="network">Network</Tab>
+              <Tab value="metadata">Metadata</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel value="overview">
+                <CollapsibleSection :title="infoSummary" :collapsed="perspectiveStore.isProblems">
+                  <div class="node-detail__info-row">
+                    <NodeInfoPanel :node="node" />
+                    <CategoryPanel :node="node" :isAdmin="adminRole" />
+                  </div>
+                </CollapsibleSection>
+                <AvailabilityPanel
+                  :availability="availability"
+                  :chartData="chartData"
+                  :downSegmentMeta="downSegmentMeta"
+                  :loading="availLoading"
+                  :error="availError"
+                  :problemsOnly="perspectiveStore.isProblems"
+                  :nodeId="nodeResourceKey"
+                  @go-graphs="goToTab('graphs')"
+                />
+              </TabPanel>
+              <TabPanel value="activity">
+                <NodeActivityTab
+                  v-if="tabVisited.activity"
+                  :nodeId="node.id"
+                  :nodeLabel="node.label"
+                  :defaultSubTab="activitySubTab"
+                />
+              </TabPanel>
+              <TabPanel value="graphs">
+                <ResourceGraphsPanel v-if="tabVisited.graphs" :nodeId="node.id" />
+              </TabPanel>
+              <TabPanel value="network">
+                <NetworkTab
+                  v-if="tabVisited.network"
+                  :nodeId="id"
+                  :nodeResourceKey="nodeResourceKey"
+                  @go-graphs="goToTab('graphs')"
+                  @go-activity="goToTab('activity')"
+                />
+              </TabPanel>
+              <TabPanel value="metadata">
+                <NodeMetadataPanel v-if="tabVisited.metadata" :nodeId="id" />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
 
           <div class="node-detail__perspective-wrap">
             <PerspectiveToggle />
           </div>
         </div>
       </div>
-    </div>
-  </template>
+    </template>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import NodeHeader from '@/components/NodeDetail/NodeHeader.vue'
 import AdminActionsBar from '@/components/NodeDetail/AdminActionsBar.vue'
@@ -136,35 +122,37 @@ const TAB_KEYS = ['overview', 'activity', 'graphs', 'network', 'metadata'] as co
 type TopTabKey = typeof TAB_KEYS[number]
 const ACTIVITY_SUB_KEYS = ['alarms', 'events', 'outages', 'links'] as const
 
-const activeTab = ref(0)
-const tabVisited = reactive([true, false, false, false, false])
+const activeTab = ref<TopTabKey>('overview')
+const tabVisited = reactive<Record<TopTabKey, boolean>>({
+  overview: true,
+  activity: false,
+  graphs: false,
+  network: false,
+  metadata: false,
+})
 
 const goToTab = (key: TopTabKey) => {
-  const idx = TAB_KEYS.indexOf(key)
-  activeTab.value = idx
+  activeTab.value = key
 }
 
-// Initialize from URL on mount
 onMounted(() => {
   const tabParam = route.query.tab as string
 
   // Backwards compat: old ?tab=alarms|events|outages|links navigate to Activity with that sub-tab
   if (ACTIVITY_SUB_KEYS.includes(tabParam as any)) {
-    activeTab.value = 1
+    activeTab.value = 'activity'
     router.replace({ query: { tab: 'activity', subtab: tabParam } })
     return
   }
 
-  const idx = TAB_KEYS.indexOf(tabParam as TopTabKey)
-  if (idx >= 0) activeTab.value = idx
+  if (TAB_KEYS.includes(tabParam as TopTabKey)) {
+    activeTab.value = tabParam as TopTabKey
+  }
 })
 
-// Mark tab visited (lazy-loads heavy panels) and sync URL
-watch(activeTab, (idx) => {
-  tabVisited[idx] = true
-  const key = TAB_KEYS[idx]
+watch(activeTab, (key) => {
+  tabVisited[key] = true
   if (key !== 'activity') {
-    // Remove subtab when leaving Activity tab
     const { subtab, ...rest } = route.query
     router.replace({ query: { ...rest, tab: key } })
   } else {
@@ -172,7 +160,6 @@ watch(activeTab, (idx) => {
   }
 })
 
-// Sub-tab for NodeActivityTab (reads ?subtab=)
 const activitySubTab = computed(() => {
   const subtab = route.query.subtab as string
   return ACTIVITY_SUB_KEYS.includes(subtab as any) ? subtab : 'alarms'
@@ -211,11 +198,15 @@ const nodeResourceKey = computed(() => {
 @use '@/styles/vars' as vars;
 @import "@featherds/styles/themes/variables";
 
+.node-detail-page {
+  padding: 16px 20px;
+}
+
 .node-detail {
   &__error    { padding: 24px; text-align: center; }
   &__skeleton { padding: 16px; }
 
-  &__tab-wrap { position: relative; }
+  &__tab-wrap { position: relative; margin-top: 12px; }
 
   &__tab-header-row {
     position: relative;
@@ -234,9 +225,5 @@ const nodeResourceKey = computed(() => {
     gap: 0 16px;
     @media (max-width: 700px) { grid-template-columns: 1fr; }
   }
-}
-
-.feather-row + .feather-row {
-  margin-top: 12px;
 }
 </style>

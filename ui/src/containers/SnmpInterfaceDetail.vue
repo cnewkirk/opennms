@@ -1,59 +1,47 @@
 <template>
-  <div class="feather-row">
-    <div class="feather-col-12">
-      <BreadCrumbs :items="breadcrumbs" />
-    </div>
-  </div>
+  <div class="snmp-iface-detail-page">
+    <BreadCrumbs :items="breadcrumbs" />
 
-  <template v-if="loading">
-    <div class="feather-row">
-      <div class="feather-col-12 snmp-iface-detail__skeleton headline3">Loading SNMP interface…</div>
-    </div>
-  </template>
+    <template v-if="loading">
+      <div class="snmp-iface-detail__skeleton headline3">Loading SNMP interface…</div>
+    </template>
 
-  <template v-else-if="error">
-    <div class="feather-row">
-      <div class="feather-col-12 snmp-iface-detail__error">
+    <template v-else-if="error">
+      <div class="snmp-iface-detail__error">
         <p class="headline4">Error</p>
         <p class="subtitle1">{{ error }}</p>
       </div>
-    </div>
-  </template>
+    </template>
 
-  <template v-else-if="snmpIface">
-    <div class="feather-row">
-      <div class="feather-col-12">
-        <SnmpInterfaceHeader
-          :snmpIface="snmpIface"
-          :nodeLabel="nodeLabel"
-          :nodeId="nodeId"
-        />
+    <template v-else-if="snmpIface">
+      <SnmpInterfaceHeader
+        :snmpIface="snmpIface"
+        :nodeLabel="nodeLabel"
+        :nodeId="nodeId"
+      />
+
+      <div class="snmp-iface-detail__tab-wrap">
+        <Tabs value="events">
+          <TabList>
+            <Tab value="events">Events</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel value="events">
+              <EventsTable :nodeId="nodeId" :filterFiql="`ifIndex==${ifIndex}`" />
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </div>
-    </div>
-
-    <div class="feather-row">
-      <div class="feather-col-12 snmp-iface-detail__tab-wrap">
-        <FeatherTabContainer v-model="activeTab">
-          <template #tabs>
-            <FeatherTab>Events</FeatherTab>
-          </template>
-
-          <!-- Events -->
-          <FeatherTabPanel>
-            <EventsTable
-              v-if="tabVisited[0]"
-              :nodeId="nodeId"
-              :filterFiql="`ifIndex==${ifIndex}`"
-            />
-          </FeatherTabPanel>
-        </FeatherTabContainer>
-      </div>
-    </div>
-  </template>
+    </template>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import SnmpInterfaceHeader from '@/components/SnmpInterfaceDetail/SnmpInterfaceHeader.vue'
 import EventsTable from '@/components/Nodes/EventsTable.vue'
@@ -71,13 +59,6 @@ const loading   = ref(true)
 const error     = ref('')
 const snmpIface = ref<SnmpInterface | null>(null)
 const node      = ref<Node | null>(null)
-
-const activeTab  = ref(0)
-const tabVisited = reactive([true])
-
-watch(activeTab, (idx) => {
-  tabVisited[idx] = true
-})
 
 const nodeLabel = computed(() => node.value?.label ?? nodeId)
 
@@ -119,6 +100,10 @@ onMounted(async () => {
 <style lang="scss" scoped>
 @import "@featherds/styles/themes/variables";
 
+.snmp-iface-detail-page {
+  padding: 16px 20px;
+}
+
 .snmp-iface-detail {
   &__error {
     padding: 24px;
@@ -130,11 +115,7 @@ onMounted(async () => {
   }
 
   &__tab-wrap {
-    position: relative;
+    margin-top: 12px;
   }
-}
-
-.feather-row + .feather-row {
-  margin-top: 12px;
 }
 </style>
