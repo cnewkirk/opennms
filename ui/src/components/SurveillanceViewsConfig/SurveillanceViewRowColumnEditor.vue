@@ -24,7 +24,7 @@
   <div class="rowcol-editor">
     <div class="section-header">
       <span class="section-title">{{ title }}</span>
-      <FeatherButton text @click="addItem">+ Add</FeatherButton>
+      <Button text label="+ Add" @click="addItem" />
     </div>
 
     <div v-if="localItems.length === 0" class="empty-state">
@@ -32,9 +32,9 @@
     </div>
 
     <div v-for="(item, i) in localItems" :key="i" class="item-row">
-      <FeatherInput
+      <InputText
         v-model="item.label"
-        :label="title.slice(0, -1) + ' Label'"
+        :placeholder="title.slice(0, -1) + ' Label'"
         class="label-input"
         @update:modelValue="emitUpdate"
       />
@@ -58,19 +58,14 @@
           >{{ cat }}</option>
         </select>
       </div>
-      <FeatherButton text @click="removeItem(i)">
-        <FeatherIcon :icon="DeleteIcon" />
-      </FeatherButton>
+      <Button text icon="pi pi-trash" @click="removeItem(i)" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
-import { FeatherIcon } from '@featherds/icon'
-import Delete from '@featherds/icon/action/Delete'
-import { markRaw } from 'vue'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import type { SurveillanceViewRowOrColumn } from '@/services/surveillanceViewConfigService'
 
 const props = defineProps<{
@@ -82,8 +77,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', val: SurveillanceViewRowOrColumn[]): void
 }>()
-
-const DeleteIcon = markRaw(Delete)
 
 const localItems = ref<SurveillanceViewRowOrColumn[]>(
   JSON.parse(JSON.stringify(props.modelValue))

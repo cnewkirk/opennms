@@ -24,9 +24,7 @@
   <div class="view-list">
     <div class="view-list-header">
       <span class="list-label">Views</span>
-      <FeatherButton text @click="$emit('add')" :disabled="disabled">
-        <FeatherIcon :icon="AddIcon" />
-      </FeatherButton>
+      <Button text icon="pi pi-plus" @click="$emit('add')" :disabled="disabled" />
     </div>
 
     <div
@@ -38,9 +36,7 @@
     >
       <span class="view-name">{{ view.name || '(unnamed)' }}</span>
       <span v-if="view.name === defaultView" class="default-badge">default</span>
-      <FeatherButton text class="delete-btn" @click.stop="$emit('delete', i)" :disabled="disabled">
-        <FeatherIcon :icon="DeleteIcon" />
-      </FeatherButton>
+      <Button text icon="pi pi-trash" class="delete-btn" @click.stop="$emit('delete', i)" :disabled="disabled" />
     </div>
 
     <div v-if="views.length === 0" class="empty-state">No views configured.</div>
@@ -48,11 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import Add from '@featherds/icon/action/Add'
-import Delete from '@featherds/icon/action/Delete'
-import { markRaw } from 'vue'
+import Button from 'primevue/button'
 import type { SurveillanceView } from '@/services/surveillanceViewConfigService'
 
 defineProps<{
@@ -68,8 +60,7 @@ defineEmits<{
   (e: 'delete', index: number): void
 }>()
 
-const AddIcon = markRaw(Add)
-const DeleteIcon = markRaw(Delete)
+
 </script>
 
 <style lang="scss" scoped>

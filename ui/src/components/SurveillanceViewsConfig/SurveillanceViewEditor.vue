@@ -23,19 +23,20 @@
 <template>
   <div class="view-editor">
     <div class="editor-toolbar">
-      <FeatherInput v-model="localView.name" label="View Name" class="name-input" @update:modelValue="emitUpdate" />
-      <FeatherInput
+      <InputText v-model="localView.name" placeholder="View Name" class="name-input" @update:modelValue="emitUpdate" />
+      <InputText
         :modelValue="String(localView.refreshSeconds)"
-        label="Refresh (seconds)"
+        placeholder="Refresh (seconds)"
         type="number"
         class="refresh-input"
-        @update:modelValue="(v) => { localView.refreshSeconds = Number(v) || 300; emitUpdate() }"
+        @update:modelValue="(v: any) => { localView.refreshSeconds = Number(v) || 300; emitUpdate() }"
       />
-      <FeatherButton
+      <Button
         v-if="!isDefault"
         text
+        label="Set as Default"
         @click="$emit('setDefault')"
-      >Set as Default</FeatherButton>
+      />
       <span v-else class="default-label">Default view</span>
     </div>
 
@@ -61,8 +62,8 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import SurveillanceViewRowColumnEditor from './SurveillanceViewRowColumnEditor.vue'
 import type { SurveillanceView } from '@/services/surveillanceViewConfigService'
 
