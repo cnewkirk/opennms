@@ -259,13 +259,12 @@ public class EventController extends MultiActionController implements Initializi
     }
 
     private ModelAndView getRedirectView(HttpServletRequest request) {
-        String redirectParms = request.getParameter("redirectParms");
         String redirect = request.getParameter("redirect");
         String viewName;
         if (redirect != null) {
             viewName = redirect;
         } else {
-            viewName = (redirectParms == null || "".equals(redirectParms) || "null".equals(redirectParms) ? "/event/list" : "/event/list" + "?" + redirectParms);
+            viewName = request.getContextPath() + "/ui/events";
         }
         RedirectView redirectView = new RedirectView(viewName);
         return new ModelAndView(redirectView);
