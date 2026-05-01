@@ -39,6 +39,8 @@ Use this mapping throughout all tasks. PrimeVue import paths are exact.
 | `FeatherSwitch` | `ToggleSwitch` | `import ToggleSwitch from 'primevue/toggleswitch'` |
 | `FeatherDateInput` | `DatePicker` | `import DatePicker from 'primevue/datepicker'` |
 | `FeatherTextarea` | `Textarea` | `import Textarea from 'primevue/textarea'` |
+| `FeatherSpinner` | `ProgressSpinner` | `import ProgressSpinner from 'primevue/progressspinner'` — use `style="width: 32px; height: 32px"` |
+| `FeatherBackButton` | `Button` with `icon="pi pi-arrow-left"` | `<Button icon="pi pi-arrow-left" text @click="$router.back()" />` |
 
 ### PrimeVue 4 Gotchas
 

@@ -1,16 +1,15 @@
 <template>
   <transition name="fade">
     <div class="spinner" v-if="isActive">
-      <FeatherSpinner />
+      <ProgressSpinner style="width: 48px; height: 48px" />
     </div>
   </transition>
 </template>
 
 <script setup lang="ts">
-import { FeatherSpinner } from '@featherds/progress'
+import ProgressSpinner from 'primevue/progressspinner'
 import useSpinner from '@/composables/useSpinner'
 const { isActive } = useSpinner()
-
 </script>
 
 <style scoped lang="scss">
@@ -20,9 +19,9 @@ const { isActive } = useSpinner()
   width: 95%;
   height: 90%;
   background: transparent;
-}
-.spinner-container {
-  height: 75%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .fade-enter-active,
 .fade-leave-active {

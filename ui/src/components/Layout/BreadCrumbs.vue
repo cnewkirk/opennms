@@ -24,7 +24,6 @@ defineProps({
   
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/themes/variables";
 
 .breadcrumbs {

@@ -20,7 +20,7 @@
 /// License.
 ///
 
-import { SORT } from '@featherds/table'
+export type SortDirection = 'asc' | 'desc' | 'none'
 
 export type UpdateModelFunction = (_value: any) => any
 
@@ -389,7 +389,7 @@ export interface QueryParameters {
   offset?: number
   _s?: string
   orderBy?: string
-  order?: SORT
+  order?: string
   search?: string
   groupBy?: string
   groupByValue?: string
@@ -398,7 +398,7 @@ export interface QueryParameters {
 
 export interface FeatherSortObject {
   property: string
-  value: SORT | any
+  value: SortDirection | any
 }
 
 export interface SortProps extends FeatherSortObject {

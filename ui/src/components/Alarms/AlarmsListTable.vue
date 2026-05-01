@@ -98,7 +98,7 @@
   <template v-else>
     <!-- Empty state -->
     <div v-if="!alarms.length" class="alarms-list__empty">
-      <FeatherIcon :icon="CheckCircleIcon" class="alarms-list__empty-icon" />
+      <i class="pi pi-check-circle alarms-list__empty-icon" />
       <div class="subtitle2">{{ hasActiveFilters ? 'No alarms match your filters' : 'No alarms found' }}</div>
       <button v-if="hasActiveFilters" class="alarms-list__reset-link" @click="resetFilters">Reset filters</button>
     </div>
@@ -211,9 +211,6 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { FeatherIcon } from '@featherds/icon'
-import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
-import { SORT } from '@featherds/table'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import { getAlarms, modifyAlarm } from '@/services/alarmService'
 import { type Alarm, type QueryParameters, type AlarmQueryParameters } from '@/types'
@@ -346,7 +343,7 @@ const load = async () => {
     limit: PAGE_SIZE,
     offset: page.value * PAGE_SIZE,
     orderBy: sortField.value,
-    order: sortDesc.value ? SORT.DESCENDING : SORT.ASCENDING,
+    order: sortDesc.value ? 'desc' : 'asc',
   }
 
   const criteria = buildCriteria()

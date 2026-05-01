@@ -141,7 +141,6 @@
 import { useRouter } from 'vue-router'
 import { getOutages } from '@/services/outageService'
 import { type Outage } from '@/types'
-import { SORT } from '@featherds/table'
 import { usePerspectiveStore } from '@/stores/perspectiveStore'
 
 const router = useRouter()
@@ -183,7 +182,7 @@ const load = async () => {
     limit: PAGE_SIZE,
     offset: page.value * PAGE_SIZE,
     orderBy: sortField.value,
-    order: sortDesc.value ? SORT.DESCENDING : SORT.ASCENDING,
+    order: sortDesc.value ? 'desc' : 'asc',
   }
 
   const criteria = buildCriteria()
