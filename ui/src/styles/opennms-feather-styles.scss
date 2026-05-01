@@ -12,6 +12,16 @@
 //
 // Setting body here makes every element (PrimeVue or Feather) inherit OpenSans.
 // font-smoothing gives crisp rendering on retina displays.
+// Paint the viewport immediately when CSS loads — before Vue mounts.
+// Without this, body/html have background-color:transparent (browser default = white)
+// until the component tree renders, causing a flash on every cold load in dark mode.
+// --feather-background is already set to the correct value for each theme by the
+// time the browser parses this file (the inline <script> in index.html sets
+// html.open-dark synchronously before any stylesheet is fetched).
+html {
+  background-color: var(--feather-background);
+}
+
 body {
   font-family: var(--feather-font-family);  // OpenSans, Helvetica, Arial, sans-serif
   -webkit-font-smoothing: antialiased;
