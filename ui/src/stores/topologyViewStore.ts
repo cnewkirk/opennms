@@ -30,6 +30,7 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
   const categoryIconMap = ref<IconMapping[]>([])
   const oidIconMap      = ref<IconMapping[]>([])
   const lagPrefixPatterns = ref<string[]>(['Po', 'ae', 'bond', 'Bundle-Ether', 'LAG'])
+  const namePatternRules = ref<Array<{ pattern: string; iconKey: string }>>([])
 
   // Dirty flag
   const isDirty = ref(false)
@@ -170,7 +171,7 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
   }
 
   return {
-    gridSnap, filters, categoryIconMap, oidIconMap, lagPrefixPatterns,
+    gridSnap, filters, categoryIconMap, oidIconMap, lagPrefixPatterns, namePatternRules,
     isDirty, markDirty, clearDirty, saveFilterDefaults, clearFilterDefaults,
     serverViews, activeView, viewsLoading, viewsError, viewLayout,
     suppressedVertices, suppressedEdges,
