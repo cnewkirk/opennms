@@ -1,29 +1,36 @@
 <template>
   <div class="extended-search-container">
-    <FeatherSelect
-      label="Search Type"
-      :options="searchOptions"
-      :textProp="'title'"
+    <Select
       v-model="currentSelection"
+      :options="searchOptions"
+      optionLabel="title"
+      placeholder="Search Type"
+      class="extended-search-select"
       @update:modelValue="onSearchTypeSelectionUpdated"
     />
 
-    <FeatherInput
+    <InputText
       v-model="searchTerm"
+      placeholder="Search Term"
+      class="extended-search-input"
       @update:modelValue="onCurrentSearchUpdated"
-      label="Search Term"
     />
   </div>
 </template>
 
 <script setup lang="ts">
+import Select from 'primevue/select'
+import InputText from 'primevue/inputtext'
 import { isIP } from 'is-ip'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSelect, ISelectItemType } from '@featherds/select'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
-import { NodeQueryFilter, UpdateModelFunction } from '@/types'
+import { NodeQueryFilter } from '@/types'
 
-const searchOptions: ISelectItemType[] = [
+interface SearchOption {
+  title: string
+  value: string
+}
+
+const searchOptions: SearchOption[] = [
   { title: 'Foreign Source', value: 'foreignSource' },
   { title: 'Foreign ID', value: 'foreignId' },
   { title: 'Foreign Source:Foreign ID', value: 'foreignSourceId' },
@@ -46,7 +53,7 @@ const sysKeys = ['sysContact', 'sysDescription', 'sysLocation', 'sysName', 'sysO
 
 const nodeStructureStore = useNodeStructureStore()
 const searchTerm = ref('')
-const currentSelection = ref<ISelectItemType | undefined>(undefined)
+const currentSelection = ref<SearchOption | undefined>(undefined)
 
 const onCurrentSearchUpdated = (updatedValue: any) => {
   const item = (updatedValue as string) ?? ''
@@ -80,7 +87,8 @@ const onCurrentSearchUpdated = (updatedValue: any) => {
   }
 }
 
-const onSearchTypeSelectionUpdated: UpdateModelFunction = (selected: any) => {
+const onSearchTypeSelectionUpdated = (selected: SearchOption | undefined) => {
+  if (!selected) return
   if (selected.value === 'ipAddress') {
     nodeStructureStore.setFilterWithIpAddress(searchTerm.value)
   } else if ((selected.value as string || '').startsWith('foreign')) {
@@ -164,9 +172,17 @@ watch([() => nodeStructureStore.queryFilter], () => {
 onMounted(() => {
   updateFromStore()
 })
-
 </script>
 
 <style lang="scss" scoped>
+.extended-search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
 
+.extended-search-select,
+.extended-search-input {
+  width: 100%;
+}
 </style>

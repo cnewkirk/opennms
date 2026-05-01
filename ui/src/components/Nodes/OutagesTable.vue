@@ -29,12 +29,12 @@
         </table>
       </div>
     </div>
-    <Pagination
-      :payload="payload"
-      :parameters="queryParameters"
-      @update-query-parameters="updateQueryParameters"
-      :query="getNodeOutages"
-      :getTotalCount="getOutagesTotalCount"
+    <Paginator
+      v-if="totalCount > 0"
+      :rows="limit"
+      :rowsPerPageOptions="[5, 10, 25, 50]"
+      :totalRecords="totalCount"
+      @page="onPage"
     />
   </div>
 </template>
@@ -43,29 +43,30 @@
   setup
   lang="ts"
 >
-import Pagination from '../Common/Pagination.vue'
+import Paginator from 'primevue/paginator'
 import { useNodeStore } from '@/stores/nodeStore'
-import useQueryParameters from '@/composables/useQueryParams'
 import { QueryParameters } from '@/types'
 
 const props = defineProps<{ nodeId: string; filterFiql?: string }>()
 
 const nodeStore = useNodeStore()
+const limit = ref(10)
+const offset = ref(0)
+const totalCount = computed(() => nodeStore.outagesTotalCount)
 
-const getNodeOutages = async (payload: QueryParameters) => {
-  const params: QueryParameters = { ...payload }
-  if (props.filterFiql) params._s = props.filterFiql
-  nodeStore.getNodeOutages({ id: props.nodeId, queryParameters: params })
+const loadData = async (params: QueryParameters = { limit: limit.value, offset: offset.value }) => {
+  const query: QueryParameters = { ...params }
+  if (props.filterFiql) query._s = props.filterFiql
+  nodeStore.getNodeOutages({ id: props.nodeId, queryParameters: query })
 }
 
-const getOutagesTotalCount = () => {
-  return nodeStore.outagesTotalCount
+const onPage = (e: { first: number; rows: number }) => {
+  limit.value = e.rows
+  offset.value = e.first
+  loadData({ limit: e.rows, offset: e.first })
 }
 
-const { queryParameters, updateQueryParameters, payload } = useQueryParameters({
-  limit: 10,
-  offset: 0
-}, getNodeOutages)
+onMounted(() => loadData())
 
 const outages = computed(() => nodeStore.outages)
 </script>

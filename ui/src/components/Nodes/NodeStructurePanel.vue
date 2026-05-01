@@ -1,80 +1,107 @@
 <template>
   <h1 class="title">Filtering</h1>
   <div class="button-panel">
-      <FeatherButton primary class="category-btn" @click="onClearAll" :disabled="!isAnyFilterSelected">Clear All</FeatherButton>
+    <Button class="category-btn" @click="onClearAll" :disabled="!isAnyFilterSelected">Clear All</Button>
   </div>
-  <FeatherExpansionPanel>
-    <template #title>
-      <div v-if="selectedCategoryCount">
-        <span>{{ `Categories (${selectedCategoryCount})` }}</span>
-        <FeatherButton icon="Clear" @click="onClearCategories">
-          <FeatherIcon :icon="clearIcon"> </FeatherIcon>
-        </FeatherButton>
-      </div>
-      <div v-else>Categories</div>
-    </template>
-    <template #default>
-      <div class="category-button-group">
-        <div class="category-switcher-container">
-          <span>Match All </span>
-          <SwitchRender
-            class="category-switcher-right"
-            :checked="categorySwitchChecked"
-            @click="onCategorySwitchClick"
-          />
+
+  <Accordion :value="openPanels" multiple>
+    <AccordionPanel value="categories">
+      <AccordionHeader>
+        <span v-if="selectedCategoryCount">{{ `Categories (${selectedCategoryCount})` }}</span>
+        <span v-else>Categories</span>
+        <Button
+          v-if="selectedCategoryCount"
+          text
+          severity="secondary"
+          size="small"
+          @click.stop="onClearCategories"
+          aria-label="Clear categories"
+          class="clear-btn"
+        >
+          <i class="pi pi-times" />
+        </Button>
+      </AccordionHeader>
+      <AccordionContent>
+        <div class="category-button-group">
+          <div class="category-switcher-container">
+            <span>Match All </span>
+            <ToggleSwitch v-model="categorySwitchModel" @update:modelValue="onCategorySwitchChange" />
+          </div>
         </div>
-      </div>
-      <FeatherList class="category-list">
-        <FeatherListItem
-          v-for="cat of nodeStructureStore.categories"
-          :selected="isCategorySelected(cat)"
-          :key="cat.name"
-          @click="onCategoryClick(cat)">
-          {{ cat.name }}
-        </FeatherListItem>
-      </FeatherList>
-    </template>
-  </FeatherExpansionPanel>
-  <FeatherExpansionPanel>
-    <template #title>
-      <div v-if="selectedFlowCount">
-        <span>{{ `Flows (${selectedFlowCount})` }}</span>
-        <FeatherButton icon="Clear" @click="onClearFlows">
-          <FeatherIcon :icon="clearIcon"> </FeatherIcon>
-        </FeatherButton>
-      </div>
-      <div v-else>Flows</div>
-    </template>
-    <FeatherList class="category-list">
-      <FeatherListItem
-        v-for="flow of flowTypes"
-        :selected="isFlowSelected(flow)"
-        :key="flow"
-        @click="onFlowClick(flow)">
-        {{ flow }}
-      </FeatherListItem>
-    </FeatherList>
-  </FeatherExpansionPanel>
-  <FeatherExpansionPanel>
-    <template #title>
-      <div v-if="selectedLocationCount">
-        <span>{{ `Locations (${selectedLocationCount})` }}</span>
-        <FeatherButton icon="Clear" @click="onClearLocations">
-          <FeatherIcon :icon="clearIcon"> </FeatherIcon>
-        </FeatherButton>
-      </div>
-      <div v-else>Locations</div>
-    </template>
-    <FeatherList class="category-list">
-      <FeatherListItem
-        v-for="loc of locations"
-        :selected="isLocationSelected(loc)"
-        :key="loc.name"
-        @click="onLocationClick(loc)">
-        {{ loc.name }}
-      </FeatherListItem>
-    </FeatherList>
-  </FeatherExpansionPanel>
+        <ul class="category-list">
+          <li
+            v-for="cat of nodeStructureStore.categories"
+            :key="cat.name"
+            :class="['category-item', { 'category-item--selected': isCategorySelected(cat) }]"
+            @click="onCategoryClick(cat)"
+          >
+            {{ cat.name }}
+          </li>
+        </ul>
+      </AccordionContent>
+    </AccordionPanel>
+
+    <AccordionPanel value="flows">
+      <AccordionHeader>
+        <span v-if="selectedFlowCount">{{ `Flows (${selectedFlowCount})` }}</span>
+        <span v-else>Flows</span>
+        <Button
+          v-if="selectedFlowCount"
+          text
+          severity="secondary"
+          size="small"
+          @click.stop="onClearFlows"
+          aria-label="Clear flows"
+          class="clear-btn"
+        >
+          <i class="pi pi-times" />
+        </Button>
+      </AccordionHeader>
+      <AccordionContent>
+        <ul class="category-list">
+          <li
+            v-for="flow of flowTypes"
+            :key="flow"
+            :class="['category-item', { 'category-item--selected': isFlowSelected(flow) }]"
+            @click="onFlowClick(flow)"
+          >
+            {{ flow }}
+          </li>
+        </ul>
+      </AccordionContent>
+    </AccordionPanel>
+
+    <AccordionPanel value="locations">
+      <AccordionHeader>
+        <span v-if="selectedLocationCount">{{ `Locations (${selectedLocationCount})` }}</span>
+        <span v-else>Locations</span>
+        <Button
+          v-if="selectedLocationCount"
+          text
+          severity="secondary"
+          size="small"
+          @click.stop="onClearLocations"
+          aria-label="Clear locations"
+          class="clear-btn"
+        >
+          <i class="pi pi-times" />
+        </Button>
+      </AccordionHeader>
+      <AccordionContent>
+        <ul class="category-list">
+          <li
+            v-for="loc of locations"
+            :key="loc.name"
+            :class="['category-item', { 'category-item--selected': isLocationSelected(loc) }]"
+            @click="onLocationClick(loc)"
+          >
+            {{ loc.name }}
+          </li>
+        </ul>
+      </AccordionContent>
+    </AccordionPanel>
+  </Accordion>
+
   <div class="search-autocomplete-panel">
     <h1 class="title">Extended Search</h1>
     <ExtendedSearchPanel />
@@ -82,21 +109,24 @@
 </template>
 
 <script setup lang="ts">
-import ClearIcon from '@featherds/icon/action/Cancel'
-import { FeatherButton } from '@featherds/button'
-import { FeatherExpansionPanel } from '@featherds/expansion'
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherList, FeatherListItem } from '@featherds/list'
-import { SwitchRender } from '@featherds/switch'
+import Accordion from 'primevue/accordion'
+import AccordionPanel from 'primevue/accordionpanel'
+import AccordionHeader from 'primevue/accordionheader'
+import AccordionContent from 'primevue/accordioncontent'
+import Button from 'primevue/button'
+import ToggleSwitch from 'primevue/toggleswitch'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
 import { Category, MonitoringLocation, SetOperator } from '@/types'
 import ExtendedSearchPanel from './ExtendedSearchPanel.vue'
 
 const nodeStructureStore = useNodeStructureStore()
-const clearIcon = ref(ClearIcon)
+const openPanels = ref(['categories', 'flows', 'locations'])
 const flowTypes = computed<string[]>(() => ['Ingress', 'Egress'])
 const categoryMode = computed(() => nodeStructureStore.queryFilter.categoryMode)
-const categorySwitchChecked = computed<boolean>(() => nodeStructureStore.queryFilter.categoryMode === SetOperator.Intersection)
+const categorySwitchModel = computed({
+  get: () => nodeStructureStore.queryFilter.categoryMode === SetOperator.Intersection,
+  set: (_val: boolean) => {} // handled by onCategorySwitchChange
+})
 
 const locations = computed<MonitoringLocation[]>(() => nodeStructureStore.monitoringLocations)
 const selectedCategoryCount = computed<number>(() => nodeStructureStore.queryFilter.selectedCategories?.length || 0)
@@ -116,7 +146,7 @@ const isLocationSelected = (loc: MonitoringLocation) => {
   return nodeStructureStore.queryFilter.selectedMonitoringLocations.some(x => x.name === loc.name)
 }
 
-const onCategorySwitchClick = () => {
+const onCategorySwitchChange = (_val: boolean) => {
   const newMode = categoryMode.value === SetOperator.Union ? SetOperator.Intersection : SetOperator.Union
   nodeStructureStore.setCategoryMode(newMode)
 }
@@ -139,17 +169,11 @@ const onClearAll = () => {
 
 /**
 * Create a new array of selected items in a hierarchy filter by taking existing items and adding/removing the selected item.
-* @param item the item clicked
-* @param isSelected predicate for determining whether the item was previously selected
-* @param existingItems array of existing values
-* @param deselector function for determining the item that should be deselected
 */
 const getNewSelection = <T,>(item: T, isSelected: boolean, existingItems: T[], deselector: ((existingItem: T, clickedItem: T) => boolean)) => {
   if (isSelected) {
-    // deselect clicked item
     return existingItems.filter(c => deselector(c, item))
   } else {
-    // add clicked item to selection
     return [...existingItems, item]
   }
 }
@@ -179,15 +203,23 @@ const onLocationClick = (loc: MonitoringLocation) => {
   margin-bottom: 6px;
 }
 
-div.category-button-group {
+.category-btn {
+  margin-bottom: 4px;
+  margin-right: 4px;
+}
+
+.clear-btn {
+  margin-left: auto;
+}
+
+.category-button-group {
   margin-bottom: 0.5em;
 
   .category-switcher-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     line-height: 2.25rem;
-  }
-
-  .category-switcher-right {
-    float: right;
   }
 }
 
@@ -195,14 +227,26 @@ div.category-button-group {
   @include elevation(2);
   background: var($surface);
   overflow-y: auto;
-
-  .title {
-    @include headline3
-  }
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-.category-btn {
-  margin-bottom: 4px;
-  margin-right: 4px;
+
+.category-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    background: var($shade-4);
+  }
+
+  &--selected {
+    background: var($shade-3);
+    font-weight: 500;
+  }
 }
 
 .search-autocomplete-panel {
@@ -213,15 +257,5 @@ div.category-button-group {
   @include overline();
   color: var($primary);
   margin-bottom: 8px;
-}
-</style>
-
-<style lang="scss">
-.category-list {
-  .feather-list-item-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 </style>

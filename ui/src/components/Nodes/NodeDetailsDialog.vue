@@ -1,5 +1,12 @@
 <template>
-  <FeatherDialog :modelValue="visible" relative :labels="labels" @update:modelValue="$emit('close')">
+  <Dialog
+    :visible="visible"
+    modal
+    header="Node Details"
+    :closable="true"
+    @update:visible="$emit('close')"
+    class="node-details-dialog"
+  >
     <div class="node-details-content">
       <div class="feather-row" v-for="item in nodeItems" :key="item.label">
         <div class="feather-col-4">
@@ -11,12 +18,12 @@
         </div>
       </div>
     </div>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
+import Dialog from 'primevue/dialog'
 import { PropType } from 'vue'
-import { FeatherDialog } from '@featherds/dialog'
 import { hasEgressFlow, hasIngressFlow } from './utils'
 import { useIpInterfaceQuery } from '@/components/Nodes/hooks/useIpInterfaceQuery'
 import { useNodeStore } from '@/stores/nodeStore'
@@ -42,11 +49,6 @@ const props = defineProps({
 })
 
 defineEmits(['close'])
-
-const labels = reactive({
-  title: 'Node Details',
-  close: 'Close'
-})
 
 const EMPTY = '--'
 const nodeStore = useNodeStore()

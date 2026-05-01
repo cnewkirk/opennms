@@ -1,32 +1,37 @@
 <template>
-  <FeatherDialog :modelValue="visible" relative :labels="labels" @update:modelValue="$emit('close')">
+  <Dialog
+    :visible="visible"
+    modal
+    header="Node Preferences"
+    :closable="true"
+    @update:visible="$emit('close')"
+  >
     <div class="content">
-      <FeatherTabContainer>
-        <template v-slot:tabs>
-          <FeatherTab>Columns</FeatherTab>
-        </template>
-        <FeatherTabPanel>
-          <ColumnSelectionPanel></ColumnSelectionPanel>
-        </FeatherTabPanel>
-      </FeatherTabContainer>
+      <Tabs value="columns">
+        <TabList>
+          <Tab value="columns">Columns</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="columns">
+            <ColumnSelectionPanel />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
       <div class="button-panel">
-        <FeatherButton
-          primary
-          @click="savePreferences"
-        >Save and Close</FeatherButton>
+        <Button severity="primary" @click="savePreferences">Save and Close</Button>
       </div>
     </div>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
-import {
-  FeatherTab,
-  FeatherTabContainer,
-  FeatherTabPanel
-} from '@featherds/tabs'
+import Dialog from 'primevue/dialog'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
+import Button from 'primevue/button'
 import ColumnSelectionPanel from './ColumnSelectionPanel.vue'
 import { saveNodePreferences } from '@/services/localStorageService'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
@@ -41,11 +46,6 @@ defineProps({
 const emit = defineEmits(['close'])
 
 const nodeStructureStore = useNodeStructureStore()
-
-const labels = reactive({
-  title: 'Node Preferences',
-  close: 'Close'
-})
 
 const savePreferences = async () => {
   const nodePrefs = await nodeStructureStore.getNodePreferences()

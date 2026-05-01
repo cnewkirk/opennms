@@ -1,25 +1,29 @@
 <template>
   <div class="card">
     <div class="feather-col-12 title headline3">Node Interfaces</div>
-    <FeatherTabContainer>
-      <template v-slot:tabs>
-        <FeatherTab>IP Interfaces</FeatherTab>
-        <FeatherTab>SNMP Interfaces</FeatherTab>
-      </template>
-
-      <FeatherTabPanel>
-        <IpInterfacesTable />
-      </FeatherTabPanel>
-
-      <FeatherTabPanel>
-        <SnmpInterfacesTable />
-      </FeatherTabPanel>
-    </FeatherTabContainer>
+    <Tabs value="ip">
+      <TabList>
+        <Tab value="ip">IP Interfaces</Tab>
+        <Tab value="snmp">SNMP Interfaces</Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel value="ip">
+          <IpInterfacesTable />
+        </TabPanel>
+        <TabPanel value="snmp">
+          <SnmpInterfacesTable />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   </div>
 </template>
-    
+
 <script setup lang="ts">
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 import SnmpInterfacesTable from './SnmpInterfacesTable.vue'
 import IpInterfacesTable from './IpInterfacesTable.vue'
 </script>
@@ -37,4 +41,3 @@ import IpInterfacesTable from './IpInterfacesTable.vue'
   }
 }
 </style>
-  

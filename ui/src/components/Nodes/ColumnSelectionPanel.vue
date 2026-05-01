@@ -4,43 +4,51 @@
       <div class="feather-col-9">
       </div>
       <div class="feather-col-3 centered">
-        <FeatherButton secondary @click="resetToDefault">Default</FeatherButton>
+        <Button severity="secondary" outlined size="small" @click="resetToDefault">Default</Button>
       </div>
     </div>
   </div>
   <div
     v-for="(col, index) in columns"
     :key="col.id"
-    >
-      <div class="feather-row column-select-item-wrapper">
-        <div class="feather-col-9">
-          <FeatherCheckbox
-            class="checkbox"
-            @update:modelValue="selectColumn(col)"
+  >
+    <div class="feather-row column-select-item-wrapper">
+      <div class="feather-col-9">
+        <div class="col-checkbox-row">
+          <Checkbox
             :modelValue="col.selected"
-          >{{ col.label }}</FeatherCheckbox>
-        </div>
-        <div class="feather-col-3 centered">
-          <FeatherIcon :icon="upIcon" title="Move Up" @click="columnMove(true, index)" :class="getOrderIconCssClasses(true, index)" />
-          <FeatherIcon :icon="downIcon" title="Move Down" @click="columnMove(false, index)" :class="getOrderIconCssClasses(false, index)" />
+            :binary="true"
+            :inputId="`col-${col.id}`"
+            @update:modelValue="selectColumn(col)"
+          />
+          <label :for="`col-${col.id}`" class="col-checkbox-label">{{ col.label }}</label>
         </div>
       </div>
+      <div class="feather-col-3 centered">
+        <i
+          class="pi pi-chevron-up column-order-icon"
+          :class="getOrderIconCssClasses(true, index)"
+          title="Move Up"
+          @click="columnMove(true, index)"
+        />
+        <i
+          class="pi pi-chevron-down column-order-icon column-order-icon-down"
+          :class="getOrderIconCssClasses(false, index)"
+          title="Move Down"
+          @click="columnMove(false, index)"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { FeatherIcon } from '@featherds/icon'
-import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
-import KeyboardArrowDown from '@featherds/icon/hardware/KeyboardArrowDown'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
 import { NodeColumnSelectionItem } from '@/types'
 
 const nodeStructureStore = useNodeStructureStore()
-
-const upIcon = markRaw(KeyboardArrowUp)
-const downIcon = markRaw(KeyboardArrowDown)
 
 const columns = computed<NodeColumnSelectionItem[]>(() => nodeStructureStore.columns)
 
@@ -73,19 +81,10 @@ const columnMove = (isUp: boolean, index: number) => {
 }
 
 const getOrderIconCssClasses = (isUp: boolean, index: number) => {
-  const classes = ['column-order-icon']
-
-  if (!isUp) {
-    classes.push('column-order-icon-down')
-  }
-
   if (isUp && index > 0 || !isUp && index < (columns.value.length - 1)) {
-    classes.push('column-order-icon-active')
-  } else {
-    classes.push('column-order-icon-inactive')
+    return 'column-order-icon-active'
   }
-
-  return classes
+  return 'column-order-icon-inactive'
 }
 
 const resetToDefault = () => {
@@ -96,12 +95,14 @@ const resetToDefault = () => {
 <style lang="scss" scoped>
 @import "@featherds/table/scss/table";
 
-.focus-icon {
-  cursor: pointer;
+.col-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-button.btn.btn-icon .node-actions-icon {
-  font-size: 1.1rem;
+.col-checkbox-label {
+  cursor: pointer;
 }
 
 .column-select-container {
@@ -115,15 +116,19 @@ button.btn.btn-icon .node-actions-icon {
 .node-actions-reset {
   margin-bottom: 1em;
 }
+
 .column-order-icon {
-  font-size: 1.75em;
+  font-size: 1.1rem;
+  cursor: default;
 
   &-active {
     cursor: pointer;
+    color: inherit;
   }
 
   &-inactive {
     color: #ccc;
+    cursor: default;
   }
 
   &-down {

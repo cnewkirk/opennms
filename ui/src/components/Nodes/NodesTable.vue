@@ -8,18 +8,18 @@
             :onCsvDownload="onCsvDownload"
             :onJsonDownload="onJsonDownload"
           />
-          <FeatherButton
-            primary
+          <Button
             @click="() => nodeStructureStore.openColumnsDrawerModal()"
           >
             Customize Columns
-          </FeatherButton>
-          <FeatherButton
-            secondary
+          </Button>
+          <Button
+            severity="secondary"
+            outlined
             @click="() => nodeStructureStore.clearAllFiltersAndSelections()"
           >
             Clear Filters
-          </FeatherButton>
+          </Button>
         </div>
       </div>
       <div class="spacer-large"></div>
@@ -28,82 +28,63 @@
         <div class="feather-row">
           <div class="filter">
             <div class="search-filter-column">
-              <FeatherInput
-                v-model="currentSearch"
-                @update:modelValue="searchFilterHandler"
-                label="Search node label or full IP address"
-              >
-                <template #pre>
-                  <FeatherIcon :icon="Search" />
-                </template>
-              </FeatherInput>
+              <span class="p-input-icon-left search-input-wrap">
+                <i class="pi pi-search search-prefix-icon" />
+                <InputText
+                  v-model="currentSearch"
+                  @update:modelValue="searchFilterHandler"
+                  placeholder="Search node label or full IP address"
+                  class="search-input"
+                />
+              </span>
             </div>
             <div>
-              <FeatherButton
-                icon="FilterAlt"
+              <Button
+                text
+                severity="secondary"
+                class="filter-btn"
                 @click="() => nodeStructureStore.openInstancesDrawerModal()"
+                aria-label="Advanced Filters"
               >
-                <FeatherIcon :icon="FilterAlt" />
-              </FeatherButton>
+                <i class="pi pi-filter" />
+              </Button>
             </div>
           </div>
           <div class="chip-container">
-            <FeatherChipList label="SearchParams">
-              <FeatherChip
-                v-for="(cat, index) in nodeStructureStore.selectedCategories"
-                :key="`cat-${index}`"
-              >
-                <template #icon>
-                  <FeatherIcon
-                    :icon="cancelIcon"
-                    class="icon"
-                    @click="removeItem(cat, FilterTypeEnum.Category)"
-                  />
-                </template>
-                {{ `Category: ${cat._text}` }}
-              </FeatherChip>
+            <Chip
+              v-for="(cat, index) in nodeStructureStore.selectedCategories"
+              :key="`cat-${index}`"
+              :label="`Category: ${cat._text}`"
+              removable
+              @remove="removeItem(cat, FilterTypeEnum.Category)"
+              class="filter-chip"
+            />
 
-              <FeatherChip
-                v-for="(flow, index) in nodeStructureStore.selectedFlows"
-                :key="`flow-${index}`"
-              >
-                <template #icon>
-                  <FeatherIcon
-                    :icon="cancelIcon"
-                    class="icon"
-                    @click="removeItem(flow, FilterTypeEnum.Flow)"
-                  />
-                </template>
-                {{ `Flow: ${flow._text}` }}
-              </FeatherChip>
+            <Chip
+              v-for="(flow, index) in nodeStructureStore.selectedFlows"
+              :key="`flow-${index}`"
+              :label="`Flow: ${flow._text}`"
+              removable
+              @remove="removeItem(flow, FilterTypeEnum.Flow)"
+              class="filter-chip"
+            />
 
-              <FeatherChip
-                v-for="loc in nodeStructureStore.queryFilter.selectedMonitoringLocations"
-                :key="loc.name"
-              >
-                <template #icon>
-                  <FeatherIcon
-                    :icon="cancelIcon"
-                    class="icon"
-                    @click="removeItem(loc, FilterTypeEnum.MonitoringLocation)"
-                  />
-                </template>
-                {{ `Location: ${loc.name}` }}
-              </FeatherChip>
+            <Chip
+              v-for="loc in nodeStructureStore.queryFilter.selectedMonitoringLocations"
+              :key="loc.name"
+              :label="`Location: ${loc.name}`"
+              removable
+              @remove="removeItem(loc, FilterTypeEnum.MonitoringLocation)"
+              class="filter-chip"
+            />
 
-              <FeatherChip
-                v-if="hasExtendedSearchParams"
-              >
-                <template #icon>
-                  <FeatherIcon
-                    :icon="cancelIcon"
-                    class="icon"
-                    @click="removeExtendedSearchItem"
-                  />
-                </template>
-                {{ 'Extended Search' }}
-              </FeatherChip>
-            </FeatherChipList>
+            <Chip
+              v-if="hasExtendedSearchParams"
+              label="Extended Search"
+              removable
+              @remove="removeExtendedSearchItem"
+              class="filter-chip"
+            />
           </div>
         </div>
       </div>
@@ -126,12 +107,9 @@
                   class="navigation-cell"
                 >
                   <div @click="navigateColumns(Direction.Left)">
-                    <FeatherButton icon="Shift Left">
-                      <FeatherIcon
-                        :icon="ChevronLeft"
-                        class="navigation-icon"
-                      />
-                    </FeatherButton>
+                    <Button text severity="secondary" aria-label="Shift Left" class="nav-btn">
+                      <i class="pi pi-chevron-left navigation-icon" />
+                    </Button>
                   </div>
                 </th>
 
@@ -139,17 +117,29 @@
                   v-for="column in visibleColumns.sort((a: NodeColumnSelectionItem, b: NodeColumnSelectionItem) => a.order - b.order)"
                   :key="column.id"
                 >
-                  <FeatherSortHeader
+                  <th
                     v-if="column.id !== 'ipaddress'"
                     scope="col"
-                    :property="column.id"
-                    :sort="sortStateForId(column.id)"
-                    @sort-changed="sortChanged"
+                    class="sortable-header"
+                    @click="toggleSort(column.id)"
                   >
-                    {{ column.label }}
-                  </FeatherSortHeader>
+                    <span>{{ column.label }}</span>
+                    <i
+                      v-if="sortStates[column.id] === 'asc'"
+                      class="pi pi-sort-up sort-icon"
+                    />
+                    <i
+                      v-else-if="sortStates[column.id] === 'desc'"
+                      class="pi pi-sort-down sort-icon"
+                    />
+                    <i
+                      v-else
+                      class="pi pi-sort-alt sort-icon sort-icon--none"
+                    />
+                  </th>
                   <th v-else>{{ column.label }}</th>
                 </template>
+
                 <th
                   v-if="canNavigateRight"
                   class="navigation-cell"
@@ -158,12 +148,9 @@
                     class="icon-container"
                     @click="navigateColumns(Direction.Right)"
                   >
-                    <FeatherButton icon="Shift Right">
-                      <FeatherIcon
-                        :icon="ChevronRight"
-                        class="navigation-icon"
-                      />
-                    </FeatherButton>
+                    <Button text severity="secondary" aria-label="Shift Right" class="nav-btn">
+                      <i class="pi pi-chevron-right navigation-icon" />
+                    </Button>
                   </div>
                 </th>
                 <th>Actions</th>
@@ -229,16 +216,15 @@
                   class="navigation-cell"
                 ></td>
                 <td class="actions-cell">
-                  <FeatherButton
-                    icon="Edit"
+                  <Button
+                    text
+                    severity="secondary"
                     class="edit-icon"
                     @click="() => $router.push(`/node/${node.id}`)"
+                    aria-label="Edit"
                   >
-                    <FeatherIcon
-                      :icon="Edit"
-                      title="Edit"
-                    />
-                  </FeatherButton>
+                    <i class="pi pi-pencil" />
+                  </Button>
 
                   <NodeActionsDropdown
                     :baseHref="mainMenu.baseHref"
@@ -258,13 +244,13 @@
         </div>
       </div>
     </div>
-    <FeatherPagination
+    <Paginator
       v-if="nodeStore.totalCount > 0"
-      v-model="pageNumber"
-      :pageSizes="[10, 20, 50, 100, 200]"
-      :total="nodeStore.totalCount"
-      @update:modelValue="updatePageNumber"
-      @update:pageSize="updatePageSize"
+      :rows="queryParameters.limit || 25"
+      :rowsPerPageOptions="[10, 20, 50, 100, 200]"
+      :totalRecords="nodeStore.totalCount"
+      @page="onPaginatorPage"
+      class="nodes-paginator"
     />
   </div>
   <NodeDetailsDialog
@@ -280,13 +266,16 @@
 </template>
 
 <script setup lang="ts">
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Chip from 'primevue/chip'
+import Paginator from 'primevue/paginator'
 import useSnackbar from '@/composables/useSnackbar'
 import { useMenuStore } from '@/stores/menuStore'
 import { useNodeStore } from '@/stores/nodeStore'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
 import {
   Direction,
-  FeatherSortObject,
   FilterTypeEnum,
   Node,
   NodeColumnSelectionItem,
@@ -295,18 +284,6 @@ import {
 } from '@/types'
 import { MainMenu } from '@/types/mainMenu'
 import { IAutocompleteItemType } from '@featherds/autocomplete'
-import { FeatherButton } from '@featherds/button'
-import { FeatherChip, FeatherChipList } from '@featherds/chips'
-import { FeatherIcon } from '@featherds/icon'
-import Edit from '@featherds/icon/action/Edit'
-import FilterAlt from '@featherds/icon/action/FilterAlt'
-import Search from '@featherds/icon/action/Search'
-import Cancel from '@featherds/icon/navigation/Cancel'
-import ChevronLeft from '@featherds/icon/navigation/ChevronLeft'
-import ChevronRight from '@featherds/icon/navigation/ChevronRight'
-import { FeatherInput } from '@featherds/input'
-import { FeatherPagination } from '@featherds/pagination'
-import { FeatherSortHeader, SORT } from '@featherds/table'
 import { computed, nextTick, reactive, ref, watch } from 'vue'
 import ColumnSelectionDrawer from './ColumnSelectionDrawer.vue'
 import FlowTooltipCell from './FlowTooltipCell.vue'
@@ -350,37 +327,41 @@ const navigateColumns = (direction: Direction) => {
   }
 }
 
-const sortStates: any = reactive({
-  id: SORT.NONE,
-  label: SORT.ASCENDING,
-  ipaddress: SORT.NONE, // note, cannot sort by this at the moment
-  location: SORT.NONE,
-  foreignSource: SORT.NONE,
-  foreignId: SORT.NONE,
-  sysContact: SORT.NONE,
-  sysLocation: SORT.NONE,
-  sysDescription: SORT.NONE,
-  flows: SORT.NONE
+// Sort state: 'asc' | 'desc' | undefined
+type SortDir = 'asc' | 'desc' | undefined
+
+const sortStates: Record<string, SortDir> = reactive({
+  id: undefined,
+  label: 'asc',
+  ipaddress: undefined,
+  location: undefined,
+  foreignSource: undefined,
+  foreignId: undefined,
+  sysContact: undefined,
+  sysLocation: undefined,
+  sysDescription: undefined,
+  flows: undefined
 })
 
-const sortStateForId = (label: string) => {
-  switch (label) {
-    case 'id': return sortStates.id
-    case 'label': return sortStates.label
-    case 'ipaddress': return sortStates.ipaddress
-    case 'location': return sortStates.location
-    case 'foreignSource': return sortStates.foreignSource
-    case 'foreignId': return sortStates.foreignId
-    case 'sysContact': return sortStates.sysContact
-    case 'sysLocation': return sortStates.sysLocation
-    case 'sysDescription': return sortStates.sysDescription
-    case 'flows': return sortStates.flows
+const toggleSort = (columnId: string) => {
+  if (columnId === 'ipaddress') return
+
+  const current = sortStates[columnId]
+  const next: SortDir = current === undefined ? 'asc' : current === 'asc' ? 'desc' : undefined
+
+  // Reset all columns
+  for (const key in sortStates) {
+    sortStates[key] = undefined
   }
 
-  return SORT.NONE
-}
+  sortStates[columnId] = next
 
-const cancelIcon = computed(() => Cancel)
+  if (next !== undefined) {
+    updateQuery({ orderBy: columnId, order: next })
+  } else {
+    updateQuery()
+  }
+}
 
 const currentSearch = ref(nodeStructureStore.queryFilter.searchTerm || '')
 const nodes = computed(() => nodeStore.nodes)
@@ -390,46 +371,19 @@ const dialogVisible = ref(false)
 const dialogNode = ref<Node>()
 const tableCssClasses = computed<string[]>(() => getTableCssClasses(nodeStructureStore.columns))
 const queryParameters = ref<QueryParameters>(nodeStore.nodeQueryParameters)
-const pageNumber = ref(1)
 
 const isSelectedColumn = (column: NodeColumnSelectionItem, id: string) => {
   return column.selected && column.id === id
 }
 
-const updatePageNumber = (page: number) => {
-  pageNumber.value = page
-  const pageSize = queryParameters.value.limit || 0
-  queryParameters.value = { ...queryParameters.value, offset: Math.max((page - 1) * pageSize, 0) }
-  nodeStore.setNodeQueryParameters(queryParameters.value)
-
-  updateQuery()
-}
-
-const updatePageSize = (size: number) => {
-  queryParameters.value = { ...queryParameters.value, limit: size }
-  nodeStore.setNodeQueryParameters(queryParameters.value)
-
-  updateQuery()
-}
-
-const sortChanged = (sortObj: FeatherSortObject) => {
-  if (sortObj.property === 'ipaddress') {
-    return
-  }
-
-  for (const key in sortStates) {
-    sortStates[key] = SORT.NONE
-  }
-
-  sortStates[`${sortObj.property}`] = sortObj.value
-
+const onPaginatorPage = (event: { first: number; rows: number; page: number }) => {
   queryParameters.value = {
     ...queryParameters.value,
-    orderBy: sortObj.property,
-    order: sortObj.value
+    limit: event.rows,
+    offset: event.first
   }
-
-  updateQuery({ orderBy: sortObj.property, order: sortObj.value })
+  nodeStore.setNodeQueryParameters(queryParameters.value)
+  updateQuery()
 }
 
 const searchFilterHandler: UpdateModelFunction = (val = '') => {
@@ -473,7 +427,6 @@ const computeNodeIpInterfaceLink = (nodeId: number | string, ipAddress: string) 
   return `${mainMenu.value.baseHref}ui/interface/${nodeId}/${encodeURIComponent(ipAddress)}`
 }
 
-
 const hasExtendedSearchParams = computed(() => {
   return hasAnyExtendedSearchValues(nodeStructureStore.queryFilter.extendedSearch)
 })
@@ -498,8 +451,7 @@ const removeExtendedSearchItem = () => {
   nodeStructureStore.removeExtendedSearch()
 }
 
-const updateQuery = (options?: { orderBy?: string, order?: SORT }) => {
-  // make sure anything setting nodeStore.nodeQueryParameters has been processed
+const updateQuery = (options?: { orderBy?: string, order?: SortDir }) => {
   nextTick()
 
   const queryParamsToUse =
@@ -507,7 +459,7 @@ const updateQuery = (options?: { orderBy?: string, order?: SORT }) => {
       {
         ...nodeStore.nodeQueryParameters,
         orderBy: options.orderBy,
-        order: options.order || SORT.ASCENDING
+        order: options.order || 'asc'
       }
       : nodeStore.nodeQueryParameters
 
@@ -569,13 +521,32 @@ table {
   }
 }
 
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+
+  span {
+    vertical-align: middle;
+  }
+
+  .sort-icon {
+    margin-left: 4px;
+    font-size: 0.75rem;
+    vertical-align: middle;
+
+    &--none {
+      opacity: 0.3;
+    }
+  }
+
+  &:hover .sort-icon--none {
+    opacity: 0.6;
+  }
+}
+
 .title {
   @include headline1;
   display: block;
-}
-
-.action-buttons-column {
-  text-align: left;
 }
 
 .filter {
@@ -584,16 +555,28 @@ table {
   gap: 10px;
 
   .search-filter-column {
-    :deep(.feather-input-sub-text) {
-      display: none !important;
-    }
-
-    .feather-input-container {
-      width: 450px !important;
-    }
+    position: relative;
   }
 
-  .btn.btn-icon{
+  .search-input-wrap {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .search-prefix-icon {
+    position: absolute;
+    left: 0.75rem;
+    z-index: 1;
+    color: var($secondary-text-on-surface);
+  }
+
+  .search-input {
+    width: 450px;
+    padding-left: 2.25rem !important;
+  }
+
+  .filter-btn {
     border: 2px solid var($border-on-surface);
     border-radius: vars.$border-radius-xs;
     padding: 0 0.5rem;
@@ -604,13 +587,13 @@ table {
 
 .chip-container {
   padding-left: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
 
-  :deep(.chip) {
-    margin-bottom: 0 !important;
-  }
-
-  :deep(.chip-list) {
-    margin-top: 0.25rem !important;
+  .filter-chip {
+    font-size: 0.8125rem;
   }
 }
 
@@ -634,9 +617,7 @@ table {
 
 .actions-cell {
   .edit-icon {
-    svg {
-      font-size: 1rem !important;
-    }
+    padding: 0.25rem;
   }
 }
 
@@ -646,12 +627,16 @@ table {
 
 .navigation-cell {
   width: 10px;
+}
 
-  .btn.btn-icon-table {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: vars.$border-radius-round;
-  }
+.nav-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: vars.$border-radius-round;
+}
+
+.nodes-paginator {
+  margin-top: 0.5rem;
 }
 </style>
-

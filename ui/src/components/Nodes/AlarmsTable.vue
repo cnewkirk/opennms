@@ -67,22 +67,22 @@
       </div>
     </div>
 
-    <Pagination
-      :parameters="queryParameters"
-      @update-query-parameters="updateQueryParameters"
-      :query="fetchAlarms"
-      :getTotalCount="getTotalCount"
+    <Paginator
+      v-if="totalCount > 0"
+      :rows="limit"
+      :rowsPerPageOptions="[5, 10, 25, 50]"
+      :totalRecords="totalCount"
+      @page="onPage"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import Pagination from '../Common/Pagination.vue'
+import Paginator from 'primevue/paginator'
 import SeverityBadge from '../Common/SeverityBadge.vue'
 import { getAlarms } from '@/services/alarmService'
 import { getNodes, getNodeSnmpInterfaces } from '@/services/nodeService'
 import { getNodeEnlinkd, extractNodeId } from '@/services/enlinkdService'
-import useQueryParameters from '@/composables/useQueryParams'
 import { Alarm, QueryParameters, Node } from '@/types'
 
 const props = defineProps<{ nodeId: string; nodeLabel: string; extraFiql?: string }>()
@@ -177,6 +177,8 @@ watch(showIfAlias, async (on) => {
 const loading = ref(false)
 const alarms = ref<Alarm[]>([])
 const totalCount = ref(0)
+const limit = ref(10)
+const offset = ref(0)
 
 const buildFiql = () => {
   const ids = [numericNodeId.value, ...relatedNodeIds.value]
@@ -185,7 +187,7 @@ const buildFiql = () => {
   return nodePart
 }
 
-const fetchAlarms = async (params: QueryParameters) => {
+const fetchAlarms = async (params: QueryParameters = { limit: limit.value, offset: offset.value }) => {
   loading.value = true
   const resp = await getAlarms({ ...params, _s: buildFiql() })
   if (resp) {
@@ -195,20 +197,18 @@ const fetchAlarms = async (params: QueryParameters) => {
   loading.value = false
 }
 
-const getTotalCount = () => totalCount.value
+const onPage = (e: { first: number; rows: number }) => {
+  limit.value = e.rows
+  offset.value = e.first
+  fetchAlarms({ limit: e.rows, offset: e.first })
+}
 
-const { queryParameters, updateQueryParameters } = useQueryParameters(
-  { limit: 10, offset: 0 },
-  fetchAlarms
-)
+onMounted(() => fetchAlarms())
 
-// Re-fetch when related node IDs change — must call fetchAlarms directly because
-// Pagination only fires fetchAlarms on mount and user page interaction, not when
-// queryParameters changes externally.
+// Re-fetch when related node IDs change
 watch(relatedNodeIds, () => {
-  const params = { ...queryParameters.value, offset: 0 }
-  queryParameters.value = params
-  fetchAlarms(params)
+  offset.value = 0
+  fetchAlarms({ limit: limit.value, offset: 0 })
 })
 
 const rowClass = (alarm: Alarm) => {

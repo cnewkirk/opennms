@@ -1,13 +1,12 @@
 <template>
-  <FeatherDrawer
-    id="left-drawer"
-    data-test="left-drawer"
-    @hidden="nodeStructureStore.closeInstancesDrawerModal()"
-    v-model="nodeStructureStore.drawerState.visible"
-    :labels="{ close: 'close', title: 'Advanced Node Filters' }"
-    width="60em"
+  <Drawer
+    v-model:visible="nodeStructureStore.drawerState.visible"
+    @hide="nodeStructureStore.closeInstancesDrawerModal()"
+    header="Advanced Node Filters"
+    position="right"
+    style="width: 60em"
   >
-    <div class="feather-drawer-custom-padding">
+    <div class="drawer-content">
       <section>
         <h3>Advanced Filters</h3>
       </section>
@@ -15,40 +14,52 @@
       <div class="spacer-large"></div>
       <div>Choose one or more attributes to find a service.</div>
       <div class="spacer-large"></div>
-      <FeatherAutocomplete
-        class="my-autocomplete"
-        label="Categories"
-        type="multi"
-        v-model="selectedFilters.categories"
-        :loading="categoriesLoading"
-        :results="categoryResults"
-        @search="handleCategorySearch"
-        :allow-new="false"
-        text-prop="_text"
-        @update:modelValue="(items: any) => updateFilter('categories', items)"
-      ></FeatherAutocomplete>
-      <FeatherAutocomplete
-        class="filter-autocomplete"
-        label="Flows"
-        type="multi"
-        v-model="selectedFilters.flows"
-        :loading="flowsLoading"
-        :results="flowResults"
-        @search="handleFlowSearch"
-        @update:modelValue="(items: any) => updateFilter('flows', items)"
-        text-prop="_text"
-      ></FeatherAutocomplete>
-      <FeatherAutocomplete
-        class="last-filter-autocomplete"
-        label="Locations"
-        type="multi"
-        v-model="selectedFilters.locations"
-        :loading="locationsLoading"
-        :results="locationResults"
-        @search="handleLocationSearch"
-        @update:modelValue="(items: any) => updateFilter('locations', items)"
-      >
-      </FeatherAutocomplete>
+
+      <div class="field">
+        <label class="field-label">Categories</label>
+        <AutoComplete
+          v-model="selectedFilters.categories"
+          :suggestions="categoryResults"
+          optionLabel="_text"
+          multiple
+          :loading="categoriesLoading"
+          @complete="(e: AutoCompleteCompleteEvent) => handleCategorySearch(e.query)"
+          @update:modelValue="(items: any) => updateFilter('categories', items)"
+          class="autocomplete-full"
+          placeholder="Search categories..."
+        />
+      </div>
+
+      <div class="field">
+        <label class="field-label">Flows</label>
+        <AutoComplete
+          v-model="selectedFilters.flows"
+          :suggestions="flowResults"
+          optionLabel="_text"
+          multiple
+          :loading="flowsLoading"
+          @complete="(e: AutoCompleteCompleteEvent) => handleFlowSearch(e.query)"
+          @update:modelValue="(items: any) => updateFilter('flows', items)"
+          class="autocomplete-full"
+          placeholder="Search flows..."
+        />
+      </div>
+
+      <div class="field">
+        <label class="field-label">Locations</label>
+        <AutoComplete
+          v-model="selectedFilters.locations"
+          :suggestions="locationResults"
+          optionLabel="_text"
+          multiple
+          :loading="locationsLoading"
+          @complete="(e: AutoCompleteCompleteEvent) => handleLocationSearch(e.query)"
+          @update:modelValue="(items: any) => updateFilter('locations', items)"
+          class="autocomplete-full"
+          placeholder="Search locations..."
+        />
+      </div>
+
       <div class="spacer-medium"></div>
       <div>
         <h4 class="title">Extended Search</h4>
@@ -56,30 +67,32 @@
         <ExtendedSearchPanel />
       </div>
       <div class="footer">
-        <FeatherButton
-          primary
+        <Button
           @click="applySelectedFilters"
         >
           Apply Filters
-        </FeatherButton>
-        <FeatherButton
-          secondary
+        </Button>
+        <Button
+          severity="secondary"
+          outlined
           @click="nodeStructureStore.closeInstancesDrawerModal()"
         >
           Close
-        </FeatherButton>
+        </Button>
       </div>
     </div>
-  </FeatherDrawer>
+  </Drawer>
 </template>
 
 <script lang="ts" setup>
-import { FeatherAutocomplete, IAutocompleteItemType } from '@featherds/autocomplete'
-import { FeatherDrawer } from '@featherds/drawer'
-import { FeatherButton } from '@featherds/button'
+import AutoComplete from 'primevue/autocomplete'
+import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete'
+import Drawer from 'primevue/drawer'
+import Button from 'primevue/button'
 import { ref } from 'vue'
 import ExtendedSearchPanel from './ExtendedSearchPanel.vue'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
+import { IAutocompleteItemType } from '@featherds/autocomplete'
 
 const searchTimeout = ref<number>(-1)
 const categoriesLoading = ref(false)
@@ -88,8 +101,6 @@ const flowsLoading = ref(false)
 const flowResults = ref<IAutocompleteItemType[]>([])
 const locationsLoading = ref(false)
 const locationResults = ref<IAutocompleteItemType[]>([])
-// we already have items in memory, don't really need to use setTimeout at all,
-// but will keep it just to have the pattern. Timeout can be minimal (5ms)
 const TIMEOUT = 5
 
 const nodeStructureStore = useNodeStructureStore()
@@ -178,7 +189,7 @@ watch(() => nodeStructureStore.drawerState.visible, (visible) => {
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
 
-.feather-drawer-custom-padding {
+.drawer-content {
   padding: 20px;
   height: 100%;
   overflow: auto;
@@ -192,26 +203,25 @@ watch(() => nodeStructureStore.drawerState.visible, (visible) => {
   margin-bottom: 0.25rem;
 }
 
+.field {
+  margin-bottom: 1.25rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.375rem;
+  color: var($primary-text-on-surface);
+}
+
+.autocomplete-full {
+  width: 100%;
+}
+
 .footer {
   display: flex;
+  gap: 0.75rem;
   padding-top: 20px;
-}
-
-.inventory-auto {
-  min-width: 400px;
-
-  :deep(.feather-autocomplete-input) {
-    min-width: 100px;
-  }
-
-  :deep(.feather-autocomplete-content) {
-    display: block;
-  }
-}
-
-.last-filter-autocomplete{
-  :deep(.feather-input-sub-text) {
-    display: none !important;
-  }
 }
 </style>

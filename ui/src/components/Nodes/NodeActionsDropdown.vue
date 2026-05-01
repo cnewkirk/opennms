@@ -1,32 +1,20 @@
 <template>
-  <FeatherDropdown>
-    <template v-slot:trigger="{ attrs, on }">
-      <FeatherButton
-        icon="Node Actions"
-        v-bind="attrs"
-        v-on="on"
-      >
-        <FeatherIcon :icon="menu" class="node-actions-icon" />
-      </FeatherButton>
-    </template>
-    <FeatherDropdownItem @click="triggerNodeInfo(node)">
-      <span class="node-menu-item">Info...</span>
-    </FeatherDropdownItem>
-    <FeatherDropdownItem
-      v-for="linkItem in linkItems"
-      :key="linkItem.name"
-      @click="onNodeLink(linkItem.name, node)">
-      <span class="node-menu-item">{{ linkItem.label }}</span>
-    </FeatherDropdownItem>
-  </FeatherDropdown>
+  <Menu ref="menu" :model="menuItems" popup />
+  <Button
+    text
+    severity="secondary"
+    @click="(e: Event) => menu?.toggle(e)"
+    class="node-actions-btn"
+    aria-label="Node Actions"
+  >
+    <i class="pi pi-ellipsis-v node-actions-icon" />
+  </Button>
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
-import { FeatherIcon } from '@featherds/icon'
-import MoreVert from '@featherds/icon/navigation/MoreVert'
-import { markRaw, PropType } from 'vue'
+import Button from 'primevue/button'
+import Menu from 'primevue/menu'
+import { PropType, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Node } from '@/types'
 
@@ -46,7 +34,7 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const menu = markRaw(MoreVert)
+const menu = ref()
 
 const linkItems = [
   { name: 'events', label: 'Events' },
@@ -64,8 +52,18 @@ const linkItems = [
   { name: 'topology', label: 'View Topology Map' }
 ]
 
+const menuItems = computed(() => [
+  {
+    label: 'Info...',
+    command: () => props.triggerNodeInfo(props.node)
+  },
+  ...linkItems.map(item => ({
+    label: item.label,
+    command: () => onNodeLink(item.name, props.node)
+  }))
+])
+
 const onNodeLink = (name: string, node: Node) => {
-  // Use Vue router for pages that have Vue equivalents
   if (name === 'graphs') {
     router.push(`/node/${node.id}`)
     return
@@ -102,7 +100,6 @@ const mapLink = (name: string, node: Node) => {
     case 'admin':
       return `admin/nodemanagement/index.jsp?node=${node.id}`
     case 'updateSnmp':
-      // TODO: Get IP Address
       return `admin/updateSnmp.jsp?node=${node.id}&ipaddr=0.0.0.0`
     case 'schedule-outage':
       return `admin/sched-outages/editoutage.jsp?newName=${node.label}&addNew=true&nodeID=${node.id}`
@@ -114,11 +111,10 @@ const mapLink = (name: string, node: Node) => {
 </script>
 
 <style lang="scss" scoped>
-.node-menu-item {
-  padding: 1em;
+.node-actions-btn {
+  padding: 0.25rem;
 }
-
-button.btn.btn-icon .node-actions-icon {
+.node-actions-icon {
   font-size: 1.1rem;
 }
 </style>

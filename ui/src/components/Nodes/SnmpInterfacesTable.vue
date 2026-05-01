@@ -31,12 +31,12 @@
       </table>
     </div>
   </div>
-  <Pagination
-    :payload="payload"
-    :parameters="queryParameters"
-    @update-query-parameters="updateQueryParameters"
-    :query="snmpInterfacesQuery"
-    :getTotalCount="getSnmpInterfacesTotalCount"
+  <Paginator
+    v-if="totalCount > 0"
+    :rows="limit"
+    :rowsPerPageOptions="[5, 10, 25, 50]"
+    :totalRecords="totalCount"
+    @page="onPage"
   />
 </template>
 
@@ -44,27 +44,27 @@
   setup
   lang="ts"
 >
-import Pagination from '../Common/Pagination.vue'
+import Paginator from 'primevue/paginator'
 import { useNodeStore } from '@/stores/nodeStore'
-import useQueryParameters from '@/composables/useQueryParams'
 import { QueryParameters } from '@/types'
 
 const route = useRoute()
-const optionalPayload = { id: route.params.id }
 const nodeStore = useNodeStore()
+const limit = ref(5)
+const offset = ref(0)
+const totalCount = computed(() => nodeStore.snmpInterfacesTotalCount)
 
-const snmpInterfacesQuery = async (payload: QueryParameters) => {
-  nodeStore.getNodeSnmpInterfaces({ id: route.params.id as string, queryParameters: payload })
+const loadData = async (params: QueryParameters = { limit: limit.value, offset: offset.value }) => {
+  nodeStore.getNodeSnmpInterfaces({ id: route.params.id as string, queryParameters: params })
 }
 
-const getSnmpInterfacesTotalCount = () => {
-  return nodeStore.snmpInterfacesTotalCount
+const onPage = (e: { first: number; rows: number }) => {
+  limit.value = e.rows
+  offset.value = e.first
+  loadData({ limit: e.rows, offset: e.first })
 }
 
-const { queryParameters, updateQueryParameters, payload } = useQueryParameters({
-  limit: 5,
-  offset: 0
-}, snmpInterfacesQuery, optionalPayload)
+onMounted(() => loadData())
 
 const snmpInterfaces = computed(() => nodeStore.snmpInterfaces)
 </script>

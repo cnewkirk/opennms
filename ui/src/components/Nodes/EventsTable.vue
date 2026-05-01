@@ -39,11 +39,12 @@
         </table>
       </div>
     </div>
-    <Pagination
-      :parameters="queryParameters"
-      @update-query-parameters="updateQueryParameters"
-      :query="getEvents"
-      :getTotalCount="getEventsTotalCount"
+    <Paginator
+      v-if="totalCount > 0"
+      :rows="limit"
+      :rowsPerPageOptions="[5, 10, 25, 50]"
+      :totalRecords="totalCount"
+      @page="onPage"
     />
   </div>
 </template>
@@ -52,31 +53,32 @@
   setup
   lang="ts"
 >
-import Pagination from '../Common/Pagination.vue'
+import Paginator from 'primevue/paginator'
 import SeverityBadge from '../Common/SeverityBadge.vue'
 import { useEventStore } from '@/stores/eventStore'
-import useQueryParameters from '@/composables/useQueryParams'
 import { Event, QueryParameters } from '@/types'
 
 const props = defineProps<{ nodeId: string; filterFiql?: string }>()
 
 const eventStore = useEventStore()
+const limit = ref(5)
+const offset = ref(0)
+const totalCount = computed(() => eventStore.totalCount)
 
-const getEvents = async (payload: QueryParameters) => {
-  const params: QueryParameters = { ...payload }
-  if (props.filterFiql) params._s = props.filterFiql
-  else params._s = `node.id==${props.nodeId}`
-  eventStore.getEvents(params)
+const loadData = async (params: QueryParameters = { limit: limit.value, offset: offset.value }) => {
+  const query: QueryParameters = { ...params }
+  if (props.filterFiql) query._s = props.filterFiql
+  else query._s = `node.id==${props.nodeId}`
+  await eventStore.getEvents(query)
 }
 
-const getEventsTotalCount = () => {
-  return eventStore.totalCount
+const onPage = (e: { first: number; rows: number }) => {
+  limit.value = e.rows
+  offset.value = e.first
+  loadData({ limit: e.rows, offset: e.first })
 }
 
-const { queryParameters, updateQueryParameters } = useQueryParameters({
-  limit: 5,
-  offset: 0
-}, getEvents)
+onMounted(() => loadData())
 
 const events = computed(() => eventStore.events)
 const getRowClass = (data: Event) => `row--${data.severity.toLowerCase()}`

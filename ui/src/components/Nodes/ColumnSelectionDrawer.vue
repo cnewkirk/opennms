@@ -1,13 +1,13 @@
 <template>
-  <FeatherDrawer
+  <Drawer
+    v-model:visible="nodeStructureStore.columnsDrawerState.visible"
+    header="Customize Columns"
+    position="right"
+    style="width: 55em"
     id="column-selection-drawer"
     data-test="column-selection-drawer"
-    v-model="nodeStructureStore.columnsDrawerState.visible"
-    :labels="{ close: 'close', title: 'Customize Columns' }"
-    hide-close
-    width="55em"
   >
-    <div class="feather-drawer-custom-padding">
+    <div class="drawer-content">
       <section>
         <h3>Customize the available columns</h3>
         <p>Select which columns you wish to showcase</p>
@@ -21,75 +21,76 @@
       >
         <template #item="{ index }">
           <div class="column-row">
-            <FeatherButton icon="Apps" text>
-              <FeatherIcon class="close-icon drag-handle" :icon="Apps" />
-            </FeatherButton>
-            <FeatherSelect
+            <Button text severity="secondary" class="drag-handle drag-btn" aria-label="Drag to reorder">
+              <i class="pi pi-bars" />
+            </Button>
+            <Select
               v-model="selectedColumns[index]"
               :options="getAvailableOptions(index)"
-              text-prop="name"
-              value-prop="value"
+              optionLabel="name"
               :placeholder="'Select column...'"
-              :label="`Column ${index + 1}`"
               class="columns-selector"
             />
-            <FeatherButton icon="Cancel" text @click="removeColumn(index)">
-              <FeatherIcon class="close-icon" :icon="Cancel" />
-            </FeatherButton>
+            <Button text severity="secondary" @click="removeColumn(index)" aria-label="Remove column">
+              <i class="pi pi-times" />
+            </Button>
           </div>
         </template>
       </Draggable>
       <div class="spacer-medium"></div>
       <div class="button-column">
-        <FeatherButton
-          secondary
+        <Button
+          severity="secondary"
+          outlined
           :disabled="selectedColumns.length >= 10"
           @click="addColumn"
         >
           Add Column
-        </FeatherButton>
-        <FeatherButton
-          secondary
+        </Button>
+        <Button
+          severity="secondary"
+          outlined
           @click="resetColumns"
         >
           Reset Columns
-        </FeatherButton>
-        <FeatherButton
-          primary
+        </Button>
+        <Button
           @click="customizeTable"
         >
           Customize Table
-        </FeatherButton>
+        </Button>
       </div>
     </div>
-  </FeatherDrawer>
+  </Drawer>
 </template>
 
 <script lang="ts" setup>
-import { FeatherButton } from '@featherds/button'
-import { FeatherDrawer } from '@featherds/drawer'
-import { FeatherIcon } from '@featherds/icon'
-import Apps from '@featherds/icon/navigation/Apps'
-import Cancel from '@featherds/icon/navigation/Cancel'
-import { FeatherSelect, ISelectItemType } from '@featherds/select'
+import Drawer from 'primevue/drawer'
+import Button from 'primevue/button'
+import Select from 'primevue/select'
 import Draggable from 'vuedraggable'
 import { saveNodePreferences } from '@/services/localStorageService'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
 import { NodeColumnSelectionItem } from '@/types'
 import { defaultColumns } from './utils'
 
+interface ColumnOption {
+  name: string
+  value: string
+}
+
 const nodeStructureStore = useNodeStructureStore()
 const columns = ref<NodeColumnSelectionItem[]>(defaultColumns)
-const selectedColumns = ref<ISelectItemType[]>([])
+const selectedColumns = ref<ColumnOption[]>([])
 
-const initializeSelectedColumns = (columns: NodeColumnSelectionItem[]) => {
-  selectedColumns.value = columns
+const initializeSelectedColumns = (cols: NodeColumnSelectionItem[]) => {
+  selectedColumns.value = cols
     .filter(col => col.selected)
     .sort((a, b) => a.order - b.order)
     .map(col => ({ name: col.label, value: col.id }))
 }
 
-const getAvailableOptions = (currentIndex: number) => {
+const getAvailableOptions = (currentIndex: number): ColumnOption[] => {
   const currentSelection = selectedColumns.value[currentIndex]?.value
 
   return columns.value
@@ -145,7 +146,7 @@ watch(() => nodeStructureStore.columns, (newColumns) => {
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
 
-.feather-drawer-custom-padding {
+.drawer-content {
   padding: 20px;
   height: 100%;
   overflow: auto;
@@ -159,45 +160,30 @@ watch(() => nodeStructureStore.columns, (newColumns) => {
   margin-bottom: 0.25rem;
 }
 
-.footer {
-  display: flex;
-  padding-top: 20px;
-}
-
 .column-row {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem;
   width: 80%;
   margin-bottom: 1rem;
   border: 1px solid var($border-on-surface);
-  padding-left: 10px;
-  padding-top: 3px;
-  padding-bottom: 3px;
+  padding: 4px 8px;
   border-radius: vars.$border-radius-surface;
 }
 
-.column-header {
-  font-weight: bold;
-  width: 100px;
+.drag-btn {
+  cursor: grab;
+  padding: 0.25rem;
 }
 
 .columns-selector {
-    width: 80%;
+  flex: 1;
 }
 
-:deep(.feather-input-sub-text) {
-    display: none;
-}
-
-.button-column{
+.button-column {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  align-items:flex-start;
-
- :deep(.btn + .btn) {
-    margin-left: 0 !important;
-  }
+  align-items: flex-start;
 }
 </style>
-
