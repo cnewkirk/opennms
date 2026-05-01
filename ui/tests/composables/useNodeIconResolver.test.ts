@@ -47,6 +47,21 @@ describe('useNodeIconResolver', () => {
     expect(resolveIconDataUri(makeVertex('rack-pdu-01'), 'NORMAL')).toBe('data:uri:pdu:#f59e0b')
   })
 
+  test('built-in pattern: firewall label resolves to firewall', () => {
+    const { resolveIconDataUri } = useNodeIconResolver()
+    expect(resolveIconDataUri(makeVertex('fw-edge-01'), 'NORMAL')).toBe('data:uri:firewall:#f59e0b')
+  })
+
+  test('built-in pattern: load-balancer label resolves to load-balancer', () => {
+    const { resolveIconDataUri } = useNodeIconResolver()
+    expect(resolveIconDataUri(makeVertex('lb-prod'), 'NORMAL')).toBe('data:uri:load-balancer:#f59e0b')
+  })
+
+  test('built-in pattern: ups label resolves to ups', () => {
+    const { resolveIconDataUri } = useNodeIconResolver()
+    expect(resolveIconDataUri(makeVertex('rack-ups-01'), 'NORMAL')).toBe('data:uri:ups:#f59e0b')
+  })
+
   test('fallback: unknown label resolves to server', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
     expect(resolveIconDataUri(makeVertex('xyzzy-unknown-42'), 'NORMAL')).toBe('data:uri:server:#f59e0b')
@@ -85,6 +100,26 @@ describe('useNodeIconResolver', () => {
   test('MAJOR severity maps to orange (#f97316)', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
     expect(resolveIconDataUri(makeVertex('spine-01'), 'MAJOR')).toContain('#f97316')
+  })
+
+  test('MINOR severity maps to yellow (#eab308)', () => {
+    const { resolveIconDataUri } = useNodeIconResolver()
+    expect(resolveIconDataUri(makeVertex('spine-01'), 'MINOR')).toContain('#eab308')
+  })
+
+  test('WARNING severity maps to amber (#f59e0b)', () => {
+    const { resolveIconDataUri } = useNodeIconResolver()
+    expect(resolveIconDataUri(makeVertex('spine-01'), 'WARNING')).toContain('#f59e0b')
+  })
+
+  test('NORMAL severity maps to amber (#f59e0b)', () => {
+    const { resolveIconDataUri } = useNodeIconResolver()
+    expect(resolveIconDataUri(makeVertex('spine-01'), 'NORMAL')).toContain('#f59e0b')
+  })
+
+  test('INDETERMINATE severity maps to gray (#6b7280)', () => {
+    const { resolveIconDataUri } = useNodeIconResolver()
+    expect(resolveIconDataUri(makeVertex('spine-01'), 'INDETERMINATE')).toContain('#6b7280')
   })
 
   test('null severity falls back to default cyan (#06b6d4)', () => {
