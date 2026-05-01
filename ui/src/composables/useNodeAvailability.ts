@@ -23,6 +23,7 @@
 import { getNodeAvailabilityPercentage, getNodeById } from '@/services/nodeService'
 import { getOutages } from '@/services/outageService'
 import { NodeAvailability, Outage } from '@/types'
+import { ref } from 'vue'
 import { sub } from 'date-fns'
 
 export interface ChartSegment {
@@ -95,6 +96,7 @@ const useNodeAvailability = (nodeId: string) => {
   const downSegmentMeta = ref<DownSegmentMeta[]>([])
   const loading = ref(true)
   const error = ref<string | null>(null)
+  const outages = ref<Outage[]>([])
 
   const fetch = async () => {
     loading.value = true
@@ -131,8 +133,9 @@ const useNodeAvailability = (nodeId: string) => {
     }
 
     availability.value = avResult
-    const outages = outageResult ? outageResult.outage : []
-    const result = buildAvailabilityChartData(avResult, outages, windowStart, now)
+    const fetchedOutages = outageResult ? outageResult.outage : []
+    outages.value = fetchedOutages
+    const result = buildAvailabilityChartData(avResult, fetchedOutages, windowStart, now)
     chartData.value = result
     downSegmentMeta.value = result.downSegmentMeta
     loading.value = false
@@ -140,7 +143,7 @@ const useNodeAvailability = (nodeId: string) => {
 
   fetch()
 
-  return { availability, chartData, downSegmentMeta, loading, error }
+  return { availability, chartData, downSegmentMeta, outages, loading, error }
 }
 
 export default useNodeAvailability
