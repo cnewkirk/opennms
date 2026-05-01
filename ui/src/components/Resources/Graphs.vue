@@ -8,10 +8,10 @@
     <div class="feather-col-11">
       <div class="controls">
         <TimeControls @updateTime="updateTime" />
-        <FeatherInput
+        <InputText
           v-if="!singleGraphDefinition"
           class="search-input"
-          label="Search"
+          placeholder="Search"
           v-model="searchVal"
           @update:modelValue="searchHandler"
         />
@@ -34,7 +34,7 @@ import GraphContainer from './GraphContainer.vue'
 import TimeControls from './TimeControls.vue'
 import { sub, getUnixTime } from 'date-fns'
 import { StartEndTime } from '@/types'
-import { FeatherInput } from '@featherds/input'
+import InputText from 'primevue/inputtext'
 import useSpinner from '@/composables/useSpinner'
 import { UpdateModelFunction } from '@/types'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'

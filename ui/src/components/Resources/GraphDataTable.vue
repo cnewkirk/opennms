@@ -1,16 +1,14 @@
 <template>
   <div id="wrap">
     <div class="data-controls">
-      <FeatherCheckbox
-        :modelValue="hideNaNRows"
-        @update:modelValue="() => hideNaNRows = !hideNaNRows"
-        >Hide empty rows</FeatherCheckbox
-      >
-      <FeatherCheckbox
-        :modelValue="displayRawValues"
-        @update:modelValue="valueDisplayHandler"
-        >Raw values</FeatherCheckbox
-      >
+      <label class="checkbox-label">
+        <Checkbox v-model="hideNaNRows" binary />
+        Hide empty rows
+      </label>
+      <label class="checkbox-label">
+        <Checkbox v-model="displayRawValues" binary @change="valueDisplayHandler" />
+        Raw values
+      </label>
       <div class="export-buttons">
         <button class="export-btn" @click="exportCSV">CSV</button>
         <button class="export-btn" @click="exportJSON">JSON</button>
@@ -67,7 +65,7 @@
   lang="ts"
 >
 import { ConvertedGraphData, GraphMetricsResponse } from '@/types'
-import { FeatherCheckbox } from '@featherds/checkbox'
+import Checkbox from 'primevue/checkbox'
 import { format } from 'd3'
 import { PropType } from 'vue'
 
@@ -127,7 +125,7 @@ const getColumnFromMetricName = (metricName: string): number[] => {
   return []
 }
 
-const valueDisplayHandler = () => { displayRawValues.value = !displayRawValues.value }
+const valueDisplayHandler = () => { /* toggled via v-model */ }
 
 function getExportRows() {
   const headers = ['Date/Time', ...visibleMetrics.value.map(m => getHeaderFromMetricName(m.name as string) || m.name as string)]
@@ -229,6 +227,15 @@ function highlightTableText() {
     align-items: center;
     gap: 16px;
     margin: 10px 0px -4px 18px;
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      user-select: none;
+    }
   }
 
   .export-buttons {
