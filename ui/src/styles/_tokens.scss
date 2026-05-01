@@ -10,6 +10,7 @@
 // overridden in opennms-feather-styles.scss for our zinc/blue-gray palette.
 
 @use "sass:string";
+@use '@/styles/vars' as _local-vars;
 
 @function prefix($name) {
   @return string.unquote("--feather-#{$name}");
@@ -70,5 +71,5 @@ $spacing-xxl: prefix(spacing-xxl);
 $zindex-dropdown: prefix(zindex-dropdown);
 $zindex-sticky:   prefix(zindex-sticky);
 
-// Border radius (kept for backward compat; vars.scss is preferred for new code)
-$border-radius-surface: prefix(border-radius-surface);
+// Border radius — NOT a Feather CSS var; re-exported from vars.scss for backward compat
+$border-radius-surface: _local-vars.$border-radius-surface;
