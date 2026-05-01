@@ -18,6 +18,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Path("path-outages")
@@ -79,6 +80,7 @@ public class PathOutageRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Create or update a path outage", operationId = "savePathOutage")
+    @Transactional
     public Response savePathOutage(PathOutageDTO dto, @Context SecurityContext sc, @Context UriInfo uriInfo) {
         if (!sc.isUserInRole(Authentication.ROLE_ADMIN)) {
             return Response.status(Response.Status.FORBIDDEN).build();
@@ -89,25 +91,31 @@ public class PathOutageRestService {
             return Response.status(Response.Status.BAD_REQUEST)
                 .entity("Node " + dto.getNodeId() + " not found").build();
         }
-        boolean isNew = (m_pathOutageDao.get(dto.getNodeId()) == null);
-        OnmsPathOutage entity = new OnmsPathOutage(
-            node,
-            InetAddressUtils.addr(dto.getCriticalPathIp()),
-            dto.getCriticalPathServiceName()
-        );
-        m_pathOutageDao.saveOrUpdate(entity);
-        if (isNew) {
+        OnmsPathOutage existing = m_pathOutageDao.get(dto.getNodeId());
+        if (existing != null) {
+            // Update: modify the existing managed entity in-session
+            existing.setCriticalPathIp(InetAddressUtils.addr(dto.getCriticalPathIp()));
+            existing.setCriticalPathServiceName(dto.getCriticalPathServiceName());
+            m_pathOutageDao.saveOrUpdate(existing);
+            return Response.ok(toDto(existing)).build();
+        } else {
+            // Insert: use save() to force INSERT on a foreign-key-id entity
+            OnmsPathOutage entity = new OnmsPathOutage(
+                node,
+                InetAddressUtils.addr(dto.getCriticalPathIp()),
+                dto.getCriticalPathServiceName()
+            );
+            m_pathOutageDao.save(entity);
             return Response.created(uriInfo.getRequestUriBuilder()
                 .path(String.valueOf(dto.getNodeId())).build())
                 .entity(toDto(entity)).build();
-        } else {
-            return Response.ok(toDto(entity)).build();
         }
     }
 
     @DELETE
     @Path("{nodeId}")
     @Operation(summary = "Remove path outage configuration for a node", operationId = "deletePathOutage")
+    @Transactional
     public Response deletePathOutage(@PathParam("nodeId") int nodeId, @Context SecurityContext sc) {
         if (!sc.isUserInRole(Authentication.ROLE_ADMIN)) {
             return Response.status(Response.Status.FORBIDDEN).build();
