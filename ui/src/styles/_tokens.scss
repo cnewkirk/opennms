@@ -1,0 +1,74 @@
+// src/styles/_tokens.scss
+//
+// Local replacement for @featherds/styles/themes/variables.
+// Declares the same SCSS variable names so call sites using var($surface) etc.
+// need only change their @import path, not their code.
+//
+// The --feather-* CSS custom property values are provided at runtime by:
+//   main.ts → import '@featherds/styles/themes/open-light.css'
+//   main.ts → import '@featherds/styles/themes/open-dark.css'
+// overridden in opennms-feather-styles.scss for our zinc/blue-gray palette.
+
+@use "sass:string";
+
+@function prefix($name) {
+  @return string.unquote("--feather-#{$name}");
+}
+
+// Surface / background
+$background:   prefix(background);
+$surface:      prefix(surface);
+$surface-dark: prefix(surface-dark);
+
+// Text
+$primary-text-on-surface:   prefix(primary-text-on-surface);
+$secondary-text-on-surface: prefix(secondary-text-on-surface);
+$disabled-text-on-surface:  prefix(disabled-text-on-surface);
+$primary-text-on-color:     prefix(primary-text-on-color);
+
+// Borders
+$border-on-surface:       prefix(border-on-surface);
+$border-light-on-surface: prefix(border-light-on-surface);
+
+// Brand / semantic colours
+$primary:          prefix(primary);
+$primary-variant:  prefix(primary-variant);
+$secondary:        prefix(secondary);
+$secondary-variant: prefix(secondary-variant);
+$error:            prefix(error);
+$success:          prefix(success);
+$warning:          prefix(warning);
+$major:            prefix(major);
+$minor:            prefix(minor);
+$indeterminate:    prefix(indeterminate);
+$cleared:          prefix(cleared);
+
+// Interaction
+$clickable-normal:   prefix(clickable-normal);
+$clickable-selected: prefix(clickable-selected);
+$clickable-visited:  prefix(clickable-visited);
+
+// Shades
+$shade-1: prefix(shade-1);
+$shade-2: prefix(shade-2);
+$shade-3: prefix(shade-3);
+$shade-4: prefix(shade-4);
+
+// Typography
+$font-family: prefix(font-family);
+
+// Spacing
+$spacing-xxs: prefix(spacing-xxs);
+$spacing-xs:  prefix(spacing-xs);
+$spacing-s:   prefix(spacing-s);
+$spacing-m:   prefix(spacing-m);
+$spacing-l:   prefix(spacing-l);
+$spacing-xl:  prefix(spacing-xl);
+$spacing-xxl: prefix(spacing-xxl);
+
+// z-index
+$zindex-dropdown: prefix(zindex-dropdown);
+$zindex-sticky:   prefix(zindex-sticky);
+
+// Border radius (kept for backward compat; vars.scss is preferred for new code)
+$border-radius-surface: prefix(border-radius-surface);
