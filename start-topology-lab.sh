@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # start-topology-lab.sh
-# Spins up a 5-node leaf/spine topology lab alongside test-opennms.
-# Nodes run FRR (OSPF + ISIS) + lldpd (LLDP) + net-snmp for EnLinkd testing.
+# Spins up a 7-node leaf/spine/host topology lab alongside test-opennms.
+# Spine/leaf nodes run FRR (OSPF + ISIS) + lldpd + net-snmp for EnLinkd testing.
+# Host nodes run lldpd + net-snmp only (dual-homed to leaf pair, no routing).
 #
 # Usage:
 #   ./start-topology-lab.sh             # start lab (teardown + rebuild if running)
@@ -30,9 +31,11 @@ done
 NODES=(
   "topo-spine-01 10.100.0.11 spine topo-s1-l1:eth1:10.101.1.1 topo-s1-l2:eth2:10.101.2.1 topo-s1-l3:eth3:10.101.3.1"
   "topo-spine-02 10.100.0.12 spine topo-s2-l1:eth1:10.101.4.1 topo-s2-l2:eth2:10.101.5.1 topo-s2-l3:eth3:10.101.6.1"
-  "topo-leaf-01  10.100.0.21 leaf  topo-s1-l1:eth1:10.101.1.2 topo-s2-l1:eth2:10.101.4.2"
-  "topo-leaf-02  10.100.0.22 leaf  topo-s1-l2:eth1:10.101.2.2 topo-s2-l2:eth2:10.101.5.2"
-  "topo-leaf-03  10.100.0.23 leaf  topo-s1-l3:eth1:10.101.3.2 topo-s2-l3:eth2:10.101.6.2"
+  "topo-leaf-01  10.100.0.21 leaf  topo-s1-l1:eth1:10.101.1.2 topo-s2-l1:eth2:10.101.4.2 topo-l1-h1:eth3:10.102.1.1"
+  "topo-leaf-02  10.100.0.22 leaf  topo-s1-l2:eth1:10.101.2.2 topo-s2-l2:eth2:10.101.5.2 topo-l2-h1:eth3:10.102.2.1 topo-l2-h2:eth4:10.102.3.1"
+  "topo-leaf-03  10.100.0.23 leaf  topo-s1-l3:eth1:10.101.3.2 topo-s2-l3:eth2:10.101.6.2 topo-l3-h2:eth3:10.102.4.1"
+  "topo-host-01  10.100.0.31 host  topo-l1-h1:eth1:10.102.1.2 topo-l2-h1:eth2:10.102.2.2"
+  "topo-host-02  10.100.0.32 host  topo-l2-h2:eth1:10.102.3.2 topo-l3-h2:eth2:10.102.4.2"
 )
 
 MGMT_NET="topology-mgmt"
@@ -44,6 +47,10 @@ P2P_NETS=(
   "topo-s2-l1:10.101.4.0/30"
   "topo-s2-l2:10.101.5.0/30"
   "topo-s2-l3:10.101.6.0/30"
+  "topo-l1-h1:10.102.1.0/30"
+  "topo-l2-h1:10.102.2.0/30"
+  "topo-l2-h2:10.102.3.0/30"
+  "topo-l3-h2:10.102.4.0/30"
 )
 
 # ---------------------------------------------------------------------------
@@ -113,6 +120,7 @@ interface eth0 6 1000000000
 interface eth1 6 1000000000
 interface eth2 6 1000000000
 interface eth3 6 1000000000
+interface eth4 6 1000000000
 SNMPD
 
   # ---- entrypoint.sh ----
@@ -144,6 +152,11 @@ fi
 # Start lldpd as AgentX subagent (-x = AgentX)
 lldpd -x &
 sleep 1
+
+# Hosts don't run FRR — just keep the container alive
+if [[ "${ROLE}" == "host" ]]; then
+  exec tail -f /dev/null
+fi
 
 # Start FRR (zebra + ospfd + isisd via watchfrr, same as docker-start)
 source /usr/lib/frr/frrcommon.sh
@@ -192,14 +205,13 @@ for entry in "${P2P_NETS[@]}"; do
 done
 
 # ---------------------------------------------------------------------------
-# Phase 2b: Configure bridge multicast forwarding for LLDP
+# Phase 2b: Collect bridge names for LLDP forwarding (applied after Phase 4)
 # ---------------------------------------------------------------------------
 # Linux bridges drop IEEE reserved multicast (01:80:c2:00:00:00-0f) by default.
 # LLDP uses 01:80:c2:00:00:0e (bit 14 = 0x4000 in group_fwd_mask).
 # Multicast snooping must also be disabled (no IGMP querier in lab).
-# This must be done inside the podman VM via `podman machine ssh`.
-echo ""
-echo "==> [2b] Configuring bridge multicast forwarding for LLDP..."
+# NOTE: podman resets bridge settings when containers attach, so we apply
+# these settings after Phase 4 (container startup), not here.
 
 ALL_NETS=("${MGMT_NET}")
 for entry in "${P2P_NETS[@]}"; do
@@ -213,14 +225,8 @@ for net in "${ALL_NETS[@]}"; do
   if [[ -n "$br" ]]; then
     BRIDGE_CMDS+="echo 0 > /sys/class/net/${br}/bridge/multicast_snooping 2>/dev/null;"
     BRIDGE_CMDS+="echo 0x4000 > /sys/class/net/${br}/bridge/group_fwd_mask 2>/dev/null;"
-    echo "    configured LLDP forwarding: ${net} -> ${br}"
   fi
 done
-
-if [[ -n "$BRIDGE_CMDS" ]]; then
-  podman machine ssh -- "bash -c '${BRIDGE_CMDS}exit 0'" 2>/dev/null || \
-    echo "    WARNING: could not configure bridge multicast (rootless/non-VM mode?)"
-fi
 
 # ---------------------------------------------------------------------------
 # Phase 3: Stage per-node FRR configs
@@ -535,7 +541,7 @@ router isis FABRIC
 !
 FRR
 
-echo "    FRR configs staged for all 5 nodes."
+echo "    FRR configs staged for all 5 routing nodes."
 
 # ---------------------------------------------------------------------------
 # Phase 4: Start containers
@@ -566,16 +572,36 @@ for node_def in "${NODES[@]}"; do
     net_args+=("--network" "${net}:interface_name=${iface},ip=${ip}")
   done
 
+  # Hosts don't run FRR — skip the config bind mount
+  frr_vol_arg=()
+  if [[ "${role}" != "host" ]]; then
+    frr_vol_arg=("-v" "${frr_dir}:/etc/frr:ro")
+  fi
+
   podman run -d --privileged \
     --name "${name}" \
     --hostname "${hostname}" \
     -e "ROLE=${role}" \
-    -v "${frr_dir}:/etc/frr:ro" \
+    "${frr_vol_arg[@]}" \
     "${net_args[@]}" \
     "${TOPO_IMAGE}"
 
   echo "    started: ${name} (mgmt: ${mgmt_ip}, role: ${role})"
 done
+
+# ---------------------------------------------------------------------------
+# Phase 4b: Apply bridge multicast forwarding for LLDP
+# ---------------------------------------------------------------------------
+# Applied after container startup because podman resets bridge settings when
+# containers attach to networks.
+echo ""
+echo "==> [4b] Configuring bridge multicast forwarding for LLDP..."
+
+if [[ -n "$BRIDGE_CMDS" ]]; then
+  podman machine ssh -- "bash -c '${BRIDGE_CMDS}exit 0'" 2>/dev/null && \
+    echo "    LLDP forwarding enabled on ${#ALL_NETS[@]} bridges" || \
+    echo "    WARNING: could not configure bridge multicast (rootless/non-VM mode?)"
+fi
 
 # ---------------------------------------------------------------------------
 # Phase 5: Attach test-opennms to management network
@@ -632,7 +658,7 @@ echo "    collectd reload triggered"
 # appearing in the topology view.
 STALE_IDS=$(PGPASSWORD=notdefault psql -h localhost -p 5432 -U opennms opennms -tAq \
   -c "SELECT nodeid FROM node WHERE foreignsource NOT IN ('Topology-Lab','selfmonitor')
-      AND (nodelabel ILIKE 'spine-%' OR nodelabel ILIKE 'leaf-%');" 2>/dev/null || true)
+      AND (nodelabel ILIKE 'spine-%' OR nodelabel ILIKE 'leaf-%' OR nodelabel ILIKE 'host-%');" 2>/dev/null || true)
 if [[ -n "$STALE_IDS" ]]; then
   for id in $STALE_IDS; do
     curl -s -o /dev/null -u admin:notdefault -X DELETE \
@@ -690,6 +716,20 @@ cat > "${REQ_FILE}" <<'REQUISITION'
     </interface>
     <category name="Topology-Lab"/>
   </node>
+  <node node-label="host-01" foreign-id="topo-host-01">
+    <interface ip-addr="10.100.0.31" snmp-primary="P" status="1">
+      <monitored-service service-name="SNMP"/>
+      <monitored-service service-name="ICMP"/>
+    </interface>
+    <category name="Topology-Lab"/>
+  </node>
+  <node node-label="host-02" foreign-id="topo-host-02">
+    <interface ip-addr="10.100.0.32" snmp-primary="P" status="1">
+      <monitored-service service-name="SNMP"/>
+      <monitored-service service-name="ICMP"/>
+    </interface>
+    <category name="Topology-Lab"/>
+  </node>
 </model-import>
 REQUISITION
 
@@ -715,7 +755,7 @@ PGPASSWORD=notdefault psql -h localhost -p 5432 -U opennms opennms -q \
   -c "UPDATE snmpinterface SET snmpifspeed = 1000000000
       FROM node WHERE node.nodeid = snmpinterface.nodeid
         AND node.foreignsource = 'Topology-Lab'
-        AND snmpinterface.snmpifname IN ('eth0','eth1','eth2','eth3')
+        AND snmpinterface.snmpifname IN ('eth0','eth1','eth2','eth3','eth4')
         AND snmpinterface.snmpifspeed > 1000000000;" 2>/dev/null || true
 echo "    patched snmpifspeed to 1 Gbps for all topology interfaces"
 
