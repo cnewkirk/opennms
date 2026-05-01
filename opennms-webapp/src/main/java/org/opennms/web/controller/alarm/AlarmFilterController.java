@@ -84,11 +84,8 @@ public class AlarmFilterController extends MultiActionController implements Init
     }
 
     public ModelAndView list(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        OnmsFilterFavorite favorite = getFavorite(
-                request.getParameter("favoriteId"),
-                request.getRemoteUser(),
-                FilterUtil.parse(request.getQueryString() == null ? "" : request.getQueryString()));
-        return list(request, favorite);
+        response.sendRedirect(request.getContextPath() + "/ui/alarms");
+        return null;
     }
 
     private ModelAndView list(HttpServletRequest request, OnmsFilterFavorite favorite) {
@@ -102,11 +99,8 @@ public class AlarmFilterController extends MultiActionController implements Init
 
     // index view
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        List<OnmsFilterFavorite> userFilterList = favoriteService.getFavorites(request.getRemoteUser(), OnmsFilterFavorite.Page.ALARM);
-        ModelAndView modelAndView = new ModelAndView("alarm/index");
-        modelAndView.addObject("favorites", userFilterList.toArray());
-        modelAndView.addObject("callback", getFilterCallback());
-        return modelAndView;
+        response.sendRedirect(request.getContextPath() + "/ui/alarms");
+        return null;
     }
 
     public ModelAndView createFavorite(HttpServletRequest request, HttpServletResponse response) throws Exception {
