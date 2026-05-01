@@ -697,7 +697,7 @@ for tag in nodes:
     if not nid:
         continue
     fs_val = fs.group(1) if fs else ''
-    if fs_val not in ('Topology-Lab', 'selfmonitor'):
+    if fs_val not in ('Topology-Lab', 'selfmonitor', 'Self'):
         stale.append(nid.group(1))
 print(' '.join(stale))
 " 2>/dev/null || true)
@@ -823,7 +823,7 @@ for tag in nodes:
     if not nid:
         continue
     fs_val = fs.group(1) if fs else ''
-    if fs_val not in ('Topology-Lab', 'selfmonitor'):
+    if fs_val not in ('Topology-Lab', 'selfmonitor', 'Self'):
         stale.append(nid.group(1))
 print(' '.join(stale))
 " 2>/dev/null || true)
