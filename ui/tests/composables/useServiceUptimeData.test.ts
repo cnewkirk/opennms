@@ -106,4 +106,11 @@ describe('buildOutageSegments', () => {
     }
     expect(buildOutageSegments([outage], '10.0.0.1', 'ICMP', WIN_START, WIN_END)).toEqual([])
   })
+
+  test('uses id as outageId when outageId is absent', () => {
+    const { outageId: _, ...noOutageId } = base
+    const outage: Outage = { ...noOutageId, ifLostService: WIN_START + 1000, ifRegainedService: WIN_START + 2000 }
+    const [seg] = buildOutageSegments([outage], '10.0.0.1', 'ICMP', WIN_START, WIN_END)
+    expect(seg.outageId).toBe(1)
+  })
 })

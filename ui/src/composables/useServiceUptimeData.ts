@@ -41,7 +41,7 @@ export const buildOutageSegments = (
 ): OutageSegment[] => {
   const duration = windowEnd - windowStart
   return outages
-    .filter(o => o.ipAddress === ip && o.serviceName === serviceName && o.ifLostService != null)
+    .filter(o => o.ipAddress === ip && !!o.serviceName && o.serviceName === serviceName && o.ifLostService != null)
     .map(o => {
       const start = Math.max(o.ifLostService!, windowStart)
       const end = o.ifRegainedService != null
@@ -95,7 +95,7 @@ const useServiceUptimeData = (
   onMounted(async () => {
     const result = await API.getResourceById(resourceId.value)
     if (result) {
-      const attrs = Object.keys((result as any).rrdGraphAttributes ?? {})
+      const attrs = Object.keys(result.rrdGraphAttributes ?? {})
       if (attrs.length > 0) rrdAttribute.value = attrs[0]
     }
     resourceExists.value = result !== null
