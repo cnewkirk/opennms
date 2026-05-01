@@ -56,6 +56,9 @@ export const useNodeIconResolver = () => {
   ): string => {
     const label = vertex.label ?? ''
 
+    // Priority 0: explicit icon set by the API (future first-class support)
+    if (vertex.iconKey) return vertex.iconKey
+
     // Priority 1: user-defined name pattern rules (pre-compiled in store)
     for (const rule of viewStore.compiledNamePatternRules) {
       if (rule.regex.test(label)) return rule.iconKey
