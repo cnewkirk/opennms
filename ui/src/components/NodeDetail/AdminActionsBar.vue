@@ -76,7 +76,7 @@ const rescan = async () => {
 }
 
 const updateSnmpUrl = computed(() => `/opennms/admin/updateSnmp.jsp?node=${props.nodeId}&ipaddr=${resolvedSnmpIp.value}`)
-const scheduleOutageUrl = computed(() => `/opennms/admin/sched-outages/editoutage.jsp`)
+const scheduleOutageUrl = computed(() => `/opennms/ui/scheduled-outages`)
 const editRequisitionUrl = computed(
   () => `/opennms/admin/ng-requisitions/index.jsp#/requisitions/${props.foreignSource}`
 )
