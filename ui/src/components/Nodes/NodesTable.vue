@@ -283,7 +283,7 @@ import {
   UpdateModelFunction
 } from '@/types'
 import { MainMenu } from '@/types/mainMenu'
-import { IAutocompleteItemType } from '@featherds/autocomplete'
+type IAutocompleteItemType = { [k: string]: unknown }
 import { computed, nextTick, reactive, ref, watch } from 'vue'
 import ColumnSelectionDrawer from './ColumnSelectionDrawer.vue'
 import FlowTooltipCell from './FlowTooltipCell.vue'

@@ -92,7 +92,7 @@ import Button from 'primevue/button'
 import { ref } from 'vue'
 import ExtendedSearchPanel from './ExtendedSearchPanel.vue'
 import { useNodeStructureStore } from '@/stores/nodeStructureStore'
-import { IAutocompleteItemType } from '@featherds/autocomplete'
+type IAutocompleteItemType = { [k: string]: unknown }
 
 const searchTimeout = ref<number>(-1)
 const categoriesLoading = ref(false)
