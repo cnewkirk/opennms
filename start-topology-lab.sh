@@ -629,10 +629,26 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Phase 5b: Configure 30-second data collection step (lab-only override)
+# Phase 5b: Configure 30-second data collection step + SNMP range
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [5b] Configuring 30s SNMP collection step in OpenNMS..."
+echo "==> [5b] Configuring SNMP range and 30s collection step in OpenNMS..."
+
+# Extend the SNMP port-161 range to cover the full management subnet so that
+# host nodes (.31, .32) don't fall through to the default port-1161 config.
+podman exec test-opennms sed -i \
+  's|range begin="10.100.0.10" end="10.100.0.25"|range begin="10.100.0.10" end="10.100.0.99"|' \
+  /opt/opennms/etc/snmp-config.xml
+echo "    snmp-config.xml: extended range to 10.100.0.10–.99 (port 161)"
+
+# Ensure EnLinkd logs at WARN so that debug-mode leftovers from interactive
+# sessions don't flood the executor thread pool's log appender and slow
+# collection. The rescan intervals are 30s; if logging itself takes CPU cycles
+# the queue backs up and host nodes never get scheduled.
+podman exec test-opennms sed -i \
+  's|key="enlinkd" value="[A-Z]*"|key="enlinkd" value="WARN"|' \
+  /opt/opennms/etc/log4j2.xml
+echo "    log4j2.xml: enlinkd logger -> WARN"
 
 # Patch collectd-configuration.xml: 300s → 30s SNMP service interval
 podman exec test-opennms sed -i \
@@ -661,18 +677,38 @@ curl -s -u admin:notdefault \
   >/dev/null
 echo "    collectd reload triggered"
 
-# Purge stale topology nodes from any prior foreign-source name variants
-# (e.g. lowercase 'topology-lab' vs 'Topology-Lab') to prevent duplicates
-# appearing in the topology view.
-STALE_IDS=$(PGPASSWORD=notdefault psql -h localhost -p 5432 -U opennms opennms -tAq \
-  -c "SELECT nodeid FROM node WHERE foreignsource NOT IN ('Topology-Lab','selfmonitor')
-      AND (nodelabel ILIKE 'spine-%' OR nodelabel ILIKE 'leaf-%' OR nodelabel ILIKE 'host-%');" 2>/dev/null || true)
+# Purge stale nodes via REST API (psql port is not mapped, so we use the REST
+# API instead). Remove every node that is NOT from a known foreign source —
+# this catches prior-run Topology-Lab remnants, auto-discovered duplicates,
+# and extraneous test nodes (e.g. UI-Test-Node at 192.0.2.1) that would fill
+# the EnLinkd executor queue and starve host nodes from getting LLDP collected.
+echo "    Scanning for stale nodes via REST..."
+STALE_IDS=$(curl -s -u admin:notdefault \
+  "http://localhost:8980/opennms/rest/nodes?limit=500" 2>/dev/null | \
+  python3 -c "
+import sys, re
+data = sys.stdin.read()
+# Parse foreignSource and id from XML attribute pairs
+nodes = re.findall(r'<node[^>]+>', data)
+stale = []
+for tag in nodes:
+    fs = re.search(r'foreignSource=\"([^\"]*)\"', tag)
+    nid = re.search(r'\bid=\"([^\"]*)\"', tag)
+    if not nid:
+        continue
+    fs_val = fs.group(1) if fs else ''
+    if fs_val not in ('Topology-Lab', 'selfmonitor'):
+        stale.append(nid.group(1))
+print(' '.join(stale))
+" 2>/dev/null || true)
 if [[ -n "$STALE_IDS" ]]; then
-  for id in $STALE_IDS; do
+  for nid in $STALE_IDS; do
     curl -s -o /dev/null -u admin:notdefault -X DELETE \
-      "http://localhost:8980/opennms/rest/nodes/$id"
+      "http://localhost:8980/opennms/rest/nodes/${nid}"
   done
-  echo "    removed stale topology nodes: $STALE_IDS"
+  echo "    removed stale nodes: ${STALE_IDS}"
+else
+  echo "    no stale nodes found"
 fi
 
 # ---------------------------------------------------------------------------
@@ -767,6 +803,49 @@ PGPASSWORD=notdefault psql -h localhost -p 5432 -U opennms opennms -q \
         AND snmpinterface.snmpifspeed > 1000000000;" 2>/dev/null || true
 echo "    patched snmpifspeed to 1 Gbps for all topology interfaces"
 
+# Delete any auto-discovered nodes that EnLinkd created during the scan window.
+# EnLinkd processes LLDP neighbors from the leaf nodes and creates new node
+# records for anything it can't match to an existing provisioned node — these
+# duplicates then consume executor queue slots and starve host-01/host-02 from
+# getting their own LLDP collection scheduled. We delete them here and reload
+# EnLinkd so it starts fresh with only the 7 provisioned topology nodes.
+echo "    Cleaning up EnLinkd auto-discovered duplicate nodes..."
+AUTO_DISC=$(curl -s -u admin:notdefault \
+  "http://localhost:8980/opennms/rest/nodes?limit=500" 2>/dev/null | \
+  python3 -c "
+import sys, re
+data = sys.stdin.read()
+nodes = re.findall(r'<node[^>]+>', data)
+stale = []
+for tag in nodes:
+    fs = re.search(r'foreignSource=\"([^\"]*)\"', tag)
+    nid = re.search(r'\bid=\"([^\"]*)\"', tag)
+    if not nid:
+        continue
+    fs_val = fs.group(1) if fs else ''
+    if fs_val not in ('Topology-Lab', 'selfmonitor'):
+        stale.append(nid.group(1))
+print(' '.join(stale))
+" 2>/dev/null || true)
+if [[ -n "$AUTO_DISC" ]]; then
+  for nid in $AUTO_DISC; do
+    curl -s -o /dev/null -u admin:notdefault -X DELETE \
+      "http://localhost:8980/opennms/rest/nodes/${nid}"
+  done
+  echo "    deleted auto-discovered nodes: ${AUTO_DISC}"
+else
+  echo "    no auto-discovered nodes to clean up"
+fi
+
+# Reload EnLinkd after the cleanup so it starts a fresh collection cycle with
+# only the 7 provisioned nodes, clearing any queued tasks for deleted nodes.
+curl -s -u admin:notdefault \
+  -H "Content-Type: application/xml" \
+  -X POST "http://localhost:8980/opennms/rest/events" \
+  -d '<event><uei>uei.opennms.org/internal/reloadDaemonConfig</uei><parms><parm><parmName>daemonName</parmName><value>EnLinkd</value></parm></parms></event>' \
+  >/dev/null
+echo "    EnLinkd reloaded for clean topology collection"
+
 # ---------------------------------------------------------------------------
 # Phase 7: Wait for OSPF convergence
 # ---------------------------------------------------------------------------
@@ -797,6 +876,52 @@ if [[ "${CONVERGED}" == "false" ]]; then
   echo "--- spine-01 lldp neighbors ---" >&2
   podman exec topo-spine-01 lldpcli show neighbors >&2 || true
   exit 1
+fi
+
+# Wait for EnLinkd to establish topology links for host-01 and host-02.
+# Without this gate the script can declare success before the topology map
+# reflects the actual leaf-host connections.
+echo "    Waiting for host topology links in EnLinkd (cap: 120s)..."
+HOST_TOPO=false
+for i in $(seq 1 24); do
+  host_edges=$(curl -s -u admin:notdefault \
+    "http://localhost:8980/opennms/api/v2/graphs/enlinkd" 2>/dev/null | \
+    python3 -c "
+import sys, json, re
+try:
+    d = json.load(sys.stdin)
+    labels = {}
+    for g in d.get('graphs', []):
+        for v in g.get('vertices', []):
+            labels[v['id']] = v.get('label', '')
+    host_edges = 0
+    seen = set()
+    for g in d.get('graphs', []):
+        for e in g.get('edges', []):
+            src = e.get('source', {}).get('id', '')
+            tgt = e.get('target', {}).get('id', '')
+            pair = tuple(sorted([src, tgt]))
+            if pair in seen:
+                continue
+            seen.add(pair)
+            if 'host' in labels.get(src,'').lower() or 'host' in labels.get(tgt,'').lower():
+                host_edges += 1
+    print(host_edges)
+except:
+    print(0)
+" 2>/dev/null || echo 0)
+  if [[ "${host_edges}" -ge 2 ]]; then
+    HOST_TOPO=true
+    echo "    Host topology links established after $((i * 5))s (${host_edges} host edges)"
+    break
+  fi
+  printf "    ... waiting (%ds, host edges: %d/2)\r" "$((i * 5))" "${host_edges}"
+  sleep 5
+done
+echo ""
+
+if [[ "${HOST_TOPO}" == "false" ]]; then
+  echo "WARNING: Host topology links not established within 120s — topology map may be incomplete" >&2
 fi
 
 # ---------------------------------------------------------------------------
