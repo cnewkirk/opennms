@@ -132,7 +132,7 @@ const addBoard = () => {
 
 const deleteBoard = (i: number) => {
   config.value.wallboards.splice(i, 1)
-  selectedIndex.value = Math.min(selectedIndex.value, config.value.wallboards.length - 1)
+  selectedIndex.value = Math.max(0, Math.min(selectedIndex.value, config.value.wallboards.length - 1))
 }
 
 const updateSelectedBoard = (updated: WallboardEntry) => {

@@ -96,21 +96,27 @@ const pageSize = 25
 const currentPage = ref(0)
 const searchText = ref('')
 
+const escapeFiql = (val: string) => val.replace(/[,;()=!<>'"]/g, '')
+
 const loadEvents = async (offset = 0) => {
   loading.value = true
-  const params = {
-    limit: pageSize,
-    offset,
-    orderBy: 'eventTime',
-    order: 'desc' as any,
-    ...(searchText.value ? { _s: `nodeLabel==${searchText.value}*,uei==${searchText.value}*` } : {})
+  try {
+    const safe = escapeFiql(searchText.value)
+    const params = {
+      limit: pageSize,
+      offset,
+      orderBy: 'eventTime',
+      order: 'desc' as any,
+      ...(safe ? { _s: `nodeLabel==${safe}*,uei==${safe}*` } : {})
+    }
+    const result = await getEvents(params)
+    if (result) {
+      events.value = result.event ?? []
+      totalCount.value = result.totalCount ?? 0
+    }
+  } finally {
+    loading.value = false
   }
-  const result = await getEvents(params)
-  if (result) {
-    events.value = result.event ?? []
-    totalCount.value = result.totalCount ?? 0
-  }
-  loading.value = false
 }
 
 const onPage = (event: { first: number }) => {

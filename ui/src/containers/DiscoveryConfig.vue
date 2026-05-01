@@ -267,19 +267,21 @@ function titleFor(key: string): string {
 const load = async () => {
   loading.value = true
   loadError.value = false
-  const [cfg, locs, fss] = await Promise.all([
-    getDiscoveryConfig(),
-    getLocations(),
-    getForeignSources()
-  ])
-  loading.value = false
-  if (!cfg) {
+  try {
+    const [cfg, locs, fss] = await Promise.all([
+      getDiscoveryConfig(),
+      getLocations(),
+      getForeignSources()
+    ])
+    if (!cfg) { loadError.value = true; return }
+    config.value = cfg
+    locations.value = locs
+    foreignSources.value = fss
+  } catch {
     loadError.value = true
-    return
+  } finally {
+    loading.value = false
   }
-  config.value = cfg
-  locations.value = locs
-  foreignSources.value = fss
 }
 
 const saveConfig = async () => {

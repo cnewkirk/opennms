@@ -131,6 +131,7 @@ const tabVisited = reactive<Record<TopTabKey, boolean>>({
   network: false,
   metadata: false,
 })
+let _tabMounted = false
 
 const goToTab = (key: TopTabKey) => {
   activeTab.value = key
@@ -143,15 +144,18 @@ onMounted(() => {
   if (ACTIVITY_SUB_KEYS.includes(tabParam as any)) {
     activeTab.value = 'activity'
     router.replace({ query: { tab: 'activity', subtab: tabParam } })
+    _tabMounted = true
     return
   }
 
   if (TAB_KEYS.includes(tabParam as TopTabKey)) {
     activeTab.value = tabParam as TopTabKey
   }
+  _tabMounted = true
 })
 
 watch(activeTab, (key) => {
+  if (!_tabMounted) return
   tabVisited[key] = true
   if (key !== 'activity') {
     const { subtab, ...rest } = route.query
@@ -168,7 +172,7 @@ const activitySubTab = computed(() => {
 
 // ── Breadcrumbs / info ───────────────────────────────────────────────────────
 
-const homeUrl = computed<string>(() => menuStore.mainMenu.homeUrl)
+const homeUrl = computed<string>(() => menuStore.mainMenu?.homeUrl)
 const breadcrumbs = computed<BreadCrumb[]>(() => [
   { label: 'Home', to: homeUrl.value, isAbsoluteLink: true },
   { label: 'Nodes', to: '/nodes' },

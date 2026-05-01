@@ -42,6 +42,7 @@ import '@/styles/opennms-feather-styles.scss'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import { definePreset } from '@primevue/themes'
+import Tooltip from 'primevue/tooltip'
 import 'primeicons/primeicons.css'
 import '@/styles/primevue-theme-bridge.scss'
 
@@ -132,4 +133,5 @@ createApp({
   .use(createPinia())
   .use(PrimeVue, { theme: { preset: OpenNMSPreset, options: { darkModeSelector: '.open-dark' } } })
   .directive('date', dateFormatDirective)
+  .directive('tooltip', Tooltip)
   .mount('#app')

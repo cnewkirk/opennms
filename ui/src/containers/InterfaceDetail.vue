@@ -84,7 +84,7 @@ watch(activeTab, (name) => {
 
 const nodeLabel = computed(() => node.value?.label ?? nodeId)
 const outagesFiql = computed(() => `ipInterface.ipAddress==${ipAddress}`)
-const homeUrl = computed<string>(() => menuStore.mainMenu.homeUrl)
+const homeUrl = computed<string>(() => menuStore.mainMenu?.homeUrl)
 const breadcrumbs = computed<BreadCrumb[]>(() => [
   { label: 'Home', to: homeUrl.value, isAbsoluteLink: true },
   { label: 'Nodes', to: '/nodes' },
@@ -117,10 +117,9 @@ onMounted(async () => {
 
   loading.value = false
 
-  getNodeIpInterfaceServices(nodeId, ipAddress).then((result) => {
-    if (result) services.value = result.service
-    servicesLoading.value = false
-  })
+  getNodeIpInterfaceServices(nodeId, ipAddress)
+    .then((result) => { if (result) services.value = result.service })
+    .finally(() => { servicesLoading.value = false })
 })
 </script>
 

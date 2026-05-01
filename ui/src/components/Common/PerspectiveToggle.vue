@@ -3,18 +3,18 @@
   <div class="perspective-toggle-wrap">
     <div class="perspective-toggle" role="group" aria-label="View perspective">
       <button
+        v-tooltip.top="'Shows only active issues'"
         class="perspective-toggle__btn"
         :class="{ 'perspective-toggle__btn--active': store.perspective === 'problems' }"
-        :title="'Problems mode: shows only active issues'"
         @click="store.setPerspective('problems')"
       >
         <span class="perspective-toggle__filter-icon" aria-hidden="true">⊘</span>
         Problems
       </button>
       <button
+        v-tooltip.top="'Shows complete data'"
         class="perspective-toggle__btn"
         :class="{ 'perspective-toggle__btn--active': store.perspective === 'all' }"
-        :title="'All mode: shows complete data'"
         @click="store.setPerspective('all')"
       >All</button>
     </div>

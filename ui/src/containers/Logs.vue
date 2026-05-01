@@ -30,7 +30,7 @@ import { BreadCrumb } from '@/types'
 
 const logStore = useLogStore()
 const menuStore = useMenuStore()
-const homeUrl = computed<string>(() => menuStore.mainMenu.homeUrl)
+const homeUrl = computed<string>(() => menuStore.mainMenu?.homeUrl)
 
 const breadcrumbs = computed<BreadCrumb[]>(() => {
   return [

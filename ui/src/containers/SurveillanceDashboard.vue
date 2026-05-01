@@ -190,6 +190,7 @@ const clearSelection = () => {
 
 const onViewChange = (option: ViewOption | undefined) => {
   if (!option) return
+  if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null }
   activeViewName.value = String(option.value)
   clearSelection()
   loading.value = true

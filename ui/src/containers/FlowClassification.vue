@@ -237,10 +237,13 @@ const selectedGroup = ref<ClassificationGroup | null>(null)
 
 const loadGroups = async () => {
   groupsLoading.value = true
-  const result = await getGroups()
-  if (result !== false) groups.value = result
-  else showSnackBar({ msg: 'Failed to load classification groups.' })
-  groupsLoading.value = false
+  try {
+    const result = await getGroups()
+    if (result !== false) groups.value = result
+    else showSnackBar({ msg: 'Failed to load classification groups.' })
+  } finally {
+    groupsLoading.value = false
+  }
 }
 
 const selectGroup = (group: ClassificationGroup) => {
@@ -270,15 +273,18 @@ const loadRules = async (offset: number) => {
   if (!selectedGroup.value) return
   currentOffset = offset
   rulesLoading.value = true
-  const result = await getRules({
-    groupId: selectedGroup.value.id,
-    limit: pageSize,
-    offset,
-    query: ruleSearch.value || undefined,
-  })
-  rules.value = result.rules
-  totalRules.value = result.total
-  rulesLoading.value = false
+  try {
+    const result = await getRules({
+      groupId: selectedGroup.value.id,
+      limit: pageSize,
+      offset,
+      query: ruleSearch.value || undefined,
+    })
+    rules.value = result.rules
+    totalRules.value = result.total
+  } finally {
+    rulesLoading.value = false
+  }
 }
 
 const onPage = (e: { first: number }) => loadRules(e.first)

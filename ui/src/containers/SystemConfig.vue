@@ -108,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import { useMenuStore } from '@/stores/menuStore'
 import useRole from '@/composables/useRole'
@@ -122,8 +122,10 @@ const loading = ref(true)
 const error = ref(false)
 const info = ref<OnmsInfo | null>(null)
 const clientTime = ref(new Date().toString())
+let _clockTimer: ReturnType<typeof setInterval>
 
 onMounted(async () => {
+  _clockTimer = setInterval(() => { clientTime.value = new Date().toString() }, 1000)
   const result = await getSystemInfo()
   if (result === false) {
     error.value = true
@@ -133,7 +135,9 @@ onMounted(async () => {
   loading.value = false
 })
 
-const homeUrl = computed<string>(() => menuStore.mainMenu.homeUrl)
+onBeforeUnmount(() => clearInterval(_clockTimer))
+
+const homeUrl = computed<string>(() => menuStore.mainMenu?.homeUrl)
 
 const breadcrumbs = computed<BreadCrumb[]>(() => [
   { label: 'Home', to: homeUrl.value, isAbsoluteLink: true },

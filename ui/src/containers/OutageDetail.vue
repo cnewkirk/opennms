@@ -149,12 +149,15 @@ const breadcrumbs = computed<BreadCrumb[]>(() => [
 ])
 
 onMounted(async () => {
-  const result = await getOutage(id)
-  loading.value = false
-  if (!result) {
-    error.value = `No outage found with ID ${id}.`
-  } else {
-    outage.value = result
+  try {
+    const result = await getOutage(id)
+    if (!result) {
+      error.value = `No outage found with ID ${id}.`
+    } else {
+      outage.value = result
+    }
+  } finally {
+    loading.value = false
   }
 })
 </script>

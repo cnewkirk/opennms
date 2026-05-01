@@ -65,7 +65,7 @@
     <ChangeEventConfigSourceStatusDialog />
   </div>
   <div
-    v-else
+    v-else-if="!isLoading"
     class="not-found-container"
   >
     <p>No event configuration found.</p>
@@ -88,6 +88,7 @@ import { format } from 'date-fns-tz'
 const store = useEventConfigDetailStore()
 const router = useRouter()
 const route = useRoute()
+const isLoading = ref(true)
 
 const onAddEventClick = (source: EventConfigSource) => {
   const modificationStore = useEventModificationStore()
@@ -98,12 +99,16 @@ const onAddEventClick = (source: EventConfigSource) => {
 }
 
 onMounted(async () => {
-  if (route.params.id) {
-    await store.fetchSourceById(route.params.id as string)
-    store.refreshEventConfigEvents()
-    if (store.selectedSource) {
-      await store.fetchEventsBySourceId()
+  try {
+    if (route.params.id) {
+      await store.fetchSourceById(route.params.id as string)
+      store.refreshEventConfigEvents()
+      if (store.selectedSource) {
+        await store.fetchEventsBySourceId()
+      }
     }
+  } finally {
+    isLoading.value = false
   }
 })
 </script>

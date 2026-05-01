@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted } from 'vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'
@@ -119,6 +119,7 @@ const confirmDelete = () => {
 }
 
 onMounted(() => load())
+onBeforeUnmount(() => clearTimeout(debounceTimer))
 </script>
 
 <style lang="scss" scoped>

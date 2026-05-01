@@ -1,6 +1,6 @@
 <template>
   <div class="breadcrumbs subtitle2">
-    <template v-for="item,index of items" :key="item.label">
+    <template v-for="item,index of items" :key="index">
       <div class="link">
         <a v-if="item.isAbsoluteLink" :href="item.to">{{ item.label }}</a>
         <router-link v-else :to="item.to">{{ item.label }}</router-link>

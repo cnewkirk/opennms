@@ -8,7 +8,7 @@
       aria-live="polite"
     >
       <span class="snackbar__message">{{ message }}</span>
-      <button class="snackbar__dismiss" @click="hideSnackbar">Dismiss</button>
+      <button class="snackbar__dismiss" aria-label="Dismiss notification" @click="hideSnackbar">Dismiss</button>
     </div>
   </Transition>
 </template>

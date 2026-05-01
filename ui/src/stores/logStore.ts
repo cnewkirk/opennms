@@ -44,7 +44,7 @@ export const useLogStore = defineStore('logStore', () => {
  
   const getLogs = async () => {
     const resp = await API.getLogs()
-    logs.value = resp
+    logs.value = resp ?? []
   }
 
   const setReverseLog = async (reverse: boolean) => {

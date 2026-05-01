@@ -69,10 +69,10 @@ const nodeItems = computed(() => {
     { label: 'Sys Name', text: props.node?.sysName || EMPTY },
     { label: 'Sys Object ID', text: props.node?.sysObjectId || EMPTY },
     { label: 'Flows', text: flowsText(props.node) },
-    { label: 'Latitude/Longitude', text: `${props.node?.assetRecord.latitude ?? EMPTY} / ${props.node?.assetRecord.longitude ?? EMPTY}` },
-    { label: 'Asset Category', text: props.node?.assetRecord.category || EMPTY },
-    { label: 'Asset Description', text: props.node?.assetRecord.description || EMPTY },
-    { label: 'Maintenance Contract', text: props.node?.assetRecord.maintcontract || EMPTY }
+    { label: 'Latitude/Longitude', text: `${props.node?.assetRecord?.latitude ?? EMPTY} / ${props.node?.assetRecord?.longitude ?? EMPTY}` },
+    { label: 'Asset Category', text: props.node?.assetRecord?.category || EMPTY },
+    { label: 'Asset Description', text: props.node?.assetRecord?.description || EMPTY },
+    { label: 'Maintenance Contract', text: props.node?.assetRecord?.maintcontract || EMPTY }
   ]
 })
 

@@ -1,6 +1,6 @@
 <template>
   <Paginator
-    v-if="totalCount"
+    v-show="totalCount"
     class="pagination"
     :rows="pageSize"
     :totalRecords="totalCount"
@@ -40,15 +40,22 @@ const totalCount = computed(() => {
 })
 
 const onPage = (e: { first: number }) => {
-  const updatedParameters = { ...props.parameters, offset: e.first }
-  if (props.payload) {
-    props.query({ ...props.payload, queryParameters: updatedParameters })
-    return
-  }
-  props.query(updatedParameters)
+  runQuery({ ...props.parameters, offset: e.first })
 }
 
-onMounted(() => props.query(props.payload || props.parameters))
+const runQuery = (params = props.parameters) => {
+  if (props.payload) {
+    props.query({ ...props.payload, queryParameters: params })
+  } else {
+    props.query(params)
+  }
+}
+
+watch(() => props.parameters.limit, (newLimit, oldLimit) => {
+  if (newLimit !== oldLimit) runQuery({ ...props.parameters, offset: 0 })
+})
+
+onMounted(() => runQuery())
 </script>
 
 <style scoped lang="scss">

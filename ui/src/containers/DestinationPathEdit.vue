@@ -45,7 +45,7 @@
         </div>
         <div class="notif-card__body">
           <div v-if="path.targets.length === 0" class="notif-empty">No targets defined.</div>
-          <div v-for="(target, ti) in path.targets" :key="ti" class="target-block">
+          <div v-for="(target, ti) in path.targets" :key="(target as any)._uid ?? ti" class="target-block">
             <div class="target-block__header">
               Target {{ ti + 1 }}
               <button class="btn-remove" @click="path.targets.splice(ti, 1)">✕ Remove</button>
@@ -88,7 +88,7 @@
       </div>
 
       <!-- Escalation cards -->
-      <div v-for="(esc, ei) in path.escalates" :key="ei" class="notif-card">
+      <div v-for="(esc, ei) in path.escalates" :key="(esc as any)._uid ?? ei" class="notif-card">
         <div class="notif-card__header">
           Escalation Level {{ ei + 1 }}
           <div class="notif-card__header-actions">
@@ -102,7 +102,7 @@
             <input v-model="esc.delay" class="form-input" placeholder="e.g. 0s, 15m" />
           </div>
           <div v-if="esc.targets.length === 0" class="notif-empty">No targets defined.</div>
-          <div v-for="(target, ti) in esc.targets" :key="ti" class="target-block">
+          <div v-for="(target, ti) in esc.targets" :key="(target as any)._uid ?? ti" class="target-block">
             <div class="target-block__header">
               Target {{ ti + 1 }}
               <button class="btn-remove" @click="esc.targets.splice(ti, 1)">✕ Remove</button>
@@ -200,6 +200,10 @@ onMounted(async () => {
   if (!isNew && pathName) {
     const existing = await destinationPathService.getDestinationPath(pathName)
     if (existing) {
+      existing.targets = existing.targets.map(t => withUid(t))
+      existing.escalates = existing.escalates?.map(esc =>
+        withUid({ ...esc, targets: esc.targets.map(t => withUid(t)) })
+      ) ?? []
       path.value = existing
     } else {
       loadError.value = true
@@ -208,8 +212,12 @@ onMounted(async () => {
   }
 })
 
+let _uidCounter = 0
+const nextUid = () => String(++_uidCounter)
+const withUid = <T>(obj: T): T => Object.assign({}, obj, { _uid: nextUid() })
+
 function newTarget(): TargetDTO {
-  return { name: '', interval: null, autoNotify: null, commands: [] }
+  return withUid({ name: '', interval: null, autoNotify: null, commands: [] })
 }
 
 function addTarget(targets: TargetDTO[]) {
@@ -218,7 +226,7 @@ function addTarget(targets: TargetDTO[]) {
 
 function addEscalation() {
   if (!path.value.escalates) path.value.escalates = []
-  path.value.escalates.push({ delay: '0s', targets: [] })
+  path.value.escalates.push(withUid({ delay: '0s', targets: [] }) as any)
 }
 
 function toggleCommand(target: TargetDTO, cmd: string) {

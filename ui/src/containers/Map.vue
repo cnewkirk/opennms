@@ -42,7 +42,7 @@ const nodesReady = ref(false)
 const leafletComponent = ref()
 
 // resizes the map / loads missing tiles
-const resize = debounce(() => leafletComponent.value.invalidateSizeFn(), 200)
+const resize = debounce(() => leafletComponent.value?.invalidateSizeFn(), 200)
 
 const minimizeBottomPane = () => {
   // override splitpane event
@@ -53,9 +53,12 @@ const minimizeBottomPane = () => {
 
 onMounted(async () => {
   startSpinner()
-  await mapStore.getNodes()
-  await mapStore.getAlarms()
-  stopSpinner()
+  try {
+    await mapStore.fetchNodes()
+    await mapStore.fetchAlarms()
+  } finally {
+    stopSpinner()
+  }
   resize()
   nodesReady.value = true
   // commented out until we do topology
