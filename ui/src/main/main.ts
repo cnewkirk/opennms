@@ -34,9 +34,9 @@ import * as Vue from 'vue/dist/vue.esm-bundler'
 import * as Pinia from 'pinia'
 import * as VueRouter from 'vue-router'
 
-import '@featherds/styles'
-import '@featherds/styles/themes/open-light.css'
-import '@featherds/styles/themes/open-dark.css'
+import '@/styles/feather-base.css'
+import '@/styles/feather-open-light.css'
+import '@/styles/feather-open-dark.css'
 import '@/styles/opennms-feather-styles.scss'
 
 import PrimeVue from 'primevue/config'

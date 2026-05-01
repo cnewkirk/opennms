@@ -5,7 +5,7 @@ import { CreateEditMode } from '@/types'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import { FeatherTextarea } from '@featherds/textarea'
+import Textarea from 'primevue/textarea'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -166,7 +166,7 @@ describe('BasicInformation Component', () => {
         plugins: [router],
         components: {
           InputText,
-          FeatherTextarea,
+          Textarea,
           Select,
           Button
         }
@@ -1459,7 +1459,7 @@ describe('BasicInformation Component', () => {
           plugins: [router],
           components: {
             InputText,
-            FeatherTextarea,
+            Textarea,
             Select,
             Button
           }
@@ -1483,7 +1483,7 @@ describe('BasicInformation Component', () => {
           plugins: [router],
           components: {
             InputText,
-            FeatherTextarea,
+            Textarea,
             Select,
             Button
           }
@@ -1518,7 +1518,7 @@ describe('BasicInformation Component', () => {
           plugins: [router],
           components: {
             InputText,
-            FeatherTextarea,
+            Textarea,
             Select,
             Button
           }
@@ -1545,7 +1545,7 @@ describe('BasicInformation Component', () => {
           plugins: [router],
           components: {
             InputText,
-            FeatherTextarea,
+            Textarea,
             Select,
             Button
           }
@@ -1605,7 +1605,7 @@ describe('BasicInformation Component', () => {
           plugins: [router],
           components: {
             InputText,
-            FeatherTextarea,
+            Textarea,
             Select,
             Button
           }

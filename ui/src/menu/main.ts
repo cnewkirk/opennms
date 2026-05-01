@@ -22,8 +22,8 @@
 
 import { createApp, h } from 'vue'
 import { createPinia } from 'pinia'
-import '@featherds/styles'
-import '@featherds/styles/themes/open-light.css'
+import '@/styles/feather-base.css'
+import '@/styles/feather-open-light.css'
 import '../styles/opennms-feather-styles.scss'
 import App from './App.vue'
 

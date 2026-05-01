@@ -20,21 +20,6 @@ importers:
       '@emotion/styled':
         specifier: ^11.13.0
         version: 11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1)
-      '@featherds/megamenu':
-        specifier: 0.12.43
-        version: 0.12.43(typescript@5.4.5)
-      '@featherds/ripple':
-        specifier: ^0.12.50
-        version: 0.12.50(typescript@5.4.5)
-      '@featherds/styles':
-        specifier: ^0.12.50
-        version: 0.12.50
-      '@featherds/textarea':
-        specifier: ^0.12.50
-        version: 0.12.50(typescript@5.4.5)
-      '@featherds/utils':
-        specifier: ^0.12.50
-        version: 0.12.50
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.72.1(react@18.3.1))
@@ -783,36 +768,6 @@ packages:
   '@eslint/js@8.57.1':
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-
-  '@featherds/composables@0.12.43':
-    resolution: {integrity: sha512-JLqSsiby2rXnmd3e/yz3uaUJ3dgxzGq1sW65hzcrl5AZxAlIdGOjLE6bQr4fZ6z3w/4i+EdJgvG9CLlFUvu6EA==}
-
-  '@featherds/dialog@0.12.43':
-    resolution: {integrity: sha512-pNCwP+tcF3NAlsyQOeLqO3CpzNd/xug4YOxJYwk0fFlqgXUSbMLsFV5oSbWaBO9um74mC8uZI8fpfMGDWz62Vg==}
-
-  '@featherds/icon@0.12.43':
-    resolution: {integrity: sha512-kKIEilDLK29QUc/jxwh/OgTdh3r3vI2KVkFExe14ANrRLp2JLa5UhVuYvRF1fNKRye2t+fP3htf6rlfpJfx+OQ==}
-
-  '@featherds/input-helper@0.12.50':
-    resolution: {integrity: sha512-HJ54irpRIk6CH6uMR2C55V+ZMSz3XBijNPGa8Mhu2pKKJ4BnWaOVVc5OkQRrWQZZW9AgIoNV6UZQert5cUoudQ==}
-
-  '@featherds/megamenu@0.12.43':
-    resolution: {integrity: sha512-gkW+vi0rN/iGVRZwpfGXhUweBpE25Vaew3t1ppg4epjPLg/FSHKFr8YdxJVKDXfNZi7SGMn4YqfsXO1NliY6pw==}
-
-  '@featherds/menu@0.12.43':
-    resolution: {integrity: sha512-ufL26vt6my3SJNlfDpcySTlxGoA1JE5nogTi8tvU+mSn/hw54oUJyhJZTyvpY2Ij2o2BYEA2yxRyzIF1Yqlu0Q==}
-
-  '@featherds/ripple@0.12.50':
-    resolution: {integrity: sha512-STs8M7aLdrO8fVLmAuDOqcaR9/AsAkf+UveR/x7YaVygKiIo0aRVc1EntFeoSL11buym6wPk6ZvjcfS0xo2O+g==}
-
-  '@featherds/styles@0.12.50':
-    resolution: {integrity: sha512-CSq4DW41+KFTs3RHyAg66P9bD2NCv4iSpFsCp23U9lNoF4G0dswN5eNQyyygMbcaLfvb8dLdgT4XYAR3DAC0Sg==}
-
-  '@featherds/textarea@0.12.50':
-    resolution: {integrity: sha512-oYMdbqaIWhTZpxUUZNc0Li154aQP+R76hnQAy6RtB6xqTtazXxafOUkZrL7ZJQQ0AiQZxBy0V/8dXbjWQlsYQQ==}
-
-  '@featherds/utils@0.12.50':
-    resolution: {integrity: sha512-dv2qnCN2jHc8scgDmUoQSJQi5B2Eck9mVtm/4c1fGeGJZUhojK49FMDdO77drPca/4IU/cPJBy+W7mQIz0WMXQ==}
 
   '@fontsource/lato@4.5.10':
     resolution: {integrity: sha512-2hYR6r661Cq9B8zugtu6yxuOKqrVhAgfOSaPSq8XoxbC4ebsl0KOTy/vPoP+9U7JuQVLfrmikirW4a9Z0nDUug==}
@@ -4495,75 +4450,6 @@ snapshots:
       - supports-color
 
   '@eslint/js@8.57.1': {}
-
-  '@featherds/composables@0.12.43(typescript@5.4.5)':
-    dependencies:
-      '@featherds/utils': 0.12.50
-      vue: 3.5.25(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@featherds/dialog@0.12.43(typescript@5.4.5)':
-    dependencies:
-      '@featherds/composables': 0.12.43(typescript@5.4.5)
-      '@featherds/icon': 0.12.43(typescript@5.4.5)
-      '@featherds/styles': 0.12.50
-      '@featherds/utils': 0.12.50
-      vue: 3.5.25(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@featherds/icon@0.12.43(typescript@5.4.5)':
-    dependencies:
-      vue: 3.5.25(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@featherds/input-helper@0.12.50(typescript@5.4.5)':
-    dependencies:
-      '@featherds/styles': 0.12.50
-      vue: 3.5.25(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@featherds/megamenu@0.12.43(typescript@5.4.5)':
-    dependencies:
-      '@featherds/dialog': 0.12.43(typescript@5.4.5)
-      '@featherds/menu': 0.12.43(typescript@5.4.5)
-      '@featherds/styles': 0.12.50
-      '@featherds/utils': 0.12.50
-      vue: 3.5.25(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@featherds/menu@0.12.43(typescript@5.4.5)':
-    dependencies:
-      '@featherds/composables': 0.12.43(typescript@5.4.5)
-      '@featherds/ripple': 0.12.50(typescript@5.4.5)
-      '@featherds/styles': 0.12.50
-      '@featherds/utils': 0.12.50
-      vue: 3.5.25(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@featherds/ripple@0.12.50(typescript@5.4.5)':
-    dependencies:
-      vue: 3.5.25(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@featherds/styles@0.12.50': {}
-
-  '@featherds/textarea@0.12.50(typescript@5.4.5)':
-    dependencies:
-      '@featherds/input-helper': 0.12.50(typescript@5.4.5)
-      '@featherds/styles': 0.12.50
-      '@featherds/utils': 0.12.50
-      vue: 3.5.25(typescript@5.4.5)
-    transitivePeerDependencies:
-      - typescript
-
-  '@featherds/utils@0.12.50': {}
 
   '@fontsource/lato@4.5.10': {}
 
