@@ -1,8 +1,8 @@
 <template>
-  <FeatherInput
+  <InputText
     class="new-input"
     ref="input"
-    label="New file name"
+    placeholder="New file name"
     @blur="addNewFile"
     @keyup.enter="addNewFile"
     v-model="newFileName"
@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
+import InputText from 'primevue/inputtext'
 import { useFileEditorStore, IFile } from '@/stores/fileEditorStore'
 import { getExtensionFromFilenameSafely } from './utils'
 import { PropType } from 'vue'
@@ -82,19 +82,13 @@ const addNewFile = () => {
   fileEditorStore.setSearchValue(newFileName.value)
 }
 
-onMounted(() => input.value.focus())
+onMounted(() => (input.value?.$el ?? input.value)?.focus())
 </script>
 
 <style lang="scss">
 .new-input {
   padding-top: 0px !important;
   padding-bottom: 0px !important;
-
-  .feather-input-wrapper-container {
-    .feather-input-wrapper {
-      margin-bottom: -25px !important;
-      min-height: 31px !important;
-    }
-  }
+  min-height: 31px !important;
 }
 </style>

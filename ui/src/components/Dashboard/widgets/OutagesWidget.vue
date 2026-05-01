@@ -25,10 +25,7 @@
       v-if="!outages.length"
       class="empty-state"
     >
-      <FeatherIcon
-        :icon="CheckCircleIcon"
-        class="empty-icon"
-      />
+      <i class="pi pi-check-circle empty-icon" />
       <div class="empty-title">All services up</div>
       <div class="empty-subtitle">
         No active outages
@@ -93,8 +90,6 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherIcon } from '@featherds/icon'
-import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
 import { getActiveOutages } from '@/services/outageService'
 import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Outage } from '@/types'
@@ -170,6 +165,7 @@ defineExpose({ refresh: load })
   font-size: 36px;
   color: var($success);
   margin-bottom: 4px;
+  display: block;
 }
 
 .empty-title {

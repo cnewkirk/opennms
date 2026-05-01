@@ -50,36 +50,32 @@
                   <td>
                     <div>
                       {{ ellipsify(currentRegistration?.accessToken ?? '', 30) }}
-                      <FeatherButton
-                        primary
-                        icon="Copy Access Token"
+                      <Button
+                        icon="pi pi-copy"
+                        text
+                        title="Copy Access Token"
                         @click.prevent="() => onCopyToken(currentRegistration?.accessToken ?? '')"
-                      >
-                        <FeatherIcon :icon="icons.ContentCopy"/>
-                      </FeatherButton>
+                      />
                     </div>
                   </td>
                   <td>
                     <div>
                       {{ ellipsify(currentRegistration?.refreshToken ?? '', 30) }}
-                      <FeatherButton
-                        primary
-                        icon="Copy Refresh Token"
+                      <Button
+                        icon="pi pi-copy"
+                        text
+                        title="Copy Refresh Token"
                         @click.prevent="() => onCopyToken(currentRegistration?.refreshToken ?? '')"
-                      >
-                        <FeatherIcon :icon="icons.ContentCopy"/>
-                      </FeatherButton>
+                      />
                     </div>
                   </td>
                   <td>
                     <div>
-                      <FeatherButton
-                        primary
+                      <Button
+                        label="Send Data"
                         :disabled="!currentRegistration?.registered || !currentRegistration?.systemId"
                         @click.prevent="() => onSendData(currentRegistration)"
-                      >
-                        Send Data
-                      </FeatherButton>
+                      />
                     </div>
                   </td>
                 </tr>
@@ -91,12 +87,10 @@
           <div>
             Register your Meridian instance with Zenith in order to send data:
             <div class="spacer"></div>
-            <FeatherButton
-              primary
+            <Button
+              label="Register with Zenith"
               @click="gotoRegister"
-            >
-              Register with Zenith
-            </FeatherButton>
+            />
           </div>
         </div>
       </div>
@@ -106,8 +100,7 @@
 
 <script setup lang="ts">
 import { format as fnsFormat } from 'date-fns'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
+import Button from 'primevue/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import useSnackbar from '@/composables/useSnackbar'
 import { ellipsify } from '@/lib/utils'
@@ -115,7 +108,6 @@ import { useMenuStore } from '@/stores/menuStore'
 import { useZenithConnectStore } from '@/stores/zenithConnectStore'
 import { BreadCrumb } from '@/types'
 import { ZenithConnectRegistration } from '@/types/zenithConnect'
-import ContentCopy from '@featherds/icon/action/ContentCopy'
 
 const menuStore = useMenuStore()
 const zenithConnectStore = useZenithConnectStore()
@@ -130,10 +122,6 @@ const breadcrumbs = computed<BreadCrumb[]>(() => {
     { label: 'Home', to: homeUrl.value, isAbsoluteLink: true },
     { label: 'Zenith Connect', to: '#', position: 'last' }
   ]
-})
-
-const icons = markRaw({
-  ContentCopy
 })
 
 const formatRegistrationDate = (reg?: ZenithConnectRegistration) => {

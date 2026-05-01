@@ -25,10 +25,7 @@
       v-if="!alarms.length"
       class="empty-state"
     >
-      <FeatherIcon
-        :icon="CheckCircleIcon"
-        class="empty-icon"
-      />
+      <i class="pi pi-check-circle empty-icon" />
       <div class="empty-title">No alarms</div>
       <div class="empty-subtitle">Network is operating normally</div>
     </div>
@@ -98,8 +95,6 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherIcon } from '@featherds/icon'
-import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import API from '@/services'
 import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
@@ -195,6 +190,7 @@ defineExpose({ refresh: load })
   font-size: 36px;
   color: var($success);
   margin-bottom: 4px;
+  display: block;
 }
 
 .empty-title {

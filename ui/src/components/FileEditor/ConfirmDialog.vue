@@ -1,16 +1,16 @@
 <template>
-  <FeatherDialog v-model="open" :labels="labels">
+  <Dialog v-model:visible="open" header="Delete confirmation" modal style="width: 380px" @update:visible="(v) => { if (!v) cancel() }">
     <p class="subtitle2 dialog">Delete {{ file?.name }}?</p>
 
-    <template v-slot:footer>
-      <FeatherButton text @click="cancel">Cancel</FeatherButton>
-      <FeatherButton class="btn-delete" text @click="deleteFile">Confirm</FeatherButton>
+    <template #footer>
+      <Button label="Cancel" text @click="cancel" />
+      <Button label="Confirm" text class="btn-delete" @click="deleteFile" />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 <script setup lang="ts">
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherButton } from '@featherds/button'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 import { useFileEditorStore } from '@/stores/fileEditorStore'
 
 const fileEditorStore = useFileEditorStore()

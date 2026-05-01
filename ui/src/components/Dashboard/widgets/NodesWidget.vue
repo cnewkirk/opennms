@@ -25,10 +25,7 @@
       v-if="!nodes.length"
       class="empty-state"
     >
-      <FeatherIcon
-        :icon="InfoIcon"
-        class="empty-icon"
-      />
+      <i class="pi pi-info-circle empty-icon" />
       <div class="empty-title">No nodes found</div>
       <div
         v-if="config.categories.length"
@@ -87,8 +84,6 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherIcon } from '@featherds/icon'
-import InfoIcon from '@featherds/icon/action/Info'
 import API from '@/services'
 import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Node, type QueryParameters } from '@/types'
@@ -169,6 +164,7 @@ defineExpose({ refresh: load })
   font-size: 36px;
   color: var($secondary-text-on-surface);
   margin-bottom: 4px;
+  display: block;
 }
 
 .empty-title {

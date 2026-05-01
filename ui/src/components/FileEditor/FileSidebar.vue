@@ -2,32 +2,32 @@
   <Search />
   <div class="sidebar-relative-container">
     <div class="file-tools">
-      <FeatherButton
+      <Button
         v-if="changedFilesOnly"
         class="btn"
-        icon="Click to show all files."
+        icon="pi pi-filter"
+        text
+        title="Click to show all files."
         @click="getFiles(false)"
-      >
-        <FeatherIcon :icon="FilterAlt" />
-      </FeatherButton>
+      />
 
-      <FeatherButton
+      <Button
         v-if="!changedFilesOnly"
         class="btn unfiltered"
-        icon="Click to show modified files only."
+        icon="pi pi-filter"
+        text
+        title="Click to show modified files only."
         @click="getFiles(true)"
-      >
-        <FeatherIcon :icon="FilterAlt" />
-      </FeatherButton>
+      />
 
-      <FeatherButton
+      <Button
         class="btn"
+        icon="pi pi-crosshairs"
+        text
         :disabled="!selectedFileName"
-        icon="Scroll to selected file."
+        title="Scroll to selected file."
         @click="scrollToSelectedFile"
-      >
-        <FeatherIcon :icon="SupportCenter" />
-      </FeatherButton>
+      />
     </div>
     <div class="file-sidebar">
       <ul>
@@ -38,10 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherButton } from '@featherds/button'
-import FilterAlt from '@featherds/icon/action/FilterAlt'
-import SupportCenter from '@featherds/icon/action/SupportCenter'
+import Button from 'primevue/button'
 import { useFileEditorStore } from '@/stores/fileEditorStore'
 import FileTreeItem from './FileTreeItem.vue'
 import Search from './Search.vue'

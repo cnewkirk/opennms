@@ -1,25 +1,25 @@
 <template>
   <div class="editor">
     <div class="toolbar">
-      <FeatherButton
+      <Button
         v-if="reverseLog"
+        icon="pi pi-arrow-down"
+        text
         :disabled="!selectedLog"
         class="btn"
-        icon="Display oldest first."
+        title="Display oldest first."
         @click="getLog(false)"
-      >
-        <FeatherIcon :icon="KeyboardArrowDown" />
-      </FeatherButton>
+      />
 
-      <FeatherButton
+      <Button
         v-if="!reverseLog"
+        icon="pi pi-arrow-up"
+        text
         :disabled="!selectedLog"
         class="btn"
-        icon="Display newest first."
+        title="Display newest first."
         @click="getLog(true)"
-      >
-        <FeatherIcon :icon="KeyboardArrowUp" />
-      </FeatherButton>
+      />
     </div>
     <VAceEditor
       v-model:value="content"
@@ -34,11 +34,8 @@
 
 <script setup lang="ts">
 import { VAceEditor } from 'vue3-ace-editor'
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import { onKeyStroke } from '@vueuse/core'
-import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
-import KeyboardArrowDown from '@featherds/icon/hardware/KeyboardArrowDown'
 import ace from 'ace-builds'
 import 'ace-builds/src-noconflict/mode-text'
 import 'ace-builds/src-noconflict/theme-xcode'

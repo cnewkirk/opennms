@@ -2,14 +2,14 @@
   <Search />
   <div class="sidebar-relative-container">
     <div class="file-tools">
-      <FeatherButton
+      <Button
         class="btn"
+        icon="pi pi-crosshairs"
+        text
         :disabled="!selectedLog"
-        icon="Scroll to selected log."
+        title="Scroll to selected log."
         @click="scrollToSelectedLog"
-      >
-        <FeatherIcon :icon="SupportCenter" />
-      </FeatherButton>
+      />
     </div>
     <div class="logs-sidebar">
       <p
@@ -28,9 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherButton } from '@featherds/button'
-import SupportCenter from '@featherds/icon/action/SupportCenter'
+import Button from 'primevue/button'
 import Search from './Search.vue'
 import { useLogStore } from '@/stores/logStore'
 

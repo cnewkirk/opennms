@@ -1,7 +1,7 @@
 <template>
   <div class="search-bar">
     <div class="search">
-      <FeatherInput label="Search logs" v-model="searchValue" @update:modelValue="search" />
+      <InputText placeholder="Search logs" v-model="searchValue" @update:modelValue="search" />
     </div>
   </div>
   <hr />
@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { useLogStore } from '@/stores/logStore'
-import { FeatherInput } from '@featherds/input'
+import InputText from 'primevue/inputtext'
 
 const logStore = useLogStore()
 const searchValue = ref('')
@@ -21,10 +21,6 @@ const search = () => logStore.setSearchValue(searchValue.value)
   display: flex;
   .search {
     width: 100%;
-    .feather-input-container {
-      padding: 0px;
-      margin-bottom: -26px;
-    }
   }
 }
 </style>

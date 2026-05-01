@@ -25,60 +25,65 @@
     <h2 class="step-title">Step 1: JMX Connection</h2>
 
     <div class="form-field">
-      <FeatherInput
-        v-model="config.serviceName"
-        label="Service Name"
-        hint="Used as the collection name in the generated XML (e.g. jmx-cassandra)"
-      />
+      <label class="field-label">Service Name</label>
+      <InputText v-model="config.serviceName" class="field-input" />
+      <small class="field-hint">Used as the collection name in the generated XML (e.g. jmx-cassandra)</small>
     </div>
 
     <div class="form-field">
-      <FeatherInput
-        v-model="config.connection"
-        label="JMX Connection URL"
-        hint="e.g. service:jmx:rmi://hostname:port/jndi/rmi://hostname:port/jmxrmi"
-      />
+      <label class="field-label">JMX Connection URL</label>
+      <InputText v-model="config.connection" class="field-input" />
+      <small class="field-hint">e.g. service:jmx:rmi://hostname:port/jndi/rmi://hostname:port/jmxrmi</small>
     </div>
 
     <div class="form-field">
-      <FeatherCheckbox v-model="config.authenticate">Requires Authentication</FeatherCheckbox>
+      <div class="flex align-items-center gap-2">
+        <Checkbox v-model="config.authenticate" inputId="auth-check" :binary="true" />
+        <label for="auth-check">Requires Authentication</label>
+      </div>
     </div>
 
     <template v-if="config.authenticate">
       <div class="form-field">
-        <FeatherInput
+        <label class="field-label">Username</label>
+        <InputText
           :modelValue="config.user ?? ''"
-          label="Username"
+          class="field-input"
           @update:modelValue="(v) => { config.user = (v as string) || null }"
         />
       </div>
       <div class="form-field">
-        <FeatherInput
+        <label class="field-label">Password</label>
+        <InputText
           :modelValue="config.password ?? ''"
-          label="Password"
           type="password"
+          class="field-input"
           @update:modelValue="(v) => { config.password = (v as string) || null }"
         />
       </div>
     </template>
 
     <div class="form-field options-row">
-      <FeatherCheckbox v-model="config.skipDefaultVM">Skip Default JVM MBeans</FeatherCheckbox>
-      <FeatherCheckbox v-model="config.skipNonNumber">Skip Non-numeric Attributes</FeatherCheckbox>
+      <div class="flex align-items-center gap-2">
+        <Checkbox v-model="config.skipDefaultVM" inputId="skip-jvm" :binary="true" />
+        <label for="skip-jvm">Skip Default JVM MBeans</label>
+      </div>
+      <div class="flex align-items-center gap-2">
+        <Checkbox v-model="config.skipNonNumber" inputId="skip-non-num" :binary="true" />
+        <label for="skip-non-num">Skip Non-numeric Attributes</label>
+      </div>
     </div>
 
     <div class="form-actions">
-      <FeatherButton primary @click="$emit('submit', config)" :disabled="!isValid">
-        Detect MBeans
-      </FeatherButton>
+      <Button label="Detect MBeans" @click="$emit('submit', config)" :disabled="!isValid" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { FeatherButton } from '@featherds/button'
+import InputText from 'primevue/inputtext'
+import Checkbox from 'primevue/checkbox'
+import Button from 'primevue/button'
 import type { DetectRequest } from '@/services/jmxConfigService'
 
 const props = defineProps<{ modelValue: DetectRequest }>()
@@ -113,11 +118,28 @@ const isValid = computed(() =>
 
 .form-field {
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.field-hint {
+  color: var($secondary-text-on-surface);
+}
+
+.field-input {
+  width: 100%;
 }
 
 .options-row {
   display: flex;
   gap: 2rem;
+  flex-direction: row;
 }
 
 .form-actions {

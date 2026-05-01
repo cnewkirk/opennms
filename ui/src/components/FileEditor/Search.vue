@@ -1,21 +1,21 @@
 <template>
   <div class="search-bar">
     <div class="search">
-      <FeatherInput label="Search etc" :modelValue="searchValue" @update:modelValue="search" />
+      <InputText placeholder="Search etc" :modelValue="searchValue" @update:modelValue="search" />
     </div>
     <div class="save">
-      <FeatherButton :disabled="disableBtn" primary @click="save">Save</FeatherButton>
+      <Button label="Save" :disabled="disableBtn" @click="save" />
     </div>
     <div class="reset">
-      <FeatherButton :disabled="disableBtn" primary @click="reset">Reset</FeatherButton>
+      <Button label="Reset" :disabled="disableBtn" @click="reset" />
     </div>
   </div>
   <hr />
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 import { useFileEditorStore } from '@/stores/fileEditorStore'
 import { UpdateModelFunction } from '@/types'
 
@@ -36,10 +36,6 @@ const save = () => fileEditorStore.saveModifiedFile()
   display: flex;
   .search {
     width: 100%;
-    .feather-input-container {
-      padding: 0px;
-      margin-bottom: -26px;
-    }
   }
   .save,
   .reset {

@@ -1,14 +1,13 @@
 <template>
-  <!-- eslint-disable-next-line vue/no-mutating-props -->
-  <FeatherDialog v-model="props.visible" relative :labels="labels" @update:modelValue="$emit('close')">
+  <Dialog :visible="props.visible" :header="dialogTitle" modal style="width: 620px" @update:visible="(v) => { if (!v) $emit('close') }">
     <div class="content">
       <slot name="content" />
     </div>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { FeatherDialog } from '@featherds/dialog'
+import Dialog from 'primevue/dialog'
 
 const props = defineProps({
   subtitle: {
@@ -21,14 +20,11 @@ const props = defineProps({
   }
 })
 
-const labels = reactive({
-  title: 'Usage Statistics',
-  close: 'Close'
-})
+defineEmits(['close'])
 
-watchEffect(() => {
-  labels.title = props.subtitle ? `Usage Statistics: ${props.subtitle}` : 'Usage Statistics'
-})
+const dialogTitle = computed(() =>
+  props.subtitle ? `Usage Statistics: ${props.subtitle}` : 'Usage Statistics'
+)
 </script>
 
 <style scoped lang="scss">

@@ -8,37 +8,18 @@
       <table summary="Usage Statistics Sharing">
         <thead>
           <tr>
-            <FeatherSortHeader
-              scope="col"
-              property="name"
-              :sort="sortStates.name"
-              v-on:sort-changed="sortByColumnHandler"
-              >Name</FeatherSortHeader
-            >
-
-            <FeatherSortHeader
-              scope="col"
-              property="key"
-              :sort="sortStates.key"
-              v-on:sort-changed="sortByColumnHandler"
-              >Key name</FeatherSortHeader
-            >
-
-            <FeatherSortHeader
-              scope="col"
-              property="description"
-              :sort="sortStates.description"
-              v-on:sort-changed="sortByColumnHandler"
-              >Description</FeatherSortHeader
-            >
-
-            <FeatherSortHeader
-              scope="col"
-              property="latestValue"
-              :sort="sortStates.latestValue"
-              v-on:sort-changed="sortByColumnHandler"
-              >Latest value</FeatherSortHeader
-            >
+            <th scope="col" class="sortable-col" @click="sortByColumnHandler({ property: 'name', value: nextSort('name') })">
+              Name<span class="sort-indicator">{{ sortIndicator('name') }}</span>
+            </th>
+            <th scope="col" class="sortable-col" @click="sortByColumnHandler({ property: 'key', value: nextSort('key') })">
+              Key name<span class="sort-indicator">{{ sortIndicator('key') }}</span>
+            </th>
+            <th scope="col" class="sortable-col" @click="sortByColumnHandler({ property: 'description', value: nextSort('description') })">
+              Description<span class="sort-indicator">{{ sortIndicator('description') }}</span>
+            </th>
+            <th scope="col" class="sortable-col" @click="sortByColumnHandler({ property: 'latestValue', value: nextSort('latestValue') })">
+              Latest value<span class="sort-indicator">{{ sortIndicator('latestValue') }}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -88,8 +69,14 @@ import {
   UsageStatisticsMetadata,
   UsageStatisticsMetadataItem
 } from '@/types/usageStatistics'
-import { FeatherSortHeader, SORT } from '@featherds/table'
 import UsageStatisticsModal from './UsageStatisticsModal.vue'
+
+const SORT = {
+  NONE: 'none' as const,
+  ASCENDING: 'ascending' as const,
+  DESCENDING: 'descending' as const
+}
+type SortValue = typeof SORT[keyof typeof SORT]
 
 interface StatisticsItem {
   // this is just for sorting
@@ -105,7 +92,7 @@ const STRING_CLIP_LENGTH = 100
 
 const usageStatisticsStore = useUsageStatisticsStore()
 
-const sortStates: Record<string, SORT> = reactive({
+const sortStates: Record<string, SortValue> = reactive({
   name: SORT.NONE,
   key: SORT.ASCENDING,
   description: SORT.NONE,
@@ -116,7 +103,7 @@ const showValueModalContent = ref('')
 const showValueModalSubtitle = ref('')
 const showValueModalVisible = ref(false)
 
-const currentSort = ref({ property: 'key', value: SORT.ASCENDING } as FeatherSortObject)
+const currentSort = ref<{ property: string; value: SortValue }>({ property: 'key', value: SORT.ASCENDING })
 const statistics = computed<UsageStatisticsData>(() => usageStatisticsStore.statistics )
 const metadata = computed<UsageStatisticsMetadata>(() => usageStatisticsStore.metadata )
 
@@ -166,6 +153,7 @@ const filteredData = computed<StatisticsItem[]>(() => {
   } else if (currentSort.value.value === SORT.DESCENDING) {
     sortOrderValues = [1, -1]
   }
+
 
   // Sort the Items
   const currentSortKey = currentSort.value.property
@@ -224,7 +212,20 @@ const getClippedValue = (row: StatisticsItem) => {
   return `${row.latestValue.substring(0, STRING_CLIP_LENGTH)}...`
 }
 
-const sortByColumnHandler = (sortObj: FeatherSortObject) => {
+const nextSort = (property: string): SortValue => {
+  if (sortStates[property] === SORT.NONE || sortStates[property] === SORT.DESCENDING) {
+    return SORT.ASCENDING
+  }
+  return SORT.DESCENDING
+}
+
+const sortIndicator = (property: string): string => {
+  if (sortStates[property] === SORT.ASCENDING) return ' ▴'
+  if (sortStates[property] === SORT.DESCENDING) return ' ▾'
+  return ''
+}
+
+const sortByColumnHandler = (sortObj: { property: string; value: SortValue }) => {
   for (const key in sortStates) {
     sortStates[key] = SORT.NONE
   }
@@ -265,7 +266,6 @@ onMounted(() => {
 @import "@featherds/styles/mixins/elevation";
 @import "@featherds/styles/mixins/typography";
 @import "@featherds/styles/themes/variables";
-@import "@featherds/table/scss/table";
 
 #wrap {
   height: calc(100vh - 310px);
@@ -275,9 +275,18 @@ onMounted(() => {
   table {
     margin-top: 0px !important;
     font-size: 12px !important;
-    @include table;
-    @include table-condensed;
-    @include row-striped;
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+      padding: 4px 12px;
+      text-align: left;
+      border-bottom: 1px solid var($border-on-surface);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: var($shade-4);
+    }
 
     .option {
       margin-left: 8px;
@@ -292,6 +301,20 @@ onMounted(() => {
     z-index: 2;
     position: relative;
     background: var($surface);
+  }
+
+  .sortable-col {
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+
+    &:hover {
+      background: var($shade-3);
+    }
+  }
+
+  .sort-indicator {
+    color: var($primary);
   }
 }
 

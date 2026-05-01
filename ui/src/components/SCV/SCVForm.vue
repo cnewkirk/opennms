@@ -1,39 +1,45 @@
 <template>
   <div class="form-container" id="scv">
     <p class="title">{{ isEditing ? 'Update' : 'Add' }} Credentials</p>
-    <FeatherInput
-      data-test="alias-input"
-      :disabled="isEditing"
-      label="Alias"
-      @update:modelValue="updateAlias"
-      :modelValue="scvStore.credentials.alias"
-      :error="aliasError"
-      class="alias-input"
-    />
+    <div class="alias-input">
+      <InputText
+        data-test="alias-input"
+        :disabled="isEditing"
+        placeholder="Alias"
+        @update:modelValue="updateAlias"
+        :modelValue="scvStore.credentials.alias"
+        :class="{ 'p-invalid': aliasError }"
+      />
+      <small v-if="aliasError" class="p-error">{{ aliasError }}</small>
+    </div>
 
     <form autocomplete="off" class="row">
-      <FeatherInput
-        data-test="username-input"
-        autocomplete="new-username"
-        label="Username"
-        @update:modelValue="updateUsername"
-        :modelValue="scvStore.credentials.username"
-        class="input"
-      />
+      <div class="input">
+        <InputText
+          data-test="username-input"
+          autocomplete="new-username"
+          placeholder="Username"
+          @update:modelValue="updateUsername"
+          :modelValue="scvStore.credentials.username"
+        />
+      </div>
 
-      <FeatherInput
-        data-test="password-input"
-        autocomplete="new-password"
-        label="Password"
-        @update:modelValue="updatePassword"
-        :modelValue="scvStore.credentials.password"
-        :error="passwordError"
-        class="input"
-      />
+      <div class="input">
+        <InputText
+          data-test="password-input"
+          autocomplete="new-password"
+          placeholder="Password"
+          type="password"
+          @update:modelValue="updatePassword"
+          :modelValue="scvStore.credentials.password"
+          :class="{ 'p-invalid': passwordError }"
+        />
+        <small v-if="passwordError" class="p-error">{{ passwordError }}</small>
+      </div>
     </form>
 
     <div class="add-btn" @click="addAttribute" data-test="add-attr-btn">
-      <FeatherIcon :icon="Add" aria-hidden="true" focusable="false" />
+      <i class="pi pi-plus" aria-hidden="true" />
       Add attribute
     </div>
 
@@ -46,39 +52,34 @@
     />
 
     <div class="btns">
-      <FeatherButton
+      <Button
         v-if="!isEditing"
         data-test="add-creds-btn"
+        label="Add Credentials"
         :disabled="disabled"
-        primary 
-        @click="addCredentials">
-          Add Credentials
-      </FeatherButton>
+        @click="addCredentials"
+      />
 
-      <FeatherButton
+      <Button
         v-if="isEditing"
         data-test="update-creds-btn"
+        label="Update Credentials"
         :disabled="disabled"
-        primary 
-        @click="updateCredentials">
-          Update Credentials
-      </FeatherButton>
+        @click="updateCredentials"
+      />
 
-      <FeatherButton
-        primary 
+      <Button
         data-test="clear-btn"
-        @click="clearCredentials">
-          Clear Form
-      </FeatherButton>
+        label="Clear Form"
+        @click="clearCredentials"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import Add from '@featherds/icon/action/Add' 
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 import { useScvStore } from '@/stores/scvStore'
 import { SCVCredentials } from '@/types/scv'
 import { UpdateModelFunction } from '@/types'
@@ -183,10 +184,3 @@ const addAttribute = () => scvStore.addAttribute()
 }
 </style>
 
-<style lang="scss">
-#scv {
-  .feather-input-sub-text {
-    min-height: 0.4rem !important;
-  }
-}
-</style>

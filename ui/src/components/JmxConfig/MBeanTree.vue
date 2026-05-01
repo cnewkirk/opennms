@@ -25,20 +25,22 @@
     <h2 class="step-title">Step 3: Select MBeans and Attributes</h2>
 
     <div class="tree-toolbar">
-      <FeatherButton text @click="selectAll">Select All</FeatherButton>
-      <FeatherButton text @click="deselectAll">Deselect All</FeatherButton>
+      <Button label="Select All" text @click="selectAll" />
+      <Button label="Deselect All" text @click="deselectAll" />
       <span class="count-summary">{{ selectedCount }} of {{ totalCount }} attributes selected</span>
     </div>
 
     <div class="mbean-list">
       <div v-for="mbean in localMbeans" :key="mbean.objectName" class="mbean-row">
         <div class="mbean-header" @click="toggleExpand(mbean.objectName)">
-          <FeatherCheckbox
+          <Checkbox
             :modelValue="mbean.include"
-            :label="mbean.name || mbean.objectName"
+            :binary="true"
+            :inputId="`mbean-${mbean.objectName}`"
             @update:modelValue="(v) => { mbean.include = !!v }"
             @click.stop
           />
+          <label :for="`mbean-${mbean.objectName}`">{{ mbean.name || mbean.objectName }}</label>
           <span class="mbean-objectname">{{ mbean.objectName }}</span>
           <span class="expand-icon">{{ expanded.has(mbean.objectName) ? '▲' : '▼' }}</span>
         </div>
@@ -49,14 +51,16 @@
             :key="attr.name"
             class="attribute-row"
           >
-            <FeatherCheckbox
+            <Checkbox
               :modelValue="attr.include"
-              :label="attr.name"
+              :binary="true"
+              :inputId="`attr-${attr.name}`"
               @update:modelValue="(v) => { attr.include = !!v }"
             />
-            <FeatherInput
+            <label :for="`attr-${attr.name}`">{{ attr.name }}</label>
+            <InputText
               v-model="attr.alias"
-              label="Alias (optional)"
+              placeholder="Alias (optional)"
               class="alias-input"
             />
             <span class="attr-type">{{ attr.type }}</span>
@@ -66,18 +70,16 @@
     </div>
 
     <div class="form-actions">
-      <FeatherButton @click="$emit('back')">Back</FeatherButton>
-      <FeatherButton primary @click="$emit('next', localMbeans)" :disabled="selectedCount === 0">
-        Next
-      </FeatherButton>
+      <Button label="Back" @click="$emit('back')" />
+      <Button label="Next" @click="$emit('next', localMbeans)" :disabled="selectedCount === 0" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
+import Checkbox from 'primevue/checkbox'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import type { MBeanDto } from '@/services/jmxConfigService'
 
 const props = defineProps<{ mbeans: MBeanDto[] }>()

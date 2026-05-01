@@ -15,70 +15,67 @@
             Register your OpenNMS instance with Zenith in order to send data.
           </div>
           <div class="spacer"></div>
-          <FeatherExpansionPanel
-            class="zc-register-steps-expansion-panel"
-          >
-            <template #title>
-              <h4>Steps</h4>
-            </template>
-            <template #default>
-              <div class="instructions">
-                <ul>
-                  <li>Confirm the Zenith Connect URL below. If desired, modify the display name for your OpenNMS instance.</li>
-                  <li>Click Connect to Zenith</li>
-                  <li>You will then be directed to Zenith to login with the Zenith user associated with your OpenNMS instance.</li>
-                  <li>Zenith will register your user. You may need to enter your Zenith password again.</li>
-                  <li>Zenith will display your Refresh Token which OpenNMS will need to connect with Zenith.</li>
-                  <li>You can copy the token to the clipboard and manually enter it into OpenNMS, or...</li>
-                  <li>
-                    You will be given a link to return to OpenNMS which will automatically save this token in OpenNMS for you. Note, you
-                    may need to open a separate tab, log into OpenNMS, then copy that link into that same browser tab for this to work.
-                  </li>
-                </ul>
-              </div>
-            </template>
-          </FeatherExpansionPanel>
+          <Accordion class="zc-register-steps-expansion-panel">
+            <AccordionPanel value="steps">
+              <AccordionHeader>
+                <h4>Steps</h4>
+              </AccordionHeader>
+              <AccordionContent>
+                <div class="instructions">
+                  <ul>
+                    <li>Confirm the Zenith Connect URL below. If desired, modify the display name for your OpenNMS instance.</li>
+                    <li>Click Connect to Zenith</li>
+                    <li>You will then be directed to Zenith to login with the Zenith user associated with your OpenNMS instance.</li>
+                    <li>Zenith will register your user. You may need to enter your Zenith password again.</li>
+                    <li>Zenith will display your Refresh Token which OpenNMS will need to connect with Zenith.</li>
+                    <li>You can copy the token to the clipboard and manually enter it into OpenNMS, or...</li>
+                    <li>
+                      You will be given a link to return to OpenNMS which will automatically save this token in OpenNMS for you. Note, you
+                      may need to open a separate tab, log into OpenNMS, then copy that link into that same browser tab for this to work.
+                    </li>
+                  </ul>
+                </div>
+              </AccordionContent>
+            </AccordionPanel>
+          </Accordion>
 
           <div class="spacer"></div>
           <div>
             <div>
-              <FeatherInput
-                label="Zenith Connect URL"
+              <label class="field-label">Zenith Connect URL</label>
+              <InputText
                 @update:modelValue="(val: any) => zenithUrl = String(val)"
                 :modelValue="zenithUrl"
                 class="input"
               />
             </div>
             <div>
-              <FeatherInput
-                label="OpenNMS System ID"
+              <label class="field-label">OpenNMS System ID</label>
+              <InputText
                 :disabled="true"
                 :modelValue="systemId"
                 class="input"
               />
             </div>
             <div>
-              <FeatherInput
-                label="OpenNMS System Display Name"
+              <label class="field-label">OpenNMS System Display Name</label>
+              <InputText
                 @update:modelValue="(val: any) => displayName = String(val)"
                 :modelValue="displayName"
                 class="input"
               />
             </div>
             <div class="btns">
-              <FeatherButton
-                primary
+              <Button
+                label="Register with Zenith"
                 @click="onRegisterWithZenith"
-              >
-                  Register with Zenith
-              </FeatherButton>
+              />
 
-              <FeatherButton
-                secondary
+              <Button
+                label="View Registrations"
+                severity="secondary"
                 @click="onViewRegistrations"
-              >
-                  View Registrations
-              </FeatherButton>
+              />
             </div>
           </div>
         </div>
@@ -88,9 +85,12 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherExpansionPanel } from '@featherds/expansion'
-import { FeatherInput } from '@featherds/input'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Accordion from 'primevue/accordion'
+import AccordionPanel from 'primevue/accordionpanel'
+import AccordionHeader from 'primevue/accordionheader'
+import AccordionContent from 'primevue/accordioncontent'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import useSnackbar from '@/composables/useSnackbar'
 import { useMenuStore } from '@/stores/menuStore'
@@ -220,6 +220,16 @@ onMounted(async () => {
 
       .input {
         width: 50%;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      .field-label {
+        display: block;
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+        margin-top: 0.75rem;
       }
 
       .spacer {
@@ -229,6 +239,8 @@ onMounted(async () => {
       .btns {
         display: flex;
         flex-direction: row;
+        gap: 0.5rem;
+        margin-top: 1rem;
       }
     }
   }

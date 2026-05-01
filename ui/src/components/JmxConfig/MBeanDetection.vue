@@ -25,20 +25,20 @@
     <h2 class="step-title">Step 2: Detecting MBeans</h2>
 
     <div v-if="status === 'pending' || status === 'running'" class="detecting">
-      <FeatherSpinner />
+      <ProgressSpinner style="width: 32px; height: 32px" />
       <p class="detecting-msg">Connecting to JMX server and enumerating MBeans…</p>
     </div>
 
     <div v-else-if="status === 'error'" class="detection-error">
       <p class="error-text">Detection failed: {{ error }}</p>
-      <FeatherButton @click="$emit('back')">Back</FeatherButton>
+      <Button label="Back" @click="$emit('back')" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherSpinner } from '@featherds/progress'
-import { FeatherButton } from '@featherds/button'
+import ProgressSpinner from 'primevue/progressspinner'
+import Button from 'primevue/button'
 import { pollDetect } from '@/services/jmxConfigService'
 import type { MBeanDto } from '@/services/jmxConfigService'
 

@@ -6,7 +6,7 @@
     >
       <div :class="{ 'icon-err': logErrors.length }">
         Console
-        <FeatherIcon :icon="Error" />
+        <i class="pi pi-exclamation-triangle" />
       </div>
       <div
         class="btns"
@@ -41,8 +41,6 @@
   setup
   lang="ts"
 >
-import { FeatherIcon } from '@featherds/icon'
-import Error from '@featherds/icon/notification/Error'
 import { useFileEditorStore } from '@/stores/fileEditorStore'
 import { FileEditorResponseLog } from '@/types'
 
@@ -97,7 +95,7 @@ const clear = () => fileEditorStore.clearLogs()
     }
   }
   .icon-err {
-    .feather-icon {
+    .pi {
       color: var($error);
     }
   }

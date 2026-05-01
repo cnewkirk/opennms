@@ -26,26 +26,22 @@
 
     <div v-if="!generated" class="generate-section">
       <div class="form-field">
-        <FeatherInput
-          v-model="localFileName"
-          label="Output File Name"
-          hint="Saved to /opt/opennms/etc/jmx-datacollection-config.d/"
-        />
+        <label class="field-label">Output File Name</label>
+        <InputText v-model="localFileName" class="field-input" />
+        <small class="field-hint">Saved to /opt/opennms/etc/jmx-datacollection-config.d/</small>
       </div>
 
       <div v-if="error" class="inline-error">
         <span v-if="conflictError">
           File already exists.
-          <FeatherButton text @click="generateWithOverwrite">Overwrite</FeatherButton>
+          <Button label="Overwrite" text @click="generateWithOverwrite" />
         </span>
         <span v-else>{{ error }}</span>
       </div>
 
       <div class="form-actions">
-        <FeatherButton @click="$emit('back')">Back</FeatherButton>
-        <FeatherButton primary @click="save" :disabled="saving">
-          {{ saving ? 'Saving…' : 'Save to Server' }}
-        </FeatherButton>
+        <Button label="Back" @click="$emit('back')" />
+        <Button :label="saving ? 'Saving…' : 'Save to Server'" @click="save" :disabled="saving" />
       </div>
     </div>
 
@@ -58,16 +54,16 @@
       <textarea class="xml-preview" readonly :value="xml" />
 
       <div class="form-actions">
-        <FeatherButton @click="download">Download XML</FeatherButton>
-        <FeatherButton text @click="$emit('reset')">Start Over</FeatherButton>
+        <Button label="Download XML" @click="download" />
+        <Button label="Start Over" text @click="$emit('reset')" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 import { generate } from '@/services/jmxConfigService'
 import type { MBeanDto } from '@/services/jmxConfigService'
 import useSnackbar from '@/composables/useSnackbar'
@@ -151,6 +147,22 @@ const download = () => {
 
 .form-field {
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.field-hint {
+  color: var($secondary-text-on-surface);
+}
+
+.field-input {
+  width: 100%;
 }
 
 .form-actions {

@@ -1,33 +1,32 @@
 <template>
   <div class="attribute-container" id="scv-attribute">
-    <FeatherInput
-      data-test="attr-key"
-      ref="keyRef"
-      label="key"
-      @update:modelValue="updateAttributeKey"
-      :modelValue="attributeKey"
-      :error="keyError"
-      class="input"
-    />
-    <FeatherInput
-      data-test="attr-value"
-      label="value"
-      @update:modelValue="updateAttributeValue"
-      :modelValue="attributeValue"
-      class="input"
-    />
+    <div class="input">
+      <InputText
+        data-test="attr-key"
+        ref="keyRef"
+        placeholder="key"
+        @update:modelValue="updateAttributeKey"
+        :modelValue="attributeKey"
+        :class="{ 'p-invalid': keyError }"
+      />
+      <small v-if="keyError" class="p-error">{{ keyError }}</small>
+    </div>
+    <div class="input">
+      <InputText
+        data-test="attr-value"
+        placeholder="value"
+        @update:modelValue="updateAttributeValue"
+        :modelValue="attributeValue"
+      />
+    </div>
 
-    <FeatherButton icon="Remove attribute" @click="removeAttribute" data-test="rm-attr-btn">
-      <FeatherIcon :icon="Delete" />
-    </FeatherButton>
+    <Button icon="pi pi-minus" text title="Remove attribute" @click="removeAttribute" data-test="rm-attr-btn" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import Delete from '@featherds/icon/action/Remove'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 import { useScvStore } from '@/stores/scvStore'
 import { SCVCredentials } from '@/types/scv'
 import { UpdateModelFunction } from '@/types'
@@ -83,7 +82,7 @@ const updateAttributeValue: UpdateModelFunction = (value: string) =>
 
 const removeAttribute = () => scvStore.removeAttribute(props.attributeKey)
 
-onMounted(() => keyRef.value.focus())
+onMounted(() => (keyRef.value?.$el ?? keyRef.value)?.focus())
 </script>
 
 <style lang="scss" scoped>

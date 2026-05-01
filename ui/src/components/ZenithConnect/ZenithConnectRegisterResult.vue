@@ -43,25 +43,23 @@
                     <td>
                       <div>
                         {{ ellipsify(zenithConnectStore.currentRegistration?.accessToken ?? '', 30) }}
-                        <FeatherButton
-                          primary
-                          icon="Copy Access Token"
+                        <Button
+                          icon="pi pi-copy"
+                          text
+                          title="Copy Access Token"
                           @click.prevent="() => onCopyToken(true)"
-                        >
-                          <FeatherIcon :icon="icons.ContentCopy"/>
-                        </FeatherButton>
+                        />
                       </div>
                     </td>
                     <td>
                       <div>
                         {{ ellipsify(zenithConnectStore.currentRegistration?.refreshToken ?? '', 30) }}
-                        <FeatherButton
-                          primary
-                          icon="Copy Refresh Token"
+                        <Button
+                          icon="pi pi-copy"
+                          text
+                          title="Copy Refresh Token"
                           @click.prevent="() => onCopyToken(false)"
-                        >
-                          <FeatherIcon :icon="icons.ContentCopy"/>
-                        </FeatherButton>
+                        />
                       </div>
                     </td>
                   </tr>
@@ -71,12 +69,10 @@
           </div>
           <div>
             <div class="spacer"></div>
-            <FeatherButton
-              primary
+            <Button
+              label="View Zenith Connections"
               @click="gotoView"
-            >
-                View Zenith Connections
-            </FeatherButton>
+            />
           </div>
         </div>
       </div>
@@ -85,9 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import ContentCopy from '@featherds/icon/action/ContentCopy'
+import Button from 'primevue/button'
 import { useRoute } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import useSnackbar from '@/composables/useSnackbar'
@@ -115,10 +109,6 @@ const breadcrumbs = computed<BreadCrumb[]>(() => {
     { label: 'Zenith Connect', to: '/zenith-connect' },
     { label: 'Zenith Connect Registration Result', to: '#', position: 'last' }
   ]
-})
-
-const icons = markRaw({
-  ContentCopy
 })
 
 const gotoView = () => {
