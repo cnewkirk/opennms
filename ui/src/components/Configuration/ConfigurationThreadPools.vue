@@ -1,22 +1,25 @@
 <template>
-  <FeatherExpansionPanel
+  <Accordion
     id="thread-pool-expansion"
     class="expansion-panel"
-    v-model="threadPoolsActive"
+    :value="threadPoolsActive ? 'panel' : null"
+    @update:value="(v) => { threadPoolsActive = !!v }"
   >
-    <template v-slot:title>
-      <div class="title-flex">
-        <div class="title">Thread Pools</div>
-        <div v-if="!threadPoolsActive">
-          <div class="chip-list">
-            <Chip v-if="unTouchedThreadPoolData.importThreads" :label="`${unTouchedThreadPoolData.importThreads} Import Threads`" />
-            <Chip v-if="unTouchedThreadPoolData.scanThreads" :label="`${unTouchedThreadPoolData.scanThreads} Scan Threads`" />
-            <Chip v-if="unTouchedThreadPoolData.rescanThreads" :label="`${unTouchedThreadPoolData.rescanThreads} Rescan Threads`" />
-            <Chip v-if="unTouchedThreadPoolData.writeThreads" :label="`${unTouchedThreadPoolData.writeThreads} Write Threads`" />
+    <AccordionPanel value="panel">
+      <AccordionHeader>
+        <div class="title-flex">
+          <div class="title">Thread Pools</div>
+          <div v-if="!threadPoolsActive">
+            <div class="chip-list">
+              <Chip v-if="unTouchedThreadPoolData.importThreads" :label="`${unTouchedThreadPoolData.importThreads} Import Threads`" />
+              <Chip v-if="unTouchedThreadPoolData.scanThreads" :label="`${unTouchedThreadPoolData.scanThreads} Scan Threads`" />
+              <Chip v-if="unTouchedThreadPoolData.rescanThreads" :label="`${unTouchedThreadPoolData.rescanThreads} Rescan Threads`" />
+              <Chip v-if="unTouchedThreadPoolData.writeThreads" :label="`${unTouchedThreadPoolData.writeThreads} Write Threads`" />
+            </div>
           </div>
         </div>
-      </div>
-    </template>
+      </AccordionHeader>
+      <AccordionContent>
     <div>
       <p class="pb-xl">
         Thread pool sizes impact the performance of the provisioning subsystem. Larger systems may require larger
@@ -77,7 +80,9 @@
         label="Update Thread Pools"
       />
     </div>
-  </FeatherExpansionPanel>
+      </AccordionContent>
+    </AccordionPanel>
+  </Accordion>
 </template>
 
 <script
@@ -89,7 +94,10 @@ import { useConfigurationStore } from '@/stores/configurationStore'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Chip from 'primevue/chip'
-import { FeatherExpansionPanel } from '@featherds/expansion'
+import Accordion from 'primevue/accordion'
+import AccordionPanel from 'primevue/accordionpanel'
+import AccordionHeader from 'primevue/accordionheader'
+import AccordionContent from 'primevue/accordioncontent'
 import { isEqual as _isEqual } from 'lodash'
 
 import { putProvisionDService } from '@/services/configurationService'

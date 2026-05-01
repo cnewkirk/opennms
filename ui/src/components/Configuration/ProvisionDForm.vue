@@ -146,19 +146,25 @@
       :updateValue="updateCronValue"
     />
     <div>
-      <FeatherRadioGroup
-        class="side-label"
-        label="Rescan Behavior"
-        :modelValue="config.rescanBehavior"
-        @update:modelValue="(val: any) => updateFormValue('rescanBehavior', val)"
-      >
-        <FeatherRadio
-          v-for="({value, name}) in rescanItems"
-          :value="value"
-          :key="name"
-          >{{ name }}</FeatherRadio
-        >
-      </FeatherRadioGroup>
+      <div class="side-label radio-group-wrap">
+        <label class="radio-group-label">Rescan Behavior</label>
+        <div class="radio-group">
+          <div
+            v-for="({value, name}) in rescanItems"
+            :key="name"
+            class="radio-item"
+          >
+            <RadioButton
+              :inputId="`rescan-${value}`"
+              name="rescanBehavior"
+              :value="value"
+              :modelValue="config.rescanBehavior"
+              @update:modelValue="(val: any) => updateFormValue('rescanBehavior', val)"
+            />
+            <label :for="`rescan-${value}`">{{ name }}</label>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -169,7 +175,7 @@
 import Select from 'primevue/select'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
-import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
+import RadioButton from 'primevue/radiobutton'
 import { requisitionSubTypes, RequsitionTypesUsingHost, RequisitionTypes, requisitionTypeList, RequisitionHTTPTypes } from './copy/requisitionTypes'
 import { rescanItems } from './copy/rescanItems'
 import { PropType } from 'vue'

@@ -1,11 +1,13 @@
 <template>
-  <FeatherExpansionPanel
+  <Accordion
     id="advanced-panel"
     class="expansion-panel advanced-panel"
-    title="Advanced Options (optional)"
-    :modelValue="props.active"
-    @update:modelValue="props.activeUpdate"
+    :value="props.active ? 'panel' : null"
+    @update:value="(v) => props.activeUpdate(!!v)"
   >
+    <AccordionPanel value="panel">
+      <AccordionHeader>Advanced Options (optional)</AccordionHeader>
+      <AccordionContent>
     <div>
       <div
         v-bind:key="index"
@@ -48,7 +50,9 @@
         />
       </div>
     </div>
-  </FeatherExpansionPanel>
+      </AccordionContent>
+    </AccordionPanel>
+  </Accordion>
 </template>
 
 <script
@@ -57,7 +61,10 @@
 >
 import { PropType } from 'vue'
 
-import { FeatherExpansionPanel } from '@featherds/expansion'
+import Accordion from 'primevue/accordion'
+import AccordionPanel from 'primevue/accordionpanel'
+import AccordionHeader from 'primevue/accordionheader'
+import AccordionContent from 'primevue/accordioncontent'
 import AutoComplete from 'primevue/autocomplete'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'

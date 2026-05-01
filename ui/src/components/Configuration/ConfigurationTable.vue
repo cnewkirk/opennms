@@ -64,12 +64,11 @@
         </tr>
       </tbody>
     </table>
-    <FeatherPagination
-      :total="pageVals.total"
-      :page-size="pageVals.pageSize"
-      :modelValue="pageVals.page"
-      @update:modelValue="pageUpdate"
-      @update:pageSize="pageSizeUpdate"
+    <Paginator
+      :totalRecords="pageVals.total"
+      :rows="pageVals.pageSize"
+      :first="(pageVals.page - 1) * pageVals.pageSize"
+      @page="(e) => { pageUpdate(e.page + 1); pageSizeUpdate(e.rows) }"
     />
   </div>
 </template>
@@ -79,7 +78,7 @@
   lang="ts"
 >
 import { ComputedRef, PropType } from 'vue'
-import { FeatherPagination } from '@featherds/pagination'
+import Paginator from 'primevue/paginator'
 import Button from 'primevue/button'
 
 import { RequisitionData } from './copy/requisitionTypes'
