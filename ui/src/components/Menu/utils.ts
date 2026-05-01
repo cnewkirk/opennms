@@ -20,12 +20,22 @@
 /// License.
 ///
 
-import { DefineComponent, markRaw } from 'vue'
-import { FeatherMenuList, MenuListEntry } from '@featherds/menu'
-import { FeatherIcon } from '@featherds/icon'
-import IconHome from '@featherds/icon/action/Home'
 import { Plugin } from '@/types'
 import { MenuItem } from '@/types/mainMenu'
+
+// Internal menu list entry type (no longer @featherds/menu dependent)
+interface MenuListEntry {
+  id: string
+  type: 'item' | 'separator' | 'header'
+  title?: string
+  href?: string
+  icon?: string
+  target?: string
+  onClick?: (() => void) | null
+  content?: string
+  component?: any
+  componentProps?: Record<string, unknown>
+}
 
 const TOP_MENU_ID_PREFIX = 'opennms-menu-id-'
 
@@ -95,18 +105,16 @@ const getMenuLink = (menuItem: MenuItem, baseHref?: string | null) => {
   return '#'
 }
 
-const createMenuIcon = (menuItem: MenuItem, getIcon: (iconId?: string | null) => DefineComponent | null) => {
-  const icon: (DefineComponent | null) = getIcon(menuItem.icon)
-
-  return (icon ?? IconHome) as typeof FeatherIcon
+const createMenuIcon = (menuItem: MenuItem, getIcon: (iconId?: string | null) => string | null): string => {
+  return getIcon(menuItem.icon) ?? 'pi-home'
 }
 
 const createMenuListEntry = (
   menuItem: MenuItem,
   baseHref: string | null | undefined,
-  getIcon: (iconId?: string | null) => DefineComponent | null,
+  getIcon: (iconId?: string | null) => string | null,
   onLogout: () => void
-) => {
+): MenuListEntry => {
   let onClick = menuItem.onClick
 
   if (menuItem.action === 'logout') {
@@ -115,21 +123,21 @@ const createMenuListEntry = (
 
   const target = menuItem.linkTarget === '_blank' ? '_blank' : '_self'
 
-  let icon: typeof FeatherIcon | undefined = undefined
+  let icon: string | undefined = undefined
 
   if (menuItem.icon) {
     icon = createMenuIcon(menuItem, getIcon)
   }
 
   return {
-    id: menuItem.id ?? menuItem.name,
+    id: menuItem.id ?? menuItem.name ?? '',
     type: 'item',
-    title: menuItem.name,
+    title: menuItem.name ?? undefined,
     href: getMenuLink(menuItem, baseHref),
-    icon: icon,
+    icon,
     target,
     onClick
-  } as MenuListEntry
+  }
 }
 
 const createMenuListSeparator = () => {
@@ -172,9 +180,9 @@ const createPluginsMenu = (plugins: Plugin[], menuItem?: MenuItem) => {
 const createTopMenuListEntry = (
   topMenuItem: MenuItem,
   baseHref: string | null | undefined,
-  getIcon: (iconId?: string | null) => DefineComponent | null,
+  getIcon: (iconId?: string | null) => string | null,
   onLogout: () => void
-) => {
+): MenuListEntry => {
   if (topMenuItem.type === 'separator') {
     return createMenuListSeparator()
   }
@@ -184,17 +192,16 @@ const createTopMenuListEntry = (
   }
 
   // 'item'
-  let entry = {
+  let entry: MenuListEntry = {
     id: `${TOP_MENU_ID_PREFIX}${topMenuItem.id ?? topMenuItem.name ?? ''}`,
     type: 'item',
-    title: topMenuItem.name,
+    title: topMenuItem.name ?? undefined,
     content: '',
     icon: createMenuIcon(topMenuItem, getIcon),
-    component: markRaw(FeatherMenuList),
     componentProps: {
       items: topMenuItem.items?.map(item => createMenuListEntry(item, baseHref, getIcon, onLogout)) ?? []
     }
-  } as MenuListEntry
+  }
 
   if (topMenuItem.action && topMenuItem.action === 'link' && topMenuItem.url && topMenuItem.url.length > 0) {
     const url = getMenuLink(topMenuItem, baseHref)
@@ -203,7 +210,7 @@ const createTopMenuListEntry = (
       ...entry,
       href: url,
       onClick: () => window.location.assign(url)
-    } as any as MenuListEntry
+    }
   }
 
   return entry

@@ -11,7 +11,7 @@
                 </div>
             </div>
             <span :class="iconClass">
-                <FeatherIcon :icon="SubdirectoryArrowLeft"></FeatherIcon>
+                <i class="pi pi-arrow-right" style="font-size: 0.75em;" />
             </span>
         </div>
     </button>
@@ -26,8 +26,6 @@
 
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { FeatherIcon } from '@featherds/icon'
-import SubdirectoryArrowLeft from '@featherds/icon/navigation/SubdirectoryArrowLeft'
 import { SearchResultItem } from '@/types'
 
 const props = defineProps({
