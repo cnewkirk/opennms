@@ -30,7 +30,7 @@ defineProps({
   width: 100%;
   display: flex;
   margin-bottom: 15px;
-  background: var($background);
+  background: var($surface); // $surface not $background — breadcrumb is an elevated card, not the page canvas
   border: 1px solid var($border-light-on-surface);
   border-radius: vars.$border-radius-surface;
 
