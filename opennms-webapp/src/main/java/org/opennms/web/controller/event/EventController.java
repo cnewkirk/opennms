@@ -27,7 +27,6 @@ import org.opennms.netmgt.model.OnmsFilterFavorite;
 import org.opennms.web.alert.AlertType;
 import org.opennms.web.event.*;
 import org.opennms.web.event.filter.EventCriteria;
-import org.opennms.web.event.filter.EventIdFilter;
 import org.opennms.web.event.filter.EventIdListFilter;
 import org.opennms.web.filter.Filter;
 import org.opennms.web.filter.FilterUtil;
@@ -113,11 +112,8 @@ public class EventController extends MultiActionController implements Initializi
      * </p>
      */
     public ModelAndView list(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        OnmsFilterFavorite favorite = getFavorite(
-                request.getParameter("favoriteId"),
-                request.getRemoteUser(),
-                FilterUtil.parse(request.getQueryString() == null ? "" : request.getQueryString()));
-        return list(request, favorite);
+        response.sendRedirect(request.getContextPath() + "/ui/events");
+        return null;
     }
 
     private ModelAndView list(HttpServletRequest request, OnmsFilterFavorite favorite) {
@@ -130,28 +126,20 @@ public class EventController extends MultiActionController implements Initializi
     }
 
     public ModelAndView detail(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    	String idString = request.getParameter("id");
-    	// asking for a specific ID; only filter should be event ID
-        final long eventId;
+        String idString = request.getParameter("id");
         try {
-            eventId = WebSecurityUtils.safeParseLong(idString);
+            long eventId = WebSecurityUtils.safeParseLong(idString);
+            response.sendRedirect(request.getContextPath() + "/ui/event/" + eventId);
+            return null;
         } catch (NumberFormatException e) {
             throw new EventIdNotFoundException("Could not parse event ID '" + idString + "' to integer.", idString);
         }
-    	ModelAndView modelAndView = createModelAndView(request, new EventIdFilter(eventId));
-    	modelAndView.setViewName("event/detail");
-        modelAndView.addObject("eventId", idString);
-
-        return modelAndView;
     }
 
     // index view
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    	List<OnmsFilterFavorite> userFilterList = favoriteService.getFavorites(request.getRemoteUser(), OnmsFilterFavorite.Page.EVENT);
-        ModelAndView modelAndView = new ModelAndView("event/index");
-        modelAndView.addObject("favorites", userFilterList.toArray());
-        modelAndView.addObject("callback", getFilterCallback());
-        return modelAndView;
+        response.sendRedirect(request.getContextPath() + "/ui/events");
+        return null;
     }
 
     public ModelAndView createFavorite(HttpServletRequest request, HttpServletResponse response) throws Exception {
