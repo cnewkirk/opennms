@@ -108,6 +108,8 @@ const emit = defineEmits<{ 'go-graphs': [] }>()
 const props = defineProps<{
   availability: NodeAvailability | null
   outages: Outage[]
+  windowStart: number
+  windowEnd: number
   loading: boolean
   error: string | null
   problemsOnly?: boolean
@@ -117,10 +119,6 @@ const props = defineProps<{
 
 const isClickable = computed(() => props.clickable !== false)
 const showAll = ref(false)
-
-const now = Date.now()
-const windowStart = now - 24 * 60 * 60 * 1000
-const windowEnd = now
 
 const allHealthy = computed(() => {
   if (!props.availability?.ipinterfaces?.length) return true

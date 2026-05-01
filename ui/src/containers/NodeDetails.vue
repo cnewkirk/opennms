@@ -35,6 +35,8 @@
                 <AvailabilityPanel
                   :availability="availability"
                   :outages="outages"
+                  :windowStart="windowStartMs"
+                  :windowEnd="windowEndMs"
                   :loading="availLoading"
                   :error="availError"
                   :problemsOnly="perspectiveStore.isProblems"
@@ -110,7 +112,7 @@ const id = route.params.id as string
 
 const { node, loading: nodeLoading, error: nodeError } = useNodeDetail(id)
 const {
-  availability, chartData, downSegmentMeta, outages,
+  availability, outages, windowStartMs, windowEndMs,
   loading: availLoading, error: availError
 } = useNodeAvailability(id)
 const { adminRole } = useRole()

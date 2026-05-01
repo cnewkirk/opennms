@@ -96,6 +96,8 @@ const useNodeAvailability = (nodeId: string) => {
   const loading = ref(true)
   const error = ref<string | null>(null)
   const outages = ref<Outage[]>([])
+  const windowStartMs = ref<number>(0)
+  const windowEndMs   = ref<number>(0)
 
   const fetch = async () => {
     loading.value = true
@@ -103,6 +105,8 @@ const useNodeAvailability = (nodeId: string) => {
 
     const now = Date.now()
     const windowStart = sub(now, { hours: 24 }).getTime()
+    windowEndMs.value   = now
+    windowStartMs.value = sub(now, { hours: 24 }).getTime()
 
     // /rest/availability/nodes/{id} only accepts numeric IDs.
     // Resolve foreignSource:foreignId to the numeric ID first.
@@ -143,7 +147,7 @@ const useNodeAvailability = (nodeId: string) => {
 
   fetch()
 
-  return { availability, chartData, downSegmentMeta, outages, loading, error }
+  return { availability, chartData, downSegmentMeta, outages, windowStartMs, windowEndMs, loading, error }
 }
 
 export default useNodeAvailability
