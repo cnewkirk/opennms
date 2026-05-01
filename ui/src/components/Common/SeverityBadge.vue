@@ -9,7 +9,7 @@ defineProps<{ severity: string }>()
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @use "@/styles/tokens" as fvars;
-@use '@featherds/styles/themes/utils';
+@use "@/styles/utils";
 
 // Outlined severity badge: severity color as border + text, subtle tinted background.
 // Light mode overrides (solid fill) live in opennms-feather-styles.scss because

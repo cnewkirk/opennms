@@ -467,7 +467,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @use "@/styles/tokens" as fvars;
-@use '@featherds/styles/themes/utils';
+@use "@/styles/utils";
 @import "@/styles/tokens";
 @import "@/styles/typography";
 

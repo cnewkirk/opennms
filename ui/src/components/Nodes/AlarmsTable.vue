@@ -220,7 +220,7 @@ const rowClass = (alarm: Alarm) => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @use "@/styles/tokens" as fvars;
-@use '@featherds/styles/themes/utils';
+@use "@/styles/utils";
 @import "@featherds/table/scss/table";
 @import "@/styles/elevation";
 @import "@/styles/tokens";
