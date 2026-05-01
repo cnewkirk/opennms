@@ -45,8 +45,8 @@
       </div>
       <div class="svc-uptime-row__bar" title="Red = confirmed outage period">
         <div
-          v-for="(seg, i) in outageSegments"
-          :key="i"
+          v-for="seg in outageSegments"
+          :key="seg.outageId"
           class="svc-uptime-row__outage"
           :style="{ left: `${seg.startPct}%`, width: `${seg.widthPct}%` }"
         />
@@ -109,9 +109,9 @@ const availClass = computed(() => {
 
   &__pct {
     font-weight: 600;
-    &--normal   { color: fvars.$success; }
-    &--warning  { color: fvars.$warning; }
-    &--critical { color: fvars.$error; }
+    &--normal   { color: var(--feather-success); }
+    &--warning  { color: var(--feather-warning); }
+    &--critical { color: var(--feather-error); }
   }
 
   &__skeleton, &__no-data {
@@ -137,7 +137,7 @@ const availClass = computed(() => {
   &__outage {
     position: absolute;
     height: 100%;
-    background: fvars.$error;
+    background: var(--feather-error);
     opacity: 0.75;
     border-radius: 2px;
   }
