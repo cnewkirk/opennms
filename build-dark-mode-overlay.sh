@@ -158,6 +158,13 @@ cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/mibCompiler.jsp" \
 # delete.jsp — redirect to Vue /delete-nodes
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/delete.jsp" \
    "${OVERLAY_DIR}/admin/delete.jsp"
+# classification/index.jsp — redirect to Vue /flow-classification
+mkdir -p "${OVERLAY_DIR}/admin/classification"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/classification/index.jsp" \
+   "${OVERLAY_DIR}/admin/classification/index.jsp"
+# newInterface.jsp — redirect to Vue /add-interface
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/newInterface.jsp" \
+   "${OVERLAY_DIR}/admin/newInterface.jsp"
 # node.jsp — redirect to Vue SPA at /#/node/:id
 mkdir -p "${OVERLAY_DIR}/element"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/element/node.jsp" \
@@ -348,6 +355,12 @@ COPY --chown=10001:10001 admin/mibCompiler.jsp /opt/opennms/jetty-webapps/opennm
 
 # delete.jsp — redirect to Vue SPA /delete-nodes
 COPY --chown=10001:10001 admin/delete.jsp /opt/opennms/jetty-webapps/opennms/admin/delete.jsp
+
+# classification/index.jsp — redirect to Vue SPA /flow-classification
+COPY --chown=10001:10001 admin/classification/index.jsp /opt/opennms/jetty-webapps/opennms/admin/classification/index.jsp
+
+# newInterface.jsp — redirect to Vue SPA /add-interface
+COPY --chown=10001:10001 admin/newInterface.jsp /opt/opennms/jetty-webapps/opennms/admin/newInterface.jsp
 
 # node.jsp — redirect to Vue SPA at /#/node/:id
 COPY --chown=10001:10001 element/node.jsp /opt/opennms/jetty-webapps/opennms/element/node.jsp

@@ -70,7 +70,7 @@ const adminCards = computed(() => {
         { label: 'Configure Discovery', to: '/discovery-config' },
         { label: 'Run Single Discovery Scan', href: baseHref.value + 'admin/discovery/edit-scan.jsp' },
         { label: 'Configure SNMP Community Names by IP Address', to: '/snmp-config' },
-        { label: 'Manually Add an Interface', href: baseHref.value + 'admin/newInterface.jsp' },
+        { label: 'Manually Add an Interface', to: '/add-interface' },
         { label: 'Delete Nodes', to: '/delete-nodes' },
         { label: 'Configure External Requisitions', to: '/configuration' },
         { label: 'Configure Geocoder Service', href: baseHref.value + 'admin/geoservice/index.jsp' },
