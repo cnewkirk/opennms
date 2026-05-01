@@ -28,9 +28,11 @@
 
 package org.opennms.web.controller.node;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.opennms.web.svclayer.NodeListService;
 import org.opennms.web.svclayer.model.NodeListCommand;
-import org.opennms.web.svclayer.model.NodeListModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -52,10 +54,9 @@ public class NodeListController {
     private NodeListService m_nodeListService;
 
     @RequestMapping(method={ RequestMethod.GET, RequestMethod.POST })
-    public ModelAndView handle(@ModelAttribute("command") NodeListCommand command) {
-        NodeListModel model = m_nodeListService.createNodeList(command);
-        ModelAndView modelAndView = new ModelAndView("element/nodeList", "model", model);
-        modelAndView.addObject("command", command);
-        return modelAndView;
+    public ModelAndView handle(@ModelAttribute("command") NodeListCommand command,
+                               HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.sendRedirect(request.getContextPath() + "/ui/nodes");
+        return null;
     }
 }
