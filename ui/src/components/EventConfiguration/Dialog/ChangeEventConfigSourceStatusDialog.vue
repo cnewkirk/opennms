@@ -1,10 +1,11 @@
 <template>
   <div class="change-event-conf-event-status-dialog">
-    <FeatherDialog
-      v-model="store.changeEventConfigSourceStatusDialogState.visible"
-      :labels="labels"
-      hide-close
-      @hidden="store.hideChangeEventConfigSourceStatusDialog()"
+    <Dialog
+      v-model:visible="store.changeEventConfigSourceStatusDialogState.visible"
+      header="Change Event Configuration Source Status"
+      modal
+      :style="{ width: '480px' }"
+      @hide="store.hideChangeEventConfigSourceStatusDialog()"
     >
       <div class="modal-body">
         <p v-html="getMessage()"></p>
@@ -13,24 +14,19 @@
         </p>
         <p><strong>Are you sure you want to proceed?</strong></p>
       </div>
-      <template v-slot:footer>
-        <FeatherButton @click="store.hideChangeEventConfigSourceStatusDialog()"> Cancel </FeatherButton>
-        <FeatherButton
-          primary
-          @click="changeStatus()"
-        >
-          Save
-        </FeatherButton>
+      <template #footer>
+        <Button label="Cancel" text @click="store.hideChangeEventConfigSourceStatusDialog()" />
+        <Button label="Save" @click="changeStatus()" />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { VENDOR_OPENNMS } from '@/lib/utils'
 import { useEventConfigStore } from '@/stores/eventConfigStore'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 
 const store = useEventConfigStore()
 const labels = {

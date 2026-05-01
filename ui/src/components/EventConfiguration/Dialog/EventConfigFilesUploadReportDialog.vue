@@ -1,9 +1,10 @@
 <template>
-  <FeatherDialog
-    v-model="store.uploadedEventConfigFilesReportDialogState.visible"
-    :labels="{ title: 'Upload Report', close: 'Close' }"
-    hide-close
-    @hidden="closeDialog"
+  <Dialog
+    v-model:visible="store.uploadedEventConfigFilesReportDialogState.visible"
+    header="Upload Report"
+    modal
+    :style="{ width: '480px' }"
+    @hide="closeDialog"
   >
     <div>
       <h4>Message:</h4>
@@ -26,23 +27,18 @@
     </ul>
   </div>
     </div>
-    <template v-slot:footer>
-      <FeatherButton @click="closeDialog"> Close </FeatherButton>
-      <FeatherButton
-        primary
-        @click="gotoViewTab"
-      >
-        View Uploaded Files
-      </FeatherButton>
+    <template #footer>
+      <Button label="Close" text @click="closeDialog" />
+      <Button label="View Uploaded Files" @click="gotoViewTab" />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { useEventConfigStore } from '@/stores/eventConfigStore'
 import { EventConfigFilesUploadResponse } from '@/types/eventConfig'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 
 const store = useEventConfigStore()
 

@@ -6,28 +6,24 @@
       </div>
       <div class="action-container">
         <div class="search-container">
-          <FeatherInput
-            label="Search"
-            type="search"
-            data-test="search-input"
-            v-model.trim="store.sourcesSearchTerm"
-            :hint="'Search by Source, Vendor, UEI or Label'"
-            @update:modelValue.self="((e: string) => onChangeSearchTerm(e))"
-          >
-            <template #pre>
-              <FeatherIcon :icon="Search" />
-            </template>
-          </FeatherInput>
+          <span class="p-input-icon-left w-full">
+            <i class="pi pi-search" />
+            <InputText
+              type="search"
+              data-test="search-input"
+              v-model.trim="store.sourcesSearchTerm"
+              placeholder="Search by Source, Vendor, UEI or Label"
+              class="w-full"
+              @update:modelValue="((e: string) => onChangeSearchTerm(e))"
+            />
+          </span>
         </div>
         <div class="refresh">
-          <FeatherButton
-            primary
-            icon="Refresh"
+          <Button
+            icon="pi pi-refresh"
             data-test="refresh-button"
             @click="store.refreshSourcesFilters()"
-          >
-            <FeatherIcon :icon="Refresh"> </FeatherIcon>
-          </FeatherButton>
+          />
         </div>
       </div>
     </div>
@@ -39,16 +35,15 @@
       >
         <thead>
           <tr>
-            <FeatherSortHeader
+            <th
               v-for="col of columns"
               :key="col.label"
               scope="col"
-              :property="col.id"
-              :sort="(sort as any)[col.id]"
-              v-on:sort-changed="sortChanged"
+              class="sortable-header"
+              @click="nextSort(col.id)"
             >
-              {{ col.label }}
-            </FeatherSortHeader>
+              {{ col.label }}<span>{{ sortIndicator(col.id) }}</span>
+            </th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -67,46 +62,31 @@
             <td>{{ config.enabled ? 'Enabled' : 'Disabled' }}</td>
             <td>
               <div class="action-container">
-                <FeatherButton
-                  icon="View Details"
+                <Button
+                  icon="pi pi-eye"
+                  text
+                  v-tooltip.top="'View Details'"
                   data-test="view-button"
                   @click="onEventClick(config)"
-                >
-                  <FeatherIcon :icon="ViewDetails"> </FeatherIcon>
-                </FeatherButton>
-                <FeatherButton
-                  icon="Download XML"
+                />
+                <Button
+                  icon="pi pi-download"
+                  text
+                  v-tooltip.top="'Download XML'"
                   data-test="download-button"
                   @click="downloadEventConfXmlBySourceId(config.id)"
-                >
-                  <FeatherIcon :icon="Download"> </FeatherIcon>
-                </FeatherButton>
-                <FeatherDropdown>
-                  <template v-slot:trigger="{ attrs, on }">
-                    <FeatherButton
-                      link
-                      href="#"
-                      v-bind="attrs"
-                      v-on="on"
-                      :icon="`More actions for ${config.name}`"
-                    >
-                      <FeatherIcon :icon="MenuIcon" />
-                    </FeatherButton>
-                  </template>
-                  <FeatherDropdownItem
-                    @click="store.showChangeEventConfigSourceStatusDialog(config)"
-                    data-test="change-status-button"
-                  >
-                    {{ config.enabled ? 'Disable Source' : 'Enable Source' }}
-                  </FeatherDropdownItem>
-                  <FeatherDropdownItem
-                    @click="store.showDeleteEventConfigSourceModal(config)"
-                    data-test="delete-source-button"
-                    v-if="config.vendor !== VENDOR_OPENNMS"
-                  >
-                    Delete Source
-                  </FeatherDropdownItem>
-                </FeatherDropdown>
+                />
+                <Button
+                  icon="pi pi-ellipsis-v"
+                  text
+                  :aria-label="`More actions for ${config.name}`"
+                  @click="(e) => toggleMenu(e, config)"
+                />
+                <Menu
+                  :ref="(el) => setMenuRef(el, config.id)"
+                  :model="getMenuItems(config)"
+                  :popup="true"
+                />
               </div>
             </td>
           </tr>
@@ -116,14 +96,13 @@
         class="alerts-pagination"
         v-if="store.sources.length"
       >
-        <FeatherPagination
-          :modelValue="store.sourcesPagination.page"
-          :pageSize="store.sourcesPagination.pageSize"
-          :total="store.sourcesPagination.total"
-          :pageSizes="[10, 20, 50, 100, 200]"
-          @update:modelValue="store.onSourcePageChange"
-          @update:pageSize="store.onSourcePageSizeChange"
+        <Paginator
+          :first="(store.sourcesPagination.page - 1) * store.sourcesPagination.pageSize"
+          :rows="store.sourcesPagination.pageSize"
+          :totalRecords="store.sourcesPagination.total"
+          :rowsPerPageOptions="[10, 20, 50, 100, 200]"
           data-test="FeatherPagination"
+          @page="(e) => { store.onSourcePageChange(e.page + 1); store.onSourcePageSizeChange(e.rows) }"
         />
       </div>
       <div v-if="!store.sources.length">
@@ -143,17 +122,12 @@ import { VENDOR_OPENNMS } from '@/lib/utils'
 import { downloadEventConfXmlBySourceId } from '@/services/eventConfigService'
 import { useEventConfigStore } from '@/stores/eventConfigStore'
 import { EventConfigSource } from '@/types/eventConfig'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
-import { FeatherIcon } from '@featherds/icon'
-import Download from '@featherds/icon/action/DownloadFile'
-import Search from '@featherds/icon/action/Search'
-import ViewDetails from '@featherds/icon/action/ViewDetails'
-import MenuIcon from '@featherds/icon/navigation/MoreHoriz'
-import Refresh from '@featherds/icon/navigation/Refresh'
-import { FeatherInput } from '@featherds/input'
-import { FeatherPagination } from '@featherds/pagination'
-import { FeatherSortHeader, SORT } from '@featherds/table'
+import Tooltip from 'primevue/tooltip'
+const vTooltip = Tooltip
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Menu from 'primevue/menu'
+import Paginator from 'primevue/paginator'
 import { debounce } from 'lodash'
 import EmptyList from '../Common/EmptyList.vue'
 import TableCard from '../Common/TableCard.vue'
@@ -172,12 +146,31 @@ const columns = computed(() => [
   { id: 'eventCount', label: 'Event Count' }
 ])
 
-const sort = reactive({
-  name: SORT.NONE,
-  vendor: SORT.NONE,
-  description: SORT.NONE,
-  eventCount: SORT.NONE
-}) as any
+type SortDir = 'asc' | 'desc' | undefined
+const sortField = ref<string | undefined>(undefined)
+const sortDir = ref<SortDir>(undefined)
+
+const nextSort = (field: string) => {
+  if (sortField.value !== field) {
+    sortField.value = field
+    sortDir.value = 'asc'
+  } else if (sortDir.value === 'asc') {
+    sortDir.value = 'desc'
+  } else {
+    sortField.value = undefined
+    sortDir.value = undefined
+  }
+  if (sortField.value && sortDir.value) {
+    store.onSourcesSortChange(sortField.value, sortDir.value)
+  } else {
+    store.onSourcesSortChange('createdTime', 'desc')
+  }
+}
+
+const sortIndicator = (field: string) => {
+  if (sortField.value !== field) return ''
+  return sortDir.value === 'asc' ? ' ▲' : ' ▼'
+}
 
 const onEventClick = (source: EventConfigSource) => {
   router.push({
@@ -186,17 +179,30 @@ const onEventClick = (source: EventConfigSource) => {
   })
 }
 
-const sortChanged = (sortObj: { property: string; value: SORT }) => {
-  if (sortObj.value === 'asc' || sortObj.value === 'desc') {
-    store.onSourcesSortChange(sortObj.property, sortObj.value)
-  } else {
-    store.onSourcesSortChange('createdTime', 'desc')
+// Per-row Menu refs
+const menuRefs = ref<Record<number, any>>({})
+const setMenuRef = (el: any, id: number) => {
+  if (el) menuRefs.value[id] = el
+}
+const toggleMenu = (event: Event, config: EventConfigSource) => {
+  menuRefs.value[config.id]?.toggle(event)
+}
+const getMenuItems = (config: EventConfigSource) => {
+  const items: any[] = [
+    {
+      label: config.enabled ? 'Disable Source' : 'Enable Source',
+      command: () => store.showChangeEventConfigSourceStatusDialog(config),
+      'data-test': 'change-status-button'
+    }
+  ]
+  if (config.vendor !== VENDOR_OPENNMS) {
+    items.push({
+      label: 'Delete Source',
+      command: () => store.showDeleteEventConfigSourceModal(config),
+      'data-test': 'delete-source-button'
+    })
   }
-
-  for (const prop in sort) {
-    sort[prop] = SORT.NONE
-  }
-  sort[sortObj.property] = sortObj.value
+  return items
 }
 
 const onChangeSearchTerm = debounce(async (value: string) => {
@@ -214,6 +220,11 @@ onMounted(async () => {
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/table/scss/table';
 @use '@/styles/_transitionDataTable';
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+}
 
 .event-configuration-table {
   margin-top: 10px;

@@ -6,27 +6,23 @@
       </div>
       <div class="action-container">
         <div class="search-container">
-          <FeatherInput
-            label="Search"
-            type="search"
-            data-test="search-input"
-            v-model.trim="store.eventsSearchTerm"
-            :hint="'Search by Event UEI or Event Label'"
-            @update:modelValue.self="((e: string) => onChangeSearchTerm(e))"
-          >
-            <template #pre>
-              <FeatherIcon :icon="Search" />
-            </template>
-          </FeatherInput>
+          <span class="p-input-icon-left w-full">
+            <i class="pi pi-search" />
+            <InputText
+              type="search"
+              data-test="search-input"
+              v-model.trim="store.eventsSearchTerm"
+              placeholder="Search by Event UEI or Event Label"
+              class="w-full"
+              @update:modelValue="((e: string) => onChangeSearchTerm(e))"
+            />
+          </span>
         </div>
         <div class="refresh">
-          <FeatherButton
-            primary
-            icon="Refresh"
+          <Button
+            icon="pi pi-refresh"
             @click="store.refreshEventConfigEvents()"
-          >
-            <FeatherIcon :icon="Refresh"> </FeatherIcon>
-          </FeatherButton>
+          />
         </div>
       </div>
     </div>
@@ -38,16 +34,15 @@
       >
         <thead>
           <tr>
-            <FeatherSortHeader
+            <th
               v-for="col of columns"
               :key="col.label"
               scope="col"
-              :property="col.id"
-              :sort="(sort as any)[col.id]"
-              v-on:sort-changed="sortChanged"
+              class="sortable-header"
+              @click="nextSort(col.id)"
             >
-              {{ col.label }}
-            </FeatherSortHeader>
+              {{ col.label }}<span>{{ sortIndicator(col.id) }}</span>
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -68,57 +63,29 @@
               <td>{{ event.enabled ? 'Enabled' : 'Disabled' }}</td>
               <td>
                 <div class="action-container">
-                  <FeatherButton
-                    icon="Edit"
-                    :title="`Edit ${event.eventLabel}`"
+                  <Button
+                    icon="pi pi-pencil"
+                    text
+                    :aria-label="`Edit ${event.eventLabel}`"
                     data-test="edit-button"
                     @click="onEditEvent(event)"
-                  >
-                    <FeatherIcon :icon="Edit" />
-                  </FeatherButton>
-                  <FeatherDropdown>
-                    <template v-slot:trigger="{ attrs, on }">
-                      <FeatherButton
-                        link
-                        href="#"
-                        v-bind="attrs"
-                        v-on="on"
-                        :icon="`More Options`"
-                      >
-                        <FeatherIcon :icon="MenuIcon" />
-                      </FeatherButton>
-                    </template>
-                    <FeatherDropdownItem
-                      @click="store.showChangeEventConfigEventStatusDialog(event)"
-                      data-test="change-status-button"
-                    >
-                      {{ event.enabled ? 'Disable Event' : 'Enable Event' }}
-                    </FeatherDropdownItem>
-                    <FeatherDropdownItem
-                      @click="store.showDeleteEventConfigEventDialog(event)"
-                      data-test="delete-event-button"
-                      v-if="store.selectedSource?.vendor !== VENDOR_OPENNMS"
-                    >
-                      Delete Event
-                    </FeatherDropdownItem>
-                  </FeatherDropdown>
-                  <FeatherButton
-                    primary
-                    :icon="`${expandedRows.includes(event.id)
-                    ? 'Expand Less'
-                    : 'Expand More'
-                    }`"
+                  />
+                  <Button
+                    icon="pi pi-ellipsis-v"
+                    text
+                    aria-label="More Options"
+                    @click="(e) => toggleEventMenu(e, event)"
+                  />
+                  <Menu
+                    :ref="(el) => setEventMenuRef(el, event.id)"
+                    :model="getEventMenuItems(event)"
+                    :popup="true"
+                  />
+                  <Button
+                    :icon="expandedRows.includes(event.id) ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                    text
                     @click="toggleExpand(event.id)"
-                  >
-                    <FeatherIcon
-                      :icon="ExpandLess"
-                      v-if="expandedRows.includes(event.id)"
-                    />
-                    <FeatherIcon
-                      :icon="ExpandMore"
-                      v-else
-                    />
-                  </FeatherButton>
+                  />
                 </div>
               </td>
             </tr>
@@ -141,14 +108,13 @@
         class="alerts-pagination"
         v-if="store.events.length"
       >
-        <FeatherPagination
-          :modelValue="store.eventsPagination.page"
-          :pageSize="store.eventsPagination.pageSize"
-          :total="store.eventsPagination.total"
-          :pageSizes="[10, 20, 50]"
-          @update:modelValue="store.onEventsPageChange"
-          @update:pageSize="store.onEventsPageSizeChange"
+        <Paginator
+          :first="(store.eventsPagination.page - 1) * store.eventsPagination.pageSize"
+          :rows="store.eventsPagination.pageSize"
+          :totalRecords="store.eventsPagination.total"
+          :rowsPerPageOptions="[10, 20, 50]"
           data-test="FeatherPagination"
+          @page="(e) => { store.onEventsPageChange(e.page + 1); store.onEventsPageSizeChange(e.rows) }"
         />
       </div>
       <div v-if="!store.events.length">
@@ -169,18 +135,10 @@ import { useEventConfigDetailStore } from '@/stores/eventConfigDetailStore'
 import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { CreateEditMode } from '@/types'
 import { EventConfigEvent } from '@/types/eventConfig'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
-import { FeatherIcon } from '@featherds/icon'
-import Edit from '@featherds/icon/action/Edit'
-import Search from '@featherds/icon/action/Search'
-import ExpandLess from '@featherds/icon/navigation/ExpandLess'
-import ExpandMore from '@featherds/icon/navigation/ExpandMore'
-import MenuIcon from '@featherds/icon/navigation/MoreHoriz'
-import Refresh from '@featherds/icon/navigation/Refresh'
-import { FeatherInput } from '@featherds/input'
-import { FeatherPagination } from '@featherds/pagination'
-import { FeatherSortHeader, SORT } from '@featherds/table'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Menu from 'primevue/menu'
+import Paginator from 'primevue/paginator'
 import { debounce } from 'lodash'
 import SeverityBadge from '../Common/SeverityBadge.vue'
 import EmptyList from '../Common/EmptyList.vue'
@@ -202,24 +160,56 @@ const columns = computed(() => [
   { id: 'enabled', label: 'Status' }
 ])
 
-const sort = reactive({
-  uei: SORT.NONE,
-  eventLabel: SORT.NONE,
-  severity: SORT.NONE,
-  enabled: SORT.NONE
-}) as any
+type SortDir = 'asc' | 'desc' | undefined
+const sortField = ref<string | undefined>(undefined)
+const sortDir = ref<SortDir>(undefined)
 
-const sortChanged = (sortObj: { property: string; value: SORT }) => {
-  if (sortObj.value === 'asc' || sortObj.value === 'desc') {
-    store.onEventsSortChange(sortObj.property, sortObj.value)
+const nextSort = (field: string) => {
+  if (sortField.value !== field) {
+    sortField.value = field
+    sortDir.value = 'asc'
+  } else if (sortDir.value === 'asc') {
+    sortDir.value = 'desc'
+  } else {
+    sortField.value = undefined
+    sortDir.value = undefined
+  }
+  if (sortField.value && sortDir.value) {
+    store.onEventsSortChange(sortField.value, sortDir.value)
   } else {
     store.onEventsSortChange('createdTime', 'desc')
   }
+}
 
-  for (const prop in sort) {
-    sort[prop] = SORT.NONE
+const sortIndicator = (field: string) => {
+  if (sortField.value !== field) return ''
+  return sortDir.value === 'asc' ? ' ▲' : ' ▼'
+}
+
+// Per-row Menu refs
+const eventMenuRefs = ref<Record<number, any>>({})
+const setEventMenuRef = (el: any, id: number) => {
+  if (el) eventMenuRefs.value[id] = el
+}
+const toggleEventMenu = (event: Event, row: EventConfigEvent) => {
+  eventMenuRefs.value[row.id]?.toggle(event)
+}
+const getEventMenuItems = (event: EventConfigEvent) => {
+  const items: any[] = [
+    {
+      label: event.enabled ? 'Disable Event' : 'Enable Event',
+      command: () => store.showChangeEventConfigEventStatusDialog(event),
+      'data-test': 'change-status-button'
+    }
+  ]
+  if (store.selectedSource?.vendor !== VENDOR_OPENNMS) {
+    items.push({
+      label: 'Delete Event',
+      command: () => store.showDeleteEventConfigEventDialog(event),
+      'data-test': 'delete-event-button'
+    })
   }
-  sort[sortObj.property] = sortObj.value
+  return items
 }
 
 const toggleExpand = (id: number) => {
@@ -253,6 +243,11 @@ const onChangeSearchTerm = debounce(async (value: string) => {
 @use '@featherds/table/scss/table';
 @use '@/styles/_transitionDataTable';
 @use '@/styles/_severities';
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+}
 
 .event-config-event-table {
   margin-top: 10px;

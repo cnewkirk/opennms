@@ -1,11 +1,12 @@
 <template>
   <div class="change-event-conf-event-status-dialog">
-    <FeatherDialog
-      v-model="store.changeEventConfigSourceStatusDialogState.visible"
-      :labels="labels"
-      hide-close
-      @hidden="store.hideChangeEventConfigSourceStatusDialog()"
+    <Dialog
+      v-model:visible="store.changeEventConfigSourceStatusDialogState.visible"
+      header="Change Event Configuration Source Status"
+      modal
+      :style="{ width: '480px' }"
       data-test="feather-dialog"
+      @hide="store.hideChangeEventConfigSourceStatusDialog()"
     >
       <div class="modal-body">
         <p v-html="getMessage()"></p>
@@ -14,16 +15,11 @@
         </p>
         <p><strong>Are you sure you want to proceed?</strong></p>
       </div>
-      <template v-slot:footer>
-        <FeatherButton @click="store.hideChangeEventConfigSourceStatusDialog()"> Cancel </FeatherButton>
-        <FeatherButton
-          primary
-          @click="changeStatus()"
-        >
-          Save
-        </FeatherButton>
+      <template #footer>
+        <Button label="Cancel" text @click="store.hideChangeEventConfigSourceStatusDialog()" />
+        <Button label="Save" @click="changeStatus()" />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
@@ -31,8 +27,8 @@
 import useSnackbar from '@/composables/useSnackbar'
 import { VENDOR_OPENNMS } from '@/lib/utils'
 import { useEventConfigDetailStore } from '@/stores/eventConfigDetailStore'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 
 const store = useEventConfigDetailStore()
 const { showSnackBar } = useSnackbar()

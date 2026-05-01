@@ -1,64 +1,72 @@
 <template>
   <div class="uploaded-file-rename-dialog">
-    <FeatherDialog
-      v-model="dialogVisible"
-      :labels="labels"
-      hide-close
-      @hidden="handleDialogHidden"
+    <Dialog
+      v-model:visible="dialogVisible"
+      header="Rename Uploaded File"
+      modal
+      :style="{ width: '480px' }"
       data-test="dialog-title"
+      @hide="handleDialogHidden"
     >
       <div class="modal-body">
         <p>
           The file name '<strong> {{ originalFileName }} </strong>' already exists in the system.
         </p>
         <p>Choose one of the following options:</p>
-        <FeatherCheckboxGroup class="checkbox-group" label="" vertical>
-          <FeatherCheckbox
-            v-model="overwriteFile"
-            @update:model-value="onChangeOverwriteFile"
-          >
-            Keep Original File Name: <strong>{{ originalFileName }}</strong> and Overwrite Existing File.
-          </FeatherCheckbox>
-          <FeatherCheckbox
-            v-model="renameFile"
-            @update:model-value="onChangeRenameFile"
-          >
-            Rename Uploaded File to:
-          </FeatherCheckbox>
-        </FeatherCheckboxGroup>
-        <FeatherInput
-          v-if="renameFile"
-          class="new-file-name-input"
-          v-model.trim="newFileName"
-          label="New File Name"
-          :error="error"
-          :error-message="error || ''"
-          placeholder="Enter new file name (must end with .xml)"
-          @update:model-value="onChangeFileName"
-          data-test="file-name"
-        />
+        <div class="checkbox-group">
+          <div class="checkbox-row">
+            <Checkbox
+              v-model="overwriteFile"
+              :binary="true"
+              inputId="overwrite-cb"
+              @update:model-value="onChangeOverwriteFile"
+            />
+            <label for="overwrite-cb">
+              Keep Original File Name: <strong>{{ originalFileName }}</strong> and Overwrite Existing File.
+            </label>
+          </div>
+          <div class="checkbox-row">
+            <Checkbox
+              v-model="renameFile"
+              :binary="true"
+              inputId="rename-cb"
+              @update:model-value="onChangeRenameFile"
+            />
+            <label for="rename-cb">Rename Uploaded File to:</label>
+          </div>
+        </div>
+        <div v-if="renameFile" class="new-file-name-input">
+          <label class="p-label">New File Name</label>
+          <InputText
+            v-model.trim="newFileName"
+            class="w-full"
+            :invalid="!!error"
+            placeholder="Enter new file name (must end with .xml)"
+            data-test="file-name"
+            @update:model-value="onChangeFileName"
+          />
+          <small v-if="error" class="p-error">{{ error }}</small>
+        </div>
       </div>
-      <template v-slot:footer>
-        <FeatherButton @click="handleDialogHidden"> Cancel </FeatherButton>
-        <FeatherButton
-          primary
+      <template #footer>
+        <Button label="Cancel" text @click="handleDialogHidden" />
+        <Button
+          label="Save Changes"
           :disabled="shouldRemainDisabled"
           @click="saveChanges"
           data-test="save-button"
-        >
-          Save Changes
-        </FeatherButton>
+        />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { UploadedSourceNamesResponse, UploadEventFileType } from '@/types/eventConfig'
-import { FeatherButton } from '@featherds/button'
-import { FeatherCheckbox, FeatherCheckboxGroup } from '@featherds/checkbox'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherInput } from '@featherds/input'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 
 const props = defineProps<{
   visible: boolean,
@@ -164,13 +172,26 @@ watch(() => props.visible, (val) => {
 
 <style scoped lang="scss">
 .modal-body {
-  :deep(.checkbox-group) {
-    .feather-input-sub-text {
-      display: none !important;
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
   }
   .new-file-name-input {
     margin-top: 15px;
+
+    .p-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.875rem;
+    }
   }
 }
 </style>

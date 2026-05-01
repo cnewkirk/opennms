@@ -1,27 +1,32 @@
 <template>
-  <FeatherDialog
-    v-model="store.createEventConfigSourceDialogState.visible"
-    :labels="labels"
-    hide-close
-    @hidden="handleCancel"
+  <Dialog
+    v-model:visible="store.createEventConfigSourceDialogState.visible"
+    header="Create New Event Source"
+    modal
+    :style="{ width: '480px' }"
+    @hide="handleCancel"
   >
     <div
       v-if="!successMessage"
       class="modal-body-form"
     >
       <div>
-        <FeatherInput
-          label="Event Configuration Source Name"
+        <label class="p-label">Event Configuration Source Name</label>
+        <InputText
           v-model="configName"
-          :error="error?.name"
+          class="w-full"
+          :invalid="!!error?.name"
         />
+        <small v-if="error?.name" class="p-error">{{ error.name }}</small>
       </div>
       <div>
-        <FeatherInput
-          label="Vendor"
+        <label class="p-label">Vendor</label>
+        <InputText
           v-model="vendor"
-          :error="error?.vendor"
+          class="w-full"
+          :invalid="!!error?.vendor"
         />
+        <small v-if="error?.vendor" class="p-error">{{ error.vendor }}</small>
       </div>
       <div>
         <p>
@@ -36,34 +41,30 @@
     >
       <p>The event configuration source has been created successfully.</p>
     </div>
-    <template v-slot:footer>
-      <FeatherButton @click="handleCancel"> Cancel </FeatherButton>
-      <FeatherButton
+    <template #footer>
+      <Button label="Cancel" text @click="handleCancel" />
+      <Button
         v-if="!successMessage"
-        primary
-        @click="handleSave"
+        label="Create"
         :disabled="Object.keys(error || {}).length > 0"
-      >
-        Create
-      </FeatherButton>
-      <FeatherButton
+        @click="handleSave"
+      />
+      <Button
         v-else
-        primary
+        label="View Source"
         @click="visitCreatedEventConfigSource"
-      >
-        View Source
-      </FeatherButton>
+      />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
 import useSnackbar from '@/composables/useSnackbar'
 import { addEventConfigSource } from '@/services/eventConfigService'
 import { useEventConfigStore } from '@/stores/eventConfigStore'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherInput } from '@featherds/input'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 
 const router = useRouter()
 const configName = ref('')

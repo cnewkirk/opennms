@@ -1,10 +1,11 @@
 <template>
   <div class="delete-event-config-event-dialog">
-    <FeatherDialog
-      v-model="store.deleteEventConfigEventDialogState.visible"
-      :labels="labels"
-      hide-close
-      @hidden="store.hideDeleteEventConfigEventDialog()"
+    <Dialog
+      v-model:visible="store.deleteEventConfigEventDialogState.visible"
+      header="Delete Event Configuration Event"
+      modal
+      :style="{ width: '480px' }"
+      @hide="store.hideDeleteEventConfigEventDialog()"
     >
       <div class="modal-body">
         <p>
@@ -15,16 +16,11 @@
         </p>
         <p><strong>Are you sure you want to proceed?</strong></p>
       </div>
-      <template v-slot:footer>
-        <FeatherButton @click="store.hideDeleteEventConfigEventDialog()"> Cancel </FeatherButton>
-        <FeatherButton
-          primary
-          @click="deleteEventConfigEvent(store.deleteEventConfigEventDialogState?.eventConfigEvent?.id)"
-        >
-          Delete
-        </FeatherButton>
+      <template #footer>
+        <Button label="Cancel" text @click="store.hideDeleteEventConfigEventDialog()" />
+        <Button label="Delete" @click="deleteEventConfigEvent(store.deleteEventConfigEventDialogState?.eventConfigEvent?.id)" />
       </template>
-    </FeatherDialog>
+    </Dialog>
   </div>
 </template>
 
@@ -32,8 +28,8 @@
 import useSnackbar from '@/composables/useSnackbar'
 import { deleteEventConfigEventBySourceId } from '@/services/eventConfigService'
 import { useEventConfigDetailStore } from '@/stores/eventConfigDetailStore'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDialog } from '@featherds/dialog'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 
 const store = useEventConfigDetailStore()
 const router = useRouter()

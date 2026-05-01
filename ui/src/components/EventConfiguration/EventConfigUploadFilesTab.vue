@@ -16,65 +16,40 @@
               <template #item="{ element, index }">
                 <div class="file">
                   <div class="file-icon">
-                    <FeatherIcon :icon="Text" />
+                    <i class="pi pi-file" />
                     <span>
                       {{ ellipsify(element.file.name, 39) }}
                     </span>
                   </div>
                   <div class="actions">
-                    <FeatherTooltip
+                    <i
                       v-if="element.isDuplicate"
-                      :title="'File is a duplicate of another file that has been already uploaded.'"
-                      v-slot="{ attrs, on }"
-                    >
-                      <FeatherIcon
-                        :icon="Warning"
-                        v-bind="attrs"
-                        v-on="on"
-                        class="warning-icon"
-                        @click="openFileRenameDialog(index)"
-                      />
-                    </FeatherTooltip>
-                    <FeatherTooltip
+                      class="pi pi-exclamation-triangle warning-icon"
+                      v-tooltip.top="'File is a duplicate of another file that has been already uploaded.'"
+                      @click="openFileRenameDialog(index)"
+                    />
+                    <i
                       v-if="element.isValid && !element.isDuplicate"
-                      :title="'File is valid'"
-                      v-slot="{ attrs, on }"
-                    >
-                      <FeatherIcon
-                        :icon="CheckCircle"
-                        v-bind="attrs"
-                        v-on="on"
-                        class="success-icon"
-                      />
-                    </FeatherTooltip>
-                    <FeatherTooltip
+                      class="pi pi-check-circle success-icon"
+                      v-tooltip.top="'File is valid'"
+                    />
+                    <i
                       v-if="!element.isValid"
-                      :title="element.errors.map((error: string) => `${error}. `).join('\n')"
-                      v-slot="{ attrs, on }"
-                    >
-                      <FeatherIcon
-                        :icon="Error"
-                        v-bind="attrs"
-                        v-on="on"
-                        class="error-icon"
-                      />
-                    </FeatherTooltip>
-                    <FeatherButton
-                      icon="Apps"
+                      class="pi pi-times-circle error-icon"
+                      v-tooltip.top="element.errors.map((e: string) => `${e}. `).join('\n')"
+                    />
+                    <Button
+                      icon="pi pi-bars"
                       text
-                    >
-                      <FeatherIcon
-                        class="close-icon drag-handle"
-                        :icon="Apps"
-                      />
-                    </FeatherButton>
-                    <FeatherButton
-                      icon="Trash"
+                      class="drag-handle"
+                      aria-label="Drag to reorder"
+                    />
+                    <Button
+                      icon="pi pi-trash"
+                      text
                       data-test="remove-files-button"
                       @click="removeFile(index)"
-                    >
-                      <FeatherIcon :icon="Delete" />
-                    </FeatherButton>
+                    />
                   </div>
                 </div>
               </template>
@@ -101,27 +76,26 @@
             @change="handleFolderUpload"
             ref="eventFolderInput"
           />
-          <FeatherButton
+          <Button
+            label="Choose files to upload"
             @click="openFileDialog"
             :disabled="isLoading"
-          >
-            Choose files to upload
-          </FeatherButton>
-          <FeatherButton
+          />
+          <Button
+            label="Choose folder to upload"
             @click="openFolderDialog"
             :disabled="isLoading"
-          >
-            Choose folder to upload
-          </FeatherButton>
-          <FeatherButton
-            primary
+          />
+          <Button
             :disabled="shouldUploadDisabled"
             @click="uploadFiles"
             data-test="upload-button"
           >
-            <FeatherSpinner v-if="isLoading" />
-            <span v-else>Upload Files</span>
-          </FeatherButton>
+            <template #default>
+              <ProgressSpinner v-if="isLoading" style="width: 1.5rem; height: 1.5rem" />
+              <span v-else>Upload Files</span>
+            </template>
+          </Button>
         </div>
       </div>
       <div class="info-section">
@@ -134,25 +108,16 @@
           <li>Ensure that the XML files are well-formed and adhere to the expected schema.</li>
           <li>
             Files that are valid and ready for upload will be flagged with icon
-            <FeatherIcon
-              :icon="CheckCircle"
-              class="success-icon-text"
-            />.
+            <i class="pi pi-check-circle success-icon-text" />.
           </li>
           <li>
             Files with duplicate names (excluding the .xml extension) will be flagged with icon
-            <FeatherIcon
-              :icon="Warning"
-              class="warning-icon-text"
-            />
+            <i class="pi pi-exclamation-triangle warning-icon-text" />
             indicating renaming or overwriting is required. It can be done by clicking on the icon.
           </li>
           <li>
             Invalid files will be flagged with icon
-            <FeatherIcon
-              :icon="Error"
-              class="error-icon-text"
-            />
+            <i class="pi pi-times-circle error-icon-text" />
             and error messages indicating the issues found during validation of the file contents and schema compliance.
           </li>
         </ul>
@@ -177,16 +142,10 @@ import { ellipsify } from '@/lib/utils'
 import { uploadEventConfigFiles } from '@/services/eventConfigService'
 import { useEventConfigStore } from '@/stores/eventConfigStore'
 import { EventConfigFilesUploadResponse, UploadEventFileType } from '@/types/eventConfig'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import CheckCircle from '@featherds/icon/action/CheckCircle'
-import Delete from '@featherds/icon/action/Delete'
-import Text from '@featherds/icon/file/Text'
-import Apps from '@featherds/icon/navigation/Apps'
-import Error from '@featherds/icon/notification/Error'
-import Warning from '@featherds/icon/notification/Warning'
-import { FeatherSpinner } from '@featherds/progress'
-import { FeatherTooltip } from '@featherds/tooltip'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
+import Tooltip from 'primevue/tooltip'
+const vTooltip = Tooltip
 import Draggable from 'vuedraggable'
 import EventConfigFilesUploadReportDialog from './Dialog/EventConfigFilesUploadReportDialog.vue'
 import UploadedFileRenameDialog from './Dialog/UploadedFileRenameDialog.vue'
