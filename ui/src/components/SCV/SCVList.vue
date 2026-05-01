@@ -1,20 +1,19 @@
 <template>
-  <FeatherList class="scv-list">
-    <FeatherListHeader class="title">
-      Aliases
-    </FeatherListHeader>
-    <FeatherListItem
-      v-for="alias of aliases" 
-      :selected="selectedAlias === alias && isEditing" 
+  <div class="scv-list">
+    <div class="title">Aliases</div>
+    <div
+      v-for="alias of aliases"
       :key="alias"
-      @click="onAliasClick(alias)">
+      class="scv-list__item"
+      :class="{ 'scv-list__item--selected': selectedAlias === alias && isEditing }"
+      @click="onAliasClick(alias)"
+    >
       {{ alias }}
-    </FeatherListItem>
-  </FeatherList>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherList, FeatherListHeader, FeatherListItem } from '@featherds/list'
 import { useScvStore } from '@/stores/scvStore'
 
 const scvStore = useScvStore()
@@ -40,17 +39,27 @@ const onAliasClick = (alias: string) => {
   overflow-y: auto;
 
   .title {
-    @include headline3
+    @include headline3;
+    padding: 16px;
+    color: var($primary-text-on-surface);
   }
-}
-</style>
 
-<style lang="scss">
-.scv-list {
-  .feather-list-item-text {
+  &__item {
+    padding: 12px 16px;
+    cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var($primary-text-on-surface);
+
+    &:hover {
+      background: var($shade-2);
+    }
+
+    &--selected {
+      background: var($primary);
+      color: var($primary-text-on-color);
+    }
   }
 }
 </style>

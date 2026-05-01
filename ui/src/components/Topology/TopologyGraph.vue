@@ -1,7 +1,7 @@
 <template>
   <div class="topology-graph">
     <div v-if="store.loading" class="topology-graph__loading">
-      <FeatherSpinner />
+      <ProgressSpinner style="width:40px;height:40px" />
       <span>Loading topology…</span>
     </div>
     <div v-else-if="store.error" class="topology-graph__error">
@@ -14,14 +14,14 @@
     <!-- Linking mode banner -->
     <div v-if="store.linkMode" class="topology-graph__link-banner">
       <span>Click a target node to link from <strong>{{ store.linkSourceVertex?.label }}</strong></span>
-      <FeatherButton text @click="store.cancelLinkMode()">Cancel (Esc)</FeatherButton>
+      <Button text label="Cancel (Esc)" @click="store.cancelLinkMode()" />
     </div>
 
     <!-- Edit mode banner -->
     <div v-if="viewStore.editMode" class="topology-graph__edit-banner">
       <span>Editing: <strong>{{ viewStore.activeView?.name }}</strong></span>
-      <FeatherButton text @click="emit('save-view')">Save</FeatherButton>
-      <FeatherButton text @click="viewStore.discardEditMode()">Discard</FeatherButton>
+      <Button text label="Save" @click="emit('save-view')" />
+      <Button text label="Discard" @click="viewStore.discardEditMode()" />
     </div>
 
     <div ref="graphContainer" class="topology-graph__canvas" />
@@ -40,8 +40,8 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherSpinner } from '@featherds/progress'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
 import useTopology from '@/composables/useTopology'
 import useSnackbar from '@/composables/useSnackbar'
 import { useTopologyStore } from '@/stores/topologyStore'

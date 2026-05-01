@@ -8,7 +8,7 @@
         </div>
 
         <div v-if="loadingInterfaces" class="create-link-modal__loading">
-          <FeatherSpinner />
+          <ProgressSpinner style="width:32px;height:32px" />
           <span>Loading interfaces…</span>
         </div>
 
@@ -36,19 +36,18 @@
           </div>
 
           <!-- Link label -->
-          <FeatherInput
-            v-model="linkLabel"
-            label="Link Label"
-            class="create-link-modal__input"
-          />
+          <span class="p-float-label create-link-modal__input">
+            <InputText id="link-label" v-model="linkLabel" style="width:100%" />
+            <label for="link-label">Link Label</label>
+          </span>
 
           <div class="create-link-modal__actions">
-            <FeatherButton secondary @click="cancel">Cancel</FeatherButton>
-            <FeatherButton
-              primary
+            <Button text label="Cancel" @click="cancel" />
+            <Button
               type="submit"
+              label="Create"
               :disabled="!canSubmit"
-            >Create</FeatherButton>
+            />
           </div>
         </form>
       </div>
@@ -57,9 +56,9 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
-import { FeatherSpinner } from '@featherds/progress'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import ProgressSpinner from 'primevue/progressspinner'
 import { getNodeIpInterfaces, getNodeSnmpInterfaces } from '@/services/nodeService'
 import { TopologyVertex } from '@/types/topology'
 import { IpInterface, SnmpInterface } from '@/types'

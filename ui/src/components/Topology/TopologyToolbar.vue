@@ -33,12 +33,14 @@
     </div>
 
     <!-- Search -->
-    <FeatherInput
-      v-model="searchText"
-      label="Search nodes"
-      class="topology-toolbar__search"
-      @update:modelValue="onSearch"
-    />
+    <span class="p-float-label topology-toolbar__search">
+      <InputText
+        id="topo-search"
+        v-model="searchText"
+        @update:modelValue="onSearch"
+      />
+      <label for="topo-search">Search nodes</label>
+    </span>
 
     <!-- Layout dropdown -->
     <div class="topology-toolbar__dd" ref="layoutPanelRef">
@@ -240,7 +242,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherInput } from '@featherds/input'
+import InputText from 'primevue/inputtext'
 import { useTopologyStore } from '@/stores/topologyStore'
 import { useWeathermapStore } from '@/stores/weathermapStore'
 import { useEdgeLabelStore } from '@/stores/edgeLabelStore'

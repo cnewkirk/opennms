@@ -13,7 +13,7 @@
 
           <!-- Loading shimmer -->
           <div v-if="nodeDetailLoading" class="topo-panel__loading">
-            <FeatherSpinner />
+            <ProgressSpinner style="width:32px;height:32px" />
             <span>Loading node detail…</span>
           </div>
 
@@ -138,7 +138,7 @@
           </template>
 
           <div class="topo-panel__actions">
-            <FeatherButton text @click="goToNodeDetail">View Full Node Detail</FeatherButton>
+            <Button text label="View Full Node Detail" @click="goToNodeDetail" />
           </div>
         </template>
 
@@ -178,14 +178,12 @@
               <span class="topo-panel__val">{{ edge.owner }}</span>
             </div>
             <div class="topo-panel__actions">
-              <FeatherButton text :disabled="deletingLink" @click="onDeleteLink">
-                {{ deletingLink ? 'Deleting…' : 'Delete Link' }}
-              </FeatherButton>
+              <Button text :disabled="deletingLink" :label="deletingLink ? 'Deleting…' : 'Delete Link'" @click="onDeleteLink" />
             </div>
           </template>
 
           <div v-if="detailLoading" class="topo-panel__loading">
-            <FeatherSpinner />
+            <ProgressSpinner style="width:32px;height:32px" />
             <span>Loading link detail…</span>
           </div>
 
@@ -256,8 +254,8 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherSpinner } from '@featherds/progress'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import PersesPanel from '@/components/Perses/PersesPanel.vue'
 import { useTopologyStore } from '@/stores/topologyStore'

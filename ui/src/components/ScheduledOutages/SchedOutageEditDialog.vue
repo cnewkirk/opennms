@@ -1,12 +1,11 @@
 <template>
-  <FeatherDialog v-model="open" :labels="dialogLabels" @hidden="handleCancel">
+  <Dialog v-model:visible="open" :header="dialogLabels.title" modal :closable="true" @hide="handleCancel">
     <div class="sched-outage-dialog">
       <div class="sched-outage-dialog__field">
-        <FeatherInput
-          label="Name"
-          v-model="form.name"
-          :disabled="!isNew"
-        />
+        <span class="p-float-label">
+          <InputText id="outage-name" v-model="form.name" :disabled="!isNew" style="width:100%" />
+          <label for="outage-name">Name</label>
+        </span>
       </div>
 
       <div class="sched-outage-dialog__field">
@@ -47,27 +46,24 @@
 
           <!-- Day input for monthly (1-31) -->
           <div v-else-if="form.type === 'monthly'" class="sched-outage-dialog__inline-field">
-            <FeatherInput
-              label="Day of Month (1–31)"
-              v-model="t.day"
-              type="text"
-            />
+            <span class="p-float-label">
+              <InputText :id="`day-${i}`" v-model="t.day" style="width:100%" />
+              <label :for="`day-${i}`">Day of Month (1–31)</label>
+            </span>
           </div>
 
           <!-- Begins/Ends -->
           <div class="sched-outage-dialog__inline-field">
-            <FeatherInput
-              :label="form.type === 'specific' ? 'Begins (dd-MMM-yyyy HH:mm:ss)' : 'Begins (HH:mm:ss)'"
-              v-model="t.begins"
-              :placeholder="form.type === 'specific' ? '01-Jan-2024 08:00:00' : '08:00:00'"
-            />
+            <span class="p-float-label">
+              <InputText :id="`begins-${i}`" v-model="t.begins" :placeholder="form.type === 'specific' ? '01-Jan-2024 08:00:00' : '08:00:00'" style="width:100%" />
+              <label :for="`begins-${i}`">{{ form.type === 'specific' ? 'Begins (dd-MMM-yyyy HH:mm:ss)' : 'Begins (HH:mm:ss)' }}</label>
+            </span>
           </div>
           <div class="sched-outage-dialog__inline-field">
-            <FeatherInput
-              :label="form.type === 'specific' ? 'Ends (dd-MMM-yyyy HH:mm:ss)' : 'Ends (HH:mm:ss)'"
-              v-model="t.ends"
-              :placeholder="form.type === 'specific' ? '01-Jan-2024 09:00:00' : '09:00:00'"
-            />
+            <span class="p-float-label">
+              <InputText :id="`ends-${i}`" v-model="t.ends" :placeholder="form.type === 'specific' ? '01-Jan-2024 09:00:00' : '09:00:00'" style="width:100%" />
+              <label :for="`ends-${i}`">{{ form.type === 'specific' ? 'Ends (dd-MMM-yyyy HH:mm:ss)' : 'Ends (HH:mm:ss)' }}</label>
+            </span>
           </div>
 
           <Button text label="Remove" @click="removeTime(i)" />
@@ -82,7 +78,10 @@
           <span class="subtitle2">Nodes</span>
         </div>
         <div class="sched-outage-dialog__add-row">
-          <FeatherInput label="Node ID" v-model="newNodeId" type="text" />
+          <span class="p-float-label">
+            <InputText id="node-id-input" v-model="newNodeId" style="width:100%" />
+            <label for="node-id-input">Node ID</label>
+          </span>
           <Button text label="Add" @click="addNode" />
         </div>
         <div
@@ -102,7 +101,10 @@
           <span class="subtitle2">Interfaces</span>
         </div>
         <div class="sched-outage-dialog__add-row">
-          <FeatherInput label="IP Address or match-any" v-model="newIfaceAddress" type="text" />
+          <span class="p-float-label">
+            <InputText id="iface-input" v-model="newIfaceAddress" style="width:100%" />
+            <label for="iface-input">IP Address or match-any</label>
+          </span>
           <Button text label="Add" @click="addInterface" />
         </div>
         <div
@@ -117,17 +119,17 @@
       </div>
     </div>
 
-    <template v-slot:footer>
+    <template #footer>
       <Button text label="Cancel" @click="handleCancel" />
       <Button :disabled="saving" @click="handleSave" :label="saving ? 'Saving…' : 'Save'" />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherInput } from '@featherds/input'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import { SchedOutage, SchedOutageTime } from '@/types'
 import { saveSchedOutage } from '@/services/schedOutageService'
