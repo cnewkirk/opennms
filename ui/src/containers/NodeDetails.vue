@@ -36,6 +36,7 @@
                   :availability="availability"
                   :chartData="chartData"
                   :downSegmentMeta="downSegmentMeta"
+                  :outages="outages"
                   :loading="availLoading"
                   :error="availError"
                   :problemsOnly="perspectiveStore.isProblems"
@@ -111,7 +112,7 @@ const id = route.params.id as string
 
 const { node, loading: nodeLoading, error: nodeError } = useNodeDetail(id)
 const {
-  availability, chartData, downSegmentMeta,
+  availability, chartData, downSegmentMeta, outages,
   loading: availLoading, error: availError
 } = useNodeAvailability(id)
 const { adminRole } = useRole()

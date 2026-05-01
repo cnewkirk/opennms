@@ -76,13 +76,21 @@
           </div>
         </div>
 
-        <!-- Expandable timeline -->
-        <button class="availability-panel__toggle subtitle2" @click="showChart = !showChart">
-          {{ showChart ? '▲ Hide timeline' : '▼ Show timeline' }}
-        </button>
-
-        <div v-if="showChart" class="availability-panel__chart-wrap">
-          <canvas ref="canvasRef" />
+        <!-- Per-service Perses response-time charts with outage bands -->
+        <div v-if="nodeId" class="availability-panel__uptime-rows">
+          <template v-for="iface in displayedInterfaces" :key="iface.id">
+            <ServiceUptimeRow
+              v-for="svc in iface.services"
+              :key="`${iface.id}-${svc.id}`"
+              :nodeId="nodeId"
+              :ip="iface.address"
+              :serviceName="svc.name"
+              :availability="svc.availability"
+              :outages="outages"
+              :windowStart="windowStart"
+              :windowEnd="windowEnd"
+            />
+          </template>
         </div>
       </template>
     </template>
@@ -90,14 +98,11 @@
 </template>
 
 <script setup lang="ts">
-import { Chart, registerables } from 'chart.js'
-import { format } from 'date-fns'
-import { NodeAvailability } from '@/types'
+import { NodeAvailability, Outage } from '@/types'
 import { AvailabilityChartData, DownSegmentMeta } from '@/composables/useNodeAvailability'
 import ClearSummary from '@/components/Common/ClearSummary.vue'
 import ServiceGraphTooltip from './ServiceGraphTooltip.vue'
-
-Chart.register(...registerables)
+import ServiceUptimeRow from './ServiceUptimeRow.vue'
 
 const emit = defineEmits<{ 'go-graphs': [] }>()
 
@@ -105,18 +110,20 @@ const props = defineProps<{
   availability: NodeAvailability | null
   chartData: AvailabilityChartData | null
   downSegmentMeta: DownSegmentMeta[]
+  outages: Outage[]
   loading: boolean
   error: string | null
   problemsOnly?: boolean
-  /** Node ID — passed through to ServiceGraphTooltip for resource lookup */
   nodeId?: string
-  /** Whether cards are clickable (navigate to Graphs tab). Default: true */
   clickable?: boolean
 }>()
 
 const isClickable = computed(() => props.clickable !== false)
-
 const showAll = ref(false)
+
+const now = Date.now()
+const windowStart = now - 24 * 60 * 60 * 1000
+const windowEnd = now
 
 const allHealthy = computed(() => {
   if (!props.availability?.ipinterfaces?.length) return true
@@ -141,10 +148,6 @@ const displayedInterfaces = computed(() => {
   return props.availability.ipinterfaces
 })
 
-const showChart = ref(false)
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-let chartInstance: Chart | null = null
-
 const formatPct = (v: number) => (Math.round(v * 100) / 100).toFixed(2)
 
 const severityClass = (pct: number) => {
@@ -152,67 +155,6 @@ const severityClass = (pct: number) => {
   if (pct >= 95) return 'avail-card--warning'
   return 'avail-card--critical'
 }
-
-const now = Date.now()
-const windowStart = now - 24 * 60 * 60 * 1000
-
-const buildChart = () => {
-  if (!canvasRef.value || !props.chartData) return
-  chartInstance?.destroy()
-
-  const serviceLabels = (props.availability?.ipinterfaces ?? []).flatMap(
-    iface => iface.services.map(s => `${s.name} @ ${iface.address}`)
-  )
-
-  chartInstance = new Chart(canvasRef.value, {
-    type: 'bar',
-    data: {
-      labels: serviceLabels,
-      datasets: props.chartData.datasets as any
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: 'linear',
-          min: windowStart,
-          max: now,
-          stacked: false,
-          ticks: {
-            maxTicksLimit: 7,
-            callback: (value) => format(new Date(value as number), 'HH:mm')
-          }
-        },
-        y: { stacked: false }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false }
-      },
-      onClick: (_event, elements) => {
-        if (elements.length && elements[0].datasetIndex === 1) {
-          const meta = props.downSegmentMeta[elements[0].index]
-          if (meta?.outageId) {
-            window.location.href = `/opennms/outage/detail.htm?id=${meta.outageId}`
-          }
-        }
-      }
-    }
-  })
-}
-
-watch(showChart, (visible) => {
-  if (visible) {
-    nextTick(buildChart)
-  } else {
-    chartInstance?.destroy()
-    chartInstance = null
-  }
-})
-
-onUnmounted(() => chartInstance?.destroy())
 </script>
 
 <style lang="scss" scoped>
@@ -220,7 +162,9 @@ onUnmounted(() => chartInstance?.destroy())
 @use "@/styles/tokens" as fvars;
 @use "@/styles/utils";
 @import "@/styles/tokens";
+
 .card { background: var($surface); padding: 16px; margin-bottom: 16px; }
+
 .availability-panel {
   &__title   { margin-bottom: 12px; }
   &__skeleton, &__error { padding: 8px; color: var($secondary-text-on-surface); }
@@ -229,9 +173,9 @@ onUnmounted(() => chartInstance?.destroy())
   &__iface-group:last-child { margin-bottom: 0; }
   &__iface-header { color: var($secondary-text-on-surface); margin-bottom: 6px; }
   &__iface-cards  { display: flex; flex-wrap: wrap; gap: 12px; }
-  &__toggle  { background: none; border: none; cursor: pointer; color: var($clickable-normal); padding: 4px 0; }
-  &__chart-wrap { height: 200px; margin-top: 12px; }
+  &__uptime-rows  { margin-top: 16px; }
 }
+
 .avail-card {
   border-radius: vars.$border-radius-surface;
   padding: 10px 16px;
