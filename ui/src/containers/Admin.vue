@@ -65,7 +65,7 @@ const adminCards = computed(() => {
       title: 'Provisioning',
       links: [
         { label: 'Manage Provisioning Requisitions', href: baseHref.value + 'admin/ng-requisitions/index.jsp' },
-        { label: 'Import and Export Asset Information', href: baseHref.value + 'admin/asset/index.jsp' },
+        { label: 'Import and Export Asset Information', to: '/asset-management' },
         { label: 'Manage Surveillance Categories', to: '/surveillance-categories' },
         { label: 'Configure Discovery', to: '/discovery-config' },
         { label: 'Run Single Discovery Scan', to: '/discovery-scan' },

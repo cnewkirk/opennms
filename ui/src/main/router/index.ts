@@ -416,6 +416,11 @@ const router = createRouter({
       component: () => import('@/containers/GeocoderConfig.vue')
     },
     {
+      path: '/asset-management',
+      name: 'Asset Import/Export',
+      component: () => import('@/containers/AssetManagement.vue')
+    },
+    {
       path: '/surveillance-dashboard',
       name: 'Surveillance Dashboard',
       component: () => import('@/containers/SurveillanceDashboard.vue')
