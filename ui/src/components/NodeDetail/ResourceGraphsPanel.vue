@@ -25,6 +25,16 @@
       </template>
     </div>
 
+    <!-- Search bar -->
+    <div class="resource-graphs-panel__search-wrap">
+      <input
+        v-model="searchQuery"
+        class="resource-graphs-panel__search"
+        type="search"
+        placeholder="Search graphs… (e.g. eth0, icmp, octets)"
+      />
+    </div>
+
     <!-- Loading / Error -->
     <div v-if="loading" class="resource-graphs-panel__loading caption">Loading resources…</div>
     <div v-else-if="error" class="resource-graphs-panel__error">
@@ -33,52 +43,66 @@
     </div>
 
     <template v-else>
-      <!-- Pinned Graphs -->
-      <div class="resource-graphs-panel__section-title headline4">Pinned Graphs</div>
-      <PinnedGraphs
-        :pinnedItems="pinnedItems"
-        :time="highlightTime"
-        :hasPerNodePins="hasPerNodePins"
-        @toggle-pin="togglePin"
-        @set-as-default="setAsDefault"
-      />
-
-      <!-- Resource Categories -->
-      <div class="resource-graphs-panel__section-title headline4">Browse by Category</div>
-      <ResourceAccordion
-        :groups="resourceGroups"
+      <!-- Search results (active query) -->
+      <ResourceSearchResults
+        v-if="isSearching"
+        :results="searchResults"
+        :query="searchQuery"
         :time="highlightTime"
         :isPinned="isPinned"
+        :capped="searchCapped"
         @toggle-pin="togglePin"
       />
 
-      <!-- Saved Charts -->
-      <template v-if="savedCharts.length">
-        <div class="resource-graphs-panel__section-title headline4">Saved Charts</div>
-        <div class="resource-graphs-panel__saved-grid">
-          <CustomChart
-            v-for="chart in savedCharts"
-            :key="chart.id"
-            :series="chart.series"
-            :title="chart.title"
-            :time-range="chart.timeRange ?? globalRange"
-            :node-id="nodeId"
-            :editable="false"
-            @edit="editSavedChart(chart)"
-            @delete="deleteChart(chart.id)"
-          />
-        </div>
-      </template>
+      <!-- Browse mode (no query) -->
+      <template v-else>
+        <!-- Pinned Graphs -->
+        <div class="resource-graphs-panel__section-title headline4">Pinned Graphs</div>
+        <PinnedGraphs
+          :pinnedItems="pinnedItems"
+          :time="highlightTime"
+          :hasPerNodePins="hasPerNodePins"
+          @toggle-pin="togglePin"
+          @set-as-default="setAsDefault"
+        />
 
-      <!-- Query Builder -->
-      <div class="resource-graphs-panel__section-title headline4">Build Custom Charts</div>
-      <QueryBuilder
-        ref="queryBuilderRef"
-        :resources="resources"
-        :time-range="globalRange"
-        :node-id="nodeId"
-        @save-chart="saveChart"
-      />
+        <!-- Resource Categories -->
+        <div class="resource-graphs-panel__section-title headline4">Browse by Category</div>
+        <ResourceAccordion
+          :groups="resourceGroups"
+          :time="highlightTime"
+          :isPinned="isPinned"
+          @toggle-pin="togglePin"
+        />
+
+        <!-- Saved Charts -->
+        <template v-if="savedCharts.length">
+          <div class="resource-graphs-panel__section-title headline4">Saved Charts</div>
+          <div class="resource-graphs-panel__saved-grid">
+            <CustomChart
+              v-for="chart in savedCharts"
+              :key="chart.id"
+              :series="chart.series"
+              :title="chart.title"
+              :time-range="chart.timeRange ?? globalRange"
+              :node-id="nodeId"
+              :editable="false"
+              @edit="editSavedChart(chart)"
+              @delete="deleteChart(chart.id)"
+            />
+          </div>
+        </template>
+
+        <!-- Query Builder -->
+        <div class="resource-graphs-panel__section-title headline4">Build Custom Charts</div>
+        <QueryBuilder
+          ref="queryBuilderRef"
+          :resources="resources"
+          :time-range="globalRange"
+          :node-id="nodeId"
+          @save-chart="saveChart"
+        />
+      </template>
     </template>
   </div>
 </template>
@@ -86,10 +110,12 @@
 <script setup lang="ts">
 import PinnedGraphs from './PinnedGraphs.vue'
 import ResourceAccordion from './ResourceAccordion.vue'
+import ResourceSearchResults from './ResourceSearchResults.vue'
 import CustomChart from './ResourceQueryBuilder/CustomChart.vue'
 import QueryBuilder from './ResourceQueryBuilder/QueryBuilder.vue'
 import useResourceGraphs from '@/composables/useResourceGraphs'
 import usePinnedGraphs from '@/composables/usePinnedGraphs'
+import { useResourceSearch } from '@/composables/useResourceSearch'
 import type { StartEndTime } from '@/types'
 import type { SavedChart, HighlightItem } from '@/types/resourceGraphs'
 
@@ -100,6 +126,10 @@ const { resources, resourceGroups, savedCharts, loading, error, saveChart, delet
 
 const { pinnedItems, isPinned, togglePin, setAsDefault, hasPerNodePins } =
   usePinnedGraphs(props.nodeId, () => resourceGroups.value)
+
+const { query: searchQuery, results: searchResults, isSearching } =
+  useResourceSearch(computed(() => resourceGroups.value))
+const searchCapped = computed(() => searchResults.value.length >= 50)
 
 // ── Time range ──────────────────────────────────────────────────────────────
 
@@ -214,6 +244,26 @@ const editSavedChart = (chart: SavedChart) => {
     color: #fff;
     cursor: pointer;
     font-size: 0.8rem;
+  }
+
+  &__search-wrap {
+    padding: 0 0 14px;
+    border-bottom: 1px solid var($border-light-on-surface);
+    margin-bottom: 16px;
+  }
+
+  &__search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: 1px solid var($border-on-surface);
+    border-radius: vars.$border-radius-surface;
+    background: var($surface);
+    color: var($primary-text-on-surface);
+    font-size: 0.875rem;
+    outline: none;
+    &::placeholder { color: var($secondary-text-on-surface); }
+    &:focus { border-color: var($primary); }
   }
 
   &__section-title {
