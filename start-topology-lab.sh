@@ -87,6 +87,14 @@ if [[ "${TEARDOWN_ONLY}" == "true" ]]; then
   exit 0
 fi
 
+# ---------------------------------------------------------------------------
+# Preflight
+# ---------------------------------------------------------------------------
+if ! podman inspect test-opennms --format '{{.State.Running}}' 2>/dev/null | grep -q true; then
+  echo "ERROR: test-opennms container is not running. Start OpenNMS first." >&2
+  exit 1
+fi
+
 # Always tear down first for clean state
 teardown
 
@@ -94,7 +102,7 @@ teardown
 # Phase 1: Build topology-node image
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [1/7] Building topology-node image..."
+echo "==> [1/8] Building topology-node image..."
 
 if podman image exists "${TOPO_IMAGE}" && [[ "${FORCE_REBUILD}" == "false" ]]; then
   echo "    Image already exists, skipping build (use --rebuild to force)"
@@ -192,7 +200,7 @@ fi
 # Phase 2: Create networks
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [2/7] Creating podman networks..."
+echo "==> [2/8] Creating podman networks..."
 
 podman network create --subnet "${MGMT_SUBNET}" "${MGMT_NET}"
 echo "    created: ${MGMT_NET} (${MGMT_SUBNET})"
@@ -232,7 +240,7 @@ done
 # Phase 3: Stage per-node FRR configs
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [3/7] Staging FRR configs..."
+echo "==> [3/8] Staging FRR configs..."
 
 # Fixed location so bind-mount paths survive manual container restarts
 CONFIGS="${SCRIPT_DIR}/.topology-lab/configs"
@@ -547,7 +555,7 @@ echo "    FRR configs staged for all 5 routing nodes."
 # Phase 4: Start containers
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [4/7] Starting topology nodes..."
+echo "==> [4/8] Starting topology nodes..."
 
 # Each entry in NODES: "name mgmt-ip role net1:iface1:ip1 ..."
 for node_def in "${NODES[@]}"; do
@@ -595,7 +603,7 @@ done
 # Applied after container startup because podman resets bridge settings when
 # containers attach to networks.
 echo ""
-echo "==> [4b] Configuring bridge multicast forwarding for LLDP..."
+echo "==> [5/8] Configuring bridge multicast forwarding for LLDP..."
 
 if [[ -n "$BRIDGE_CMDS" ]]; then
   podman machine ssh -- "bash -c '${BRIDGE_CMDS}exit 0'" 2>/dev/null && \
@@ -607,7 +615,7 @@ fi
 # Phase 5: Attach test-opennms to management network
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [5/7] Attaching test-opennms to ${MGMT_NET}..."
+echo "==> [6/8] Attaching test-opennms to ${MGMT_NET}..."
 
 if podman network inspect "${MGMT_NET}" \
      --format '{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null \
@@ -671,7 +679,7 @@ fi
 # Phase 6: Drop requisition and trigger import
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [6/7] Provisioning topology nodes into OpenNMS..."
+echo "==> [7/8] Provisioning topology nodes into OpenNMS..."
 
 REQ_FILE="$(mktemp)"
 trap 'rm -f "${REQ_FILE}"' EXIT
@@ -763,7 +771,7 @@ echo "    patched snmpifspeed to 1 Gbps for all topology interfaces"
 # Phase 7: Wait for OSPF convergence
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [7/7] Waiting for OSPF convergence (cap: 120s)..."
+echo "==> [8/8] Waiting for OSPF convergence (cap: 120s)..."
 
 CONVERGED=false
 for i in $(seq 1 24); do
