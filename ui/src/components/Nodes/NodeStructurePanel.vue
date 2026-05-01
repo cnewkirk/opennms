@@ -196,7 +196,7 @@ const onLocationClick = (loc: MonitoringLocation) => {
 
 <style lang="scss" scoped>
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 @import "@/styles/typography";
 
 .button-panel {

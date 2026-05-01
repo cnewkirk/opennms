@@ -294,7 +294,7 @@ const advanceActiveUpdate = (newVal: boolean) => {
 >
 @import "@/styles/tokens";
 @import "@/styles/typography";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 
 .title {
   @include headline3();

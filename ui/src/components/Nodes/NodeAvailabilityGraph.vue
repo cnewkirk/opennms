@@ -67,7 +67,7 @@ onUnmounted(() => window.removeEventListener('resize', recalculateWidth))
 
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 .card {
   @include elevation(2);
   padding: 15px;

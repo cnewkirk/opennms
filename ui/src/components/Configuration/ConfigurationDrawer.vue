@@ -211,7 +211,7 @@ const toggleHelp = () => {
   scoped
 >
 @import "@/styles/typography";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 @import "@/styles/tokens";
 
 .flex {

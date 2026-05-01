@@ -185,7 +185,7 @@ watch(() => nodeStructureStore.drawerState.visible, (visible) => {
 
 <style lang="scss" scoped>
 @import "@featherds/table/scss/table";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 @import "@/styles/typography";
 @import "@/styles/tokens";
 

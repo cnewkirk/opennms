@@ -88,7 +88,7 @@ const updateStatus = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 @import "@/styles/typography";
 @import "@/styles/tokens";
 

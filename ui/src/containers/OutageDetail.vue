@@ -163,7 +163,7 @@ onMounted(async () => {
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
 @import "@/styles/typography";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 
 .card {
   @include elevation(2);

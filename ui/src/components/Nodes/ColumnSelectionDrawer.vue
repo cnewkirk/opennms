@@ -142,7 +142,7 @@ watch(() => nodeStructureStore.columns, (newColumns) => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @import "@featherds/table/scss/table";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 @import "@/styles/typography";
 @import "@/styles/tokens";
 

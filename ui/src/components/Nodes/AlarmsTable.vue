@@ -222,7 +222,7 @@ const rowClass = (alarm: Alarm) => {
 @use "@/styles/tokens" as fvars;
 @use '@featherds/styles/themes/utils';
 @import "@featherds/table/scss/table";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 @import "@/styles/tokens";
 
 .card {

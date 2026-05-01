@@ -48,7 +48,7 @@ const editCategoriesUrl = computed(
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 
 .card {
   @include elevation(2);

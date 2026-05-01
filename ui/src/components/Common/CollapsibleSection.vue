@@ -20,7 +20,7 @@ watch(() => props.collapsed, (v) => { isOpen.value = !v })
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 
 .collapsible-section {
   @include elevation(2);

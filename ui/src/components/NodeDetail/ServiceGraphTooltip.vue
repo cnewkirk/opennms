@@ -132,7 +132,7 @@ onUnmounted(() => {
 <style lang="scss">
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 
 .svc-tooltip-trigger {
   display: contents; // transparent wrapper — doesn't affect layout

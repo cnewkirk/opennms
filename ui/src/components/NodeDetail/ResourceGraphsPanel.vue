@@ -160,7 +160,7 @@ const editSavedChart = (chart: SavedChart) => {
 <style lang="scss" scoped>
 @use '@/styles/vars' as vars;
 @import "@/styles/tokens";
-@import "@featherds/styles/mixins/elevation";
+@import "@/styles/elevation";
 @import "@/styles/typography";
 
 .card {
