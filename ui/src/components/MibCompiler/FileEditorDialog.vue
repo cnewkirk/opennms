@@ -21,32 +21,28 @@
 -->
 
 <template>
-  <FeatherDialog v-model="dialogOpen" :labels="{ title: dialogTitle, close: 'Close' }">
-    <template #default>
-      <div class="file-editor">
-        <div v-if="loading" class="loading-state">Loading file content...</div>
-        <div v-else-if="loadError" class="error-state">{{ loadError }}</div>
-        <textarea
-          v-else
-          v-model="content"
-          class="file-content"
-          :readonly="readOnly"
-          spellcheck="false"
-        />
-      </div>
-    </template>
+  <Dialog v-model:visible="dialogOpen" :header="dialogTitle" :modal="true" :closable="true" @hide="close">
+    <div class="file-editor">
+      <div v-if="loading" class="loading-state">Loading file content...</div>
+      <div v-else-if="loadError" class="error-state">{{ loadError }}</div>
+      <textarea
+        v-else
+        v-model="content"
+        class="file-content"
+        :readonly="readOnly"
+        spellcheck="false"
+      />
+    </div>
     <template #footer>
-      <FeatherButton text @click="close">Cancel</FeatherButton>
-      <FeatherButton v-if="!readOnly" primary @click="save" :disabled="saving || loading">
-        {{ saving ? 'Saving...' : 'Save' }}
-      </FeatherButton>
+      <Button text label="Cancel" @click="close" />
+      <Button v-if="!readOnly" :label="saving ? 'Saving...' : 'Save'" @click="save" :disabled="saving || loading" />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherButton } from '@featherds/button'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 import { useMibCompilerStore } from '@/stores/mibCompilerStore'
 import { getMibContent, saveMibContent } from '@/services/mibCompilerService'
 
@@ -101,9 +97,7 @@ const close = () => {
   emit('close')
 }
 
-watch(dialogOpen, (val) => {
-  if (!val) emit('close')
-})
+// Dialog 'hide' event handled via @hide="close" on the Dialog component
 </script>
 
 <style lang="scss" scoped>

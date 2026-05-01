@@ -21,40 +21,37 @@
 -->
 
 <template>
-  <FeatherDialog v-model="dialogOpen" :labels="{ title: 'Generated Events', close: 'Close' }">
-    <template #default>
-      <div class="generate-events-dialog">
-        <p class="summary">
-          Found <strong>{{ store.generatedEventCount }}</strong> events from
-          <strong>{{ store.mibName }}</strong>
-        </p>
+  <Dialog v-model:visible="dialogOpen" header="Generated Events" :modal="true" :closable="true" @hide="close">
+    <div class="generate-events-dialog">
+      <p class="summary">
+        Found <strong>{{ store.generatedEventCount }}</strong> events from
+        <strong>{{ store.mibName }}</strong>
+      </p>
 
-        <textarea
-          :value="store.generatedEventsXml ?? ''"
-          class="xml-preview"
-          readonly
-          spellcheck="false"
-        />
+      <textarea
+        :value="store.generatedEventsXml ?? ''"
+        class="xml-preview"
+        readonly
+        spellcheck="false"
+      />
 
-        <div class="save-controls">
-          <FeatherInput v-model="fileName" label="Save as filename" />
-        </div>
+      <div class="save-controls">
+        <label class="field-label">Save as filename</label>
+        <InputText v-model="fileName" class="filename-input" />
       </div>
-    </template>
+    </div>
     <template #footer>
-      <FeatherButton text @click="close">Cancel</FeatherButton>
-      <FeatherButton text @click="download">Download</FeatherButton>
-      <FeatherButton primary @click="save" :disabled="saving || !fileName.trim()">
-        {{ saving ? 'Saving...' : 'Save to Server' }}
-      </FeatherButton>
+      <Button text label="Cancel" @click="close" />
+      <Button text label="Download" @click="download" />
+      <Button label="Save to Server" @click="save" :disabled="saving || !fileName.trim()" />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import { useMibCompilerStore } from '@/stores/mibCompilerStore'
 import { saveEvents } from '@/services/mibCompilerService'
 
@@ -108,9 +105,7 @@ const close = () => {
   emit('close')
 }
 
-watch(dialogOpen, (val) => {
-  if (!val) emit('close')
-})
+// Dialog 'hide' event handled via @hide="close" on the Dialog component
 </script>
 
 <style lang="scss" scoped>
@@ -143,5 +138,18 @@ watch(dialogOpen, (val) => {
 
 .save-controls {
   margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var($secondary-text-on-surface);
+}
+
+.filename-input {
+  width: 100%;
 }
 </style>

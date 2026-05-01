@@ -24,7 +24,7 @@
   <div class="mib-console">
     <div class="console-header">
       <h3 class="console-title">Console</h3>
-      <FeatherButton text @click="store.clearLog()">Clear Log</FeatherButton>
+      <Button text label="Clear Log" @click="store.clearLog()" />
     </div>
     <div ref="logContainer" class="console-log">
       <div
@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import { useMibCompilerStore } from '@/stores/mibCompilerStore'
 
 const store = useMibCompilerStore()

@@ -21,30 +21,27 @@
 -->
 
 <template>
-  <FeatherDialog v-model="dialogOpen" :labels="{ title: 'Event UEI Base', close: 'Close' }">
-    <template #default>
-      <div class="uei-dialog">
-        <p>Enter the UEI base for the generated events:</p>
-        <FeatherInput
-          v-model="ueiBase"
-          label="UEI Base"
-          hint="e.g. uei.opennms.org/traps/MY-MIB"
-        />
-      </div>
-    </template>
+  <Dialog v-model:visible="dialogOpen" header="Event UEI Base" :modal="true" :closable="true" @hide="close">
+    <div class="uei-dialog">
+      <p>Enter the UEI base for the generated events:</p>
+      <label class="field-label">UEI Base</label>
+      <InputText
+        v-model="ueiBase"
+        class="uei-input"
+        placeholder="e.g. uei.opennms.org/traps/MY-MIB"
+      />
+    </div>
     <template #footer>
-      <FeatherButton text @click="close">Cancel</FeatherButton>
-      <FeatherButton primary @click="confirm" :disabled="!ueiBase.trim()">
-        Continue
-      </FeatherButton>
+      <Button text label="Cancel" @click="close" />
+      <Button label="Continue" @click="confirm" :disabled="!ueiBase.trim()" />
     </template>
-  </FeatherDialog>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { FeatherDialog } from '@featherds/dialog'
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 
 const props = defineProps<{
   filename: string
@@ -71,17 +68,30 @@ const close = () => {
   emit('close')
 }
 
-watch(dialogOpen, (val) => {
-  if (!val) emit('close')
-})
+// Dialog 'hide' event handled via @hide="close" on the Dialog component
 </script>
 
 <style lang="scss" scoped>
+@import "@featherds/styles/themes/variables";
+
 .uei-dialog {
   min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .uei-dialog p {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var($secondary-text-on-surface);
+}
+
+.uei-input {
+  width: 100%;
 }
 </style>

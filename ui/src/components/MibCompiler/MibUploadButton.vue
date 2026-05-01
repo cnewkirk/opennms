@@ -22,9 +22,7 @@
 
 <template>
   <div class="mib-upload">
-    <FeatherButton primary @click="triggerUpload" :disabled="uploading">
-      {{ uploading ? 'Uploading...' : 'Upload MIB' }}
-    </FeatherButton>
+    <Button :label="uploading ? 'Uploading...' : 'Upload MIB'" @click="triggerUpload" :disabled="uploading" />
     <input
       ref="fileInput"
       type="file"
@@ -36,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
+import Button from 'primevue/button'
 import { useMibCompilerStore } from '@/stores/mibCompilerStore'
 import { uploadMib, listMibs } from '@/services/mibCompilerService'
 
