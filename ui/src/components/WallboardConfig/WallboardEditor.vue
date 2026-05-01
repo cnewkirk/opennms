@@ -23,14 +23,17 @@
 <template>
   <div class="wallboard-editor">
     <div class="editor-toolbar">
-      <FeatherInput v-model="local.title" label="Board Title" class="title-input" @update:modelValue="emitUpdate" />
-      <FeatherCheckbox v-model="local.default" @update:modelValue="emitUpdate">Default board</FeatherCheckbox>
+      <InputText v-model="local.title" placeholder="Board Title" class="title-input" @update:modelValue="emitUpdate" />
+      <label class="checkbox-label">
+        <Checkbox v-model="local.default" binary @update:modelValue="emitUpdate" />
+        Default board
+      </label>
     </div>
 
     <div class="dashlets-section">
       <div class="dashlets-header">
         <span class="dashlets-label">Dashlets ({{ local.dashlets.length }})</span>
-        <FeatherButton text @click="addDashlet">+ Add Dashlet</FeatherButton>
+        <Button text label="+ Add Dashlet" @click="addDashlet" />
       </div>
 
       <div v-if="local.dashlets.length === 0" class="empty-state">
@@ -56,9 +59,9 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
-import { FeatherCheckbox } from '@featherds/checkbox'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Checkbox from 'primevue/checkbox'
 import DashletRow from './DashletRow.vue'
 import { makeDefaultDashlet } from '@/services/wallboardConfigService'
 import type { WallboardEntry, DashletEntry } from '@/services/wallboardConfigService'
@@ -120,6 +123,14 @@ const moveDashlet = (i: number, direction: -1 | 1) => {
 }
 
 .title-input { width: 250px; }
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
 
 .dashlets-section {
   display: flex;

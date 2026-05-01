@@ -24,42 +24,35 @@
   <div class="parameters-table">
     <div class="params-header">
       <span class="params-label">Parameters</span>
-      <FeatherButton text @click="addRow">+ Add</FeatherButton>
+      <Button text label="+ Add" @click="addRow" />
     </div>
 
     <div v-if="rows.length === 0" class="empty-state">No parameters.</div>
 
     <div v-for="(row, i) in rows" :key="i" class="param-row">
-      <FeatherInput
+      <InputText
         v-model="row.key"
-        label="Key"
+        placeholder="Key"
         class="key-input"
         @update:modelValue="emitUpdate"
       />
-      <FeatherInput
+      <InputText
         v-model="row.value"
-        label="Value"
+        placeholder="Value"
         class="val-input"
         @update:modelValue="emitUpdate"
       />
-      <FeatherButton text @click="removeRow(i)">
-        <FeatherIcon :icon="DeleteIcon" />
-      </FeatherButton>
+      <Button text icon="pi pi-trash" @click="removeRow(i)" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherInput } from '@featherds/input'
-import { FeatherIcon } from '@featherds/icon'
-import Delete from '@featherds/icon/action/Delete'
-import { markRaw } from 'vue'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 
 const props = defineProps<{ modelValue: Record<string, string> }>()
 const emit = defineEmits<{ (e: 'update:modelValue', val: Record<string, string>): void }>()
-
-const DeleteIcon = markRaw(Delete)
 
 interface KVRow { key: string; value: string }
 

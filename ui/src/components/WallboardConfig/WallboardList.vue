@@ -24,9 +24,7 @@
   <div class="wallboard-list">
     <div class="list-header">
       <span class="list-label">Boards</span>
-      <FeatherButton text @click="$emit('add')" :disabled="disabled">
-        <FeatherIcon :icon="AddIcon" />
-      </FeatherButton>
+      <Button text icon="pi pi-plus" @click="$emit('add')" :disabled="disabled" />
     </div>
 
     <div
@@ -38,9 +36,7 @@
     >
       <span class="board-title">{{ board.title || '(untitled)' }}</span>
       <span v-if="board.default" class="default-badge">default</span>
-      <FeatherButton text class="delete-btn" @click.stop="$emit('delete', i)" :disabled="disabled">
-        <FeatherIcon :icon="DeleteIcon" />
-      </FeatherButton>
+      <Button text icon="pi pi-trash" class="delete-btn" @click.stop="$emit('delete', i)" :disabled="disabled" />
     </div>
 
     <div v-if="wallboards.length === 0" class="empty-state">No boards configured.</div>
@@ -48,11 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { markRaw } from 'vue'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import Add from '@featherds/icon/action/Add'
-import Delete from '@featherds/icon/action/Delete'
+import Button from 'primevue/button'
 import type { WallboardEntry } from '@/services/wallboardConfigService'
 
 defineProps<{
@@ -67,8 +59,7 @@ defineEmits<{
   (e: 'delete', index: number): void
 }>()
 
-const AddIcon = markRaw(Add)
-const DeleteIcon = markRaw(Delete)
+
 </script>
 
 <style lang="scss" scoped>

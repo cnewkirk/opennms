@@ -26,16 +26,10 @@
       <span class="dashlet-type-badge">{{ local.dashletName }}</span>
       <span class="dashlet-title">{{ local.title || '(untitled)' }}</span>
       <div class="row-actions">
-        <FeatherButton text @click.stop="$emit('moveUp')" :disabled="isFirst">
-          <FeatherIcon :icon="UpIcon" />
-        </FeatherButton>
-        <FeatherButton text @click.stop="$emit('moveDown')" :disabled="isLast">
-          <FeatherIcon :icon="DownIcon" />
-        </FeatherButton>
-        <FeatherButton text @click.stop="$emit('delete')">
-          <FeatherIcon :icon="DeleteIcon" />
-        </FeatherButton>
-        <FeatherIcon :icon="expanded ? CollapseIcon : ExpandIcon" class="expand-icon" />
+        <Button text icon="pi pi-arrow-up" @click.stop="$emit('moveUp')" :disabled="isFirst" />
+        <Button text icon="pi pi-arrow-down" @click.stop="$emit('moveDown')" :disabled="isLast" />
+        <Button text icon="pi pi-trash" @click.stop="$emit('delete')" />
+        <i :class="['pi', expanded ? 'pi-chevron-up' : 'pi-chevron-down', 'expand-icon']" />
       </div>
     </div>
 
@@ -47,37 +41,37 @@
             <option v-for="t in DASHLET_TYPES" :key="t" :value="t">{{ t }}</option>
           </select>
         </div>
-        <FeatherInput v-model="local.title" label="Title" class="title-input" @update:modelValue="emitUpdate" />
+        <InputText v-model="local.title" placeholder="Title" class="title-input" @update:modelValue="emitUpdate" />
       </div>
 
       <div class="form-row">
-        <FeatherInput
+        <InputText
           :modelValue="String(local.duration)"
-          label="Duration (s)"
+          placeholder="Duration (s)"
           type="number"
           class="num-input"
-          @update:modelValue="(v) => { local.duration = Number(v) || 0; emitUpdate() }"
+          @update:modelValue="(v: any) => { local.duration = Number(v) || 0; emitUpdate() }"
         />
-        <FeatherInput
+        <InputText
           :modelValue="String(local.priority)"
-          label="Priority"
+          placeholder="Priority"
           type="number"
           class="num-input"
-          @update:modelValue="(v) => { local.priority = Number(v) || 0; emitUpdate() }"
+          @update:modelValue="(v: any) => { local.priority = Number(v) || 0; emitUpdate() }"
         />
-        <FeatherInput
+        <InputText
           :modelValue="String(local.boostDuration)"
-          label="Boost Duration (s)"
+          placeholder="Boost Duration (s)"
           type="number"
           class="num-input"
-          @update:modelValue="(v) => { local.boostDuration = Number(v) || 0; emitUpdate() }"
+          @update:modelValue="(v: any) => { local.boostDuration = Number(v) || 0; emitUpdate() }"
         />
-        <FeatherInput
+        <InputText
           :modelValue="String(local.boostPriority)"
-          label="Boost Priority"
+          placeholder="Boost Priority"
           type="number"
           class="num-input"
-          @update:modelValue="(v) => { local.boostPriority = Number(v) || 0; emitUpdate() }"
+          @update:modelValue="(v: any) => { local.boostPriority = Number(v) || 0; emitUpdate() }"
         />
       </div>
 
@@ -87,15 +81,8 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import { FeatherInput } from '@featherds/input'
-import Delete from '@featherds/icon/action/Delete'
-import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
-import KeyboardArrowDown from '@featherds/icon/hardware/KeyboardArrowDown'
-import ExpandMore from '@featherds/icon/navigation/ExpandMore'
-import ExpandLess from '@featherds/icon/navigation/ExpandLess'
-import { markRaw } from 'vue'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import ParametersTable from './ParametersTable.vue'
 import { DASHLET_TYPES } from '@/services/wallboardConfigService'
 import type { DashletEntry } from '@/services/wallboardConfigService'
@@ -112,12 +99,6 @@ const emit = defineEmits<{
   (e: 'moveDown'): void
   (e: 'delete'): void
 }>()
-
-const DeleteIcon = markRaw(Delete)
-const UpIcon = markRaw(KeyboardArrowUp)
-const DownIcon = markRaw(KeyboardArrowDown)
-const ExpandIcon = markRaw(ExpandMore)
-const CollapseIcon = markRaw(ExpandLess)
 
 const expanded = ref(false)
 const local = ref<DashletEntry>(JSON.parse(JSON.stringify(props.modelValue)))
