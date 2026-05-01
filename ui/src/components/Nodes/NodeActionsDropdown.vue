@@ -17,6 +17,8 @@ import Menu from 'primevue/menu'
 import { PropType, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Node } from '@/types'
+import { v2, rest } from '@/services/axiosInstances'
+import useSnackbar from '@/composables/useSnackbar'
 
 const props = defineProps({
   baseHref: {
@@ -35,6 +37,7 @@ const props = defineProps({
 
 const router = useRouter()
 const menu = ref()
+const { showSnackBar } = useSnackbar()
 
 const linkItems = [
   { name: 'events', label: 'Events' },
@@ -73,8 +76,30 @@ const onNodeLink = (name: string, node: Node) => {
     router.push(`/node/${node.id}?tab=${tab}`)
     return
   }
+  if (name === 'updateSnmp') {
+    triggerSnmpReinit(node)
+    return
+  }
   const link = mapLink(name, node)
   window.location.assign(`${props.baseHref}${link}`)
+}
+
+const triggerSnmpReinit = async (node: Node) => {
+  try {
+    const resp = await v2.get(`/nodes/${node.id}/ipinterfaces`, { params: { _s: 'snmpPrimary==P', limit: 1 } })
+    const ifaces = resp.data?.ipInterface ?? []
+    const ip = ifaces.length > 0 ? ifaces[0].ipAddress : null
+    await rest.post('/events', {
+      uei: 'uei.opennms.org/nodes/reinitializePrimarySnmpInterface',
+      nodeId: node.id,
+      ...(ip ? { interface: ip } : {}),
+      source: 'web ui',
+      time: new Date().toISOString()
+    }, { headers: { 'Content-Type': 'application/json' } })
+    showSnackBar({ msg: 'SNMP information update triggered.' })
+  } catch {
+    showSnackBar({ msg: 'Failed to trigger SNMP update.', error: true })
+  }
 }
 
 const mapLink = (name: string, node: Node) => {
@@ -99,8 +124,6 @@ const mapLink = (name: string, node: Node) => {
       return `element/rescan.jsp?node=${node.id}`
     case 'admin':
       return `admin/nodemanagement/index.jsp?node=${node.id}`
-    case 'updateSnmp':
-      return `admin/updateSnmp.jsp?node=${node.id}&ipaddr=0.0.0.0`
     case 'schedule-outage':
       return `admin/sched-outages/editoutage.jsp?newName=${node.label}&addNew=true&nodeID=${node.id}`
     case 'topology':

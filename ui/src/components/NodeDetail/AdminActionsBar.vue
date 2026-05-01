@@ -24,9 +24,7 @@
   <div v-if="adminRole" class="admin-bar">
     <Button :label="rescanning ? 'Rescanning…' : 'Rescan'" :disabled="rescanning" @click="rescan" />
 
-    <a v-if="resolvedSnmpIp" :href="updateSnmpUrl" class="p-button p-button-outlined admin-bar__link-btn">
-      Update SNMP
-    </a>
+    <Button v-if="resolvedSnmpIp" outlined :label="updatingSnmp ? 'Updating…' : 'Update SNMP'" :disabled="updatingSnmp" @click="updateSnmp" />
     <a :href="scheduleOutageUrl" class="p-button p-button-outlined admin-bar__link-btn">
       Schedule Outage
     </a>
@@ -40,7 +38,7 @@
 import Button from 'primevue/button'
 import useRole from '@/composables/useRole'
 import useSnackbar from '@/composables/useSnackbar'
-import { v2 } from '@/services/axiosInstances'
+import { v2, rest } from '@/services/axiosInstances'
 
 const props = defineProps<{
   nodeId: string
@@ -51,6 +49,7 @@ const { adminRole } = useRole()
 const { showSnackBar } = useSnackbar()
 
 const rescanning = ref(false)
+const updatingSnmp = ref(false)
 const resolvedSnmpIp = ref<string | null>(null)
 
 onMounted(async () => {
@@ -75,7 +74,24 @@ const rescan = async () => {
   }
 }
 
-const updateSnmpUrl = computed(() => `/opennms/admin/updateSnmp.jsp?node=${props.nodeId}&ipaddr=${resolvedSnmpIp.value}`)
+const updateSnmp = async () => {
+  updatingSnmp.value = true
+  try {
+    await rest.post('/events', {
+      uei: 'uei.opennms.org/nodes/reinitializePrimarySnmpInterface',
+      nodeId: parseInt(props.nodeId),
+      interface: resolvedSnmpIp.value,
+      source: 'web ui',
+      time: new Date().toISOString()
+    }, { headers: { 'Content-Type': 'application/json' } })
+    showSnackBar({ msg: 'SNMP information update triggered.' })
+  } catch {
+    showSnackBar({ msg: 'Failed to trigger SNMP update.', error: true })
+  } finally {
+    updatingSnmp.value = false
+  }
+}
+
 const scheduleOutageUrl = computed(() => `/opennms/ui/scheduled-outages`)
 const editRequisitionUrl = computed(
   () => `/opennms/admin/ng-requisitions/index.jsp#/requisitions/${props.foreignSource}`
