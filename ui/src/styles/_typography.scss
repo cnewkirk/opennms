@@ -5,7 +5,7 @@
 // Font metric values come from --feather-* CSS custom properties loaded at runtime.
 
 @mixin headline1 {
-  font-family: var(--feather-font-family);
+  font-family: var(--feather-header-font-family);
   font-size: var(--feather-headline1-font-size);
   line-height: var(--feather-headline1-line-height);
   letter-spacing: var(--feather-headline1-letter-spacing);
@@ -14,7 +14,7 @@
 }
 
 @mixin headline2 {
-  font-family: var(--feather-font-family);
+  font-family: var(--feather-header-font-family);
   font-size: var(--feather-headline2-font-size);
   line-height: var(--feather-headline2-line-height);
   letter-spacing: var(--feather-headline2-letter-spacing);
@@ -23,7 +23,7 @@
 }
 
 @mixin headline3 {
-  font-family: var(--feather-font-family);
+  font-family: var(--feather-header-font-family);
   font-size: var(--feather-headline3-font-size);
   line-height: var(--feather-headline3-line-height);
   letter-spacing: var(--feather-headline3-letter-spacing);
@@ -32,7 +32,7 @@
 }
 
 @mixin headline4 {
-  font-family: var(--feather-font-family);
+  font-family: var(--feather-header-font-family);
   font-size: var(--feather-headline4-font-size);
   line-height: var(--feather-headline4-line-height);
   letter-spacing: var(--feather-headline4-letter-spacing);
@@ -41,7 +41,7 @@
 }
 
 @mixin subtitle1 {
-  font-family: var(--feather-font-family);
+  font-family: var(--feather-header-font-family);
   font-size: var(--feather-subtitle1-font-size);
   line-height: var(--feather-subtitle1-line-height);
   letter-spacing: var(--feather-subtitle1-letter-spacing);
@@ -50,7 +50,7 @@
 }
 
 @mixin subtitle2 {
-  font-family: var(--feather-font-family);
+  font-family: var(--feather-header-font-family);
   font-size: var(--feather-subtitle2-font-size);
   line-height: var(--feather-subtitle2-line-height);
   letter-spacing: var(--feather-subtitle2-letter-spacing);
@@ -92,15 +92,17 @@
   letter-spacing: var(--feather-overline-letter-spacing);
   font-weight: var(--feather-overline-font-weight);
   font-style: var(--feather-overline-font-style);
-  text-transform: uppercase;
+  text-transform: var(--feather-overline-text-transform);
 }
 
 @mixin button {
   font-family: var(--feather-font-family);
-  font-size: var(--feather-body-small-font-size);
-  font-weight: var(--feather-font-semibold);
-  letter-spacing: 0.025em;
-  text-transform: uppercase;
+  font-size: var(--feather-button-font-size);
+  line-height: var(--feather-button-line-height);
+  letter-spacing: var(--feather-button-letter-spacing);
+  font-weight: var(--feather-button-font-weight);
+  text-transform: var(--feather-button-text-transform);
+  font-style: var(--feather-button-font-style);
 }
 
 // console is a non-standard Feather mixin (monospace code blocks)
