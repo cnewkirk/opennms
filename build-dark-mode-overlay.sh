@@ -99,6 +99,17 @@ fi
 echo "    opennms-webapp-rest.jar: OK ($(basename "${WEBAPP_REST_JAR}"))"
 
 # ---------------------------------------------------------------------------
+# 3c. Pre-hash admin password (notdefault) so image starts with correct creds
+# ---------------------------------------------------------------------------
+echo "==> [3c/4] Pre-hashing admin password..."
+JASYPT_JAR=$(find "${SCRIPT_DIR}/opennms-webapp/target" -name "jasypt-*.jar" 2>/dev/null | head -1)
+[[ -z "$JASYPT_JAR" ]] && JASYPT_JAR=$(find /opt/opennms/lib -name "jasypt-*.jar" 2>/dev/null | head -1)
+ADMIN_HASH=$(java -cp "$JASYPT_JAR" org.jasypt.intf.cli.JasyptStringDigestCLI \
+  input='notdefault' algorithm=SHA-256 saltSizeBytes=16 iterations=100000 2>/dev/null \
+  | grep -A1 'OUTPUT' | tail -1 | tr -d '[:space:]')
+echo "    admin hash: OK"
+
+# ---------------------------------------------------------------------------
 # 4. Stage overlay directory
 # ---------------------------------------------------------------------------
 echo ""
@@ -420,6 +431,10 @@ RUN microdnf install -y net-snmp net-snmp-utils && microdnf clean all
 COPY snmpd.conf /etc/snmp/snmpd.conf
 COPY entrypoint-wrapper.sh /entrypoint-wrapper.sh
 RUN chmod +x /entrypoint-wrapper.sh
+
+# Set admin password to notdefault (hash pre-computed at build time)
+RUN sed -i "s|<password salt=\"true\">.*</password>|<password salt=\"true\">${ADMIN_HASH}</password>|" \
+    /opt/opennms/etc/users.xml
 
 # OpenNMS SNMP client config + self-provisioning requisition
 COPY --chown=10001:10001 etc/snmp-config.xml /opt/opennms/etc/snmp-config.xml
