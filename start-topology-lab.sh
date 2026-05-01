@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # start-topology-lab.sh
 # Spins up a 7-node leaf/spine/host topology lab alongside test-opennms.
-# Spine/leaf nodes run FRR (OSPF + ISIS) + lldpd + net-snmp for EnLinkd testing.
+# Spine/leaf nodes run FRR + lldpd + net-snmp for EnLinkd testing.
+# Protocol split: leaf-01↔spines=OSPF, leaf-02↔spines=IS-IS, leaf-03↔spines=eBGP+EVPN/VXLAN.
 # Host nodes run lldpd + net-snmp only (dual-homed to leaf pair, no routing).
 #
 # Usage:
@@ -155,6 +156,11 @@ if [[ "${ROLE}" == "leaf" ]]; then
   ip link set dummy0 master br0 2>/dev/null || true
   ip link set br0 up
   ip link set dummy0 up
+  # leaf-03: VXLAN VTEP for eBGP/EVPN demo (VNI 100, dstport 4789)
+  if [[ "$(hostname)" == "leaf-03" ]]; then
+    ip link add vxlan100 type vxlan id 100 dstport 4789 2>/dev/null || true
+    ip link set vxlan100 up 2>/dev/null || true
+  fi
 fi
 
 # Start lldpd as AgentX subagent (-x = AgentX)
@@ -181,7 +187,8 @@ RUN apk update && apk add --no-cache \
     lldpd \
     net-snmp \
     net-snmp-tools \
-    iproute2
+    iproute2 \
+    iperf3
 RUN mkdir -p /var/agentx /var/run/frr /var/log/frr /etc/frr && \
     addgroup -S frr 2>/dev/null || true && \
     adduser -S -G frr frr 2>/dev/null || true && \
@@ -251,13 +258,18 @@ echo "    config staging dir: ${CONFIGS}"
 # vtysh.conf is identical for all nodes
 VTYSH_CONF="service integrated-vtysh-config"
 
+# Protocol split:
+#   leaf-01 <-> both spines : OSPF  (eth1/eth2 on spines, AS-independent IGP)
+#   leaf-02 <-> both spines : IS-IS (eth2 on spines, separate adjacency domain)
+#   leaf-03 <-> both spines : eBGP  (eth3 on spines, AS65003↔AS65000, EVPN/VXLAN VNI 100)
+
 # ---- spine-01 ----
 mkdir -p "${CONFIGS}/spine-01"
 cat > "${CONFIGS}/spine-01/daemons" <<'DAEMONS'
 zebra=yes
 ospfd=yes
 isisd=yes
-bgpd=no
+bgpd=yes
 ripd=no
 ospf6d=no
 watchfrr_enable=yes
@@ -265,6 +277,7 @@ vtysh_enable=yes
 zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
+bgpd_options="  -A 127.0.0.1 -M bgpd_snmp"
 DAEMONS
 cat > "${CONFIGS}/spine-01/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/spine-01/frr.conf" <<'FRR'
@@ -275,44 +288,40 @@ agentx
 !
 interface lo
  ip address 10.255.0.11/32
- isis passive
- ip router isis FABRIC
+ ip ospf area 0.0.0.0
 !
 interface eth1
- description link-to-leaf-01
+ description link-to-leaf-01-ospf
  ip address 10.101.1.1/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
- ip router isis FABRIC
- isis circuit-type level-2-only
- isis network point-to-point
 !
 interface eth2
- description link-to-leaf-02
+ description link-to-leaf-02-isis
  ip address 10.101.2.1/30
- ip ospf area 0.0.0.0
- ip ospf network point-to-point
  ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
 interface eth3
- description link-to-leaf-03
+ description link-to-leaf-03-bgp
  ip address 10.101.3.1/30
- ip ospf area 0.0.0.0
- ip ospf network point-to-point
- ip router isis FABRIC
- isis circuit-type level-2-only
- isis network point-to-point
 !
 router ospf
  ospf router-id 10.255.0.11
- network 10.255.0.11/32 area 0.0.0.0
 !
 router isis FABRIC
  net 49.0001.0aff.000b.00
  is-type level-2-only
  metric-style wide
+!
+router bgp 65000
+ bgp router-id 10.255.0.11
+ neighbor 10.101.3.2 remote-as 65003
+ !
+ address-family l2vpn evpn
+  neighbor 10.101.3.2 activate
+ exit-address-family
 !
 FRR
 
@@ -322,7 +331,7 @@ cat > "${CONFIGS}/spine-02/daemons" <<'DAEMONS'
 zebra=yes
 ospfd=yes
 isisd=yes
-bgpd=no
+bgpd=yes
 ripd=no
 ospf6d=no
 watchfrr_enable=yes
@@ -330,6 +339,7 @@ vtysh_enable=yes
 zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
+bgpd_options="  -A 127.0.0.1 -M bgpd_snmp"
 DAEMONS
 cat > "${CONFIGS}/spine-02/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/spine-02/frr.conf" <<'FRR'
@@ -340,53 +350,49 @@ agentx
 !
 interface lo
  ip address 10.255.0.12/32
- isis passive
- ip router isis FABRIC
+ ip ospf area 0.0.0.0
 !
 interface eth1
- description link-to-leaf-01
+ description link-to-leaf-01-ospf
  ip address 10.101.4.1/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
- ip router isis FABRIC
- isis circuit-type level-2-only
- isis network point-to-point
 !
 interface eth2
- description link-to-leaf-02
+ description link-to-leaf-02-isis
  ip address 10.101.5.1/30
- ip ospf area 0.0.0.0
- ip ospf network point-to-point
  ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
 !
 interface eth3
- description link-to-leaf-03
+ description link-to-leaf-03-bgp
  ip address 10.101.6.1/30
- ip ospf area 0.0.0.0
- ip ospf network point-to-point
- ip router isis FABRIC
- isis circuit-type level-2-only
- isis network point-to-point
 !
 router ospf
  ospf router-id 10.255.0.12
- network 10.255.0.12/32 area 0.0.0.0
 !
 router isis FABRIC
  net 49.0001.0aff.000c.00
  is-type level-2-only
  metric-style wide
 !
+router bgp 65000
+ bgp router-id 10.255.0.12
+ neighbor 10.101.6.2 remote-as 65003
+ !
+ address-family l2vpn evpn
+  neighbor 10.101.6.2 activate
+ exit-address-family
+!
 FRR
 
-# ---- leaf-01 ----
+# ---- leaf-01 (OSPF only) ----
 mkdir -p "${CONFIGS}/leaf-01"
 cat > "${CONFIGS}/leaf-01/daemons" <<'DAEMONS'
 zebra=yes
 ospfd=yes
-isisd=yes
+isisd=no
 bgpd=no
 ripd=no
 ospf6d=no
@@ -394,7 +400,6 @@ watchfrr_enable=yes
 vtysh_enable=yes
 zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
-isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
 cat > "${CONFIGS}/leaf-01/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/leaf-01/frr.conf" <<'FRR'
@@ -405,43 +410,30 @@ agentx
 !
 interface lo
  ip address 10.255.0.21/32
- isis passive
- ip router isis FABRIC
+ ip ospf area 0.0.0.0
 !
 interface eth1
  description uplink-to-spine-01
  ip address 10.101.1.2/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
- ip router isis FABRIC
- isis circuit-type level-2-only
- isis network point-to-point
 !
 interface eth2
  description uplink-to-spine-02
  ip address 10.101.4.2/30
  ip ospf area 0.0.0.0
  ip ospf network point-to-point
- ip router isis FABRIC
- isis circuit-type level-2-only
- isis network point-to-point
 !
 router ospf
  ospf router-id 10.255.0.21
- network 10.255.0.21/32 area 0.0.0.0
-!
-router isis FABRIC
- net 49.0001.0aff.0015.00
- is-type level-2-only
- metric-style wide
 !
 FRR
 
-# ---- leaf-02 ----
+# ---- leaf-02 (IS-IS only) ----
 mkdir -p "${CONFIGS}/leaf-02"
 cat > "${CONFIGS}/leaf-02/daemons" <<'DAEMONS'
 zebra=yes
-ospfd=yes
+ospfd=no
 isisd=yes
 bgpd=no
 ripd=no
@@ -449,7 +441,6 @@ ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
 zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
-ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
 DAEMONS
 cat > "${CONFIGS}/leaf-02/vtysh.conf" <<< "${VTYSH_CONF}"
@@ -467,8 +458,6 @@ interface lo
 interface eth1
  description uplink-to-spine-01
  ip address 10.101.2.2/30
- ip ospf area 0.0.0.0
- ip ospf network point-to-point
  ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
@@ -476,15 +465,9 @@ interface eth1
 interface eth2
  description uplink-to-spine-02
  ip address 10.101.5.2/30
- ip ospf area 0.0.0.0
- ip ospf network point-to-point
  ip router isis FABRIC
  isis circuit-type level-2-only
  isis network point-to-point
-!
-router ospf
- ospf router-id 10.255.0.22
- network 10.255.0.22/32 area 0.0.0.0
 !
 router isis FABRIC
  net 49.0001.0aff.0016.00
@@ -493,20 +476,19 @@ router isis FABRIC
 !
 FRR
 
-# ---- leaf-03 ----
+# ---- leaf-03 (eBGP AS65003 + EVPN/VXLAN VNI 100) ----
 mkdir -p "${CONFIGS}/leaf-03"
 cat > "${CONFIGS}/leaf-03/daemons" <<'DAEMONS'
 zebra=yes
-ospfd=yes
-isisd=yes
-bgpd=no
+ospfd=no
+isisd=no
+bgpd=yes
 ripd=no
 ospf6d=no
 watchfrr_enable=yes
 vtysh_enable=yes
 zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
-ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
-isisd_options="  -A 127.0.0.1 -M isisd_snmp"
+bgpd_options="  -A 127.0.0.1 -M bgpd_snmp"
 DAEMONS
 cat > "${CONFIGS}/leaf-03/vtysh.conf" <<< "${VTYSH_CONF}"
 cat > "${CONFIGS}/leaf-03/frr.conf" <<'FRR'
@@ -517,35 +499,32 @@ agentx
 !
 interface lo
  ip address 10.255.0.23/32
- isis passive
- ip router isis FABRIC
 !
 interface eth1
  description uplink-to-spine-01
  ip address 10.101.3.2/30
- ip ospf area 0.0.0.0
- ip ospf network point-to-point
- ip router isis FABRIC
- isis circuit-type level-2-only
- isis network point-to-point
 !
 interface eth2
  description uplink-to-spine-02
  ip address 10.101.6.2/30
- ip ospf area 0.0.0.0
- ip ospf network point-to-point
- ip router isis FABRIC
- isis circuit-type level-2-only
- isis network point-to-point
 !
-router ospf
- ospf router-id 10.255.0.23
- network 10.255.0.23/32 area 0.0.0.0
+interface vxlan100
 !
-router isis FABRIC
- net 49.0001.0aff.0017.00
- is-type level-2-only
- metric-style wide
+router bgp 65003
+ bgp router-id 10.255.0.23
+ neighbor 10.101.3.1 remote-as 65000
+ neighbor 10.101.6.1 remote-as 65000
+ !
+ address-family ipv4 unicast
+  network 10.255.0.23/32
+ exit-address-family
+ !
+ address-family l2vpn evpn
+  neighbor 10.101.3.1 activate
+  neighbor 10.101.6.1 activate
+  advertise-all-vni
+  advertise ipv4 unicast
+ exit-address-family
 !
 FRR
 
@@ -850,29 +829,37 @@ echo "    EnLinkd reloaded for clean topology collection"
 # Phase 7: Wait for OSPF convergence
 # ---------------------------------------------------------------------------
 echo ""
-echo "==> [8/8] Waiting for OSPF convergence (cap: 120s)..."
+echo "==> [8/8] Waiting for routing convergence: OSPF + IS-IS + BGP (cap: 120s)..."
 
 CONVERGED=false
 for i in $(seq 1 24); do
-  # Check spine-01 has 3 Full OSPF neighbors
-  count=$(podman exec topo-spine-01 vtysh -c "show ip ospf neighbor" 2>/dev/null \
-          | grep -c "Full/" || true)
-  if [[ "${count}" -ge 3 ]]; then
+  # OSPF: spine-01 ↔ leaf-01 (1 Full neighbor)
+  ospf_ok=$(podman exec topo-spine-01 vtysh -c "show ip ospf neighbor" 2>/dev/null \
+            | grep -c "Full/" || true)
+  # IS-IS: spine-01 ↔ leaf-02 (1 Up adjacency)
+  isis_ok=$(podman exec topo-spine-01 vtysh -c "show isis neighbor" 2>/dev/null \
+            | grep -c " Up " || true)
+  # BGP: leaf-03 ↔ both spines (2 Established sessions)
+  bgp_ok=$(podman exec topo-leaf-03 vtysh -c "show bgp neighbors" 2>/dev/null \
+           | grep -c "BGP state = Established" || true)
+  if [[ "${ospf_ok}" -ge 1 && "${isis_ok}" -ge 1 && "${bgp_ok}" -ge 2 ]]; then
     CONVERGED=true
-    echo "    OSPF converged after $((i * 5))s (spine-01 sees ${count} Full neighbors)"
+    echo "    Converged after $((i * 5))s (OSPF:${ospf_ok} IS-IS:${isis_ok} BGP:${bgp_ok}/2)"
     break
   fi
-  printf "    ... waiting (%ds, spine-01 Full neighbors: %d/3)\r" "$((i * 5))" "${count}"
+  printf "    ... waiting (%ds, OSPF:%d IS-IS:%d BGP:%d/2)\r" "$((i * 5))" "${ospf_ok}" "${isis_ok}" "${bgp_ok}"
   sleep 5
 done
 echo ""
 
 if [[ "${CONVERGED}" == "false" ]]; then
-  echo "ERROR: OSPF did not converge within 120s. Diagnostics:" >&2
+  echo "ERROR: Routing did not converge within 120s. Diagnostics:" >&2
   echo "--- spine-01 ospf neighbors ---" >&2
   podman exec topo-spine-01 vtysh -c "show ip ospf neighbor" >&2 || true
   echo "--- spine-01 isis neighbors ---" >&2
   podman exec topo-spine-01 vtysh -c "show isis neighbor" >&2 || true
+  echo "--- leaf-03 bgp summary ---" >&2
+  podman exec topo-leaf-03 vtysh -c "show bgp summary" >&2 || true
   echo "--- spine-01 lldp neighbors ---" >&2
   podman exec topo-spine-01 lldpcli show neighbors >&2 || true
   exit 1
@@ -924,6 +911,26 @@ if [[ "${HOST_TOPO}" == "false" ]]; then
   echo "WARNING: Host topology links not established within 120s — topology map may be incomplete" >&2
 fi
 
+# Quick iperf3 end-to-end connectivity check: host-01 (client) → host-02 (server).
+if podman exec topo-host-02 which iperf3 >/dev/null 2>&1; then
+  echo "    Running iperf3 connectivity check (host-01 → host-02)..."
+  podman exec -d topo-host-02 iperf3 -s --one-off 2>/dev/null || true
+  sleep 1
+  iperf_bps=$(podman exec topo-host-01 iperf3 -c 10.100.0.32 -t 3 -J 2>/dev/null | \
+    python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    bps = d['end']['sum_received']['bits_per_second']
+    print('{:.0f} Mbps'.format(bps / 1e6))
+except:
+    print('unknown')
+" 2>/dev/null || echo "failed")
+  echo "    iperf3 host-01 → host-02: ${iperf_bps}"
+else
+  echo "    iperf3 not in container image — skipping (use --rebuild to include)"
+fi
+
 # ---------------------------------------------------------------------------
 # Phase 8: Start traffic generator
 # ---------------------------------------------------------------------------
@@ -955,9 +962,16 @@ for node_def in "${NODES[@]}"; do
   printf "   %-18s  %s  (%s)\n" "${parts[0]}" "${parts[1]}" "${parts[2]}"
 done
 echo ""
+echo " Protocol layout:"
+echo "   leaf-01 ↔ spines : OSPF  (AS-independent IGP)"
+echo "   leaf-02 ↔ spines : IS-IS (separate adjacency domain)"
+echo "   leaf-03 ↔ spines : eBGP AS65003↔AS65000 + EVPN/VXLAN VNI 100"
+echo ""
 echo " Verify topology layers:"
 echo "   OSPF:  podman exec topo-spine-01 vtysh -c 'show ip ospf neighbor'"
 echo "   ISIS:  podman exec topo-spine-01 vtysh -c 'show isis neighbor'"
+echo "   BGP:   podman exec topo-leaf-03 vtysh -c 'show bgp summary'"
+echo "   EVPN:  podman exec topo-leaf-03 vtysh -c 'show bgp l2vpn evpn summary'"
 echo "   LLDP:  podman exec topo-spine-01 lldpcli show neighbors"
 echo "   SNMP:  snmpwalk -v2c -c public 10.100.0.11 LLDP-MIB::lldpRemTable"
 echo ""
