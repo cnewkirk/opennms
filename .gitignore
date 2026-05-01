@@ -56,6 +56,9 @@ opennms-container/*/rpms/*.repo
 opennms-container/*/rpms/*.rpm
 opennms-container/*/tarball/*.tar.gz
 
+# Git worktrees
+.worktrees/
+
 # Python
 *.pyc
 __pycache__

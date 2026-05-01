@@ -24,6 +24,7 @@
     <div class="icon-settings__section">
       <div class="icon-settings__heading">sysOID Prefix → Icon</div>
       <div class="icon-settings__hint">Prefix match — longest matching prefix wins.</div>
+      <div class="icon-settings__hint icon-settings__hint--coming-soon">OID matching is not yet active — entries will be applied in a future release.</div>
       <div v-for="(row, i) in oidRows" :key="i" class="icon-settings__row">
         <input
           v-model="row.key"
@@ -112,9 +113,9 @@ const newPrefix    = ref('')
 const toMappings = (rows: Row[]) =>
   rows.filter(r => r.key.trim() && r.iconKey).map(r => ({ key: r.key.trim(), iconKey: r.iconKey }))
 
-const emitCategoryMap = () => { viewStore.categoryIconMap = toMappings(categoryRows.value); viewStore.markDirty() }
-const emitOidMap      = () => { viewStore.oidIconMap      = toMappings(oidRows.value);      viewStore.markDirty() }
-const emitPrefixes    = () => { viewStore.lagPrefixPatterns = [...lagPrefixes.value];        viewStore.markDirty() }
+const emitCategoryMap = () => { viewStore.categoryIconMap = toMappings(categoryRows.value); viewStore.markDirty(); viewStore.saveIconSettings() }
+const emitOidMap      = () => { viewStore.oidIconMap      = toMappings(oidRows.value);      viewStore.markDirty(); viewStore.saveIconSettings() }
+const emitPrefixes    = () => { viewStore.lagPrefixPatterns = [...lagPrefixes.value];        viewStore.markDirty(); viewStore.saveIconSettings() }
 
 const addCategory    = () => { categoryRows.value.push({ key: '', iconKey: '' }) }
 const removeCategory = (i: number) => { categoryRows.value.splice(i, 1); emitCategoryMap() }
@@ -136,6 +137,7 @@ const emitPatternRules = () => {
     .filter(r => r.pattern.trim() && r.iconKey)
     .map(r => ({ pattern: r.pattern.trim(), iconKey: r.iconKey }))
   viewStore.markDirty()
+  viewStore.saveIconSettings()
 }
 
 const addPattern = () => {
@@ -181,6 +183,11 @@ const removePrefix = (i: number) => { lagPrefixes.value.splice(i, 1); emitPrefix
     font-size: 0.62rem;
     color: var($secondary-text-on-surface);
     margin-bottom: 6px;
+
+    &--coming-soon {
+      font-style: italic;
+      opacity: 0.7;
+    }
   }
 
   &__row {

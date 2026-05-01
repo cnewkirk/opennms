@@ -71,7 +71,7 @@ const SPINE_TIER_SELECTOR =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const buildStylesheet = (canvasEl?: HTMLElement | null): any[] => {
   const defaultNodeColor = cssVar('--feather-primary')
-  const selectedColor    = cssVar('--feather-primary-dark')
+  const selectedColor    = cssVar('--feather-primary-variant')
   const light = isLightMode()
 
   // In dark mode: light text + dark halo clears the edge line behind the label.

@@ -30,7 +30,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   MAJOR:         '#f97316',
   MINOR:         '#eab308',
   WARNING:       '#f59e0b',
-  NORMAL:        '#f59e0b',
+  NORMAL:        '#4ade80',
   INDETERMINATE: '#9ca3af',
 }
 const DEFAULT_COLOR = '#06b6d4'
@@ -56,13 +56,9 @@ export const useNodeIconResolver = () => {
   ): string => {
     const label = vertex.label ?? ''
 
-    // Priority 1: user-defined name pattern rules
-    for (const rule of viewStore.namePatternRules) {
-      try {
-        if (new RegExp(rule.pattern, 'i').test(label)) return rule.iconKey
-      } catch {
-        // invalid regex — skip
-      }
+    // Priority 1: user-defined name pattern rules (pre-compiled in store)
+    for (const rule of viewStore.compiledNamePatternRules) {
+      if (rule.regex.test(label)) return rule.iconKey
     }
 
     // Priority 2: OpenNMS category mapping

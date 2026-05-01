@@ -1,13 +1,23 @@
 import { defineStore } from 'pinia'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import type { IconMapping, TopologyView, TopologyViewState } from '@/types/topology'
 import { getViews, createView, updateView, deleteView as deleteViewApi } from '@/services/topologyViewService'
 
-const LS_KEY_FILTERS = 'topology:filter:defaults'
+const LS_KEY_FILTERS      = 'topology:filter:defaults'
+const LS_KEY_ICON_SETTINGS = 'topology:icon:settings'
 
 function loadFilterDefaults() {
   try {
     const raw = localStorage.getItem(LS_KEY_FILTERS)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function loadIconSettings() {
+  try {
+    const raw = localStorage.getItem(LS_KEY_ICON_SETTINGS)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -26,11 +36,22 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
     namePattern: (savedDefaults?.namePattern ?? '') as string,
   })
 
-  // Icon mappings
-  const categoryIconMap = ref<IconMapping[]>([])
-  const oidIconMap      = ref<IconMapping[]>([])
-  const lagPrefixPatterns = ref<string[]>(['Po', 'ae', 'bond', 'Bundle-Ether', 'LAG'])
-  const namePatternRules = ref<Array<{ pattern: string; iconKey: string }>>([])
+  // Icon mappings — loaded from localStorage so they survive page reloads
+  const savedIconSettings = loadIconSettings()
+  const categoryIconMap   = ref<IconMapping[]>(savedIconSettings?.categoryIconMap ?? [])
+  const oidIconMap        = ref<IconMapping[]>(savedIconSettings?.oidIconMap ?? [])
+  const lagPrefixPatterns = ref<string[]>(savedIconSettings?.lagPrefixPatterns ?? ['Po', 'ae', 'bond', 'Bundle-Ether', 'LAG'])
+  const namePatternRules  = ref<Array<{ pattern: string; iconKey: string }>>(savedIconSettings?.namePatternRules ?? [])
+
+  // Pre-compiled user patterns — avoids repeated RegExp construction in the hot rendering path
+  const compiledNamePatternRules = computed(() =>
+    namePatternRules.value
+      .map(r => {
+        try { return { regex: new RegExp(r.pattern, 'i'), iconKey: r.iconKey } }
+        catch { return null }
+      })
+      .filter((r): r is { regex: RegExp; iconKey: string } => r !== null)
+  )
 
   // Dirty flag
   const isDirty = ref(false)
@@ -43,6 +64,17 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
         surveillanceCategories: filters.surveillanceCategories,
         cidrs: filters.cidrs,
         namePattern: filters.namePattern,
+      }))
+    } catch { /* ignore */ }
+  }
+
+  const saveIconSettings = () => {
+    try {
+      localStorage.setItem(LS_KEY_ICON_SETTINGS, JSON.stringify({
+        categoryIconMap:   categoryIconMap.value,
+        oidIconMap:        oidIconMap.value,
+        lagPrefixPatterns: lagPrefixPatterns.value,
+        namePatternRules:  namePatternRules.value,
       }))
     } catch { /* ignore */ }
   }
@@ -172,7 +204,8 @@ export const useTopologyViewStore = defineStore('topologyView', () => {
 
   return {
     gridSnap, filters, categoryIconMap, oidIconMap, lagPrefixPatterns, namePatternRules,
-    isDirty, markDirty, clearDirty, saveFilterDefaults, clearFilterDefaults,
+    compiledNamePatternRules,
+    isDirty, markDirty, clearDirty, saveFilterDefaults, clearFilterDefaults, saveIconSettings,
     serverViews, activeView, viewsLoading, viewsError, viewLayout,
     suppressedVertices, suppressedEdges,
     editMode, editPendingVertices, editPendingEdges,

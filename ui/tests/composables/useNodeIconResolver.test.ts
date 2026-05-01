@@ -19,7 +19,7 @@ describe('useNodeIconResolver', () => {
 
   test('built-in pattern: spine label resolves to router', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('spine-01'), 'NORMAL')).toBe('data:uri:router:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('spine-01'), 'NORMAL')).toBe('data:uri:router:#4ade80')
   })
 
   test('built-in pattern: leaf label resolves to switch', () => {
@@ -29,42 +29,42 @@ describe('useNodeIconResolver', () => {
 
   test('built-in pattern: host label resolves to server', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('host-03'), 'NORMAL')).toBe('data:uri:server:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('host-03'), 'NORMAL')).toBe('data:uri:server:#4ade80')
   })
 
   test('built-in pattern: IP prefix label resolves to cloud', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('10.88.0.0/16'), 'NORMAL')).toBe('data:uri:cloud:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('10.88.0.0/16'), 'NORMAL')).toBe('data:uri:cloud:#4ade80')
   })
 
   test('built-in pattern: oob label resolves to console', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('oob-mgmt'), 'NORMAL')).toBe('data:uri:console:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('oob-mgmt'), 'NORMAL')).toBe('data:uri:console:#4ade80')
   })
 
   test('built-in pattern: pdu label resolves to pdu', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('rack-pdu-01'), 'NORMAL')).toBe('data:uri:pdu:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('rack-pdu-01'), 'NORMAL')).toBe('data:uri:pdu:#4ade80')
   })
 
   test('built-in pattern: firewall label resolves to firewall', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('fw-edge-01'), 'NORMAL')).toBe('data:uri:firewall:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('fw-edge-01'), 'NORMAL')).toBe('data:uri:firewall:#4ade80')
   })
 
   test('built-in pattern: load-balancer label resolves to load-balancer', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('lb-prod'), 'NORMAL')).toBe('data:uri:load-balancer:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('lb-prod'), 'NORMAL')).toBe('data:uri:load-balancer:#4ade80')
   })
 
   test('built-in pattern: ups label resolves to ups', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('rack-ups-01'), 'NORMAL')).toBe('data:uri:ups:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('rack-ups-01'), 'NORMAL')).toBe('data:uri:ups:#4ade80')
   })
 
   test('fallback: unknown label resolves to server', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('xyzzy-unknown-42'), 'NORMAL')).toBe('data:uri:server:#f59e0b')
+    expect(resolveIconDataUri(makeVertex('xyzzy-unknown-42'), 'NORMAL')).toBe('data:uri:server:#4ade80')
   })
 
   test('category mapping overrides built-in pattern', () => {
@@ -76,7 +76,7 @@ describe('useNodeIconResolver', () => {
       'NORMAL',
       [{ id: 1, name: 'Routers', authorizedGroups: [] }]
     )
-    expect(uri).toBe('data:uri:router:#f59e0b')
+    expect(uri).toBe('data:uri:router:#4ade80')
   })
 
   test('user pattern overrides category mapping', () => {
@@ -89,7 +89,7 @@ describe('useNodeIconResolver', () => {
       'NORMAL',
       [{ id: 1, name: 'Routers', authorizedGroups: [] }]
     )
-    expect(uri).toBe('data:uri:firewall:#f59e0b')
+    expect(uri).toBe('data:uri:firewall:#4ade80')
   })
 
   test('CRITICAL severity maps to red (#ef4444)', () => {
@@ -112,9 +112,9 @@ describe('useNodeIconResolver', () => {
     expect(resolveIconDataUri(makeVertex('spine-01'), 'WARNING')).toContain('#f59e0b')
   })
 
-  test('NORMAL severity maps to amber (#f59e0b)', () => {
+  test('NORMAL severity maps to green (#4ade80)', () => {
     const { resolveIconDataUri } = useNodeIconResolver()
-    expect(resolveIconDataUri(makeVertex('spine-01'), 'NORMAL')).toContain('#f59e0b')
+    expect(resolveIconDataUri(makeVertex('spine-01'), 'NORMAL')).toContain('#4ade80')
   })
 
   test('INDETERMINATE severity maps to gray (#9ca3af)', () => {
