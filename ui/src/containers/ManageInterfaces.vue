@@ -75,7 +75,7 @@ import ToggleSwitch from 'primevue/toggleswitch'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
-import { BreadCrumb } from '@/types'
+import { type BreadCrumb } from '@/types'
 import { useMenuStore } from '@/stores/menuStore'
 import useSnackbar from '@/composables/useSnackbar'
 import {

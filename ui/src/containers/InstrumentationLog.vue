@@ -62,8 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
