@@ -137,9 +137,9 @@ defineExpose({ refresh: load })
 
 // Dark mode overrides — full selector in :global() to prevent Vue's CSS scoper
 // from stripping the descendant and applying styles to html directly.
-:global(html.open-dark .kpi-card--critical)           { background: rgba(255, 163, 181, 0.12); border-color: #fca5a5; }
+:global(html.open-dark .kpi-card--critical)           { background: rgba(248, 113, 113, 0.28); border-color: #fca5a5; }
 :global(html.open-dark .kpi-card--critical .kpi-value){ color: #fca5a5; }
-:global(html.open-dark .kpi-card--warning)            { background: rgba(251, 233, 71, 0.12);  border-color: #fde047; }
+:global(html.open-dark .kpi-card--warning)            { background: rgba(251, 191, 36, 0.28);  border-color: #fde047; }
 :global(html.open-dark .kpi-card--warning .kpi-value) { color: #fde047; }
 
 .kpi-value {
