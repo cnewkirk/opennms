@@ -804,6 +804,51 @@ const router = createRouter({
       }
     },
     {
+      path: '/path-outages',
+      name: 'Path Outages',
+      component: () => import('@/containers/PathOutages.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access Path Outages.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
+      path: '/on-call-roles',
+      name: 'On-Call Roles',
+      component: () => import('@/containers/OnCallRoles.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access On-Call Roles.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
+      path: '/on-call-role/:name',
+      name: 'On-Call Role Detail',
+      component: () => import('@/containers/OnCallRoleDetail.vue'),
+      beforeEnter: (to, from) => {
+        const checkRoles = () => {
+          if (!adminRole.value) {
+            showSnackBar({ msg: 'Must be admin to access On-Call Role Detail.' })
+            router.push(from.path)
+          }
+        }
+        if (rolesAreLoaded.value) checkRoles()
+        else whenever(rolesAreLoaded, () => checkRoles())
+      }
+    },
+    {
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }
