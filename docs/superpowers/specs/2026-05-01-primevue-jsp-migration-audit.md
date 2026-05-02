@@ -1,8 +1,16 @@
 # PrimeVue Migration & JSP Replacement Audit
 
-**Date:** 2026-05-01  
+**Date:** 2026-05-01 (updated 2026-05-01 after Domain E + H session)  
 **Branch:** `feat/ui-refactor-omnibus`  
 **Scope:** User-facing navigable pages only (excludes `includes/`, `errors/`, internal `WEB-INF/jsp/` fragments)
+
+## Session Log
+
+| Date | Work done |
+|---|---|
+| 2026-05-01 | Initial audit written; Domain E brainstorm + spec + plan |
+| 2026-05-01 | **Domain E complete:** `PathOutageRestService` + `OnCallRoleRestService` at `/api/v2/`; Vue pages `/path-outages`, `/on-call-roles`, `/on-call-role/:name`; 6 Domain E JSPs redirected |
+| 2026-05-01 | **Domain H complete:** 6 redirect-only JSPs converted (`charts/index.jsp`, `heatmap/index.jsp`, `geomap/standalone.jsp`, `alarm/advsearch.jsp`, `event/advsearch.jsp`, `frontPage.jsp`) — active after next overlay rebuild |
 
 ## Goals
 
@@ -90,12 +98,12 @@
 
 | Feature | Legacy JSP(s) | Vue route | Status | Notes |
 |---|---|---|---|---|
-| Manage/Unmanage Interfaces | `admin/manage.jsp` | — | ❌ legacy | Complex node/interface state; REST exists |
-| SNMP Interface Collection | `admin/snmpInterfaces.jsp` | — | ❌ legacy | Spring MVC; per-interface SNMP collection toggle |
-| Node Management | `admin/nodemanagement/index.jsp` | — | ❌ legacy | Manage/delete nodes per node |
-| Provisioning Requisitions | `admin/ng-requisitions/index.jsp` | `/provision/requisitions` | ⏸ deferred | Embedded Angular app with internal hash router |
-| On-Call Roles | `admin/userGroupView/roles/list.jsp` | — | ⏸ deferred | No REST endpoint (`/rest/roles` → 404) |
-| Configure Path Outages | `admin/notification/noticeWizard/buildPathOutage.jsp` | — | ⏸ deferred | Complex FilterDao interaction; intentionally deferred |
+| Manage/Unmanage Interfaces | `admin/manage.jsp` | — | ❌ legacy | Complex node/interface state; REST exists (Domain A) |
+| SNMP Interface Collection | `admin/snmpInterfaces.jsp` | — | ❌ legacy | Spring MVC; per-interface SNMP collection toggle (Domain A) |
+| Node Management | `admin/nodemanagement/index.jsp` | — | ❌ legacy | Manage/delete nodes per node (Domain A) |
+| Provisioning Requisitions | `admin/ng-requisitions/index.jsp` | `/provision/requisitions` | ⏸ deferred | Embedded Angular app with internal hash router — separate GH issue |
+| On-Call Roles | `admin/userGroupView/roles/list.jsp` | `/on-call-roles` | ✅ done | REST + Vue complete 2026-05-01; redirects need overlay rebuild |
+| Configure Path Outages | `pathOutage/index.jsp` | `/path-outages` | ✅ done | REST + Vue complete 2026-05-01; redirects need overlay rebuild |
 
 ---
 
@@ -124,15 +132,20 @@ Pages reachable via URL but not in the primary sidebar menu.
 | Open API | — | `/open-api` | ✅ done | Vue-only |
 | Usage Statistics | — | `/usage-statistics` | ✅ done | Vue-only |
 | ZenithConnect | — | `/zenith-connect` | 🔀 redirect-only | table-scss (`ZenithConnectView.vue`, `ZenithConnectRegisterResult.vue`) |
-| KSC Reports | `KSC/index.jsp` | — | ❌ legacy | No REST; complex custom graph config |
-| Database Reports | `report/index.jsp` | — | ❌ legacy | No REST |
-| Notifications (user-facing list) | `notification/index.jsp` | — | ❌ legacy | User notification history; distinct from admin notification config |
-| Path Outage | `pathOutage/index.jsp` | — | ❌ legacy | |
-| About | `about/index.jsp` | — | ❌ legacy | |
-| Support | `support/index.jsp` | — | ❌ legacy | |
-| Asset Records (per-node) | `asset/index.jsp` · `asset/modify.jsp` | — | ❌ legacy | Different from admin asset import/export |
-| Heatmap | `heatmap/index.jsp` | — | ❌ legacy | |
-| Site Status | `status/index.jsp` | — | ❌ legacy | |
+| KSC Reports | `KSC/index.jsp` | — | ❌ legacy | REST exists (`/rest/ksc`); Vue page needed (Domain D) |
+| Database Reports | `report/index.jsp` | — | ❌ legacy | REST exists; Vue page needed (Domain F) |
+| Statistics Reports | `WEB-INF/jsp/statisticsReports/*` | — | ❌ legacy | REST exists; Vue page needed (Domain F) |
+| Notifications (user-facing list) | `notification/index.jsp` · `notification/detail.jsp` | — | ❌ legacy | REST exists; Vue pages needed (Domain C) |
+| Path Outage | `pathOutage/index.jsp` | `/path-outages` | ✅ done | REST + Vue complete 2026-05-01; redirect needs overlay rebuild |
+| About | `about/index.jsp` | — | ❌ legacy | Domain G |
+| Support | `support/index.jsp` | — | ❌ legacy | Domain G |
+| Site Status | `status/index.jsp` | — | ❌ legacy | Domain G |
+| Account Self-Service | `account/selfService/*` | — | ❌ legacy | Domain G |
+| Asset Records (per-node) | `asset/index.jsp` · `asset/modify.jsp` · `asset/nodelist.jsp` | — | ❌ legacy | REST exists; Vue pages needed (Domain B) |
+| Hardware Inventory | `hardware/list.jsp` | — | ❌ legacy | REST exists; Vue page needed (Domain B) |
+| Heatmap | `heatmap/index.jsp` | — | 🔀 redirect-only | Redirects to `/resource-graphs`; needs overlay rebuild |
+| Charts | `charts/index.jsp` | — | 🔀 redirect-only | Redirects to `/resource-graphs`; needs overlay rebuild |
+| Geomap | `geomap/standalone.jsp` | — | 🔀 redirect-only | Redirects to `/map`; needs overlay rebuild |
 | Login / Logoff | `login.jsp` · `logoff.jsp` | — | n/a | Infrastructure; not migrating |
 
 ---
@@ -180,19 +193,43 @@ All remaining `#/` usage is intentional:
 
 ---
 
-## Summary Counts
+## Summary Counts (updated 2026-05-01 after Domain E + H)
 
-| Status | Count |
-|---|---|
-| ✅ done | 36 |
-| 🔀 redirect-only (Feather table SCSS) | 7 |
-| 🏗 vue-no-redirect | 5 (Alarms list, Nodes list, Events list, Event detail, Outage detail) |
-| ❌ legacy (no Vue equivalent) | 13 |
-| ⏸ deferred | 3 |
+| Status | Count | Change |
+|---|---|---|
+| ✅ done | 39 | +3 (path-outages, on-call-roles, on-call-role detail) |
+| 🔀 redirect-only (Feather table SCSS or redirect pending rebuild) | 10 | +3 (heatmap, charts, geomap now redirected) |
+| 🏗 vue-no-redirect | 5 (Alarms list, Nodes list, Events list, Event detail, Outage detail) | unchanged |
+| ❌ legacy (no Vue equivalent) | 11 | -2 (path-outages + on-call-roles now done) |
+| ⏸ deferred | 1 (ng-requisitions only) | -2 |
 
-**Highest-value remaining work:**
-1. Add redirects for `alarm/index.htm`, `element/nodeList.htm`, `event/index.htm` (Spring MVC controllers — add `sendRedirect` or a filter)
-2. Add redirects for `event/detail.htm` and `outage/detail.htm` (same pattern as `AlarmDetailController`)
-3. Migrate 20 components from Feather table SCSS to PrimeVue DataTable (or scoped CSS)
-4. Fix `EmptyList.vue` — swap `FeatherButton` → PrimeVue `Button`
-5. Decide priority order for 13 remaining legacy pages
+**Remaining work by priority:**
+
+### Quick wins (no new REST, no new Vue pages)
+1. Spring MVC redirects for `alarm/index.htm`, `element/nodeList.htm`, `event/index.htm` — add `sendRedirect` in the Java controllers or a servlet filter
+2. Redirects for `event/detail.htm?id=X` and `outage/detail.htm?id=X` — same pattern as `AlarmDetailController`
+
+### JSP elimination domains (each is REST + Vue + JSP redirects)
+All have existing REST endpoints — no new JAX-RS services needed, just Vue pages:
+
+| Domain | JSPs | Vue routes needed | Notes |
+|---|---|---|---|
+| B — Assets & Hardware | `asset/index.jsp`, `asset/modify.jsp`, `asset/nodelist.jsp`, `hardware/list.jsp` | `/assets`, `/asset/:nodeId/edit`, `/hardware` | REST exists |
+| C — Notifications | `notification/index.jsp`, `notification/detail.jsp` | `/notifications`, `/notification/:id` | REST exists |
+| D — KSC Reports | `KSC/index.jsp`, WEB-INF KSC fragments | `/ksc-reports`, `/ksc-report/:id` | REST exists at `/rest/ksc` |
+| F — Reports & Statistics | `report/index.jsp`, statistics JSPs | `/reports`, `/statistics-reports` | REST exists |
+| G — System Pages | `support/index.jsp`, `status/index.jsp`, `about/index.jsp`, `help/index.jsp`, `account/selfService/*`, `rtc/index.jsp` | `/support`, `/status`, `/about`, `/account` | Partial REST |
+| A — Admin Ops | `admin/manage.jsp`, `admin/snmpInterfaces.jsp`, `admin/nodemanagement/instrumentationLogReader.jsp` | `/manage-interfaces`, `/snmp-interfaces`, `/instrumentation-log` | Partial REST |
+
+### Feather cleanup (independent of JSP work)
+- Migrate 20 components from `@featherds/table/scss/table` to PrimeVue DataTable or scoped CSS
+- Fix `Common/EmptyList.vue` — swap `FeatherButton` → PrimeVue `Button`
+
+### Overlay rebuild needed
+The following redirects are committed but not yet active (JSP compilation happens at image build time, not hot-deploy):
+- `pathOutage/index.jsp`, `pathOutage/showNodes.jsp`
+- `admin/userGroupView/roles/list.jsp`, `view.jsp`, `editDetails.jsp`, `editSpecific.jsp`
+- `charts/index.jsp`, `heatmap/index.jsp`, `geomap/standalone.jsp`
+- `alarm/advsearch.jsp`, `event/advsearch.jsp`, `frontPage.jsp`
+
+Run `./build-dark-mode-overlay.sh` to activate all of the above.
