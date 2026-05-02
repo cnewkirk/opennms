@@ -134,7 +134,7 @@ const emptyForm = (): OnCallRole => ({
   name: '',
   'membership-group': '',
   supervisor: '',
-  description: ''
+  description: undefined
 })
 
 const form = ref<OnCallRole>(emptyForm())

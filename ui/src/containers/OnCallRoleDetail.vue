@@ -73,12 +73,10 @@ import Column from 'primevue/column'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import { BreadCrumb } from '@/types'
 import { useMenuStore } from '@/stores/menuStore'
-import useSnackbar from '@/composables/useSnackbar'
 import { type OnCallRole, getRole } from '@/services/onCallRoleService'
 
 const route = useRoute()
 const menuStore = useMenuStore()
-const { showSnackBar } = useSnackbar()
 
 const roleName = computed<string>(() => decodeURIComponent(String(route.params.name ?? '')))
 const homeUrl = computed<string>(() => menuStore.mainMenu.homeUrl)
@@ -114,7 +112,6 @@ const load = async () => {
       notFound.value = true
     } else {
       loadError.value = true
-      showSnackBar({ msg: 'Failed to load on-call role.' })
     }
   } finally {
     loading.value = false
