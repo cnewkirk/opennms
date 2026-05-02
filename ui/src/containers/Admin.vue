@@ -98,14 +98,14 @@ const adminCards = computed(() => {
       title: 'Service Monitoring',
       links: [
         { label: 'Configure Scheduled Outages', to: '/scheduled-outages' },
-        { label: 'Manage and Unmanage Interfaces and Services', href: baseHref.value + 'admin/manage.jsp' },
+        { label: 'Manage and Unmanage Interfaces and Services', to: '/manage-interfaces' },
       ]
     },
     {
       title: 'Performance Measurement',
       links: [
         { label: 'Configure SNMP Collections and Data Collection Groups', to: '/snmp-collections-config' },
-        { label: 'Configure SNMP Data Collection per Interface', href: baseHref.value + 'admin/snmpInterfaces.jsp' },
+        { label: 'Configure SNMP Data Collection per Interface', to: '/snmp-interfaces' },
         { label: 'Configure Thresholds', to: '/threshold-config' },
       ]
     },
@@ -121,7 +121,7 @@ const adminCards = computed(() => {
       title: 'Additional Tools',
       links: [
         { label: 'Configure Grafana Endpoints (Reports only)', to: '/grafana-endpoints' },
-        { label: 'Instrumentation Log Reader', href: baseHref.value + 'admin/nodemanagement/instrumentationLogReader.jsp' },
+        { label: 'Instrumentation Log Reader', to: '/instrumentation-log' },
         { label: 'JMX Config Generator', to: '/jmx-config-generator' },
         { label: 'SNMP MIB Compiler', to: '/mib-compiler' },
         { label: 'Business Service Administration', to: '/bsm-admin' },
