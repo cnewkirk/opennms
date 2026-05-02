@@ -8,7 +8,7 @@
         </div>
 
         <div v-if="loadingInterfaces" class="create-link-modal__loading">
-          <ProgressSpinner style="width:32px;height:32px" />
+          <PanelLoader :size="32" />
           <span>Loading interfaces…</span>
         </div>
 
@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { getNodeIpInterfaces, getNodeSnmpInterfaces } from '@/services/nodeService'
 import { TopologyVertex } from '@/types/topology'
 import { IpInterface, SnmpInterface } from '@/types'

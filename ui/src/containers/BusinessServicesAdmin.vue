@@ -26,7 +26,7 @@
     <h1 class="page-title">Business Service Management</h1>
 
     <div v-if="loading" class="loading-state">
-      <ProgressSpinner />
+      <PanelLoader :size="40" />
     </div>
 
     <div v-else-if="loadError" class="error-state">
@@ -102,7 +102,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import Dialog from 'primevue/dialog'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import BusinessServiceEditor from '@/components/BSM/BusinessServiceEditor.vue'

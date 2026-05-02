@@ -1,7 +1,7 @@
 <template>
   <div class="topology-graph">
     <div v-if="store.loading" class="topology-graph__loading">
-      <ProgressSpinner style="width:40px;height:40px" />
+      <PanelLoader :size="40" />
       <span>Loading topology…</span>
     </div>
     <div v-else-if="store.error" class="topology-graph__error">
@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import useTopology from '@/composables/useTopology'
 import useSnackbar from '@/composables/useSnackbar'
 import { useTopologyStore } from '@/stores/topologyStore'

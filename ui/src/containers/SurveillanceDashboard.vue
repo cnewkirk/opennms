@@ -43,7 +43,7 @@
     </div>
 
     <div v-if="loading" class="loading-state">
-      <ProgressSpinner />
+      <PanelLoader :size="40" />
     </div>
 
     <div v-else-if="error" class="error-state">
@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import Select from 'primevue/select'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import SurveillanceGrid from '@/components/SurveillanceDashboard/SurveillanceGrid.vue'

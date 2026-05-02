@@ -25,7 +25,7 @@
     <h2 class="step-title">Step 2: Detecting MBeans</h2>
 
     <div v-if="status === 'pending' || status === 'running'" class="detecting">
-      <ProgressSpinner style="width: 32px; height: 32px" />
+      <PanelLoader :size="32" />
       <p class="detecting-msg">Connecting to JMX server and enumerating MBeans…</p>
     </div>
 
@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import Button from 'primevue/button'
 import { pollDetect } from '@/services/jmxConfigService'
 import type { MBeanDto } from '@/services/jmxConfigService'

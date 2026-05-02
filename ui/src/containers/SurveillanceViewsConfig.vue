@@ -26,7 +26,7 @@
     <h1 class="page-title">Surveillance Views Configuration</h1>
 
     <div v-if="loading" class="loading-state">
-      <ProgressSpinner />
+      <PanelLoader :size="40" />
     </div>
 
     <div v-else-if="loadError" class="error-state">
@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import SurveillanceViewList from '@/components/SurveillanceViewsConfig/SurveillanceViewList.vue'
 import SurveillanceViewEditor from '@/components/SurveillanceViewsConfig/SurveillanceViewEditor.vue'

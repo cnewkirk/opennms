@@ -28,7 +28,7 @@
         <Button text icon="pi pi-times" @click="$emit('close')" />
       </div>
 
-      <div v-if="loading" class="loading-state"><ProgressSpinner /></div>
+      <div v-if="loading" class="loading-state"><PanelLoader :size="36" /></div>
 
       <template v-else>
         <!-- Name -->
@@ -150,7 +150,7 @@ import { ref, computed, onMounted } from 'vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import AddEdgeForm from './AddEdgeForm.vue'
 import type { AddEdgePayload } from './AddEdgeForm.vue'
 import {

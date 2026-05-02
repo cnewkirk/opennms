@@ -62,7 +62,7 @@
         v-if="loading"
         class="widget-loading"
       >
-        <ProgressSpinner style="width:32px;height:32px" />
+        <PanelLoader :size="32" />
       </div>
       <div
         v-else-if="error"
@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 
 defineProps<{
   title: string

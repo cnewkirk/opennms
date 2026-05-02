@@ -92,7 +92,7 @@
             data-test="upload-button"
           >
             <template #default>
-              <ProgressSpinner v-if="isLoading" style="width: 1.5rem; height: 1.5rem" />
+              <PanelLoader v-if="isLoading" :size="20" />
               <span v-else>Upload Files</span>
             </template>
           </Button>
@@ -143,7 +143,7 @@ import { uploadEventConfigFiles } from '@/services/eventConfigService'
 import { useEventConfigStore } from '@/stores/eventConfigStore'
 import { EventConfigFilesUploadResponse, UploadEventFileType } from '@/types/eventConfig'
 import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import Tooltip from 'primevue/tooltip'
 const vTooltip = Tooltip
 import Draggable from 'vuedraggable'

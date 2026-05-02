@@ -13,7 +13,7 @@
 
           <!-- Loading shimmer -->
           <div v-if="nodeDetailLoading" class="topo-panel__loading">
-            <ProgressSpinner style="width:32px;height:32px" />
+            <PanelLoader :size="32" />
             <span>Loading node detail…</span>
           </div>
 
@@ -183,7 +183,7 @@
           </template>
 
           <div v-if="detailLoading" class="topo-panel__loading">
-            <ProgressSpinner style="width:32px;height:32px" />
+            <PanelLoader :size="32" />
             <span>Loading link detail…</span>
           </div>
 
@@ -255,7 +255,7 @@
 
 <script setup lang="ts">
 import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import PersesPanel from '@/components/Perses/PersesPanel.vue'
 import { useTopologyStore } from '@/stores/topologyStore'
