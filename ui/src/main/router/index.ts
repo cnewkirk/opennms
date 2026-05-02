@@ -894,6 +894,11 @@ const router = createRouter({
       }
     },
     {
+      path: '/account',
+      name: 'User Account',
+      component: () => import('@/containers/UserAccount.vue')
+    },
+    {
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }

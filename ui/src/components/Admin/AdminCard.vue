@@ -36,8 +36,9 @@ defineProps<{
 
 .admin-card {
   background: var($surface);
-  border-radius: 4px;
+  border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  border: 1px solid var($border-light-on-surface);
   overflow: hidden;
 
   &__header {

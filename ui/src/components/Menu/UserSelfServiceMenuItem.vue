@@ -44,11 +44,13 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import Popover from 'primevue/popover'
+import { useRouter } from 'vue-router'
 import { ellipsify } from '@/lib/utils'
 import { performLogout } from '@/services/logoutService'
 import { useMenuStore } from '@/stores/menuStore'
 import { MainMenu, MenuItem } from '@/types/mainMenu'
 
+const router = useRouter()
 const menuStore = useMenuStore()
 const mainMenu = computed<MainMenu>(() => menuStore.mainMenu)
 
@@ -71,14 +73,22 @@ const getItemIcon = (item: MenuItem): string => {
   return 'pi-external-link'
 }
 
+const isVueHandled = (item: MenuItem) =>
+  item.id === 'selfServicePassword' || item.id === 'changePassword'
+
 const onUserProfileMenuClick = () => {
-  const url = mainMenu.value?.selfServiceMenu?.url ?? ''
-  if (url) window.location.assign(computeLink(url))
+  popoverRef.value?.hide()
+  router.push('/account')
 }
 
 const onMenuItemClick = async (item: MenuItem) => {
   if (item.action === 'logout') {
     await performLogout()
+    return
+  }
+  if (isVueHandled(item)) {
+    popoverRef.value?.hide()
+    router.push('/account')
     return
   }
   window.location.assign(computeLink(item.url || ''))

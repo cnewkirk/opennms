@@ -139,7 +139,6 @@ const adminCards = computed(() => {
 
 .admin-hub-page {
   padding: 0 20px 20px;
-  background: var($surface);
   min-height: 100%;
 }
 
