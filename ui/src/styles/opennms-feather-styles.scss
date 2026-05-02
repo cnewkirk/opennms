@@ -61,6 +61,30 @@ a:visited {
   color: var(--feather-clickable-normal) !important;
 }
 
+// ─── OpenNMS chrome tokens (top bar + side nav) ─────────────────────────────
+//
+// Branding: blue chrome in both modes — dark navy in dark mode, a brighter
+// saturated blue in light mode. Content surfaces (cards, dialogs, panels)
+// still follow --feather-surface; only the shell chrome uses these tokens.
+// Foreground is white-on-blue in both modes, so the alpha values are reused.
+:root {
+  --onms-chrome-bg:        #131a36;  // dark-mode default; light overridden below
+  --onms-chrome-fg:        rgba(255, 255, 255, 0.92);
+  --onms-chrome-fg-muted:  rgba(255, 255, 255, 0.62);
+  --onms-chrome-border:    rgba(255, 255, 255, 0.10);
+  --onms-chrome-hover:     rgba(255, 255, 255, 0.08);
+  --onms-chrome-active:    rgba(255, 255, 255, 0.16);
+}
+
+html:not(.open-dark) {
+  // Brighter, saturated blue for light mode chrome — distinctly "blue"
+  // against the off-white canvas without being so bright it competes with
+  // page content. White text/icons remain legible at all alpha tiers.
+  --onms-chrome-bg:    #1e3a8a;  // Tailwind blue-800
+  --onms-chrome-hover: rgba(255, 255, 255, 0.10);
+  --onms-chrome-active: rgba(255, 255, 255, 0.20);
+}
+
 // Normalize surface containers to consistent rounded corners.
 .card {
   border-radius: vars.$border-radius-surface;
@@ -131,30 +155,34 @@ html:not(.open-dark) {
 // html.open-dark here (0,1,1) wins the cascade and replaces those purple values
 // with neutral zinc tones that match the PrimeVue bridge's dark palette.
 html.open-dark {
-  --feather-background: #09090b;       // zinc-950 — page canvas
-  --feather-surface: #1c1c1f;          // zinc-900 — card / panel surfaces
-  --feather-surface-dark: #111113;     // zinc-950-ish — nav rail, sidebar item bg
-  --feather-background-r: 9;
-  --feather-background-g: 9;
-  --feather-background-b: 11;
-  --feather-surface-r: 28;
-  --feather-surface-g: 28;
-  --feather-surface-b: 31;
-  --feather-surface-dark-r: 17;
-  --feather-surface-dark-g: 17;
-  --feather-surface-dark-b: 19;
+  // Blue-tinted slate replaces the previous near-black zinc-950. Pairs with
+  // the navy chrome (--onms-chrome-bg #131a36): chrome reads as the deepest
+  // anchor, content area is a step lighter and warmer, cards step up again.
+  --feather-background: #181b26;       // slate-tinted dark — page canvas
+  --feather-surface: #21242f;          // cards / panels — ~+10 luminance vs bg
+  --feather-surface-dark: #14161f;     // nav rail wells, deeper recesses
+  --feather-background-r: 24;
+  --feather-background-g: 27;
+  --feather-background-b: 38;
+  --feather-surface-r: 33;
+  --feather-surface-g: 36;
+  --feather-surface-b: 47;
+  --feather-surface-dark-r: 20;
+  --feather-surface-dark-g: 22;
+  --feather-surface-dark-b: 31;
 
-  // Elevation ladder: zinc-950 → zinc-800, matching the PrimeVue bridge.
-  --feather-elevation-background-0:  #09090b;  // zinc-950 = background
-  --feather-elevation-background-1:  #111113;
-  --feather-elevation-background-2:  #18181b;  // zinc-900
-  --feather-elevation-background-3:  #1c1c1f;
-  --feather-elevation-background-4:  #202024;
-  --feather-elevation-background-6:  #1c1c1f;  // zinc-900 = surface
-  --feather-elevation-background-8:  #222226;
-  --feather-elevation-background-12: #27272a;  // zinc-800
-  --feather-elevation-background-16: #2c2c30;
-  --feather-elevation-background-24: #323236;
+  // Elevation ladder: ramp from background up through surface to higher tiers.
+  // Each step shifts ~3-4 luminance points and preserves the slight blue tint.
+  --feather-elevation-background-0:  #181b26;  // = background
+  --feather-elevation-background-1:  #1b1e29;
+  --feather-elevation-background-2:  #1e212c;
+  --feather-elevation-background-3:  #21242f;  // = surface
+  --feather-elevation-background-4:  #242732;
+  --feather-elevation-background-6:  #272a35;
+  --feather-elevation-background-8:  #2a2d38;
+  --feather-elevation-background-12: #2d303b;
+  --feather-elevation-background-16: #30333e;
+  --feather-elevation-background-24: #353844;
 }
 
 // Light mode severity overrides — solid fill badges and chips.

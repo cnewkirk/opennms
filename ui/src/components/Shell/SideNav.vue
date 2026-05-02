@@ -284,8 +284,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--feather-surface);
-  border-right: 1px solid var(--feather-border-light-on-surface);
+  background: var(--onms-chrome-bg);
+  color: var(--onms-chrome-fg);
+  border-right: 1px solid var(--onms-chrome-border);
   overflow: hidden;
   // NOTE: no width transition here — the CSS Grid handles the animation in App.vue
 
@@ -312,14 +313,15 @@ onUnmounted(() => {
     width: 100%;
     height: 40px;
     border: none;
-    border-top: 1px solid var(--feather-border-light-on-surface);
+    border-top: 1px solid var(--onms-chrome-border);
     background: transparent;
     cursor: pointer;
-    color: var(--feather-secondary-text-on-surface);
+    color: var(--onms-chrome-fg-muted);
     flex-shrink: 0;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.06);
+      background: var(--onms-chrome-hover);
+      color: var(--onms-chrome-fg);
     }
 
     &:focus-visible {
@@ -339,7 +341,7 @@ onUnmounted(() => {
     background: transparent;
     cursor: pointer;
     gap: 10px;
-    color: var(--feather-secondary-text-on-surface);
+    color: var(--onms-chrome-fg-muted);
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -348,8 +350,8 @@ onUnmounted(() => {
     overflow: hidden;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.06);
-      color: var(--feather-primary-text-on-surface);
+      background: var(--onms-chrome-hover);
+      color: var(--onms-chrome-fg);
     }
 
     &:focus-visible {
@@ -395,7 +397,7 @@ onUnmounted(() => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--feather-secondary-text-on-surface);
+  color: var(--onms-chrome-fg-muted);
   white-space: nowrap;
   overflow: hidden;
 }
@@ -405,7 +407,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   padding: 8px 12px 8px 24px;
-  color: var(--feather-primary-text-on-surface);
+  color: var(--onms-chrome-fg);
   text-decoration: none;
   font-size: 13px;
   white-space: nowrap;
@@ -424,7 +426,7 @@ onUnmounted(() => {
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--onms-chrome-hover);
   }
 
   &:focus-visible {
@@ -433,8 +435,8 @@ onUnmounted(() => {
   }
 
   &--active {
-    background: var(--feather-primary-container-on-surface);
-    color: var(--feather-primary-text-on-primary-container);
+    background: var(--onms-chrome-active);
+    color: #fff;
     font-weight: 600;
   }
 }

@@ -102,13 +102,29 @@ const onAddNode = () => {
 
 <style lang="scss" scoped>
 .topbar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  background: var(--feather-surface);
-  color: var(--feather-primary-text-on-surface);
+  background: var(--onms-chrome-bg);
+  color: var(--onms-chrome-fg);
   height: var(--topbar-height, 56px);
+
+  // Bottom divider only over the content-area portion of the topbar.
+  // Starting at var(--sidebar-width) keeps the logo zone continuous with
+  // the sidebar below, and meets the sidebar's right border in a clean
+  // L-junction at the (sidebar-width, topbar-height) corner.
+  &::after {
+    content: '';
+    position: absolute;
+    left: var(--sidebar-width);
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--onms-chrome-border);
+    pointer-events: none;
+  }
   &__left {
     display: flex;
     align-items: center;
