@@ -32,6 +32,7 @@
         class="resource-graphs-panel__search"
         type="search"
         placeholder="Search graphs… (e.g. eth0, icmp, octets)"
+        aria-label="Search resource graphs"
       />
     </div>
 

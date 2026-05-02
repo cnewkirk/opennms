@@ -58,7 +58,7 @@ const getGraphNodesNodes = async (queryParameters?: QueryParameters): Promise<Gr
 const getGraphDefinitionsByResourceId = async (id: string): Promise<ResourceDefinitionsApiResponse> => {
   return cached(`graphDefs:${id}`, Infinity, async () => {
     try {
-      const resp = await rest.get(`/graphs/for/${id}`)
+      const resp = await rest.get(`/graphs/for/${encodeURIComponent(id)}`)
       return resp.data
     } catch (err) {
       return (<unknown>{ name: [] }) as ResourceDefinitionsApiResponse

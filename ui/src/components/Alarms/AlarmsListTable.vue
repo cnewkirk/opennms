@@ -324,12 +324,12 @@ const buildCriteria = (): string => {
   else if (ackStatus.value === 'acked') parts.push('alarmAckTime!=null')
 
   if (nodeSearch.value.trim()) {
-    parts.push(`nodeLabel==*${nodeSearch.value.trim()}*`)
+    parts.push(`node.label==*${nodeSearch.value.trim()}*`)
   }
 
   if (timeRange.value !== 'all') {
     const msMap: Record<string, number> = { '24h': 86400000, '7d': 604800000, '30d': 2592000000 }
-    parts.push(`lastEventTime>=${new Date(Date.now() - msMap[timeRange.value]).toISOString()}`)
+    parts.push(`lastEventTime=ge=${Date.now() - msMap[timeRange.value]}`)
   }
 
   return parts.join(';')
