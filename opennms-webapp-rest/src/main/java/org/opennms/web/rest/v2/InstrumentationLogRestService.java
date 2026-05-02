@@ -27,11 +27,14 @@ import org.springframework.stereotype.Component;
 @Produces(MediaType.APPLICATION_JSON)
 public class InstrumentationLogRestService {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InstrumentationLogRestService.class);
+
     @GET
     @Operation(summary = "Get instrumentation log statistics", operationId = "getInstrumentationLog")
     public Response getInstrumentationLog(
             @Context SecurityContext securityContext,
             @QueryParam("search") @DefaultValue("") String search,
+            // API default is TOTALCOLLECTS; Collector library default is AVGCOLLECTTIME — the override is intentional
             @QueryParam("sortColumn") @DefaultValue("TOTALCOLLECTS") String sortColumn,
             @QueryParam("sortOrder") @DefaultValue("DESCENDING") String sortOrder) {
 
@@ -62,7 +65,9 @@ public class InstrumentationLogRestService {
                 for (File f : logFiles) {
                     try {
                         collector.readLogMessagesFromFile(f.getPath());
-                    } catch (IOException ignored) { }
+                    } catch (IOException e) {
+                        LOG.warn("Failed to read instrumentation log file {}: {}", f.getPath(), e.getMessage());
+                    }
                 }
             }
         }
