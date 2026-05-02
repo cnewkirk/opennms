@@ -83,23 +83,25 @@ a:visited {
 // in App.vue — both rules agree; whichever the cascade picks, the result is
 // identical.
 html:not(.open-dark) {
-  // Surface palette — muted blue-gray instead of pure white.
-  --feather-surface: #e8ecf5;
-  --feather-background: #dde4f0;
+  // Surface palette — clearly not white. Like dark mode uses zinc-950/900
+  // instead of black, we need to be far enough from white that the eye reads
+  // it as "colored" not "white." At 90%+ brightness, blue-gray still reads
+  // as white; we target ~83-87% per channel so it's unambiguously off-white.
+  --feather-surface: #d4d8e4;
+  --feather-background: #c8ccd8;
 
-  // Elevation layers — step up from background (#dde4f0) through surface
-  // (#e8ecf5) toward lighter, anchored to the blue-gray palette.
-  // (open-light.css hardcodes all of these to #fff, bypassing --feather-surface)
-  --feather-elevation-background-0:  #dde4f0;
-  --feather-elevation-background-1:  #dfe6f1;
-  --feather-elevation-background-2:  #e1e8f2;
-  --feather-elevation-background-3:  #e3eaf3;
-  --feather-elevation-background-4:  #e5ecf4;
-  --feather-elevation-background-6:  #e8ecf5;
-  --feather-elevation-background-8:  #eaeff6;
-  --feather-elevation-background-12: #ecf1f7;
-  --feather-elevation-background-16: #eef2f8;
-  --feather-elevation-background-24: #f0f4f9;
+  // Elevation ladder: steps from background (#c8ccd8) up to surface (#d4d8e4).
+  // open-light.css hardcodes all of these to #fff; we override with a ramp.
+  --feather-elevation-background-0:  #c8ccd8;
+  --feather-elevation-background-1:  #caceda;
+  --feather-elevation-background-2:  #ccd0db;
+  --feather-elevation-background-3:  #ced2dc;
+  --feather-elevation-background-4:  #d0d4de;
+  --feather-elevation-background-6:  #d2d6e0;
+  --feather-elevation-background-8:  #d3d7e2;
+  --feather-elevation-background-12: #d4d8e3;
+  --feather-elevation-background-16: #d4d8e4;
+  --feather-elevation-background-24: #d4d8e4;
 
   // Text — open-dark.css sets these to white; re-assert dark values for
   // legibility on the light surface (this was causing invisible sidebar text).
@@ -107,11 +109,12 @@ html:not(.open-dark) {
   --feather-primary-text-on-surface-r: 10;
   --feather-primary-text-on-surface-g: 12;
   --feather-primary-text-on-surface-b: 27;
-  --feather-secondary-text-on-surface: rgba(10, 12, 27, 0.7);
+  --feather-secondary-text-on-surface: rgba(10, 12, 27, 0.70);
 
-  // Borders — dark theme uses rgba(white, 0.12/0.24); boost for blue-gray surface.
-  --feather-border-on-surface:       rgba(10, 12, 27, 0.28);
-  --feather-border-light-on-surface: rgba(10, 12, 27, 0.16);
+  // Borders — slightly above Feather defaults (0.12/0.06) for legibility on
+  // the off-white surface; back from the over-boosted dark-bg values.
+  --feather-border-on-surface:       rgba(10, 12, 27, 0.18);
+  --feather-border-light-on-surface: rgba(10, 12, 27, 0.10);
 
   // Shade helpers (hover states, row stripes, etc.).
   --feather-shade-4: rgba(10, 12, 27, 0.18);

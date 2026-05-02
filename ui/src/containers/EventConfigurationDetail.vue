@@ -149,7 +149,7 @@ onMounted(async () => {
     border: 1px solid var($primary);
     border-radius: vars.$border-radius-surface;
     padding: 20px;
-    background: white;
+    background: var(--feather-surface);
     margin-bottom: 30px;
 
     .config-row {

@@ -50,6 +50,31 @@
   --p-form-field-focus-border-color: var(--feather-primary);
 }
 
+// Light-mode overrides — specificity 0,1,1 beats PrimeVue's :root 0,1,0 rules.
+// PrimeVue injects its theme CSS after our bundle, so same-specificity :root
+// loses by source order. These overrides cover ALL surface tokens so PrimeVue
+// components use our off-white palette rather than defaulting to #ffffff.
+html:not(.open-dark) {
+  // Page canvas / section backgrounds
+  --p-surface-ground:   #c8ccd8;
+  --p-surface-section:  #ccd0dc;
+
+  // Card and content surfaces — clearly not white (~83-87% brightness)
+  --p-surface-0:        #d4d8e4;
+  --p-surface-card:     #d4d8e4;
+  --p-content-background: #d4d8e4;
+  --p-content-hover-background: #ccd0dc;
+
+  // Overlays sit at the same level as cards
+  --p-surface-overlay:            #d4d8e4;
+  --p-overlay-modal-background:   #d4d8e4;
+  --p-overlay-popover-background: #d4d8e4;
+  --p-overlay-select-background:  #d4d8e4;
+
+  // Form inputs match the card surface they sit on
+  --p-form-field-background: #d4d8e4;
+}
+
 // Dark-mode surface overrides — uses neutral zinc tones rather than the
 // Feather DS navy-purple (#15182B) to avoid "purple everywhere" in dark mode.
 // html.open-dark specificity (0,1,1) > PrimeVue's .open-dark (0,1,0), so

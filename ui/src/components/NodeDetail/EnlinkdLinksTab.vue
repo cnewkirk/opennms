@@ -116,11 +116,11 @@ onMounted(async () => {
   background: var($border-light-on-surface);
   color: var($secondary-text-on-surface);
 
-  &--lldp    { background: #dbeafe; color: #1d4ed8; }
-  &--cdp     { background: #fef9c3; color: #854d0e; }
-  &--ospf    { background: #dcfce7; color: #166534; }
-  &--isis    { background: #fce7f3; color: #9d174d; }
-  &--bridge  { background: #ede9fe; color: #5b21b6; }
+  &--lldp    { background: rgba(59,  130, 246, 0.22); color: #1d4ed8; }
+  &--cdp     { background: rgba(234, 179,   8, 0.22); color: #854d0e; }
+  &--ospf    { background: rgba(16,  185, 129, 0.22); color: #166534; }
+  &--isis    { background: rgba(236,  72, 153, 0.22); color: #9d174d; }
+  &--bridge  { background: rgba(139,  92, 246, 0.22); color: #5b21b6; }
 }
 
 // Dark mode badge overrides — use :global on the full selector chain to prevent

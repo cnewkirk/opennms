@@ -780,7 +780,7 @@ onMounted(async () => {
   margin: 30px;
 
   border-radius: vars.$border-radius-sm;
-  background-color: #ffffff;
+  background: var(--feather-surface);
 
   .title {
     display: flex;

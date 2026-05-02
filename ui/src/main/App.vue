@@ -57,12 +57,12 @@ html {
   overflow-x: hidden;
 }
 
-// Soften the light theme — muted blue-gray surfaces instead of pure white.
-// body.open-light in opennms-feather-styles.scss carries the same values so
-// the cascade winner (both rules share specificity 0,1,1) is irrelevant.
+// Light theme — visibly off-white, not pure white. Like dark mode uses
+// zinc-950/900 instead of black, we use clearly-colored values instead of
+// white. opennms-feather-styles.scss carries the full token set.
 html:not(.open-dark) {
-  --feather-surface: #e8ecf5;
-  --feather-background: #dde4f0;
+  --feather-surface: #d4d8e4;
+  --feather-background: #c8ccd8;
 }
 
 .app-shell {

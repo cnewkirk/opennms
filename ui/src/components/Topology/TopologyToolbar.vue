@@ -719,7 +719,7 @@ onMounted(async () => {
     width: 15px;
     height: 15px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--feather-surface);
     color: var($primary);
     font-size: 0.6rem;
     font-weight: 700;

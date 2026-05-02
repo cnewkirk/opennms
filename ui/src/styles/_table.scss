@@ -17,19 +17,19 @@
 
 @mixin row-hover {
   tr:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(0, 0, 0, 0.08);
   }
 }
 
 @mixin row-select {
   tr.selected {
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.14);
   }
 }
 
 @mixin row-striped {
   tr:nth-child(even) {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(0, 0, 0, 0.06);
   }
 }
 

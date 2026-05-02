@@ -3,7 +3,7 @@
     <div ref="containerRef" class="perses-panel-container"></div>
     <Transition name="pp-fade">
       <div v-if="loading" class="perses-panel-loader" aria-label="Loading">
-        <svg class="perses-panel-loader__icon" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
+        <svg class="perses-panel-loader__icon" width="36" height="36" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
           <defs>
             <linearGradient id="pp-g1" x1="38.51" y1="67.61" x2="-3.17" y2="25.53" gradientUnits="userSpaceOnUse">
               <stop offset="0" stop-color="#0081ad" /><stop offset="1" stop-color="#14d1df" />
@@ -251,6 +251,7 @@ watch(() => appStore.theme, rerender)
   justify-content: center;
   gap: 12px;
   pointer-events: none;
+  background: var(--feather-surface);
 
   &__icon {
     width: 36px;

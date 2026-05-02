@@ -154,11 +154,11 @@ const nodeClass = (nodeId: number): string => {
   border-radius: vars.$border-radius-surface;
   background: var($surface);
 
-  &--down     { background: rgba(198,40,40,0.08); }
-  &--critical { background: rgba(106,27,154,0.08); }
-  &--major    { background: rgba(198,40,40,0.08); }
-  &--minor    { background: rgba(239,108,0,0.08); }
-  &--warning  { background: rgba(249,168,37,0.08); }
+  &--down     { background: rgba(198,40,40,0.18); }
+  &--critical { background: rgba(106,27,154,0.18); }
+  &--major    { background: rgba(198,40,40,0.18); }
+  &--minor    { background: rgba(239,108,0,0.18); }
+  &--warning  { background: rgba(249,168,37,0.18); }
 }
 
 .node-link {

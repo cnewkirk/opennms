@@ -124,13 +124,13 @@ defineExpose({ refresh: load })
   // Feather DS CSS vars that both theme files set unconditionally in :root.
   &--critical {
     border-color: #b71c1c;
-    background: rgba(183, 28, 28, 0.08);
+    background: rgba(183, 28, 28, 0.18);
     .kpi-value { color: #b71c1c; }
   }
 
   &--warning {
     border-color: #f9a825;
-    background: rgba(249, 168, 37, 0.08);
+    background: rgba(249, 168, 37, 0.18);
     .kpi-value { color: #856400; }
   }
 }
