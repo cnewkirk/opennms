@@ -51,6 +51,7 @@ const adminCards = computed(() => {
   const openNMSSystemLinks: AdminLink[] = [
     { label: 'System Configuration', to: '/system-config' },
     { label: 'Configure Users, Groups and On-Call Roles', to: '/users-groups' },
+    { label: 'Manage On-Call Roles', to: '/on-call-roles' },
   ]
   if (zenithEnabled.value) {
     openNMSSystemLinks.push({ label: 'Connect to Zenith', to: '/zenith-connect' })
@@ -84,7 +85,7 @@ const adminCards = computed(() => {
         { label: 'Configure Notifications', to: '/notification-config' },
         { label: 'Configure Destination Paths', to: '/notification-config/paths' },
         { label: 'Manage Event Configurations', to: '/event-config' },
-        { label: 'Configure Path Outages (legacy)', href: baseHref.value + 'admin/notification/noticeWizard/buildPathOutage.jsp' },
+        { label: 'Configure Path Outages', to: '/path-outages' },
       ]
     },
     {
