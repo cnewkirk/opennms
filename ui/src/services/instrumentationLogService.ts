@@ -1,4 +1,4 @@
-import { v2 } from '@/services/axiosInstances'
+import { v2 } from './axiosInstances'
 
 export interface ServiceCollectorEntry {
   serviceId: string
