@@ -27,7 +27,7 @@
           <template #body="{ data }">
             <ToggleSwitch
               :model-value="data._managed"
-              @update:model-value="val => toggleInterface(data, val)"
+              @update:model-value="(val: boolean) => toggleInterface(data, val)"
             />
           </template>
         </Column>
@@ -42,7 +42,7 @@
                 <span class="manage-interfaces__svc-name">{{ svc.serviceType.name }}</span>
                 <ToggleSwitch
                   :model-value="svc._managed"
-                  @update:model-value="val => toggleService(data, svc, val)"
+                  @update:model-value="(val: boolean) => toggleService(data, svc, val)"
                 />
               </div>
             </div>

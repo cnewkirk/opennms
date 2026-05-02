@@ -38,7 +38,7 @@
           <ToggleSwitch
             :model-value="data.collect"
             :disabled="data._saving"
-            @update:model-value="val => toggleCollect(data, val)"
+            @update:model-value="(val: boolean) => toggleCollect(data, val)"
           />
         </template>
       </Column>
