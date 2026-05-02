@@ -41,7 +41,7 @@
       <Column field="avgCollectionTimeMs" header="Avg Collect (ms)" sortable />
       <Column field="avgTimeBetweenCollectionsMs" header="Avg Between (ms)" sortable />
       <Column field="successfulCollectionCount" header="Successes" sortable />
-      <Column header="Success %" sortable>
+      <Column header="Success %" sortable sort-field="successPercentage">
         <template #body="{ data }">
           <span :class="successClass(data.successPercentage)">
             {{ data.successPercentage === -1 ? 'N/A' : data.successPercentage.toFixed(1) + '%' }}
@@ -49,7 +49,7 @@
         </template>
       </Column>
       <Column field="errorCollectionCount" header="Errors" sortable />
-      <Column header="Error %" sortable>
+      <Column header="Error %" sortable sort-field="errorPercentage">
         <template #body="{ data }">
           {{ data.errorPercentage === -1 ? 'N/A' : data.errorPercentage.toFixed(1) + '%' }}
         </template>
@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -130,6 +130,7 @@ const debouncedLoad = () => {
   clearTimeout(debounceTimer)
   debounceTimer = setTimeout(load, 300)
 }
+onBeforeUnmount(() => clearTimeout(debounceTimer))
 
 const successClass = (pct: number) => {
   if (pct === -1) return ''
