@@ -57,7 +57,7 @@ import AutoComplete from 'primevue/autocomplete'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import ToggleSwitch from 'primevue/toggleswitch'
-import { BreadCrumb } from '@/types'
+import { type BreadCrumb } from '@/types'
 import { useMenuStore } from '@/stores/menuStore'
 import useSnackbar from '@/composables/useSnackbar'
 import { searchNodes, type ManagedNode } from '@/services/manageInterfacesService'
@@ -89,6 +89,7 @@ const onNodeSearch = async (event: { query: string }) => {
 
 const onNodeSelected = async (event: { value: ManagedNode }) => {
   selectedNode.value = event.value
+  interfaces.value = []
   loading.value = true
   try {
     const ifaces = await getSnmpInterfaces(event.value.id)
@@ -108,7 +109,7 @@ const toggleCollect = async (iface: SnmpRow, collect: boolean) => {
     iface.collect = collect
     showSnackBar({ msg: `Collection ${collect ? 'enabled' : 'disabled'} for ${iface.ifName || iface.ifIndex}.` })
   } catch {
-    showSnackBar({ msg: 'Failed to update SNMP collection setting.' })
+    showSnackBar({ msg: 'Failed to update SNMP collection setting.', error: true })
   } finally {
     iface._saving = false
   }
