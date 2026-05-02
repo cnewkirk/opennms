@@ -90,6 +90,7 @@ html:not(.open-dark) {
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
+    background: var(--feather-background);
   }
 }
 

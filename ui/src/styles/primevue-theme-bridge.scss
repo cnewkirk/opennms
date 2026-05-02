@@ -42,6 +42,10 @@
   --p-overlay-select-border-color: var(--feather-border-light-on-surface);
   --p-overlay-modal-color: var(--feather-primary-text-on-surface);
 
+  // Tabs — make the TabPanels container transparent so the page background
+  // shows through, giving card components inside real elevation contrast.
+  --p-tabs-tabpanel-background: transparent;
+
   // Form inputs
   --p-form-field-background: var(--feather-surface);
   --p-form-field-border-color: var(--feather-border-light-on-surface);
@@ -120,4 +124,13 @@ html.open-dark {
   --p-select-option-selected-color: rgba(255, 255, 255, 0.87);
   --p-select-option-selected-background: rgba(56, 189, 248, 0.15);  // sky-400 tint
   --p-select-option-focus-background: rgba(255, 255, 255, 0.07);
+}
+
+// Direct override for PrimeVue TabPanels container — specificity 0,1,1 beats
+// PrimeVue's .p-tabpanels rule (0,1,0) regardless of source order.
+// Transparent lets the page background (#c8ccd8 light / #09090b dark) show
+// through, giving the card components inside real elevation contrast instead
+// of all merging into one flat surface.
+html .p-tabpanels {
+  background: transparent;
 }

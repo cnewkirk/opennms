@@ -109,12 +109,15 @@ const onAddNode = () => {
   background: var(--feather-surface);
   color: var(--feather-primary-text-on-surface);
   height: var(--topbar-height, 56px);
-  border-bottom: 1px solid var(--feather-border-light-on-surface);
-
   &__left {
     display: flex;
     align-items: center;
+    align-self: stretch;
     flex-shrink: 0;
+    // Exactly as wide as the sidebar so border-right aligns with sidenav's
+    // border-right below it — logo area and nav rail read as one unified panel.
+    width: calc(var(--sidebar-width, 220px) - 16px); // 16px = topbar padding-left
+    border-right: 1px solid var(--feather-border-light-on-surface);
   }
 
   &__logo-link {
