@@ -19,6 +19,7 @@ export interface ManagedService {
 }
 
 export const searchNodes = async (label: string): Promise<ManagedNode[]> => {
+  // Uses v2 for FIQL label search (_s param); v1 does not support FIQL
   const resp = await v2.get('/nodes', { params: { _s: `label==*${label}*`, limit: 10 } })
   const raw = resp.data.node
   return Array.isArray(raw) ? raw : raw ? [raw] : []
@@ -45,9 +46,8 @@ export const setInterfaceManaged = async (nodeId: string, ip: string, managed: b
 
 export const setServiceManaged = async (ip: string, serviceName: string, managed: boolean): Promise<void> => {
   const params = new URLSearchParams({ status: managed ? 'A' : 'F', services: serviceName })
-  await rest.put(
-    `/ifservices?ipInterface.ipAddress=${encodeURIComponent(ip)}`,
-    params,
-    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-  )
+  await rest.put('/ifservices', params, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    params: { 'ipInterface.ipAddress': ip }
+  })
 }
