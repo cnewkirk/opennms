@@ -168,6 +168,7 @@ export interface Node {
     category: string
     description: string
     maintcontract: string
+    username?: string | null
   }
   categories: Category[]
   createTime: number

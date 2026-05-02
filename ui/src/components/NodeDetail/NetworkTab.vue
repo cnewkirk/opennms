@@ -36,6 +36,7 @@
             </td>
             <td>
               <span class="network-table__ip">{{ ep.ipAddress || '—' }}</span>
+              <SshLink v-if="ep.ipAddress" :ip="ep.ipAddress" :username="sshUsername" class="network-table__ssh" />
               <span v-if="ep.hostname && ep.hostname !== ep.ipAddress" class="network-table__host caption">{{ ep.hostname }}</span>
             </td>
             <td>{{ ep.speed || '—' }}</td>
@@ -108,12 +109,14 @@
 import { getNodeIpInterfaces, getNodeSnmpInterfaces } from '@/services/nodeService'
 import type { IpInterface, SnmpInterface } from '@/types'
 import ClearSummary from '@/components/Common/ClearSummary.vue'
+import SshLink from './SshLink.vue'
 
 const props = defineProps<{
   nodeId: string
   /** foreignSource:foreignId or just numeric ID — needed for building resource IDs */
   nodeResourceKey: string
   problemsOnly?: boolean
+  sshUsername?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -344,6 +347,8 @@ onMounted(async () => {
   &__alias { color: var($secondary-text-on-surface); margin-top: 1px; }
 
   &__ip { font-family: monospace; font-size: 0.85rem; }
+  &__ssh { margin-left: 6px; vertical-align: middle; opacity: 0.7; }
+  &__ssh:hover { opacity: 1; }
   &__host { display: block; color: var($secondary-text-on-surface); }
 
   &__detail td {

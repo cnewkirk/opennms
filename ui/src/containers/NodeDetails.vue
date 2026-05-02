@@ -60,6 +60,7 @@
                   v-if="tabVisited.network"
                   :nodeId="id"
                   :nodeResourceKey="nodeResourceKey"
+                  :sshUsername="node?.assetRecord?.username || null"
                   @go-graphs="goToTab('graphs')"
                   @go-activity="goToTab('activity')"
                 />

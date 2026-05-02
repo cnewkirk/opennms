@@ -25,6 +25,7 @@
     <div class="node-header__title">
       <span class="headline2">{{ node.label }}</span>
       <span class="status-badge" :class="statusClass">{{ statusText }}</span>
+      <SshLink v-if="primaryIp" :ip="primaryIp" :username="sshUsername" variant="button" class="node-header__ssh" />
     </div>
     <div class="node-header__meta subtitle1">
       <span v-if="node.location">Location: {{ node.location }}</span>
@@ -36,13 +37,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Node } from '@/types'
+import { v2 } from '@/services/axiosInstances'
+import SshLink from './SshLink.vue'
 
 const props = defineProps<{ node: Node }>()
 
 const statusText = computed(() => props.node.type === 'A' ? 'UP' : 'DOWN')
 const statusClass = computed(() => props.node.type === 'A' ? 'status-badge--up' : 'status-badge--down')
+
+const primaryIp = ref<string | null>(null)
+const sshUsername = computed(() => props.node.assetRecord?.username || null)
+
+const fetchPrimaryIp = async (nodeId: string) => {
+  primaryIp.value = null
+  try {
+    const resp = await v2.get(`/nodes/${nodeId}/ipinterfaces`, {
+      params: { _s: 'snmpPrimary==P', limit: 1 }
+    })
+    const ifaces = resp.data?.ipInterface ?? []
+    if (ifaces.length > 0) primaryIp.value = ifaces[0].ipAddress ?? null
+  } catch { /* button just won't render */ }
+}
+
+watch(() => props.node.id, (id) => { if (id) fetchPrimaryIp(id) }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
@@ -59,6 +78,10 @@ const statusClass = computed(() => props.node.type === 'A' ? 'status-badge--up' 
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  &__ssh {
+    margin-left: auto;
   }
 
   &__meta {
