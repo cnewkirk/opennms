@@ -1,6 +1,6 @@
 <template>
   <div v-if="loading" class="links-loading">
-    <ProgressSpinner style="width: 40px; height: 40px" />
+    <PanelLoader :size="40" />
   </div>
 
   <div v-else-if="links.length === 0" class="links-empty">
@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import ProgressSpinner from 'primevue/progressspinner'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { getNodeEnlinkd, normalizeLinks, groupLinks } from '@/services/enlinkdService'
 import type { GroupedLink } from '@/services/enlinkdService'
 

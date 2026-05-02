@@ -24,12 +24,17 @@ podman ps --filter name=test-opennms --format '{{.Status}} {{.Image}}'
 ```
 And read MEMORY.md. Every session starts blind — these steps give you context.
 
-Also check whether the topology lab is running if you'll be testing the topology view:
+**Topology lab must be running AND provisioned for any UI testing session — both steps are defaults, neither is gated on "is this a topology task?"**
 ```bash
-podman ps --filter name=topo- --format '{{.Names}}'
-# If empty: ./start-topology-lab.sh
+# (1) Lab containers up
+[ "$(podman ps --filter name=topo- -q | wc -l)" -lt 7 ] && ./start-topology-lab.sh
+# (2) Lab provisioned in OpenNMS (test-opennms forgets the requisition every rebuild)
+curl -s -u admin:notdefault http://localhost:8980/opennms/rest/requisitions | \
+  grep -q 'foreign-source="Topology-Lab"' || ./provision-topology-lab.sh
 ```
-The edge tooltip bandwidth chart requires the topology lab SNMP agents to be up so collectd can create `interfaceSnmp` RRD files. A freshly rebuilt container will always show a blank chart until the lab is started and collectd runs at least one 30s poll cycle.
+The lab supplies the SNMP-monitored nodes (`topo-spine-*`, `topo-leaf-*`, `topo-host-*`) that drive the dashboard widgets, alarms, outages, node lists, and the topology view. Without provisioning, the lab containers run uselessly — test-opennms only knows about `localhost` and the UI shows a near-empty state: blank Network Summary widgets, no alarms, and zero `interfaceSnmp` RRD data so the edge tooltip bandwidth chart is empty.
+
+**Critical gotcha:** every `podman rm -f test-opennms && podman run ...` cycle wipes `/opt/opennms/etc/imports/Topology-Lab.xml` from inside the container. The lab containers stay up across rebuilds (they're independent), but OpenNMS forgets they exist. After ANY test container rebuild, run `./provision-topology-lab.sh` — it's idempotent, takes ~30s, and restores monitoring without touching the lab containers themselves. A "broken UI" you're debugging may just be a UI with no data — verify both checks above first, rule that out, then debug.
 
 **Container freshness is NOT optional.** Compare the image `Created` date against `git log -1 --format='%ci' HEAD`. **If the image is more than 24 hours older than HEAD and the fix touches ANYTHING outside `ui/src/`** (JSPs, REST, Karaf features, backend jars, config XML, etc.), you **MUST** rebuild before trusting the container:
 ```bash
