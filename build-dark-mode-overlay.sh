@@ -100,13 +100,18 @@ echo "    opennms-webapp-rest.jar: OK ($(basename "${WEBAPP_REST_JAR}"))"
 
 # ---------------------------------------------------------------------------
 # 3c. Pre-hash admin password (notdefault) so image starts with correct creds
+# Use the base image's own Java + jasypt to avoid any host-Java dependency.
 # ---------------------------------------------------------------------------
 echo "==> [3c/4] Pre-hashing admin password..."
-JASYPT_JAR=$(find "${SCRIPT_DIR}/opennms-webapp/target" -name "jasypt-*.jar" 2>/dev/null | head -1)
-[[ -z "$JASYPT_JAR" ]] && JASYPT_JAR=$(find /opt/opennms/lib -name "jasypt-*.jar" 2>/dev/null | head -1)
-ADMIN_HASH=$(java -cp "$JASYPT_JAR" org.jasypt.intf.cli.JasyptStringDigestCLI \
+ADMIN_HASH=$(podman run --rm --privileged --entrypoint java "${ONMS_BASE_IMAGE}" \
+  -cp /opt/opennms/lib/jasypt-1.9.3.jar \
+  org.jasypt.intf.cli.JasyptStringDigestCLI \
   input='notdefault' algorithm=SHA-256 saltSizeBytes=16 iterations=100000 2>/dev/null \
-  | grep -A1 'OUTPUT' | tail -1 | tr -d '[:space:]')
+  | grep -A2 'OUTPUT' | tail -1 | tr -d '[:space:]')
+if [[ -z "$ADMIN_HASH" ]]; then
+  echo "ERROR: failed to compute admin password hash — jasypt run in base image produced no output" >&2
+  exit 1
+fi
 echo "    admin hash: OK"
 
 # ---------------------------------------------------------------------------
@@ -202,6 +207,16 @@ mkdir -p "${OVERLAY_DIR}/event"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/WEB-INF/jsp/event/detail.jsp" \
    "${OVERLAY_DIR}/event/detail.jsp"
 
+# manage.jsp — redirect to Vue SPA /#/manage-interfaces
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/manage.jsp" \
+   "${OVERLAY_DIR}/admin/manage.jsp"
+# snmpInterfaces.jsp — redirect to Vue SPA /#/snmp-interfaces
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/snmpInterfaces.jsp" \
+   "${OVERLAY_DIR}/admin/snmpInterfaces.jsp"
+# instrumentationLogReader.jsp — redirect to Vue SPA /#/instrumentation-log
+mkdir -p "${OVERLAY_DIR}/admin/nodemanagement"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/nodemanagement/instrumentationLogReader.jsp" \
+   "${OVERLAY_DIR}/admin/nodemanagement/instrumentationLogReader.jsp"
 # manageSnmpCollections.jsp — redirect to Vue SPA at /#/snmp-collections-config
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/manageSnmpCollections.jsp" \
    "${OVERLAY_DIR}/admin/manageSnmpCollections.jsp"
@@ -407,6 +422,12 @@ COPY --chown=10001:10001 element/node.jsp /opt/opennms/jetty-webapps/opennms/ele
 # event/detail.jsp — redirect to Vue SPA at /#/event/:id
 COPY --chown=10001:10001 event/detail.jsp /opt/opennms/jetty-webapps/opennms/WEB-INF/jsp/event/detail.jsp
 
+# manage.jsp — redirect to Vue SPA /#/manage-interfaces
+COPY --chown=10001:10001 admin/manage.jsp /opt/opennms/jetty-webapps/opennms/admin/manage.jsp
+# snmpInterfaces.jsp — redirect to Vue SPA /#/snmp-interfaces
+COPY --chown=10001:10001 admin/snmpInterfaces.jsp /opt/opennms/jetty-webapps/opennms/admin/snmpInterfaces.jsp
+# instrumentationLogReader.jsp — redirect to Vue SPA /#/instrumentation-log
+COPY --chown=10001:10001 admin/nodemanagement/instrumentationLogReader.jsp /opt/opennms/jetty-webapps/opennms/admin/nodemanagement/instrumentationLogReader.jsp
 # manageSnmpCollections.jsp — redirect to Vue SPA at /#/snmp-collections-config
 COPY --chown=10001:10001 admin/manageSnmpCollections.jsp /opt/opennms/jetty-webapps/opennms/admin/manageSnmpCollections.jsp
 

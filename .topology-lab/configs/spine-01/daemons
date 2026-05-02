@@ -1,7 +1,7 @@
 zebra=yes
 ospfd=yes
 isisd=yes
-bgpd=no
+bgpd=yes
 ripd=no
 ospf6d=no
 watchfrr_enable=yes
@@ -9,3 +9,4 @@ vtysh_enable=yes
 zebra_options="  -A 127.0.0.1 -s 90000000 -M zebra_snmp"
 ospfd_options="  -A 127.0.0.1 -M ospfd_snmp"
 isisd_options="  -A 127.0.0.1 -M isisd_snmp"
+bgpd_options="  -A 127.0.0.1 -M bgpd_snmp"
