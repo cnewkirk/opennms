@@ -140,10 +140,11 @@ const load = async () => {
   outages.value = []
 
   try {
-    const filter = `category.name==${encodeURIComponent(categoryName.value)}`
+    const filter = `category.name==${categoryName.value}`
+    const outageFilter = `ifRegainedService==null;node.categories.name==${categoryName.value}`
     const [nodeResp, outageResp] = await Promise.all([
       v2.get('/nodes', { params: { '_s': filter, limit: 0, orderBy: 'label' } }),
-      v2.get('/outages', { params: { '_s': 'ifRegainedService=is=null', limit: 0 } })
+      v2.get('/outages', { params: { '_s': outageFilter, limit: 0 } })
     ])
 
     const rawNodes = nodeResp.data.node
