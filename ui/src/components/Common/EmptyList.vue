@@ -15,12 +15,12 @@
   <div :class="['empty-list', bg ? 'bg' : '']">
     <h3 v-if="content.title" data-test="title">{{ content.title }}</h3>
     <div data-test="msg">{{ msg }}</div>
-    <FeatherButton v-if="content.btn" secondary @click="content.btn?.action" data-test="btn">{{ content.btn?.label }}
-    </FeatherButton>
+    <Button v-if="content.btn" outlined @click="content.btn?.action" data-test="btn">{{ content.btn?.label }}</Button>
   </div>
 </template>
 
 <script setup lang="ts">
+import Button from 'primevue/button'
 
 type Content = {
   title?: string
