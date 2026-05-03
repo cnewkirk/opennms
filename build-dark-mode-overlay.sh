@@ -229,6 +229,45 @@ cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/dashboard.jsp" \
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/surveillance-view.jsp" \
    "${OVERLAY_DIR}/surveillance-view.jsp"
 
+# help/index.jsp → /ui/help
+mkdir -p "${OVERLAY_DIR}/help"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/help/index.jsp" \
+   "${OVERLAY_DIR}/help/index.jsp"
+# about/index.jsp → /ui/about
+mkdir -p "${OVERLAY_DIR}/about"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/about/index.jsp" \
+   "${OVERLAY_DIR}/about/index.jsp"
+# status/index.jsp → /ui/status
+mkdir -p "${OVERLAY_DIR}/status"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/status/index.jsp" \
+   "${OVERLAY_DIR}/status/index.jsp"
+# support/index.jsp → /ui/support
+mkdir -p "${OVERLAY_DIR}/support"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/support/index.jsp" \
+   "${OVERLAY_DIR}/support/index.jsp"
+# rtc/index.jsp → /ui/surveillance-dashboard, rtc/category.jsp → /ui/rtc/category
+mkdir -p "${OVERLAY_DIR}/rtc"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/rtc/index.jsp" \
+   "${OVERLAY_DIR}/rtc/index.jsp"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/rtc/category.jsp" \
+   "${OVERLAY_DIR}/rtc/category.jsp"
+# KSC/index.jsp → /ui/ksc-reports
+mkdir -p "${OVERLAY_DIR}/KSC"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/KSC/index.jsp" \
+   "${OVERLAY_DIR}/KSC/index.jsp"
+# report/index.jsp → /ui/reports
+mkdir -p "${OVERLAY_DIR}/report"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/report/index.jsp" \
+   "${OVERLAY_DIR}/report/index.jsp"
+# notification/index.jsp → /ui/notifications
+mkdir -p "${OVERLAY_DIR}/notification"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/notification/index.jsp" \
+   "${OVERLAY_DIR}/notification/index.jsp"
+# hardware/list.jsp → /ui/hardware
+mkdir -p "${OVERLAY_DIR}/hardware"
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/hardware/list.jsp" \
+   "${OVERLAY_DIR}/hardware/list.jsp"
+
 
 # opennms-webapp jar — rename to match base image version so COPY replaces it
 # Contains updated Spring MVC controllers (CategoryController → /ui/surveillance-categories,
@@ -436,6 +475,18 @@ COPY --chown=10001:10001 dashboard.jsp /opt/opennms/jetty-webapps/opennms/dashbo
 
 # surveillance-view.jsp — redirect to Vue SPA at /#/surveillance-dashboard
 COPY --chown=10001:10001 surveillance-view.jsp /opt/opennms/jetty-webapps/opennms/surveillance-view.jsp
+
+# Top-level navigation JSP redirects → Vue SPA routes
+COPY --chown=10001:10001 help/index.jsp /opt/opennms/jetty-webapps/opennms/help/index.jsp
+COPY --chown=10001:10001 about/index.jsp /opt/opennms/jetty-webapps/opennms/about/index.jsp
+COPY --chown=10001:10001 status/index.jsp /opt/opennms/jetty-webapps/opennms/status/index.jsp
+COPY --chown=10001:10001 support/index.jsp /opt/opennms/jetty-webapps/opennms/support/index.jsp
+COPY --chown=10001:10001 rtc/index.jsp /opt/opennms/jetty-webapps/opennms/rtc/index.jsp
+COPY --chown=10001:10001 rtc/category.jsp /opt/opennms/jetty-webapps/opennms/rtc/category.jsp
+COPY --chown=10001:10001 KSC/index.jsp /opt/opennms/jetty-webapps/opennms/KSC/index.jsp
+COPY --chown=10001:10001 report/index.jsp /opt/opennms/jetty-webapps/opennms/report/index.jsp
+COPY --chown=10001:10001 notification/index.jsp /opt/opennms/jetty-webapps/opennms/notification/index.jsp
+COPY --chown=10001:10001 hardware/list.jsp /opt/opennms/jetty-webapps/opennms/hardware/list.jsp
 
 # Patch welcome-file to index.jsp (Vue dashboard redirect) — single-line sed because
 # full web.xml overlay breaks CXF servlet mappings (source version != base image version)
