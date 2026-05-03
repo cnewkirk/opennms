@@ -919,6 +919,46 @@ const router = createRouter({
       component: () => import('@/containers/RtcCategory.vue')
     },
     {
+      path: '/ksc-reports',
+      name: 'KSC Reports',
+      component: () => import('@/containers/KscReports.vue')
+    },
+    {
+      path: '/ksc-report/:id',
+      name: 'KSC Report',
+      component: () => import('@/containers/KscReportDetail.vue')
+    },
+    {
+      path: '/reports',
+      name: 'Reports',
+      component: () => import('@/containers/Reports.vue')
+    },
+    {
+      path: '/notifications',
+      name: 'Notifications',
+      component: () => import('@/containers/Notifications.vue')
+    },
+    {
+      path: '/notification/:id',
+      name: 'Notification Detail',
+      component: () => import('@/containers/NotificationDetail.vue')
+    },
+    {
+      path: '/assets',
+      name: 'Assets',
+      component: () => import('@/containers/Assets.vue')
+    },
+    {
+      path: '/asset/:nodeId/edit',
+      name: 'Asset Edit',
+      component: () => import('@/containers/AssetEdit.vue')
+    },
+    {
+      path: '/hardware',
+      name: 'Hardware Inventory',
+      component: () => import('@/containers/Hardware.vue')
+    },
+    {
       path: '/account',
       name: 'User Account',
       component: () => import('@/containers/UserAccount.vue')
