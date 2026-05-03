@@ -165,108 +165,18 @@ cp -r "${UI_DIST}/assets/." "${OVERLAY_DIR}/ui-components/assets/"
 mkdir -p "${OVERLAY_DIR}/includes"
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/includes/bootstrap.jsp" \
    "${OVERLAY_DIR}/includes/bootstrap.jsp"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/index.jsp" \
-   "${OVERLAY_DIR}/index.jsp"
-# admin JSPs — redirects to Vue SPA
-mkdir -p "${OVERLAY_DIR}/admin"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/mibCompiler.jsp" \
-   "${OVERLAY_DIR}/admin/mibCompiler.jsp"
-# delete.jsp — redirect to Vue /delete-nodes
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/delete.jsp" \
-   "${OVERLAY_DIR}/admin/delete.jsp"
-# classification/index.jsp — redirect to Vue /flow-classification
-mkdir -p "${OVERLAY_DIR}/admin/classification"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/classification/index.jsp" \
-   "${OVERLAY_DIR}/admin/classification/index.jsp"
-# newInterface.jsp — redirect to Vue /add-interface
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/newInterface.jsp" \
-   "${OVERLAY_DIR}/admin/newInterface.jsp"
-# endpoint/index.jsp — redirect to Vue /grafana-endpoints
-mkdir -p "${OVERLAY_DIR}/admin/endpoint"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/endpoint/index.jsp" \
-   "${OVERLAY_DIR}/admin/endpoint/index.jsp"
-# discovery/edit-scan.jsp — redirect to Vue /discovery-scan
-mkdir -p "${OVERLAY_DIR}/admin/discovery"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/discovery/edit-scan.jsp" \
-   "${OVERLAY_DIR}/admin/discovery/edit-scan.jsp"
-# geoservice/index.jsp — redirect to Vue /geocoder-config
-mkdir -p "${OVERLAY_DIR}/admin/geoservice"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/geoservice/index.jsp" \
-   "${OVERLAY_DIR}/admin/geoservice/index.jsp"
-# asset/index.jsp — redirect to Vue /asset-management
-mkdir -p "${OVERLAY_DIR}/admin/asset"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/asset/index.jsp" \
-   "${OVERLAY_DIR}/admin/asset/index.jsp"
-# node.jsp — redirect to Vue SPA at /#/node/:id
-mkdir -p "${OVERLAY_DIR}/element"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/element/node.jsp" \
-   "${OVERLAY_DIR}/element/node.jsp"
 
-# event/detail.jsp — redirect to Vue SPA at /#/event/:id
-mkdir -p "${OVERLAY_DIR}/event"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/WEB-INF/jsp/event/detail.jsp" \
-   "${OVERLAY_DIR}/event/detail.jsp"
-
-# manage.jsp — redirect to Vue SPA /#/manage-interfaces
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/manage.jsp" \
-   "${OVERLAY_DIR}/admin/manage.jsp"
-# snmpInterfaces.jsp — redirect to Vue SPA /#/snmp-interfaces
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/snmpInterfaces.jsp" \
-   "${OVERLAY_DIR}/admin/snmpInterfaces.jsp"
-# instrumentationLogReader.jsp — redirect to Vue SPA /#/instrumentation-log
-mkdir -p "${OVERLAY_DIR}/admin/nodemanagement"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/nodemanagement/instrumentationLogReader.jsp" \
-   "${OVERLAY_DIR}/admin/nodemanagement/instrumentationLogReader.jsp"
-# manageSnmpCollections.jsp — redirect to Vue SPA at /#/snmp-collections-config
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/admin/manageSnmpCollections.jsp" \
-   "${OVERLAY_DIR}/admin/manageSnmpCollections.jsp"
-
-# dashboard.jsp — redirect to Vue SPA at /#/surveillance-dashboard
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/dashboard.jsp" \
-   "${OVERLAY_DIR}/dashboard.jsp"
-
-# surveillance-view.jsp — redirect to Vue SPA at /#/surveillance-dashboard
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/surveillance-view.jsp" \
-   "${OVERLAY_DIR}/surveillance-view.jsp"
-
-# help/index.jsp → /ui/help
-mkdir -p "${OVERLAY_DIR}/help"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/help/index.jsp" \
-   "${OVERLAY_DIR}/help/index.jsp"
-# about/index.jsp → /ui/about
-mkdir -p "${OVERLAY_DIR}/about"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/about/index.jsp" \
-   "${OVERLAY_DIR}/about/index.jsp"
-# status/index.jsp → /ui/status
-mkdir -p "${OVERLAY_DIR}/status"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/status/index.jsp" \
-   "${OVERLAY_DIR}/status/index.jsp"
-# support/index.jsp → /ui/support
-mkdir -p "${OVERLAY_DIR}/support"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/support/index.jsp" \
-   "${OVERLAY_DIR}/support/index.jsp"
-# rtc/index.jsp → /ui/surveillance-dashboard, rtc/category.jsp → /ui/rtc/category
-mkdir -p "${OVERLAY_DIR}/rtc"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/rtc/index.jsp" \
-   "${OVERLAY_DIR}/rtc/index.jsp"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/rtc/category.jsp" \
-   "${OVERLAY_DIR}/rtc/category.jsp"
-# KSC/index.jsp → /ui/ksc-reports
-mkdir -p "${OVERLAY_DIR}/KSC"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/KSC/index.jsp" \
-   "${OVERLAY_DIR}/KSC/index.jsp"
-# report/index.jsp → /ui/reports
-mkdir -p "${OVERLAY_DIR}/report"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/report/index.jsp" \
-   "${OVERLAY_DIR}/report/index.jsp"
-# notification/index.jsp → /ui/notifications
-mkdir -p "${OVERLAY_DIR}/notification"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/notification/index.jsp" \
-   "${OVERLAY_DIR}/notification/index.jsp"
-# hardware/list.jsp → /ui/hardware
-mkdir -p "${OVERLAY_DIR}/hardware"
-cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/hardware/list.jsp" \
-   "${OVERLAY_DIR}/hardware/list.jsp"
+# All sendRedirect JSPs — collected dynamically so future additions are automatic.
+# Preserves directory structure; WEB-INF/jsp/ files land at the correct container path.
+WEBAPP_SRC="${SCRIPT_DIR}/opennms-webapp/src/main/webapp"
+echo "    Collecting sendRedirect JSPs from source tree..."
+while IFS= read -r file; do
+  rel="${file#${WEBAPP_SRC}/}"
+  mkdir -p "${OVERLAY_DIR}/$(dirname "${rel}")"
+  cp "${file}" "${OVERLAY_DIR}/${rel}"
+done < <(grep -rl "sendRedirect" "${WEBAPP_SRC}" --include="*.jsp" --include="*.htm" 2>/dev/null)
+JSP_COUNT=$(grep -rl "sendRedirect" "${WEBAPP_SRC}" --include="*.jsp" --include="*.htm" 2>/dev/null | wc -l | tr -d ' ')
+echo "    sendRedirect JSPs staged: ${JSP_COUNT}"
 
 
 # opennms-webapp jar — rename to match base image version so COPY replaces it
@@ -428,65 +338,15 @@ COPY --chown=10001:10001 ui-components/assets/ /opt/opennms/jetty-webapps/opennm
 # bootstrap.jsp with CSS loads + theme init script + Vaadin iframe injection
 COPY --chown=10001:10001 includes/bootstrap.jsp /opt/opennms/jetty-webapps/opennms/includes/bootstrap.jsp
 
-# index.jsp — redirect landing page to Vue dashboard
-COPY --chown=10001:10001 index.jsp /opt/opennms/jetty-webapps/opennms/index.jsp
-
-# mibCompiler.jsp — redirect from Vaadin iframe to Vue SPA
-COPY --chown=10001:10001 admin/mibCompiler.jsp /opt/opennms/jetty-webapps/opennms/admin/mibCompiler.jsp
-
-# delete.jsp — redirect to Vue SPA /delete-nodes
-COPY --chown=10001:10001 admin/delete.jsp /opt/opennms/jetty-webapps/opennms/admin/delete.jsp
-
-# classification/index.jsp — redirect to Vue SPA /flow-classification
-COPY --chown=10001:10001 admin/classification/index.jsp /opt/opennms/jetty-webapps/opennms/admin/classification/index.jsp
-
-# newInterface.jsp — redirect to Vue SPA /add-interface
-COPY --chown=10001:10001 admin/newInterface.jsp /opt/opennms/jetty-webapps/opennms/admin/newInterface.jsp
-
-# endpoint/index.jsp — redirect to Vue SPA /grafana-endpoints
-COPY --chown=10001:10001 admin/endpoint/index.jsp /opt/opennms/jetty-webapps/opennms/admin/endpoint/index.jsp
-
-# discovery/edit-scan.jsp — redirect to Vue SPA /discovery-scan
-COPY --chown=10001:10001 admin/discovery/edit-scan.jsp /opt/opennms/jetty-webapps/opennms/admin/discovery/edit-scan.jsp
-
-# geoservice/index.jsp — redirect to Vue SPA /geocoder-config
-COPY --chown=10001:10001 admin/geoservice/index.jsp /opt/opennms/jetty-webapps/opennms/admin/geoservice/index.jsp
-
-# asset/index.jsp — redirect to Vue SPA /asset-management
-COPY --chown=10001:10001 admin/asset/index.jsp /opt/opennms/jetty-webapps/opennms/admin/asset/index.jsp
-
-# node.jsp — redirect to Vue SPA at /#/node/:id
-COPY --chown=10001:10001 element/node.jsp /opt/opennms/jetty-webapps/opennms/element/node.jsp
-
-# event/detail.jsp — redirect to Vue SPA at /#/event/:id
-COPY --chown=10001:10001 event/detail.jsp /opt/opennms/jetty-webapps/opennms/WEB-INF/jsp/event/detail.jsp
-
-# manage.jsp — redirect to Vue SPA /#/manage-interfaces
-COPY --chown=10001:10001 admin/manage.jsp /opt/opennms/jetty-webapps/opennms/admin/manage.jsp
-# snmpInterfaces.jsp — redirect to Vue SPA /#/snmp-interfaces
-COPY --chown=10001:10001 admin/snmpInterfaces.jsp /opt/opennms/jetty-webapps/opennms/admin/snmpInterfaces.jsp
-# instrumentationLogReader.jsp — redirect to Vue SPA /#/instrumentation-log
-COPY --chown=10001:10001 admin/nodemanagement/instrumentationLogReader.jsp /opt/opennms/jetty-webapps/opennms/admin/nodemanagement/instrumentationLogReader.jsp
-# manageSnmpCollections.jsp — redirect to Vue SPA at /#/snmp-collections-config
-COPY --chown=10001:10001 admin/manageSnmpCollections.jsp /opt/opennms/jetty-webapps/opennms/admin/manageSnmpCollections.jsp
-
-# dashboard.jsp — redirect to Vue SPA at /#/surveillance-dashboard
-COPY --chown=10001:10001 dashboard.jsp /opt/opennms/jetty-webapps/opennms/dashboard.jsp
-
-# surveillance-view.jsp — redirect to Vue SPA at /#/surveillance-dashboard
-COPY --chown=10001:10001 surveillance-view.jsp /opt/opennms/jetty-webapps/opennms/surveillance-view.jsp
-
-# Top-level navigation JSP redirects → Vue SPA routes
-COPY --chown=10001:10001 help/index.jsp /opt/opennms/jetty-webapps/opennms/help/index.jsp
-COPY --chown=10001:10001 about/index.jsp /opt/opennms/jetty-webapps/opennms/about/index.jsp
-COPY --chown=10001:10001 status/index.jsp /opt/opennms/jetty-webapps/opennms/status/index.jsp
-COPY --chown=10001:10001 support/index.jsp /opt/opennms/jetty-webapps/opennms/support/index.jsp
-COPY --chown=10001:10001 rtc/index.jsp /opt/opennms/jetty-webapps/opennms/rtc/index.jsp
-COPY --chown=10001:10001 rtc/category.jsp /opt/opennms/jetty-webapps/opennms/rtc/category.jsp
-COPY --chown=10001:10001 KSC/index.jsp /opt/opennms/jetty-webapps/opennms/KSC/index.jsp
-COPY --chown=10001:10001 report/index.jsp /opt/opennms/jetty-webapps/opennms/report/index.jsp
-COPY --chown=10001:10001 notification/index.jsp /opt/opennms/jetty-webapps/opennms/notification/index.jsp
-COPY --chown=10001:10001 hardware/list.jsp /opt/opennms/jetty-webapps/opennms/hardware/list.jsp
+# sendRedirect JSPs — all collected dynamically in the shell phase above.
+# Includes admin/*, element/*, account/*, alarm/*, asset/*, notification/*, etc.
+# WEB-INF/jsp/ files land at the correct container path automatically.
+$(find "${OVERLAY_DIR}" \( -name "*.jsp" -o -name "*.htm" \) \
+    ! -path "*/includes/bootstrap.jsp" 2>/dev/null | sort | \
+  while IFS= read -r file; do
+    rel="${file#${OVERLAY_DIR}/}"
+    echo "COPY --chown=10001:10001 ${rel} /opt/opennms/jetty-webapps/opennms/${rel}"
+  done)
 
 # Patch welcome-file to index.jsp (Vue dashboard redirect) — single-line sed because
 # full web.xml overlay breaks CXF servlet mappings (source version != base image version)
