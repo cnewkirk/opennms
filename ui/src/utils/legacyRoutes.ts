@@ -19,7 +19,12 @@ export const legacyToVueRoutes: Record<string, string> = {
   'admin/bsm/adminpage.jsp':           '/bsm-admin',
   'admin/manageEvents.jsp':            '/event-config',
   'admin/index.jsp':                   '/admin',
-  'admin/classification/index.jsp':    '/flow-classification'
+  'admin/classification/index.jsp':    '/flow-classification',
+  'help/index.jsp':                    '/help',
+  'support/index.jsp':                 '/support',
+  'status/index.jsp':                  '/status',
+  'about/index.jsp':                   '/about',
+  'rtc/index.jsp':                     '/surveillance-dashboard'
 }
 
 /**

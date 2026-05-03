@@ -894,6 +894,31 @@ const router = createRouter({
       }
     },
     {
+      path: '/help',
+      name: 'Help',
+      component: () => import('@/containers/Help.vue')
+    },
+    {
+      path: '/support',
+      name: 'Support',
+      component: () => import('@/containers/Support.vue')
+    },
+    {
+      path: '/status',
+      name: 'System Status',
+      component: () => import('@/containers/SystemStatus.vue')
+    },
+    {
+      path: '/about',
+      name: 'About',
+      component: () => import('@/containers/About.vue')
+    },
+    {
+      path: '/rtc/category',
+      name: 'RTC Category',
+      component: () => import('@/containers/RtcCategory.vue')
+    },
+    {
       path: '/account',
       name: 'User Account',
       component: () => import('@/containers/UserAccount.vue')
