@@ -77,6 +77,19 @@ html:not(.open-dark) {
 
   // Form inputs match the card surface they sit on
   --p-form-field-background: #d4d8e4;
+
+  // Option/list/menu item hover — PrimeVue's Aura defaults to {surface.100}
+  // (near-white slate-100) which provides almost no contrast against our
+  // off-white palette and can appear as an invisible or black bar depending on
+  // the token resolution order. Explicit rgba overlay gives a consistent,
+  // readable hover on any surface color.
+  --p-list-option-focus-background:     rgba(0, 0, 0, 0.08);
+  --p-list-option-focus-color:          var(--feather-primary-text-on-surface);
+  --p-select-option-focus-background:   rgba(0, 0, 0, 0.08);
+  --p-select-option-focus-color:        var(--feather-primary-text-on-surface);
+  --p-navigation-item-focus-background: rgba(0, 0, 0, 0.10);
+  --p-navigation-item-focus-color:      var(--feather-primary-text-on-surface);
+  --p-content-hover-color:              var(--feather-primary-text-on-surface);
 }
 
 // Dark-mode surface overrides — uses neutral zinc tones rather than the
