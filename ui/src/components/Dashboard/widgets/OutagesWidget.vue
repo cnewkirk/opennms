@@ -21,8 +21,9 @@
 -->
 <template>
   <div class="outages-widget">
+    <PanelLoader v-if="isLoading" />
     <div
-      v-if="!outages.length"
+      v-else-if="!outages.length"
       class="empty-state"
     >
       <i class="pi pi-check-circle empty-icon" />
@@ -90,6 +91,7 @@
 </template>
 
 <script setup lang="ts">
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { getActiveOutages } from '@/services/outageService'
 import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Outage } from '@/types'
@@ -102,6 +104,7 @@ const props = defineProps<{
 const store = useDashboardStore()
 const outages = ref<Outage[]>([])
 const totalCount = ref(0)
+const isLoading = ref(true)
 
 const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
 
@@ -121,21 +124,26 @@ const toggleSort = (key: string) => {
 }
 
 const load = async () => {
-  let orderBy: string | undefined
-  if (props.config.sortBy) {
-    const def = WIDGET_COLUMNS.outages.find(c => c.key === props.config.sortBy)
-    if (def?.sortField) orderBy = def.sortField
-  }
-  const resp = await getActiveOutages(
-    props.config.categories,
-    props.config.limit,
-    0,
-    orderBy,
-    props.config.sortDir
-  )
-  if (resp) {
-    outages.value = resp.outage
-    totalCount.value = resp.totalCount
+  isLoading.value = true
+  try {
+    let orderBy: string | undefined
+    if (props.config.sortBy) {
+      const def = WIDGET_COLUMNS.outages.find(c => c.key === props.config.sortBy)
+      if (def?.sortField) orderBy = def.sortField
+    }
+    const resp = await getActiveOutages(
+      props.config.categories,
+      props.config.limit,
+      0,
+      orderBy,
+      props.config.sortDir
+    )
+    if (resp) {
+      outages.value = resp.outage
+      totalCount.value = resp.totalCount
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 

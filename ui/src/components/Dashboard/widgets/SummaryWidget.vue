@@ -20,7 +20,8 @@
   License.
 -->
 <template>
-  <div class="summary-grid">
+  <PanelLoader v-if="isLoading" />
+  <div v-else class="summary-grid">
     <router-link
       v-for="kpi in kpis"
       :key="kpi.label"
@@ -36,6 +37,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import API from '@/services'
 import { getActiveOutageCount } from '@/services/outageService'
 import { type SummaryWidgetConfig } from '@/services/dashboardConfigService'
@@ -51,39 +53,45 @@ interface Kpi {
   to: string
 }
 
+const isLoading = ref(true)
 const kpis = ref<Kpi[]>([
-  { label: 'Active Outages', value: '—', status: 'normal', to: '/outages' },
-  { label: 'Active Alarms',  value: '—', status: 'normal', to: '/alarms' },
-  { label: 'Total Nodes',    value: '—', status: 'normal', to: '/nodes' }
+  { label: 'Active Outages', value: 0,   status: 'normal', to: '/outages' },
+  { label: 'Active Alarms',  value: 0,   status: 'normal', to: '/alarms' },
+  { label: 'Total Nodes',    value: 0,   status: 'normal', to: '/nodes' }
 ])
 
 const load = async () => {
-  const [outageCount, alarmResp, nodeResp] = await Promise.all([
-    getActiveOutageCount(props.config.categories),
-    API.getAlarms({ limit: 0, _s: 'severity!=NORMAL;severity!=CLEARED' } as any),
-    API.getNodes({ limit: 0 } as any)
-  ])
+  isLoading.value = true
+  try {
+    const [outageCount, alarmResp, nodeResp] = await Promise.all([
+      getActiveOutageCount(props.config.categories),
+      API.getAlarms({ limit: 0, _s: 'severity!=NORMAL;severity!=CLEARED' } as any),
+      API.getNodes({ limit: 0 } as any)
+    ])
 
-  kpis.value = [
-    {
-      label: 'Active Outages',
-      value: outageCount,
-      status: outageCount > 0 ? 'critical' : 'normal',
-      to: '/outages'
-    },
-    {
-      label: 'Active Alarms',
-      value: alarmResp ? alarmResp.totalCount : '—',
-      status: alarmResp && alarmResp.totalCount > 0 ? 'warning' : 'normal',
-      to: '/alarms'
-    },
-    {
-      label: 'Total Nodes',
-      value: nodeResp ? nodeResp.totalCount : '—',
-      status: 'normal',
-      to: '/nodes'
-    }
-  ]
+    kpis.value = [
+      {
+        label: 'Active Outages',
+        value: outageCount,
+        status: outageCount > 0 ? 'critical' : 'normal',
+        to: '/outages'
+      },
+      {
+        label: 'Active Alarms',
+        value: alarmResp ? alarmResp.totalCount : 0,
+        status: alarmResp && alarmResp.totalCount > 0 ? 'warning' : 'normal',
+        to: '/alarms'
+      },
+      {
+        label: 'Total Nodes',
+        value: nodeResp ? nodeResp.totalCount : 0,
+        status: 'normal',
+        to: '/nodes'
+      }
+    ]
+  } finally {
+    isLoading.value = false
+  }
 }
 
 onMounted(load)

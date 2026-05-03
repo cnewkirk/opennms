@@ -1,5 +1,7 @@
 <template>
   <div class="node-status-widget">
+    <PanelLoader v-if="isLoading" />
+    <template v-else>
     <div class="chart-wrapper">
       <Chart
         type="doughnut"
@@ -20,11 +22,13 @@
         {{ downCount }} down
       </span>
     </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import Chart from 'primevue/chart'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import API from '@/services'
 import { getActiveOutageCount } from '@/services/outageService'
 import type { NodeStatusWidgetConfig } from '@/services/dashboardConfigService'
@@ -34,8 +38,10 @@ const props = defineProps<{ config: NodeStatusWidgetConfig }>()
 const totalCount = ref(0)
 const downCount  = ref(0)
 const upCount    = computed(() => Math.max(0, totalCount.value - downCount.value))
+const isLoading  = ref(true)
 
 const load = async () => {
+  isLoading.value = true
   try {
     const params: Record<string, string | number> = { limit: 0 }
     if (props.config.categories.length) {
@@ -50,6 +56,8 @@ const load = async () => {
   } catch {
     totalCount.value = 0
     downCount.value  = 0
+  } finally {
+    isLoading.value = false
   }
 }
 

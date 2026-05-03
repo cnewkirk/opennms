@@ -21,8 +21,9 @@
 -->
 <template>
   <div class="nodes-widget">
+    <PanelLoader v-if="isLoading" />
     <div
-      v-if="!nodes.length"
+      v-else-if="!nodes.length"
       class="empty-state"
     >
       <i class="pi pi-info-circle empty-icon" />
@@ -84,6 +85,7 @@
 </template>
 
 <script setup lang="ts">
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import API from '@/services'
 import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Node, type QueryParameters } from '@/types'
@@ -97,6 +99,7 @@ const props = defineProps<{
 const store = useDashboardStore()
 const nodes = ref<Node[]>([])
 const totalCount = ref(0)
+const isLoading = ref(true)
 
 const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
 
@@ -116,24 +119,29 @@ const toggleSort = (key: string) => {
 }
 
 const load = async () => {
-  const sortByKey = props.config.sortBy
-  const sortDef = sortByKey ? WIDGET_COLUMNS.nodes.find(c => c.key === sortByKey) : null
-  const params: QueryParameters = {
-    limit: props.config.limit,
-    orderBy: sortDef?.sortField ?? 'label',
-    order: (props.config.sortDir ?? 'asc') as QueryParameters['order']
-  }
+  isLoading.value = true
+  try {
+    const sortByKey = props.config.sortBy
+    const sortDef = sortByKey ? WIDGET_COLUMNS.nodes.find(c => c.key === sortByKey) : null
+    const params: QueryParameters = {
+      limit: props.config.limit,
+      orderBy: sortDef?.sortField ?? 'label',
+      order: (props.config.sortDir ?? 'asc') as QueryParameters['order']
+    }
 
-  if (props.config.categories.length === 1) {
-    params._s = `categories.name==${props.config.categories[0]}`
-  } else if (props.config.categories.length > 1) {
-    params._s = `(${props.config.categories.map(c => `categories.name==${c}`).join(',')})`
-  }
+    if (props.config.categories.length === 1) {
+      params._s = `categories.name==${props.config.categories[0]}`
+    } else if (props.config.categories.length > 1) {
+      params._s = `(${props.config.categories.map(c => `categories.name==${c}`).join(',')})`
+    }
 
-  const resp = await API.getNodes(params)
-  if (resp) {
-    nodes.value = resp.node
-    totalCount.value = resp.totalCount
+    const resp = await API.getNodes(params)
+    if (resp) {
+      nodes.value = resp.node
+      totalCount.value = resp.totalCount
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 

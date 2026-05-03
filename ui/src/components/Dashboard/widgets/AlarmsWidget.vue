@@ -21,8 +21,9 @@
 -->
 <template>
   <div class="alarms-widget">
+    <PanelLoader v-if="isLoading" />
     <div
-      v-if="!alarms.length"
+      v-else-if="!alarms.length"
       class="empty-state"
     >
       <i class="pi pi-check-circle empty-icon" />
@@ -96,6 +97,7 @@
 
 <script setup lang="ts">
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import API from '@/services'
 import { type TableWidgetConfig, WIDGET_COLUMNS } from '@/services/dashboardConfigService'
 import { type Alarm, type QueryParameters } from '@/types'
@@ -108,6 +110,7 @@ const props = defineProps<{
 const store = useDashboardStore()
 const alarms = ref<Alarm[]>([])
 const totalCount = ref(0)
+const isLoading = ref(true)
 
 const col = (key: string) => !props.config.columns?.length || props.config.columns.includes(key)
 
@@ -145,22 +148,27 @@ const buildAlarmCriteria = (): string => {
 }
 
 const load = async () => {
-  const params: QueryParameters = { limit: props.config.limit }
-  const criteria = buildAlarmCriteria()
-  if (criteria) params._s = criteria
-  if (props.config.sortBy) {
-    const def = WIDGET_COLUMNS.alarms.find(c => c.key === props.config.sortBy)
-    if (def?.sortField) {
-      params.orderBy = def.sortField
-      // QueryParameters.order is typed as Feather SORT; cast to satisfy TS
-      params.order = (props.config.sortDir ?? 'asc') as typeof params.order
+  isLoading.value = true
+  try {
+    const params: QueryParameters = { limit: props.config.limit }
+    const criteria = buildAlarmCriteria()
+    if (criteria) params._s = criteria
+    if (props.config.sortBy) {
+      const def = WIDGET_COLUMNS.alarms.find(c => c.key === props.config.sortBy)
+      if (def?.sortField) {
+        params.orderBy = def.sortField
+        // QueryParameters.order is typed as Feather SORT; cast to satisfy TS
+        params.order = (props.config.sortDir ?? 'asc') as typeof params.order
+      }
     }
-  }
 
-  const resp = await API.getAlarms(params)
-  if (resp) {
-    alarms.value = resp.alarm
-    totalCount.value = resp.totalCount
+    const resp = await API.getAlarms(params)
+    if (resp) {
+      alarms.value = resp.alarm
+      totalCount.value = resp.totalCount
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 

@@ -1,22 +1,26 @@
 <template>
   <div class="availability-widget">
-    <div class="chart-wrapper">
-      <Chart
-        type="doughnut"
-        :data="chartData"
-        :options="chartOptions"
-        class="chart"
-      />
-      <div class="center-text" :class="severityClass">
-        {{ displayPercent }}%
+    <PanelLoader v-if="isLoading" />
+    <template v-else>
+      <div class="chart-wrapper">
+        <Chart
+          type="doughnut"
+          :data="chartData"
+          :options="chartOptions"
+          class="chart"
+        />
+        <div class="center-text" :class="severityClass">
+          {{ displayPercent }}%
+        </div>
       </div>
-    </div>
-    <div class="availability-sub">availability</div>
+      <div class="availability-sub">availability</div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import Chart from 'primevue/chart'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { rest } from '@/services/axiosInstances'
 import { useDashboardStore } from '@/stores/dashboardStore'
 import { resolveTimeRange, type AvailabilityWidgetConfig } from '@/services/dashboardConfigService'
@@ -27,6 +31,7 @@ const props = defineProps<{ config: AvailabilityWidgetConfig }>()
 const dashboardStore = useDashboardStore()
 
 const availability = ref<number>(100)
+const isLoading = ref(true)
 const displayPercent = computed(() => availability.value.toFixed(1))
 
 const severityClass = computed(() => {
@@ -65,6 +70,7 @@ const chartOptions = {
 }
 
 const load = async () => {
+  isLoading.value = true
   try {
     const tr = props.config.timeRange ?? dashboardStore.timeRange
     const { start, end } = resolveTimeRange(tr)
@@ -88,6 +94,8 @@ const load = async () => {
     }
   } catch {
     availability.value = 0
+  } finally {
+    isLoading.value = false
   }
 }
 
