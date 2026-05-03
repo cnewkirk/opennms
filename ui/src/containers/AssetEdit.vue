@@ -6,8 +6,8 @@
       </div>
     </div>
 
-    <div v-if="loading" class="feather-row">
-      <div class="feather-col-12 asset-edit-page__status">Loading…</div>
+    <div v-if="loading" class="asset-edit-page__loading">
+      <PanelLoader :size="40" />
     </div>
 
     <div v-else-if="!record" class="feather-row">
@@ -119,6 +119,7 @@ import { useRoute } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { useMenuStore } from '@/stores/menuStore'
 import { getAssetRecord, updateAssetRecord, type AssetRecord } from '@/services/assetService'
 import { v2 } from '@/services/axiosInstances'
@@ -221,6 +222,12 @@ onMounted(async () => {
   &__status {
     padding: 24px;
     color: var($secondary-text-on-surface);
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
   }
 }
 

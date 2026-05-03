@@ -3,7 +3,9 @@
     <BreadCrumbs :items="breadcrumbs" />
 
     <template v-if="loading">
-      <div class="iface-detail__skeleton headline3">Loading interface…</div>
+      <div class="iface-detail__loading">
+        <PanelLoader :size="40" />
+      </div>
     </template>
 
     <template v-else-if="error">
@@ -51,6 +53,7 @@ import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import InterfaceHeader from '@/components/InterfaceDetail/InterfaceHeader.vue'
 import ServicesTable from '@/components/InterfaceDetail/ServicesTable.vue'
 import EventsTable from '@/components/Nodes/EventsTable.vue'
@@ -139,6 +142,12 @@ onMounted(async () => {
 
   &__skeleton {
     padding: 16px;
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
   }
 
   &__tab-wrap {

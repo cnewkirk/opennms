@@ -6,8 +6,8 @@
       </div>
     </div>
 
-    <div v-if="loading" class="feather-row">
-      <div class="feather-col-12 notification-detail-page__status">Loading…</div>
+    <div v-if="loading" class="notification-detail-page__loading">
+      <PanelLoader :size="40" />
     </div>
 
     <div v-else-if="!notification" class="feather-row">
@@ -71,6 +71,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import Button from 'primevue/button'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { useMenuStore } from '@/stores/menuStore'
 import { useAuthStore } from '@/stores/authStore'
 import {
@@ -138,6 +139,12 @@ onMounted(async () => {
   &__status {
     padding: 24px;
     color: var($secondary-text-on-surface);
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
   }
 }
 

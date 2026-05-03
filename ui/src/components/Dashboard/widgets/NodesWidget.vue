@@ -21,7 +21,7 @@
 -->
 <template>
   <div class="nodes-widget">
-    <PanelLoader v-if="isLoading" />
+    <PanelLoader v-if="isLoading" overlay />
     <div
       v-else-if="!nodes.length"
       class="empty-state"

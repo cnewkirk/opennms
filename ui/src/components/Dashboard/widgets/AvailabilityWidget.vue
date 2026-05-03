@@ -1,6 +1,6 @@
 <template>
   <div class="availability-widget">
-    <PanelLoader v-if="isLoading" />
+    <PanelLoader v-if="isLoading" overlay />
     <template v-else>
       <div class="chart-wrapper">
         <Chart

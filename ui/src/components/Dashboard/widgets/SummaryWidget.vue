@@ -20,7 +20,7 @@
   License.
 -->
 <template>
-  <PanelLoader v-if="isLoading" />
+  <PanelLoader v-if="isLoading" overlay />
   <div v-else class="summary-grid">
     <router-link
       v-for="kpi in kpis"

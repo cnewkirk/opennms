@@ -36,8 +36,8 @@
   </div>
 
   <!-- Loading state -->
-  <div v-else-if="loading" class="feather-row">
-    <div class="feather-col-12 outage-detail__skeleton headline3">Loading outage…</div>
+  <div v-else-if="loading" class="outage-detail__loading">
+    <PanelLoader :size="40" />
   </div>
 
   <template v-else-if="outage">
@@ -128,6 +128,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { getOutage } from '@/services/outageService'
 import { useMenuStore } from '@/stores/menuStore'
 import { type Outage, type BreadCrumb } from '@/types'
@@ -180,6 +181,12 @@ onMounted(async () => {
 .outage-detail {
   &__skeleton { padding: 16px; }
   &__error    { padding: 24px; text-align: center; }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
+  }
 
   &__header {
     margin-bottom: 16px;

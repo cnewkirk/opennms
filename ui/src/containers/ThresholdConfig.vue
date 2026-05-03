@@ -15,7 +15,9 @@
       </div>
     </div>
 
-    <div v-if="loading" class="threshold-page__status">Loading…</div>
+    <div v-if="loading" class="threshold-page__loading">
+      <PanelLoader :size="40" />
+    </div>
     <div v-else-if="loadError" class="threshold-page__status threshold-page__status--error">
       Failed to load threshold groups.
     </div>
@@ -53,6 +55,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import Button from 'primevue/button'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import useSnackbar from '@/composables/useSnackbar'
 import { v2 } from '@/services/axiosInstances'
 import { BreadCrumb } from '@/types'
@@ -118,6 +121,12 @@ async function reloadThresholds() {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
   }
 
   &__status {

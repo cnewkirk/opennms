@@ -21,7 +21,7 @@
 -->
 <template>
   <div class="outages-widget">
-    <PanelLoader v-if="isLoading" />
+    <PanelLoader v-if="isLoading" overlay />
     <div
       v-else-if="!outages.length"
       class="empty-state"

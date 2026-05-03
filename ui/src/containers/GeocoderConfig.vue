@@ -12,7 +12,9 @@
       </div>
     </div>
 
-    <div v-if="loading" class="geocoder-page__status">Loading…</div>
+    <div v-if="loading" class="geocoder-page__loading">
+      <PanelLoader :size="40" />
+    </div>
     <div v-else-if="loadError" class="geocoder-page__status geocoder-page__status--error">
       Failed to load geocoder configuration.
     </div>
@@ -155,6 +157,7 @@
 import { ref, onMounted } from 'vue'
 import Button from 'primevue/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import {
   getServiceConfig,
   setActiveGeocoder,
@@ -228,6 +231,12 @@ onMounted(load)
   &__header {
     margin-bottom: 16px;
     .headline4 { margin: 0; }
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
   }
 
   &__status {

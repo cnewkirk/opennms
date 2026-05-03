@@ -21,7 +21,7 @@
 -->
 <template>
   <div class="alarms-widget">
-    <PanelLoader v-if="isLoading" />
+    <PanelLoader v-if="isLoading" overlay />
     <div
       v-else-if="!alarms.length"
       class="empty-state"

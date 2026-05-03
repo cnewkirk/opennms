@@ -8,7 +8,9 @@
     </div>
 
     <template v-else>
-      <div v-if="nodeLoading" class="node-detail__skeleton headline3">Loading node…</div>
+      <div v-if="nodeLoading" class="node-detail__loading">
+        <PanelLoader :size="40" />
+      </div>
       <template v-else-if="node">
         <NodeHeader :node="node" />
         <AdminActionsBar :nodeId="id" :foreignSource="node.foreignSource" />
@@ -86,6 +88,7 @@ import TabList from 'primevue/tablist'
 import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
 import NodeHeader from '@/components/NodeDetail/NodeHeader.vue'
 import AdminActionsBar from '@/components/NodeDetail/AdminActionsBar.vue'
@@ -209,8 +212,8 @@ const nodeResourceKey = computed(() => {
 }
 
 .node-detail {
-  &__error    { padding: 24px; text-align: center; }
-  &__skeleton { padding: 16px; }
+  &__error   { padding: 24px; text-align: center; }
+  &__loading { display: flex; justify-content: center; padding: 3rem; }
 
   &__tab-wrap { position: relative; margin-top: 12px; }
 

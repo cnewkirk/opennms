@@ -7,7 +7,7 @@
     </div>
 
     <div v-if="loading" class="system-config__loading">
-      <p class="subtitle1">Loading system information…</p>
+      <PanelLoader :size="40" />
     </div>
 
     <div v-else-if="error" class="system-config__error">
@@ -110,6 +110,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { useMenuStore } from '@/stores/menuStore'
 import useRole from '@/composables/useRole'
 import { getSystemInfo } from '@/services/infoService'
@@ -163,7 +164,12 @@ const serviceRows = computed(() => {
 }
 
 .system-config {
-  &__loading,
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
+  }
+
   &__error {
     padding: 24px 0;
     color: var($secondary-text-on-surface);

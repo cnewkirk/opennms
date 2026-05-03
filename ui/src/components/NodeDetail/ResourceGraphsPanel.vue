@@ -37,7 +37,9 @@
     </div>
 
     <!-- Loading / Error -->
-    <div v-if="loading" class="resource-graphs-panel__loading caption">Loading resources…</div>
+    <div v-if="loading" class="resource-graphs-panel__loading">
+      <PanelLoader :size="40" />
+    </div>
     <div v-else-if="error" class="resource-graphs-panel__error">
       <span>{{ error }}</span>
       <button class="resource-graphs-panel__retry" @click="refresh">Retry</button>
@@ -109,6 +111,7 @@
 </template>
 
 <script setup lang="ts">
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import PinnedGraphs from './PinnedGraphs.vue'
 import ResourceAccordion from './ResourceAccordion.vue'
 import ResourceSearchResults from './ResourceSearchResults.vue'
@@ -203,6 +206,12 @@ const editSavedChart = (chart: SavedChart) => {
 
 .resource-graphs-panel {
   &__header { margin-bottom: 8px; }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
+  }
 
   &__time-bar {
     display: flex;

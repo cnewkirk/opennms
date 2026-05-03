@@ -16,7 +16,7 @@
     </div>
 
     <div v-if="loading" class="sched-outages-page__loading">
-      <p class="subtitle1">Loading…</p>
+      <PanelLoader :size="40" />
     </div>
     <div v-else-if="error" class="sched-outages-page__error">
       <p class="body1">Failed to load scheduled outages.</p>
@@ -65,6 +65,7 @@
 import { ref, computed, onMounted } from 'vue'
 import Button from 'primevue/button'
 import BreadCrumbs from '@/components/Layout/BreadCrumbs.vue'
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import SchedOutageEditDialog from '@/components/ScheduledOutages/SchedOutageEditDialog.vue'
 import { listSchedOutages, deleteSchedOutage } from '@/services/schedOutageService'
 import { SchedOutage, BreadCrumb } from '@/types'
@@ -150,7 +151,12 @@ const onSaved = async () => {
     align-items: center;
   }
 
-  &__loading,
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
+  }
+
   &__error,
   &__empty {
     padding: 24px 0;

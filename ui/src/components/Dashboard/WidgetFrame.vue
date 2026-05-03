@@ -130,6 +130,7 @@ defineEmits<{
 }
 
 .widget-body {
+  position: relative;
   flex: 1;
   overflow-y: auto;
   padding: 4px 0;

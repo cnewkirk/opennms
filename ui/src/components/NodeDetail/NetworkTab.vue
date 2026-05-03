@@ -1,6 +1,8 @@
 <template>
   <div class="network-tab">
-    <div v-if="loading" class="network-tab__loading caption">Loading interfaces…</div>
+    <div v-if="loading" class="network-tab__loading">
+      <PanelLoader :size="40" />
+    </div>
     <div v-else-if="!endpoints.length" class="network-tab__empty caption">No interfaces found.</div>
     <ClearSummary
       v-else-if="props.problemsOnly && allUp && !showAll"
@@ -106,6 +108,7 @@
 </template>
 
 <script setup lang="ts">
+import PanelLoader from '@/components/Common/PanelLoader.vue'
 import { getNodeIpInterfaces, getNodeSnmpInterfaces } from '@/services/nodeService'
 import type { IpInterface, SnmpInterface } from '@/types'
 import ClearSummary from '@/components/Common/ClearSummary.vue'
@@ -316,7 +319,13 @@ onMounted(async () => {
 .network-tab {
   padding: 8px 0;
 
-  &__loading, &__empty {
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
+  }
+
+  &__empty {
     padding: 24px;
     text-align: center;
     color: var($secondary-text-on-surface);
