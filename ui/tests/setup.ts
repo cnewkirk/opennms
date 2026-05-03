@@ -1,4 +1,8 @@
 // tests/setup.ts — global test setup
+import { config } from '@vue/test-utils'
+import PrimeVue from 'primevue/config'
+config.global.plugins = [...(config.global.plugins ?? []), [PrimeVue, { unstyled: true }]]
+
 // Polyfill localStorage methods missing in happy-dom's file-backed implementation
 if (typeof localStorage !== 'undefined' && typeof localStorage.clear !== 'function') {
   const store: Record<string, string> = {}

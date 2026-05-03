@@ -12,7 +12,7 @@
 }
  -->
 <template>
-  <div :class="['empty-list', bg ? 'bg' : '']">
+  <div :class="['empty-list', bg ? 'bg' : '']" data-test="empty-list">
     <h3 v-if="content.title" data-test="title">{{ content.title }}</h3>
     <div data-test="msg">{{ msg }}</div>
     <Button v-if="content.btn" outlined @click="content.btn?.action" data-test="btn">{{ content.btn?.label }}</Button>

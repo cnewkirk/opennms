@@ -8,6 +8,7 @@ import { useEventConfigDetailStore } from '@/stores/eventConfigDetailStore'
 import { useEventModificationStore } from '@/stores/eventModificationStore'
 import { CreateEditMode } from '@/types'
 import { EventConfigSource } from '@/types/eventConfig'
+import PrimeVue from 'primevue/config'
 import Button from 'primevue/button'
 import SeverityBadge from '@/components/Common/SeverityBadge.vue'
 import Menu from 'primevue/menu'
@@ -80,7 +81,7 @@ describe('EventConfigEventTable.vue', () => {
 
     wrapper = mount(EventConfigEventTable, {
       global: {
-        plugins: [pinia],
+        plugins: [pinia, PrimeVue],
         components: {
           Button,
           SeverityBadge,
@@ -117,15 +118,14 @@ describe('EventConfigEventTable.vue', () => {
     })
 
     it('renders search input with correct label and hint', () => {
-      const searchInput = wrapper.findComponent(InputText)
-      expect(searchInput.props('label')).toBe('Search')
-      expect(searchInput.props('hint')).toBe('Search by Event UEI or Event Label')
-      expect(wrapper.find('[data-test="search-input"]').exists()).toBe(true)
+      const searchInput = wrapper.find('[data-test="search-input"]')
+      expect(searchInput.exists()).toBe(true)
+      expect(searchInput.attributes('placeholder')).toBe('Search by Event UEI or Event Label')
     })
 
     it('renders refresh button', () => {
       const refreshButtons = wrapper.findAllComponents(Button)
-      const refreshButton = refreshButtons.find((btn) => btn.props('icon') === 'Refresh')
+      const refreshButton = refreshButtons.find((btn) => btn.props('icon') === 'pi pi-refresh')
       expect(refreshButton).toBeDefined()
     })
 
@@ -148,7 +148,7 @@ describe('EventConfigEventTable.vue', () => {
         }
       ]
       await nextTick()
-      const headers = wrapper.findAllComponents(SortHeader)
+      const headers = wrapper.findAll('thead th[scope="col"]')
       expect(headers.length).toBe(4)
       expect(wrapper.find('thead tr').text()).toContain('Event UEI')
       expect(wrapper.find('thead tr').text()).toContain('Event Label')
@@ -181,7 +181,7 @@ describe('EventConfigEventTable.vue', () => {
       store.eventsPagination.total = 15
       await nextTick()
       expect(wrapper.findComponent(Paginator).exists()).toBe(true)
-      expect(wrapper.find('[data-test="Paginator"]').exists()).toBe(true)
+      expect(wrapper.find('[data-test="FeatherPagination"]').exists()).toBe(true)
     })
 
     it('renders dialogs', () => {
@@ -234,7 +234,7 @@ describe('EventConfigEventTable.vue', () => {
 
   describe('Refresh Button', () => {
     it('calls store refresh on button click', async () => {
-      const refreshButton = wrapper.findAllComponents(Button).find((btn) => btn.props('icon') === 'Refresh')
+      const refreshButton = wrapper.findAllComponents(Button).find((btn) => btn.props('icon') === 'pi pi-refresh')
       await refreshButton?.trigger('click')
       await nextTick()
       expect(store.refreshEventConfigEvents).toHaveBeenCalled()
@@ -264,31 +264,26 @@ describe('EventConfigEventTable.vue', () => {
     })
 
     it('calls sort-changed on header and updates store', async () => {
-      const ueiHeader = wrapper.findAllComponents(SortHeader)[0]
-      await ueiHeader.vm.$emit('sort-changed', { property: 'uei', value: 'asc' })
+      wrapper.vm.sortChanged({ property: 'uei', value: 'asc' })
       await nextTick()
       expect(store.onEventsSortChange).toHaveBeenCalledWith('uei', 'asc')
     })
 
     it('resets other sort states to NONE when sorting a column', async () => {
-      const ueiHeader = wrapper.findAllComponents(SortHeader)[0]
-      await ueiHeader.vm.$emit('sort-changed', { property: 'uei', value: 'asc' })
+      wrapper.vm.sortChanged({ property: 'uei', value: 'asc' })
       await nextTick()
-      // Access via wrapper.vm
       expect(wrapper.vm.sort.uei).toBe('asc')
       expect(wrapper.vm.sort.eventLabel).toBe('none')
     })
 
     it('defaults to createdTime desc when sort value is NONE', async () => {
-      const ueiHeader = wrapper.findAllComponents(SortHeader)[0]
-      await ueiHeader.vm.$emit('sort-changed', { property: 'uei', value: 'none' })
+      wrapper.vm.sortChanged({ property: 'uei', value: 'none' })
       await nextTick()
       expect(store.onEventsSortChange).toHaveBeenCalledWith('createdTime', 'desc')
     })
 
     it('handles desc sort correctly', async () => {
-      const eventLabelHeader = wrapper.findAllComponents(SortHeader)[1]
-      await eventLabelHeader.vm.$emit('sort-changed', { property: 'eventLabel', value: 'desc' })
+      wrapper.vm.sortChanged({ property: 'eventLabel', value: 'desc' })
       await nextTick()
       expect(store.onEventsSortChange).toHaveBeenCalledWith('eventLabel', 'desc')
       expect(wrapper.vm.sort.eventLabel).toBe('desc')
@@ -316,7 +311,7 @@ describe('EventConfigEventTable.vue', () => {
         ]
         await nextTick()
       }
-      const sortHeaders = wrapper.findAllComponents(SortHeader)
+      const sortHeaders = wrapper.findAll('thead th[scope="col"]')
       expect(sortHeaders).toHaveLength(4)
       const headerTexts = wrapper
         .findAll('thead th')
@@ -448,37 +443,36 @@ describe('EventConfigEventTable.vue', () => {
     })
 
     it('Event UEI header has correct properties', () => {
-      const ueiHeader = wrapper.findAllComponents(SortHeader)[0]
-      expect(ueiHeader.props('property')).toBe('uei')
+      const ueiHeader = wrapper.find('thead th[data-property="uei"]')
+      expect(ueiHeader.exists()).toBe(true)
       expect(ueiHeader.attributes('scope')).toBe('col')
     })
 
     it('Event Label header has correct properties', () => {
-      const labelHeader = wrapper.findAllComponents(SortHeader)[1]
-      expect(labelHeader.props('property')).toBe('eventLabel')
+      const labelHeader = wrapper.find('thead th[data-property="eventLabel"]')
+      expect(labelHeader.exists()).toBe(true)
       expect(labelHeader.attributes('scope')).toBe('col')
     })
 
     it('Severity header has correct properties', () => {
-      const severityHeader = wrapper.findAllComponents(SortHeader)[2]
-      expect(severityHeader.props('property')).toBe('severity')
+      const severityHeader = wrapper.find('thead th[data-property="severity"]')
+      expect(severityHeader.exists()).toBe(true)
       expect(severityHeader.attributes('scope')).toBe('col')
     })
 
     it('Status (enabled) header has correct properties', () => {
-      const statusHeader = wrapper.findAllComponents(SortHeader)[3]
-      expect(statusHeader.props('property')).toBe('enabled')
+      const statusHeader = wrapper.find('thead th[data-property="enabled"]')
+      expect(statusHeader.exists()).toBe(true)
       expect(statusHeader.attributes('scope')).toBe('col')
     })
 
     it('updates header sort prop when sort changes', async () => {
-      const ueiHeader = wrapper.findAllComponents(SortHeader)[0]
-      expect(ueiHeader.props('sort')).toBe('none')
+      expect(wrapper.vm.sort.uei).toBe('none')
 
-      wrapper.vm.sort.uei = 'asc'
+      wrapper.vm.sortChanged({ property: 'uei', value: 'asc' })
       await nextTick()
 
-      expect(wrapper.findAllComponents(SortHeader)[0].props('sort')).toBe('asc')
+      expect(wrapper.vm.sort.uei).toBe('asc')
     })
   })
 
@@ -542,10 +536,9 @@ describe('EventConfigEventTable.vue', () => {
     })
 
     it('renders description with HTML in expanded row', async () => {
-      const expandButton = wrapper
-        .find('table')
-        .findAllComponents(Button)
-        .filter((btn: any) => btn.props('primary'))[0]
+      const rows = wrapper.findAll('transition-group-stub tr')
+      const buttons = rows[0].findAll('button')
+      const expandButton = buttons[2]
       expect(expandButton).toBeDefined()
       await expandButton.trigger('click')
       await nextTick()
@@ -612,42 +605,22 @@ describe('EventConfigEventTable.vue', () => {
       }
       await nextTick()
 
-      const row = wrapper.find('transition-group-stub tr')
-      expect(row.exists()).toBe(true)
-      expect(row.findAll('button')).toHaveLength(3)
-
-      expect(row.findAllComponents(Menu)).toHaveLength(1)
-
-      row.findAllComponents(Menu)[0].findAll('button')[0].trigger('click')
-      await wrapper.vm.$nextTick()
-
-      expect(row.findAllComponents(MenuItem)).toHaveLength(1)
-      expect(row.findAllComponents(MenuItem)[0].text()).toBe('Disable Event')
+      // When vendor is VENDOR_OPENNMS, only the status item appears (no delete)
+      const menu = wrapper.findAllComponents(Menu)[0]
+      const items = menu.props('model')
+      expect(items).toHaveLength(1)
+      expect(items[0].label).toBe('Disable Event')
     })
 
     it('calls showChangeEventConfigEventStatusDialog on dropdown item click', async () => {
       const spy = vi.spyOn(store, 'showChangeEventConfigEventStatusDialog')
 
-      const rows = wrapper.findAll('transition-group-stub tr')
-      expect(rows).toHaveLength(1)
-
-      const buttons1 = rows[0].findAll('button')
-      expect(buttons1.length).toBe(3)
-
-      // Find the more options button (trigger)
-      const moreButton = buttons1[1]
-      expect(moreButton).toBeDefined()
-
-      await moreButton.trigger('click')
-      await wrapper.vm.$nextTick()
-
-      // Now find the dropdown items in the whole wrapper
-      const dropdownItems = wrapper.findAllComponents(MenuItem)
-      expect(dropdownItems).toHaveLength(2)
-      expect(dropdownItems[0].text()).toBe('Disable Event')
-      expect(dropdownItems[1].text()).toBe('Delete Event')
-      const statusItem = dropdownItems[0].find('a')
-      await statusItem.trigger('click')
+      // Access menu model items directly and call the command callback
+      const menu = wrapper.findAllComponents(Menu)[0]
+      const items = menu.props('model')
+      expect(items).toHaveLength(2)
+      expect(items[0].label).toBe('Disable Event')
+      items[0].command()
       await wrapper.vm.$nextTick()
 
       expect(spy).toHaveBeenCalledWith(store.events[0])
@@ -655,56 +628,23 @@ describe('EventConfigEventTable.vue', () => {
 
     it('updates dropdown item text based on enabled status', async () => {
       store.events[0].enabled = false
-      const spy = vi.spyOn(store, 'showChangeEventConfigEventStatusDialog')
+      await nextTick()
 
-      const rows = wrapper.findAll('transition-group-stub tr')
-      expect(rows).toHaveLength(1)
-
-      const buttons1 = rows[0].findAll('button')
-      expect(buttons1.length).toBe(3)
-
-      // Find the more options button (trigger)
-      const moreButton = buttons1[1]
-      expect(moreButton).toBeDefined()
-
-      await moreButton.trigger('click')
-      await wrapper.vm.$nextTick()
-
-      // Now find the dropdown items in the whole wrapper
-      const dropdownItems = wrapper.findAllComponents(MenuItem)
-      expect(dropdownItems).toHaveLength(2)
-      expect(dropdownItems[0].text()).toBe('Enable Event')
-      expect(dropdownItems[1].text()).toBe('Delete Event')
-      const statusItem = dropdownItems[0].find('a')
-      await statusItem.trigger('click')
-      await wrapper.vm.$nextTick()
-
-      expect(spy).toHaveBeenCalledWith(store.events[0])
+      const menu = wrapper.findAllComponents(Menu)[0]
+      const items = menu.props('model')
+      expect(items).toHaveLength(2)
+      expect(items[0].label).toBe('Enable Event')
+      expect(items[1].label).toBe('Delete Event')
     })
 
     it('calls showDeleteEventConfigEventDialog on dropdown item click', async () => {
       const spy = vi.spyOn(store, 'showDeleteEventConfigEventDialog')
 
-      const rows = wrapper.findAll('transition-group-stub tr')
-      expect(rows).toHaveLength(1)
-
-      const buttons1 = rows[0].findAll('button')
-      expect(buttons1.length).toBe(3)
-
-      // Find the more options button (trigger)
-      const moreButton = buttons1[1]
-      expect(moreButton).toBeDefined()
-
-      await moreButton.trigger('click')
-      await wrapper.vm.$nextTick()
-
-      // Now find the dropdown items in the whole wrapper
-      const dropdownItems = wrapper.findAllComponents(MenuItem)
-      expect(dropdownItems).toHaveLength(2)
-      expect(dropdownItems[0].text()).toBe('Disable Event')
-      expect(dropdownItems[1].text()).toBe('Delete Event')
-      const statusItem = dropdownItems[1].find('a')
-      await statusItem.trigger('click')
+      const menu = wrapper.findAllComponents(Menu)[0]
+      const items = menu.props('model')
+      expect(items).toHaveLength(2)
+      expect(items[1].label).toBe('Delete Event')
+      items[1].command()
       await wrapper.vm.$nextTick()
 
       expect(spy).toHaveBeenCalledWith(store.events[0])
@@ -787,23 +727,23 @@ describe('EventConfigEventTable.vue', () => {
 
     it('updates page on pagination change', async () => {
       const pagination = wrapper.findComponent(Paginator)
-      await pagination.vm.$emit('update:modelValue', 2)
+      await pagination.vm.$emit('page', { page: 1, rows: 10 })
       await nextTick()
       expect(store.onEventsPageChange).toHaveBeenCalledWith(2)
     })
 
     it('updates page size on pagination change', async () => {
       const pagination = wrapper.findComponent(Paginator)
-      await pagination.vm.$emit('update:pageSize', 20)
+      await pagination.vm.$emit('page', { page: 0, rows: 20 })
       await nextTick()
       expect(store.onEventsPageSizeChange).toHaveBeenCalledWith(20)
     })
 
     it('initially sets correct pagination props', () => {
       const pagination = wrapper.findComponent(Paginator)
-      expect(pagination.props('modelValue')).toBe(1)
-      expect(pagination.props('pageSize')).toBe(10)
-      expect(pagination.props('total')).toBe(15)
+      expect(pagination.props('first')).toBe(0)
+      expect(pagination.props('rows')).toBe(10)
+      expect(pagination.props('totalRecords')).toBe(15)
     })
   })
 

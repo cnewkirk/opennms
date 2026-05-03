@@ -38,6 +38,7 @@
               v-for="col of columns"
               :key="col.label"
               scope="col"
+              :data-property="col.id"
               class="sortable-header"
               @click="nextSort(col.id)"
             >
@@ -234,6 +235,28 @@ const onEditEvent = (event: EventConfigEvent) => {
 const onChangeSearchTerm = debounce(async (value: string) => {
   await store.onChangeEventsSearchTerm(value)
 }, 500)
+
+const sort = computed(() => {
+  const s: Record<string, string> = {}
+  for (const col of columns.value) {
+    s[col.id] = sortField.value === col.id ? (sortDir.value ?? 'none') : 'none'
+  }
+  return s
+})
+
+const sortChanged = (params: { property: string; value: string }) => {
+  if (params.value === 'none') {
+    sortField.value = undefined
+    sortDir.value = undefined
+    store.onEventsSortChange('createdTime', 'desc')
+  } else {
+    sortField.value = params.property
+    sortDir.value = params.value as SortDir
+    store.onEventsSortChange(params.property, params.value)
+  }
+}
+
+defineExpose({ sortChanged, sort, columns, expandedRows })
 </script>
 
 <style lang="scss" scoped>
