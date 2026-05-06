@@ -271,4 +271,54 @@ public class LegacyRedirectFilterTest {
         verify(chain).doFilter(request, response);
         verify(response, never()).sendRedirect(any());
     }
+
+    // --- Graph / KSC / Trend legacy paths (Task 4) ---
+
+    @Test
+    public void testChooseResourceRedirects() throws Exception {
+        when(request.getServletPath()).thenReturn("/graph/chooseresource.jsp");
+        filter.doFilter(request, response, chain);
+        verify(response).sendRedirect("/opennms/ui/resource-graphs");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    public void testAdhoc2Redirects() throws Exception {
+        when(request.getServletPath()).thenReturn("/graph/adhoc2.jsp");
+        filter.doFilter(request, response, chain);
+        verify(response).sendRedirect("/opennms/ui/resource-graphs");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    public void testGraphForecastRedirects() throws Exception {
+        when(request.getServletPath()).thenReturn("/graph/forecast.jsp");
+        filter.doFilter(request, response, chain);
+        verify(response).sendRedirect("/opennms/ui/resource-graphs");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    public void testKscCustomReportRedirects() throws Exception {
+        when(request.getServletPath()).thenReturn("/KSC/customReport.htm");
+        filter.doFilter(request, response, chain);
+        verify(response).sendRedirect("/opennms/ui/ksc-reports");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    public void testKscFormProcMainRedirects() throws Exception {
+        when(request.getServletPath()).thenReturn("/KSC/formProcMain.htm");
+        filter.doFilter(request, response, chain);
+        verify(response).sendRedirect("/opennms/ui/ksc-reports");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    public void testTrendTrendHtmRedirects() throws Exception {
+        when(request.getServletPath()).thenReturn("/trend/trend.htm");
+        filter.doFilter(request, response, chain);
+        verify(response).sendRedirect("/opennms/ui/resource-graphs");
+        verify(chain, never()).doFilter(any(), any());
+    }
 }

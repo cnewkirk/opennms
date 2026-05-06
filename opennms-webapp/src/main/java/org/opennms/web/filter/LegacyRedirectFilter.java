@@ -63,6 +63,30 @@ public class LegacyRedirectFilter implements Filter {
         simple.put("/report/database/index.jsp", "/reports");
         simple.put("/statisticsReports/index.htm", "/reports");
 
+        // Graph ad-hoc wizard and embedded graph views → resource graphs
+        simple.put("/graph/chooseresource.jsp",            "/resource-graphs");
+        simple.put("/graph/adhoc2.jsp",                    "/resource-graphs");
+        simple.put("/graph/adhoc3.jsp",                    "/resource-graphs");
+        simple.put("/graph/adhoc4.jsp",                    "/resource-graphs");
+        simple.put("/graph/forecast.jsp",                  "/resource-graphs");
+        simple.put("/graph/nrtg.jsp",                      "/resource-graphs");
+        simple.put("/graph/grafana.jsp",                   "/resource-graphs");
+        simple.put("/graph/results.htm",                   "/resource-graphs");
+
+        // Trend views → resource graphs
+        simple.put("/trend/trend.htm",                     "/resource-graphs");
+        simple.put("/trend/trend-box.htm",                 "/resource-graphs");
+
+        // KSC report workflow → ksc-reports
+        simple.put("/KSC/customReport.htm",                "/ksc-reports");
+        simple.put("/KSC/customView.htm",                  "/ksc-reports");
+        simple.put("/KSC/customGraphEditDetails.htm",      "/ksc-reports");
+        simple.put("/KSC/formProcMain.htm",                "/ksc-reports");
+        simple.put("/KSC/formProcGraph.htm",               "/ksc-reports");
+        simple.put("/KSC/formProcReport.htm",              "/ksc-reports");
+        simple.put("/KSC/formProcView.htm",                "/ksc-reports");
+        simple.put("/KSC/customGraphChooseResource.jsp",   "/ksc-reports");
+
         // Help / About
         simple.put("/help/index.jsp",            "/help");
         simple.put("/support/index.jsp",         "/support");
