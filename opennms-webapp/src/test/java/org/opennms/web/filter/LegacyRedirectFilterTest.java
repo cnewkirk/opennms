@@ -321,4 +321,22 @@ public class LegacyRedirectFilterTest {
         verify(response).sendRedirect("/opennms/ui/resource-graphs");
         verify(chain, never()).doFilter(any(), any());
     }
+
+    @Test
+    public void testHeadMethodRedirects() throws Exception {
+        when(request.getMethod()).thenReturn("HEAD");
+        when(request.getServletPath()).thenReturn("/alarm/index.htm");
+        filter.doFilter(request, response, chain);
+        verify(response).sendRedirect("/opennms/ui/alarms");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    public void testMixedAcceptHeaderRedirects() throws Exception {
+        when(request.getServletPath()).thenReturn("/alarm/index.htm");
+        when(request.getHeader("Accept")).thenReturn("text/html,application/xhtml+xml,application/xml;q=0.9,application/json;q=0.8");
+        filter.doFilter(request, response, chain);
+        verify(response).sendRedirect("/opennms/ui/alarms");
+        verify(chain, never()).doFilter(any(), any());
+    }
 }
