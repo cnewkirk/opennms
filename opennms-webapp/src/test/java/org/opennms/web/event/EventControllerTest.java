@@ -36,7 +36,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.servlet.ModelAndView;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class EventControllerTest  {
@@ -105,5 +107,67 @@ public class EventControllerTest  {
 
         Assert.assertNull(mv);
         Assert.assertEquals("/opennms/ui/alarms", response.getRedirectedUrl());
+    }
+
+    @Test
+    public void testCreateFavoriteAlarmRedirects() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContextPath("/opennms");
+        request.setRemoteUser("admin");
+        request.addParameter("favoriteName", "myFav");
+        request.addParameter("filter", new String[0]);
+        when(favoriteService.createFavorite(any(), any(), any(), any())).thenReturn(null);
+
+        ModelAndView mv = alarmFilterController.createFavorite(request, response);
+
+        Assert.assertNull(mv);
+        Assert.assertEquals("/opennms/ui/alarms", response.getRedirectedUrl());
+    }
+
+    @Test
+    public void testDeleteFavoriteAlarmRedirects() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContextPath("/opennms");
+        request.setRemoteUser("admin");
+        request.addParameter("favoriteId", "42");
+        when(favoriteService.deleteFavorite(any(), any())).thenReturn(true);
+
+        ModelAndView mv = alarmFilterController.deleteFavorite(request, response);
+
+        Assert.assertNull(mv);
+        Assert.assertEquals("/opennms/ui/alarms", response.getRedirectedUrl());
+    }
+
+    @Test
+    public void testCreateFavoriteEventRedirects() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContextPath("/opennms");
+        request.setRemoteUser("admin");
+        request.addParameter("favoriteName", "myFav");
+        request.addParameter("filter", new String[0]);
+        when(favoriteService.createFavorite(any(), any(), any(), any())).thenReturn(null);
+
+        ModelAndView mv = eventController.createFavorite(request, response);
+
+        Assert.assertNull(mv);
+        Assert.assertEquals("/opennms/ui/events", response.getRedirectedUrl());
+    }
+
+    @Test
+    public void testDeleteFavoriteEventRedirects() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContextPath("/opennms");
+        request.setRemoteUser("admin");
+        request.addParameter("favoriteId", "42");
+        when(favoriteService.deleteFavorite(any(), any())).thenReturn(true);
+
+        ModelAndView mv = eventController.deleteFavorite(request, response);
+
+        Assert.assertNull(mv);
+        Assert.assertEquals("/opennms/ui/events", response.getRedirectedUrl());
     }
 }

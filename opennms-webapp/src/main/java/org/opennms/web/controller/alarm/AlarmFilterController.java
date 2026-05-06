@@ -104,45 +104,23 @@ public class AlarmFilterController extends MultiActionController implements Init
     }
 
     public ModelAndView createFavorite(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String error = null;
         try {
-            OnmsFilterFavorite favorite = favoriteService.createFavorite(
+            favoriteService.createFavorite(
                     request.getRemoteUser(),
                     request.getParameter("favoriteName"),
                     FilterUtil.toFilterURL(request.getParameterValues("filter")),
                     OnmsFilterFavorite.Page.ALARM);
-            if (favorite != null) {
-                ModelAndView successView = list(request, favorite); // success
-                //Commented out per request. Left it in, in case we wanted it back later
-                //AlertTag.addAlertToRequest(successView, "Favorite was created successfully", AlertType.SUCCESS);
-                return successView;
-            }
-            error = "An error occurred while creating the favorite";
         } catch (FilterFavoriteService.FilterFavoriteException ex) {
-            error = ex.getMessage();
+            LOG.warn("Failed to create alarm filter favorite: {}", ex.getMessage());
         }
-        ModelAndView errorView = list(request, (OnmsFilterFavorite) null);
-        AlertTag.addAlertToRequest(errorView, error, AlertType.ERROR);
-        return errorView;
+        response.sendRedirect(request.getContextPath() + "/ui/alarms");
+        return null;
     }
 
     public ModelAndView deleteFavorite(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        // delete
-        String favoriteId = request.getParameter("favoriteId");
-        boolean success = favoriteService.deleteFavorite(favoriteId, request.getRemoteUser());
-
-        ModelAndView resultView = list(request, (OnmsFilterFavorite) null);
-        resultView.addObject("favorite", null); // we deleted the favorite
-        if (!StringUtils.isEmpty(request.getParameter("redirect"))) {
-            resultView.setViewName(request.getParameter("redirect")); // change to redirect View
-        }
-
-        if (!success) {
-            AlertTag.addAlertToRequest(resultView, "Favorite couldn't be deleted.", AlertType.ERROR);
-        } else {
-            AlertTag.addAlertToRequest(resultView, "Favorite deleted successfully.", AlertType.SUCCESS);
-        }
-        return resultView;
+        favoriteService.deleteFavorite(request.getParameter("favoriteId"), request.getRemoteUser());
+        response.sendRedirect(request.getContextPath() + "/ui/alarms");
+        return null;
     }
 
     private String getDisplay(HttpServletRequest request) {
