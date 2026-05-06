@@ -209,6 +209,10 @@ cp "${SCRIPT_DIR}/opennms-webapp-rest/src/main/webapp/WEB-INF/applicationContext
 # Spring Security XML — topology/views intercept rules must precede REST catch-all
 cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/WEB-INF/applicationContext-spring-security.xml" \
    "${OVERLAY_DIR}/spring-context/"
+# dispatcher-servlet.xml — NotificationFilterController/OutageFilterController had dead
+# property injections removed; base image has the old version with all the setters
+cp "${SCRIPT_DIR}/opennms-webapp/src/main/webapp/WEB-INF/dispatcher-servlet.xml" \
+   "${OVERLAY_DIR}/spring-context/"
 
 # Also copy .js stubs so the entry is resolvable if anything tries to load them
 cp "${WEBASSETS_DIST}/dark-mode.js"    "${OVERLAY_DIR}/assets/"
@@ -383,6 +387,8 @@ COPY --chown=10001:10001 webapp-rest-lib/${WEBAPP_REST_BASENAME} /opt/opennms/je
 COPY --chown=10001:10001 spring-context/applicationContext-cxf-rest-v2.xml /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-cxf-rest-v2.xml
 # Spring Security with topology/views intercept rules before the REST catch-all
 COPY --chown=10001:10001 spring-context/applicationContext-spring-security.xml /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-spring-security.xml
+# dispatcher-servlet.xml with dead property injections removed from Notification/OutageFilterController
+COPY --chown=10001:10001 spring-context/dispatcher-servlet.xml /opt/opennms/jetty-webapps/opennms/WEB-INF/dispatcher-servlet.xml
 
 # Tell AssetLocatorImpl to load assets.json from the filesystem (not the
 # classpath JAR that lacks dark-mode/modern-ui entries).
