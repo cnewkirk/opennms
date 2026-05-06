@@ -21,36 +21,19 @@
  */
 package org.opennms.web.controller.alarm;
 
-import org.apache.commons.lang.StringUtils;
-import org.opennms.core.utils.WebSecurityUtils;
-import org.opennms.netmgt.dao.api.AlarmRepository;
-import org.opennms.netmgt.model.OnmsAlarm;
 import org.opennms.netmgt.model.OnmsFilterFavorite;
-import org.opennms.web.alarm.AcknowledgeType;
-import org.opennms.web.alarm.AlarmQueryParms;
-import org.opennms.web.alarm.AlarmUtil;
-import org.opennms.web.alarm.SortStyle;
-import org.opennms.web.alarm.filter.AlarmCriteria;
-import org.opennms.web.alert.AlertType;
-import org.opennms.web.filter.Filter;
 import org.opennms.web.filter.FilterUtil;
-import org.opennms.web.filter.NormalizedQueryParameters;
 import org.opennms.web.services.FilterFavoriteService;
-import org.opennms.web.tags.AlertTag;
-import org.opennms.web.tags.filters.AlarmFilterCallback;
-import org.opennms.web.tags.filters.FilterCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  * A controller that handles querying the event table by using filters to create an
@@ -63,19 +46,8 @@ public class AlarmFilterController extends MultiActionController implements Init
 
     private static final Logger LOG = LoggerFactory.getLogger(AlarmFilterController.class);
 
-    private static final int DEFAULT_MULTIPLE = 0;
-    private static final int DEFAULT_SHORT_LIMIT = 20;
-    private static final int DEFAULT_LONG_LIMIT = 10;
-    private static final AcknowledgeType DEFAULT_ACKNOWLEDGE_TYPE = AcknowledgeType.UNACKNOWLEDGED;
-    private static final SortStyle DEFAULT_SORT_STYLE = SortStyle.ID;
-
-    @Autowired
-    private AlarmRepository m_webAlarmRepository;
-
     @Autowired
     private FilterFavoriteService favoriteService;
-
-    private FilterCallback m_callback;
 
     @Override
     @Transactional
@@ -86,15 +58,6 @@ public class AlarmFilterController extends MultiActionController implements Init
     public ModelAndView list(HttpServletRequest request, HttpServletResponse response) throws Exception {
         response.sendRedirect(request.getContextPath() + "/ui/alarms");
         return null;
-    }
-
-    private ModelAndView list(HttpServletRequest request, OnmsFilterFavorite favorite) {
-        AcknowledgeType ackType = getAcknowledgeType(request);
-        ModelAndView modelAndView = createListModelAndView(request,
-                getFilterCallback().parse(request.getQueryString() == null ? "" : request.getQueryString()), ackType);
-        modelAndView.addObject("favorite", favorite);
-        modelAndView.setViewName("alarm/list");
-        return modelAndView;
     }
 
     // index view
@@ -123,132 +86,9 @@ public class AlarmFilterController extends MultiActionController implements Init
         return null;
     }
 
-    private String getDisplay(HttpServletRequest request) {
-        // handle the display parameter
-        String displayString = request.getParameter("display");
-        String display = null;
-        if (displayString != null) {
-            String temp = WebSecurityUtils.sanitizeString(displayString);
-            if (temp != null) {
-                display = temp;
-            }
-        }
-        return display;
-    }
-
-    private int getLimit(HttpServletRequest request) {
-        final String display = getDisplay(request);
-        final String limitString = request.getParameter("limit");
-        int limit = "long".equals(display) ? DEFAULT_LONG_LIMIT : DEFAULT_SHORT_LIMIT;
-        if (limitString != null) {
-            try {
-                int newlimit = WebSecurityUtils.safeParseInt(limitString);
-                if (newlimit > 0) {
-                    limit = newlimit;
-                }
-            } catch (NumberFormatException e) {
-                // do nothing, the default is already set
-            }
-        }
-        return limit;
-    }
-
-    private int getMultiple(HttpServletRequest request) {
-        final String multipleString = request.getParameter("multiple");
-        int multiple = DEFAULT_MULTIPLE;
-        if (multipleString != null) {
-            try {
-                multiple = Math.max(0, WebSecurityUtils.safeParseInt(multipleString));
-            } catch (NumberFormatException e) {
-            }
-        }
-        return multiple;
-    }
-
-    private SortStyle getSortStyle(HttpServletRequest request) {
-        // handle the style sort parameter
-        String sortStyleString = request.getParameter("sortby");
-        SortStyle sortStyle = DEFAULT_SORT_STYLE;
-        if (sortStyleString != null) {
-            SortStyle temp = SortStyle.getSortStyle(sortStyleString);
-            if (temp != null) {
-                sortStyle = temp;
-            }
-        }
-        return sortStyle;
-    }
-
-    private AcknowledgeType getAcknowledgeType(HttpServletRequest request) {
-        // handle the acknowledgment type parameter
-        String ackTypeString = request.getParameter("acktype");
-        AcknowledgeType ackType = DEFAULT_ACKNOWLEDGE_TYPE;
-
-        // set default ack type to both if alarm flashing enabled in opennms.properties
-        String unAckFlashStr = System.getProperty("opennms.alarmlist.unackflash");
-        boolean unAckFlash = (unAckFlashStr == null) ? false : "true".equals(unAckFlashStr.trim());
-        if (unAckFlash) ackType = AcknowledgeType.BOTH;
-
-        if (ackTypeString != null) {
-            AcknowledgeType temp = AcknowledgeType.getAcknowledgeType(ackTypeString);
-            if (temp != null) {
-                ackType = temp;
-            }
-        }
-        return ackType;
-    }
-
-    private AlarmQueryParms createAlarmQueryParms(HttpServletRequest request, List<Filter> filterList, AcknowledgeType ackType) {
-        AlarmQueryParms parms = new AlarmQueryParms();
-        parms.ackType = ackType;
-        parms.display = getDisplay(request);
-        parms.filters = filterList;
-        parms.limit = getLimit(request);
-        parms.multiple = getMultiple(request);
-        parms.sortStyle = getSortStyle(request);
-        return parms;
-    }
-
-    private ModelAndView createListModelAndView(HttpServletRequest request, List<Filter> filterList, AcknowledgeType ackType) {
-        final AlarmQueryParms parms = createAlarmQueryParms(request, filterList, ackType);
-        AlarmCriteria queryCriteria = new AlarmCriteria(parms);
-        AlarmCriteria countCriteria = new AlarmCriteria(filterList, ackType);
-
-        final OnmsAlarm[] alarms = m_webAlarmRepository.getMatchingAlarms(AlarmUtil.getOnmsCriteria(queryCriteria));
-        final long alarmCount = m_webAlarmRepository.countMatchingAlarms(AlarmUtil.getOnmsCriteria(countCriteria));
-
-        final ModelAndView modelAndView = new ModelAndView();
-        modelAndView.addObject("alarms", alarms);
-        modelAndView.addObject("alarmCount", alarmCount);
-        modelAndView.addObject("parms", new NormalizedQueryParameters(parms));
-        modelAndView.addObject("callback", getFilterCallback());
-        modelAndView.addObject("favorites", favoriteService.getFavorites(request.getRemoteUser(), OnmsFilterFavorite.Page.ALARM).toArray());
-        return modelAndView;
-    }
-
-    private OnmsFilterFavorite getFavorite(String favoriteId, String username, String[] filters) {
-        if (favoriteId != null) {
-            return favoriteService.getFavorite(favoriteId, username, getFilterCallback().toFilterString(filters));
-        }
-        return null;
-    }
-
-    private FilterCallback getFilterCallback() {
-        if (m_callback == null) {
-            m_callback = new AlarmFilterCallback(getServletContext());
-        }
-        return m_callback;
-    }
-
     @Override
     public void afterPropertiesSet() {
-        Assert.notNull(DEFAULT_SHORT_LIMIT, "property defaultShortLimit must be set to a value greater than 0");
-        Assert.isTrue(DEFAULT_SHORT_LIMIT > 0, "property defaultShortLimit must be set to a value greater than 0");
-        Assert.notNull(DEFAULT_LONG_LIMIT, "property defaultLongLimit must be set to a value greater than 0");
-        Assert.isTrue(DEFAULT_LONG_LIMIT > 0, "property defaultLongLimit must be set to a value greater than 0");
-        Assert.notNull(m_webAlarmRepository, "webAlarmRepository must be set");
-    }
-    public void setWebAlarmRepository(AlarmRepository m_webAlarmRepository) {
-        this.m_webAlarmRepository = m_webAlarmRepository;
+        // no-op: favoriteService is @Autowired; Spring will fail injection if it's missing
     }
 
     public void setFavoriteService(FilterFavoriteService favoriteService) {

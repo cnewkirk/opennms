@@ -219,25 +219,10 @@
     </bean>
 
     <alias name="/notification/list.htm" alias="/notification/browse"/>
-    <bean name="/notification/list.htm" class="org.opennms.web.controller.notification.NotificationFilterController">
-        <property name="successView" value="notification/list"/>
-        <property name="defaultShortLimit" value="20"/>
-        <property name="defaultLongLimit" value="10"/>
-        <property name="defaultSortStyle" value="ID"/>
-        <property name="webNotificationRepository" ref="webNotificationRepository"/>
-        <property name="webEventRepository" ref="webEventRepository"/>
-        <property name="nodeDao" ref="nodeDao"/>
-    </bean>
+    <bean name="/notification/list.htm" class="org.opennms.web.controller.notification.NotificationFilterController"/>
 
     <alias name="/outage/list.htm" alias="/outage/list"/>
-    <bean name="/outage/list.htm" class="org.opennms.web.controller.outage.OutageFilterController">
-        <property name="successView" value="outage/list"/>
-        <property name="defaultShortLimit" value="20"/>
-        <property name="defaultLongLimit" value="10"/>
-        <property name="defaultOutageType" value="CURRENT"/>
-        <property name="defaultSortStyle" value="ID"/>
-        <property name="webOutageRepository" ref="webOutageRepository"/>
-    </bean>
+    <bean name="/outage/list.htm" class="org.opennms.web.controller.outage.OutageFilterController"/>
 
     <alias name="/outage/detail.htm" alias="/outage/detail.jsp"/>
     <bean name="/outage/detail.htm" class="org.opennms.web.controller.outage.OutageDetailController">

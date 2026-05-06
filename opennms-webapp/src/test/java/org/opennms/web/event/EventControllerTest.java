@@ -24,8 +24,6 @@ package org.opennms.web.event;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opennms.netmgt.dao.api.AlarmRepository;
-import org.opennms.netmgt.dao.hibernate.AlarmRepositoryHibernate;
 import org.opennms.web.controller.alarm.AlarmFilterController;
 import org.opennms.web.controller.event.EventController;
 import org.opennms.web.event.DaoWebEventRepository;
@@ -52,9 +50,6 @@ public class EventControllerTest  {
 
     private AlarmFilterController alarmFilterController;
 
-    private AlarmRepository m_webAlarmRepository;
-
-
     @Before
     public void setUp() {
         //Event controller/filter settings
@@ -67,10 +62,8 @@ public class EventControllerTest  {
         eventController.afterPropertiesSet();
 
         //Alarm controller/filter settings
-        m_webAlarmRepository = mock(AlarmRepositoryHibernate.class);
         alarmFilterController = new AlarmFilterController();
         alarmFilterController.setServletContext(new MockServletContext("file:src/main/webapp"));
-        alarmFilterController.setWebAlarmRepository(m_webAlarmRepository);
         alarmFilterController.setFavoriteService(favoriteService);
         alarmFilterController.afterPropertiesSet();
     }
