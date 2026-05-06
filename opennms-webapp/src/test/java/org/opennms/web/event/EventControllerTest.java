@@ -84,81 +84,37 @@ public class EventControllerTest  {
     }
 
     /**
-     * Test matching.
+     * Test that list() redirects to Vue events page.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testEventsAdvancedSearch() throws Exception {
+    public void testListRedirectsToVueEvents() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContextPath("/opennms");
 
-        final MockHttpServletResponse response = new MockHttpServletResponse();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setQueryString("systemId=Any&amp;nodelocation=Any&amp;limit=10&amp;sortby=id&amp;filter=eventtext%3Dtest&amp;filter=severity%3D4&amp;filter=eventId%3D1");
+        ModelAndView mv = eventController.list(request, response);
 
-        List<Filter> filterList = new ArrayList();
-        filterList.add(new EventTextFilter("eventtext=test"));
-        filterList.add(new EventIdFilter(1));
-        filterList.add(new EventIdFilter(2));
-        filterList.add(new EventIdFilter(3));
-        filterList.add(new SeverityFilter(2));
-        filterList.add(new SeverityFilter(1));
-        filterList.add(new SeverityFilter(3));
-
-
-
-
-        EventQueryParms parms = new EventQueryParms();
-        parms.ackType = AcknowledgeType.UNACKNOWLEDGED;
-        parms.filters = filterList;
-        parms.limit = 10;
-        parms.sortStyle = SortStyle.ID;
-        parms.display = "Y";
-        parms.multiple = 0;
-
-        final EventCriteria eventCriteria = new EventCriteria(parms);
-        when(m_webEventRepository.getMatchingEvents(any())).thenReturn(getEvents().toArray(Event[]::new));
-
-        ModelAndView mv = eventController.list(request,response);
-        Event[] ev = (Event[])mv.getModelMap().get("events");
-        Assert.assertEquals(3, ev.length);
-        Assert.assertEquals("admin", ev[0].parms.get("user"));
-        Assert.assertEquals(OnmsSeverity.WARNING,ev[1].getSeverity());
+        Assert.assertNull(mv);
+        Assert.assertEquals("/opennms/ui/events", response.getRedirectedUrl());
     }
 
     /**
-     * Test matching.
+     * Test that list() redirects to Vue alarms page.
      *
      * @throws Exception the exception
      */
     @Test
-    public void testAlarmsAdvancedSearch() throws Exception {
+    public void testAlarmListRedirectsToVueAlarms() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContextPath("/opennms");
 
-        final MockHttpServletResponse response = new MockHttpServletResponse();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setQueryString("afterfirsteventtimedate=29&amp;afterfirsteventtimeampm=pm&amp;beforelasteventtimeampm=pm&amp;beforelasteventtimeyear=2022&amp;beforelasteventtimehour=12&amp;afterlasteventtimeyear=2022&amp;beforefirsteventtimeyear=2022&amp;beforefirsteventtimedate=29&amp;beforefirsteventtimemonth=4&amp;afterlasteventtimedate=29&amp;limit=10&amp;afterfirsteventtimeminute=22&amp;afterfirsteventtimeyear=2022&amp;afterlasteventtimemonth=4&amp;beforelasteventtimeminute=22&amp;situation=any&amp;afterlasteventtimeminute=22&amp;afterfirsteventtimemonth=4&amp;beforelasteventtimemonth=4&amp;beforefirsteventtimehour=12&amp;beforefirsteventtimeampm=pm&amp;afterlasteventtimeampm=pm&amp;afterlasteventtimehour=12&amp;afterfirsteventtimehour=12&amp;beforefirsteventtimeminute=22&amp;sortby=id&amp;beforelasteventtimedate=29&amp;filter=alarmtext%3Dtest&amp;filter=nodenamelike%3DMyNode&amp;filter=severity%3D3");
+        ModelAndView mv = alarmFilterController.list(request, response);
 
-        List<Filter> filterList = new ArrayList();
-        filterList.add(new AlarmTextFilter("alarmtext=test"));
-        filterList.add(new SeverityFilter(3));
-        filterList.add(new NodeNameLikeFilter("MyNode"));
-
-        AlarmQueryParms alarmQueryParms = new AlarmQueryParms();
-        alarmQueryParms.ackType = org.opennms.web.alarm.AcknowledgeType.UNACKNOWLEDGED;
-        alarmQueryParms.filters = filterList;
-        alarmQueryParms.limit = 20;
-        alarmQueryParms.sortStyle = org.opennms.web.alarm.SortStyle.ID;
-        alarmQueryParms.display = "Y";
-        alarmQueryParms.multiple = 0;
-
-        AlarmCriteria alarmCriteria = new AlarmCriteria(alarmQueryParms);
-
-        when(m_webAlarmRepository.getMatchingAlarms(any())).thenReturn(getAlarms());
-        when(m_webAlarmRepository.countMatchingAlarms(AlarmUtil.getOnmsCriteria(alarmCriteria))).thenReturn(2);
-
-        ModelAndView mv = alarmFilterController.list(request,response);
-        OnmsAlarm[] av = (OnmsAlarm[])mv.getModelMap().get("alarms");
-        Assert.assertEquals(2, av.length);
-        Assert.assertEquals("Normal", av[0].getSeverity().getLabel());
+        Assert.assertNull(mv);
+        Assert.assertEquals("/opennms/ui/alarms", response.getRedirectedUrl());
     }
 
     private List<OnmsEvent> getOnmsEvents(){
