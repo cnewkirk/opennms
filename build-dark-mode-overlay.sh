@@ -357,6 +357,10 @@ RUN sed -i 's|<welcome-file>frontPage.jsp</welcome-file>|<welcome-file>index.jsp
 # to connect-src; adds worker-src for the blob-URL workers MapLibre spawns.
 RUN sed -i "s|connect-src 'self' ;|connect-src 'self' https://tiles.opennms.org https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://tile.opentopomap.org https://*.tile.opentopomap.org ; worker-src 'self' blob: ;|" /opt/opennms/jetty-webapps/opennms/WEB-INF/web.xml
 
+# Register LegacyRedirectFilter: inject <filter> declaration (before first <filter-mapping>)
+# and <filter-mapping> (after springSecurityFilterChain, so auth runs first).
+RUN python3 -c 'xml = open("/opt/opennms/jetty-webapps/opennms/WEB-INF/web.xml").read(); fd = "\n  <filter>\n    <filter-name>legacyRedirectFilter</filter-name>\n    <filter-class>org.opennms.web.filter.LegacyRedirectFilter</filter-class>\n  </filter>\n"; fm = "\n  <filter-mapping>\n    <filter-name>legacyRedirectFilter</filter-name>\n    <url-pattern>/*</url-pattern>\n  </filter-mapping>"; i = xml.index("\n  <filter-mapping>"); xml = xml[:i] + fd + xml[i:]; a = "    <filter-name>springSecurityFilterChain</filter-name>\n    <url-pattern>/*</url-pattern>\n  </filter-mapping>"; i = xml.index(a) + len(a); xml = xml[:i] + fm + xml[i:]; open("/opt/opennms/jetty-webapps/opennms/WEB-INF/web.xml", "w").write(xml)'
+
 # jmxconfiggenerator + its transitive dep namecutter must be in the Bootstrap server
 # classpath (not WEB-INF/lib) so Jetty's WebAppClassLoader can resolve them.
 RUN cp /opt/opennms/system/org/opennms/features/jmxconfiggenerator/35.0.4/jmxconfiggenerator-35.0.4.jar /opt/opennms/lib/jmxconfiggenerator-35.0.4.jar && cp /opt/opennms/system/org/opennms/features/org.opennms.features.name-cutter/35.0.4/org.opennms.features.name-cutter-35.0.4.jar /opt/opennms/lib/org.opennms.features.name-cutter-35.0.4.jar
